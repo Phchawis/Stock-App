@@ -86,35 +86,7 @@ export function Login({ v }) {
               </button>
             </div>
 
-            <div style={css(`margin-top:26px; display:flex; align-items:center; gap:12px;`)}>
-              <div style={css(`flex:1; height:1px; background:var(--border-subtle);`)}></div>
-              <span style={css(`font:400 13px/1 'Sarabun',sans-serif; color:var(--text-tertiary);`)}>หรือเลือกบัญชีสาธิต</span>
-              <div style={css(`flex:1; height:1px; background:var(--border-subtle);`)}></div>
-            </div>
 
-            <div style={css(`margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:10px;`)}>
-              {demoAccounts.map((d, dI) => (
-                <React.Fragment key={dI}>
-                  <button onClick={d.onPick} style={css(`display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--surface-card); cursor:pointer; text-align:left;`)}>
-                    <span style={css(`width:32px; height:32px; border-radius:50%; background:${d.color}; color:#fff; display:grid; place-items:center; font:600 13px/1 'Sarabun',sans-serif; flex-shrink:0;`)}>
-                      {d.initials}
-                    </span>
-                    <div style={css(`min-width:0;`)}>
-                      <div style={css(`font:600 13px/1.3 'Sarabun',sans-serif; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>
-                        {d.th}
-                      </div>
-                      <div style={css(`font:500 11px/1.3 'IBM Plex Mono',monospace; color:var(--text-tertiary);`)}>
-                        {d.username}
-                      </div>
-                    </div>
-                  </button>
-                </React.Fragment>
-              ))}
-            </div>
-
-            <div style={css(`margin-top:16px; font:400 12.5px/1.5 'Sarabun',sans-serif; color:var(--text-tertiary);`)}>
-              รหัสผ่านสาธิตทุกบัญชี: <span style={css(`font-family:var(--font-mono); color:var(--text-secondary);`)}>tuh1234</span>
-            </div>
           </div>
         </div>
       </div>
