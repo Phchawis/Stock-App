@@ -1,4 +1,5 @@
 import React from 'react';
+// Trigger Cloudflare Pages rebuild
 import { css } from './css.js';
 import { Sidebar } from './layout/Sidebar.jsx';
 import { Main } from './layout/Main.jsx';
