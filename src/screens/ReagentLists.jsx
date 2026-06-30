@@ -4,8 +4,10 @@ import { css } from '../css.js';
 export function ReagentLists({ v }) {
   const {
     isReagentLists, reagentsList, activeLotsList, ic,
-    canManage, openRegister, txnRows, openPrintSticker,
+    canManage, openRegister, txnRows, openPrintSticker, deleteReagent, user,
   } = v;
+
+  const isAdmin = user && user.roleId === 'admin';
 
   const [search, setSearch] = React.useState('');
   const [selectedReagent, setSelectedReagent] = React.useState(null);
@@ -443,7 +445,24 @@ export function ReagentLists({ v }) {
               </div>
 
               {/* Modal Footer */}
-              <div style={css(`padding:12px 20px; border-top:1px solid var(--border-subtle); background:var(--slate-50); display:flex; justify-content:flex-end; gap:8px;`)}>
+              <div style={css(`padding:12px 20px; border-top:1px solid var(--border-subtle); background:var(--slate-50); display:flex; justify-content:space-between; align-items:center;`)}>
+                <div>
+                  {isAdmin && (
+                    <button
+                      onClick={() => {
+                        if (window.confirm(`คุณต้องการลบน้ำยา "${r.th}" และประวัติสต็อกล็อตทั้งหมดออกจากระบบใช่หรือไม่?`)) {
+                          deleteReagent(r.id);
+                          setSelectedReagent(null);
+                        }
+                      }}
+                      style={css(`padding:8px 14px; border-radius:var(--radius-md); border:none; background:var(--red-600); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); transition:background var(--dur-fast);`)}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--red-700)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--red-600)'; }}
+                    >
+                      🗑️ ลบน้ำยานี้ออกจากระบบ
+                    </button>
+                  )}
+                </div>
                 <button 
                   onClick={() => setSelectedReagent(null)} 
                   className="reagent-secondary-btn"

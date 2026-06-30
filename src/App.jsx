@@ -119,6 +119,30 @@ class App extends React.Component {
       this.showToast(err.message, 'warn');
     }
   }
+  async deleteReagent(id) {
+    if (this.state.role !== 'admin') {
+      this.showToast('เฉพาะผู้ดูแลระบบเท่านั้นที่มีสิทธิ์ลบข้อมูลน้ำยา', 'warn');
+      return;
+    }
+    const reagentObj = this.state.reagents.find(r => r.id === id);
+    if (!reagentObj) return;
+
+    try {
+      const res = await fetch(`/api/reagents?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) throw new Error('ลบข้อมูลน้ำยาล้มเหลว');
+
+      this.setState(s => ({
+        reagents: s.reagents.filter(r => r.id !== id),
+        lots: s.lots.filter(l => l.rid !== id),
+        txns: s.txns.filter(t => t.rid !== id)
+      }));
+      this.showToast('ลบข้อมูลน้ำยา ' + reagentObj.th + ' และข้อมูลคลังสำเร็จ');
+    } catch (err) {
+      this.showToast(err.message, 'warn');
+    }
+  }
   async clearTxns() {
     if (this.state.role !== 'admin') {
       this.showToast('เฉพาะผู้ดูแลระบบเท่านั้นที่มีสิทธิ์ล้างประวัติการเคลื่อนไหว', 'warn');
@@ -751,6 +775,7 @@ class App extends React.Component {
       ufPassword: this.bindUf('password'),
       submitAddUser: () => this.submitAddUser(),
       deleteUser: (username) => this.deleteUser(username),
+      deleteReagent: (id) => this.deleteReagent(id),
       clearTxns: () => this.clearTxns(),
       openPrintSticker: (lot, reagent) => this.openPrintSticker(lot, reagent),
       closePrintSticker: () => this.closePrintSticker(),
