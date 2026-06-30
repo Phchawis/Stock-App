@@ -50,7 +50,8 @@ CREATE TABLE IF NOT EXISTS users (
   name TEXT NOT NULL,
   role TEXT NOT NULL,
   initials TEXT NOT NULL,
-  color TEXT NOT NULL
+  color TEXT NOT NULL,
+  password TEXT
 );
 
 -- 2. Seed Initial Mock Data
@@ -86,8 +87,8 @@ INSERT OR IGNORE INTO transactions (id, lot_id, rid, type, qty, bal, ref, scan, 
 (1007, 103, 2, 'ISSUE', -12, 8, 'REQ-2606-150', 'BARCODE', 'ทนพ. วิภา แสงทอง', '2026-06-27 15:10');
 
 -- Users
-INSERT OR IGNORE INTO users (username, name, role, initials, color) VALUES
-('admin', 'ทนพ. ธนวัฒน์ ผู้ดูแลระบบ', 'admin', 'ธว', '#1387A6'),
-('supervisor', 'ภญ. สมหญิง รักษ์ดี', 'supervisor', 'สญ', '#4E7CB0'),
-('technician', 'ทนพ. สมชาย ใจดี', 'technician', 'สช', '#2E9E63'),
-('viewer', 'คุณวิภา (ผู้สังเกตการณ์)', 'viewer', 'วภ', '#6E8694');
+INSERT OR IGNORE INTO users (username, name, role, initials, color, password) VALUES
+('admin', 'ทนพ. ธนวัฒน์ ผู้ดูแลระบบ', 'admin', 'ธว', '#1387A6', 'tuh1234'),
+('supervisor', 'ภญ. สมหญิง รักษ์ดี', 'supervisor', 'สญ', '#4E7CB0', 'tuh1234'),
+('technician', 'ทนพ. สมชาย ใจดี', 'technician', 'สช', '#2E9E63', 'tuh1234'),
+('viewer', 'คุณวิภา (ผู้สังเกตการณ์)', 'viewer', 'วภ', '#6E8694', 'tuh1234');
