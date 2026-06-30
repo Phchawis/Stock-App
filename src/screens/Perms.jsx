@@ -98,7 +98,7 @@ export function Perms({ v }) {
                 </span>
               </div>
               <div style={{ display: 'grid', placeItems: 'center' }}>
-                {u.role === 'admin' ? (
+                {(u.role === 'admin' && usersList.filter(x => x.role === 'admin').length <= 1) ? (
                   <span style={css(`font:var(--fw-semibold) var(--text-3xs)/1 var(--font-body); color:var(--text-disabled);`)}>Admin (ลบไม่ได้)</span>
                 ) : (
                   isAdmin ? (

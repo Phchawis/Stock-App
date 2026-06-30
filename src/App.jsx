@@ -97,8 +97,11 @@ class App extends React.Component {
     const userObj = this.state.users.find(u => u.username === username);
     if (!userObj) return;
     if (userObj.role === 'admin') {
-      this.showToast('ไม่สามารถลบสิทธิ์บัญชีผู้ดูแลระบบ (Admin) ได้', 'warn');
-      return;
+      const adminsCount = this.state.users.filter(u => u.role === 'admin').length;
+      if (adminsCount <= 1) {
+        this.showToast('ต้องมีผู้ดูแลระบบ (Admin) เหลืออยู่ในระบบอย่างน้อย 1 คน', 'warn');
+        return;
+      }
     }
 
     try {
