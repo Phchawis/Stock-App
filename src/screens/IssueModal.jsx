@@ -1,0 +1,315 @@
+import React from 'react';
+import { css } from '../css.js';
+import { Input } from '../components/Input.jsx';
+
+export function IssueModal({ v }) {
+  const {
+    stop, ic, modalIssue, closeModal,
+    iform, ifQty, ifRef, submitIssue,
+    issuePlanRows, issueShort, issueHasPlan, issueUnit,
+    scanQRCode, unlinkLot, selectReagentForIssue,
+    activeLotsList, reagentsList, issueOnHand,
+    ifSearchInput, ifQrInput,
+  } = v;
+
+  const [showDropdown, setShowDropdown] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleOutsideClick = () => setShowDropdown(false);
+    window.addEventListener('click', handleOutsideClick);
+    return () => window.removeEventListener('click', handleOutsideClick);
+  }, []);
+
+  if (!modalIssue) return null;
+
+  const query = (iform.searchInput || '').trim().toLowerCase();
+  const filteredReagents = reagentsList.filter(r => 
+    r.code.toLowerCase().includes(query) || 
+    r.th.toLowerCase().includes(query) || 
+    r.en.toLowerCase().includes(query)
+  );
+
+  const selectedReagentObj = reagentsList.find(r => r.id === +iform.rid);
+  const linkedLotObj = activeLotsList.find(l => l.id === +iform.lotId);
+
+  const cornerStyle = (top, left, right, bottom) => css(`
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-color: var(--green-600);
+    border-style: solid;
+    border-width: ${top ? '3px' : '0'} ${right ? '3px' : '0'} ${bottom ? '3px' : '0'} ${left ? '3px' : '0'};
+    top: ${top ? '12px' : 'auto'};
+    bottom: ${bottom ? '12px' : 'auto'};
+    left: ${left ? '12px' : 'auto'};
+    right: ${right ? '12px' : 'auto'};
+  `);
+
+  return (
+    <>
+      <div className="ov-in" onClick={closeModal} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.46); z-index:50; display:grid; place-items:center; padding:24px;`)}>
+        <div className="tt-in" onClick={stop} style={css(`width:min(720px,96vw); max-height:92vh; overflow-y:auto; background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:1px solid var(--border-subtle);`)}>
+          
+          {/* Header */}
+          <div style={css(`padding:18px 22px; border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; gap:11px;`)}>
+            <span style={css(`width:34px; height:34px; border-radius:var(--radius-md); background:var(--accent-50); color:var(--accent-600); display:grid; place-items:center;`)}>
+              {ic.issue}
+            </span>
+            <div style={css(`flex:1;`)}>
+              <div style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary);`)}>เบิกจ่ายน้ำยาห้องปฏิบัติการ</div>
+              <div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>ทำรายการเบิกจ่ายสารเคมีและน้ำยาโดยอิงเกณฑ์หมดอายุก่อน (FEFO)</div>
+            </div>
+            <button onClick={closeModal} style={css(`border:none; background:var(--slate-100); cursor:pointer; padding:6px; border-radius:var(--radius-sm); color:var(--text-secondary); display:grid; place-items:center;`)}>
+              {ic.close}
+            </button>
+          </div>
+
+          {/* Form Body */}
+          <div style={css(`padding:20px 22px; display:flex; flex-direction:column; gap:16px;`)}>
+            
+            {/* 1. Search Reagent (Always at the TOP) */}
+            <div style={{ position: 'relative' }} onClick={(e) => e.stopPropagation()}>
+              <Input 
+                label="ค้นหาน้ำยาที่ต้องการเบิก (พิมพ์ชื่อหรือรหัส)" 
+                required={true}
+                placeholder="พิมพ์เพื่อค้นหา เช่น Glucose, CBC, Anti-HIV..." 
+                value={iform.searchInput || ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  ifSearchInput(val);
+                  setShowDropdown(true);
+                  if (!val) {
+                    selectReagentForIssue('');
+                  }
+                }}
+                onFocus={() => setShowDropdown(true)}
+                suffix={
+                  <span style={css(`color:var(--text-tertiary); display:grid; place-items:center; margin-right:8px;`)}>
+                    {ic.search}
+                  </span>
+                }
+              />
+              
+              {showDropdown && query && filteredReagents.length > 0 && (
+                <div style={css(`position:absolute; top:70px; left:0; right:0; background:var(--surface-card); border:1px solid var(--border-strong); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:100; max-height:220px; overflow-y:auto;`)}>
+                  {filteredReagents.map(r => {
+                    const totalStock = activeLotsList.filter(l => l.rid === r.id).reduce((sum, l) => sum + l.qty, 0);
+                    return (
+                      <div 
+                        key={r.id} 
+                        onClick={() => {
+                          selectReagentForIssue(r.id);
+                          setShowDropdown(false);
+                        }}
+                        style={css(`padding:10px 14px; cursor:pointer; font:var(--text-sm)/1.3 var(--font-body); color:var(--text-primary); border-bottom:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center; transition:background var(--dur-fast);`)}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--slate-50)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <div>
+                          <div style={css(`font-weight:600; color:var(--text-primary);`)}>{r.th}</div>
+                          <div style={css(`font:var(--text-2xs)/1 var(--font-mono); color:var(--text-tertiary); margin-top:2px;`)}>{r.code} · {r.en}</div>
+                        </div>
+                        <div style={css(`font:var(--fw-semibold) var(--text-xs)/1 var(--font-mono); color:var(--brand-800);`)}>
+                          คงเหลือ {totalStock} {r.unit}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Reagent Info Display (if selected manually) */}
+            {selectedReagentObj && (
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:10px 14px; display:flex; align-items:center; justify-content:space-between; font:var(--text-xs)/1.3 var(--font-body); margin-top:-6px;`)}>
+                <div>
+                  <span style={css(`font-weight:600; color:var(--text-primary);`)}>{selectedReagentObj.th}</span>
+                  <span style={css(`font:var(--text-2xs)/1 var(--font-mono); color:var(--text-tertiary); margin-left:8px;`)}>{selectedReagentObj.code}</span>
+                </div>
+                <div style={css(`font-family:var(--font-mono); font-weight:600; color:var(--brand-800);`)}>
+                  คงเหลือรวมในคลัง: {issueOnHand} {selectedReagentObj.unit}
+                </div>
+              </div>
+            )}
+
+            {/* 2. QR code scanner section */}
+            <div style={css(`display:flex; flex-direction:column; gap:14px; border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:16px; background:var(--surface-sunken);`)}>
+              <style>{`
+                @keyframes scanline {
+                  0% { transform: translateY(0); opacity: 0.3; }
+                  50% { transform: translateY(116px); opacity: 1; }
+                  100% { transform: translateY(0); opacity: 0.3; }
+                }
+                @keyframes pulse-qr {
+                  0% { box-shadow: 0 0 5px rgba(95, 212, 154, 0.2); }
+                  50% { box-shadow: 0 0 15px rgba(95, 212, 154, 0.6); }
+                  100% { box-shadow: 0 0 5px rgba(95, 212, 154, 0.2); }
+                }
+              `}</style>
+              
+              {/* Viewfinder Grid */}
+              <div style={css(`position:relative; height:140px; background:#050a10; border:1px solid var(--border-strong); border-radius:var(--radius-md); overflow:hidden; display:flex; flex-direction:column; justify-content:center; align-items:center;`)}>
+                <div style={cornerStyle(true, true, false, false)} />
+                <div style={cornerStyle(true, false, true, false)} />
+                <div style={cornerStyle(false, true, false, true)} />
+                <div style={cornerStyle(false, false, true, true)} />
+                
+                {/* Laser Scanline */}
+                <div style={{
+                  position: 'absolute',
+                  left: '12px',
+                  right: '12px',
+                  top: '12px',
+                  height: '2px',
+                  background: 'var(--green-600)',
+                  boxShadow: '0 0 8px var(--green-600)',
+                  animation: 'scanline 3s infinite linear',
+                  pointerEvents: 'none'
+                }} />
+                
+                <div style={css(`opacity:0.25; transform:scale(2.5); color:var(--green-600); display:grid; place-items:center;`)}>
+                  {ic.qr}
+                </div>
+                <div style={css(`position:absolute; bottom:12px; font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--green-600); letter-spacing:1px; text-transform:uppercase;`)}>
+                  จำลองกล้องแสกนคิวอาร์โค้ด...
+                </div>
+              </div>
+
+              {/* Linked Lot Status */}
+              {iform.lotId ? (
+                <div style={{
+                  background: 'rgba(56,182,115,.12)',
+                  border: '1px solid var(--green-700)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '12px 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  animation: 'pulse-qr 2s infinite ease-in-out'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ display: 'grid', placeItems: 'center', color: 'var(--green-700)' }}>
+                      {ic.shield || ic.check}
+                    </span>
+                    <div style={{ font: 'var(--text-sm)/1.3 var(--font-body)' }}>
+                      <div style={{ fontWeight: 'bold', color: 'var(--green-700)' }}>เชื่อมโยงข้อมูลล็อตสำเร็จ!</div>
+                      <div style={{ font: 'var(--text-2xs)/1 var(--font-mono)', color: 'var(--text-secondary)', marginTop: 2 }}>
+                        น้ำยา: <strong style={{ color: 'var(--text-primary)' }}>{selectedReagentObj ? selectedReagentObj.th : ''}</strong> · Lot: <strong style={{ color: 'var(--text-primary)' }}>{linkedLotObj ? linkedLotObj.lot : ''}</strong> (คงเหลือ {linkedLotObj ? linkedLotObj.qty : 0} {selectedReagentObj ? selectedReagentObj.unit : ''})
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={unlinkLot}
+                    style={css(`background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:4px 8px; font:var(--fw-medium) var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer;`)}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--red-700)'; e.currentTarget.style.color = 'var(--red-700)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                  >
+                    ยกเลิกเชื่อมโยง
+                  </button>
+                </div>
+              ) : null}
+
+              {/* Simulated Scannable demo lists */}
+              <div>
+                <div style={css(`font:var(--fw-medium) var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary); margin-bottom:6px;`)}>
+                  คลิกเพื่อจำลองการสแกนรหัส (สำหรับทดสอบเดโม):
+                </div>
+                <div style={css(`display:flex; flex-wrap:wrap; gap:6px; max-height:100px; overflow-y:auto; padding:2px;`)}>
+                  {activeLotsList.map(l => {
+                    const r = reagentsList.find(re => re.id === l.rid);
+                    return (
+                      <button
+                        key={l.id}
+                        type="button"
+                        onClick={() => scanQRCode(l.qr)}
+                        style={css(`background:var(--slate-100); border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:4px 8px; font:var(--text-2xs)/1.2 var(--font-mono); color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; gap:4px;`)}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--brand-700)'; e.currentTarget.style.color = 'var(--brand-700)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                      >
+                        {ic.qr} {l.qr} ({r ? r.en : ''})
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Manual Text Input QR Code */}
+              <div style={css(`display:grid; grid-template-columns:1fr auto; gap:8px; align-items:flex-end;`)}>
+                <Input 
+                  label="หรือกรอกรหัส QR Code ตรงนี้" 
+                  placeholder="เช่น QR-G2407A" 
+                  value={iform.qrInput || ''} 
+                  onChange={ifQrInput} 
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => scanQRCode(iform.qrInput)}
+                  style={css(`background:var(--brand-700); color:#fff; border:none; border-radius:var(--radius-md); padding:0 14px; height:40px; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); cursor:pointer; display:flex; align-items:center;`)}
+                >
+                  จำลองสแกน
+                </button>
+              </div>
+            </div>
+
+            {/* 3. Withdraw Quantity */}
+            <div>
+              <Input 
+                label="จำนวนที่เบิก" 
+                type="number" 
+                required={true} 
+                placeholder="ป้อนจำนวนตัวเลข เช่น 1" 
+                value={iform.qty} 
+                onChange={ifQty} 
+              />
+            </div>
+
+            {/* FEFO Plan details */}
+            {issueHasPlan ? (
+              <div style={css(`background:var(--brand-50); border:1px solid var(--brand-100); border-radius:var(--radius-md); padding:14px 16px; margin-top:4px;`)}>
+                <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.4 var(--font-body); color:var(--brand-800); margin-bottom:8px;`)}>
+                  {iform.lotId ? 'จัดสรรการเบิกจาก Lot เจาะจงที่สแกนสำเร็จ' : 'การจัดสรรล็อตที่จะทำรายการเบิกจ่าย (เรียงตามลำดับอายุสั้นสุด FEFO)'}
+                </div>
+                {issuePlanRows.map((p, pI) => (
+                  <div key={pI} style={css(`display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid var(--brand-100); font:var(--text-sm)/1.3 var(--font-body);`)}>
+                    <span style={css(`font:var(--fw-bold) var(--text-sm)/1 var(--font-mono); color:var(--brand-800);`)}>Lot {p.lot}</span>
+                    <span style={css(`font:var(--text-2xs)/1 var(--font-mono); color:${p.col}; font-weight:600;`)}>หมดอายุ {p.expiry} · {p.dayLabel}</span>
+                    <span style={css(`flex:1;`)} />
+                    <span style={css(`font:var(--fw-bold) var(--text-sm)/1 var(--font-mono); color:var(--accent-700);`)}>−{p.take} {issueUnit}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+            
+            {issueShort ? (
+              <div style={css(`background:var(--red-100); border:1px solid var(--red-100); border-radius:var(--radius-md); padding:11px 14px; font:var(--fw-medium) var(--text-xs)/1.5 var(--font-body); color:var(--red-700); margin-top:4px;`)}>
+                สินค้าในคลังไม่เพียงพอสำหรับเบิกจ่าย — ขาดอีก {issueShort} {issueUnit}
+              </div>
+            ) : null}
+          </div>
+
+          {/* Footer Buttons */}
+          <div style={css(`padding:14px 22px; border-top:1px solid var(--border-subtle); display:flex; justify-content:flex-end; gap:10px; background:var(--slate-50);`)}>
+            <button 
+              onClick={closeModal} 
+              style={css(`padding:8px 16px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--slate-100)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--white)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+            >
+              ยกเลิก
+            </button>
+            <button 
+              onClick={submitIssue} 
+              style={css(`padding:8px 16px; border-radius:var(--radius-md); border:none; background:var(--accent-600); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); box-shadow:var(--glow-accent); transition:all var(--dur-fast);`)}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(78,124,176,0.35)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'var(--glow-accent)'; }}
+            >
+              ยืนยันเบิกจ่าย
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

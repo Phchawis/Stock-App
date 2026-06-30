@@ -1,0 +1,123 @@
+import React from 'react';
+import { css } from '../css.js';
+import { Input } from '../components/Input.jsx';
+
+export function Login({ v }) {
+  const {
+    notAuthed, loginForm, lfUser, lfPass, loginError, hasLoginError,
+    submitLogin, demoAccounts,
+  } = v;
+
+  const [remember, setRemember] = React.useState(false);
+
+  return notAuthed ? (
+    <>
+      <div className="ov-in" style={css(`position:fixed; inset:0; z-index:80; display:flex; background:var(--surface-page); overflow:auto;`)}>
+        {/* Left branding panel */}
+        <div style={css(`flex:0 0 38%; min-width:340px; background:linear-gradient(155deg,#08202A 0%,#06596F 50%,#1A93B3 124%); color:#fff; padding:48px 44px; display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden;`)}>
+          <div style={css(`position:absolute; top:-80px; right:-60px; width:260px; height:260px; border-radius:50%; background:radial-gradient(circle,rgba(0,104,132,.6),transparent 70%);`)}></div>
+          <div style={css(`position:absolute; bottom:-90px; left:-50px; width:240px; height:240px; border-radius:50%; background:radial-gradient(circle,rgba(94,108,214,.4),transparent 72%);`)}></div>
+          
+          <div style={css(`display:flex; align-items:center; gap:14px; position:relative;`)}>
+            <div style={css(`width:60px; height:60px; border-radius:50%; background:rgba(255,255,255,.96); display:grid; place-items:center;`)}>
+              <img src="/assets/b082f9ab-2a3d-47e8-a44f-c9a7574496ec.png" alt="ตรา รพธ." style={css(`width:48px; height:48px; object-fit:contain;`)} />
+            </div>
+            <div>
+              <div style={css(`font:600 12px/1.4 'IBM Plex Mono',monospace; letter-spacing:.16em; color:#C7CCF2;`)}>TUH · REAGENT INVENTORY</div>
+              <div style={css(`font:700 20px/1.2 'Anuphan',sans-serif;`)}>ระบบจัดการ Stock น้ำยา</div>
+            </div>
+          </div>
+
+          <div style={css(`position:relative;`)}>
+            <div style={css(`font:700 26px/1.3 'Anuphan',sans-serif; letter-spacing:-.01em;`)}>
+              ระบบบริหารคลังน้ำยา<br />และสารเคมีวิเคราะห์<br />ห้องปฏิบัติการเทคนิคการแพทย์
+            </div>
+            <div style={css(`margin-top:12px; font:400 15px/1.7 'Sarabun',sans-serif; color:#E7E9F8; max-width:34ch;`)}>
+              โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ · คลังควบคุมและติดตามการใช้งานอย่างเป็นระบบตามเกณฑ์มาตรฐาน Quality Management System
+            </div>
+          </div>
+
+          <div style={css(`position:relative; font:400 12px/1.5 'Sarabun',sans-serif; color:#C7CCF2;`)}>
+            โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ · ห้องปฏิบัติการเทคนิคการแพทย์
+          </div>
+        </div>
+
+        {/* Right login form panel */}
+        <div style={css(`flex:1; padding:40px 44px; overflow-y:auto; display:flex; align-items:center; justify-content:center;`)}>
+          <div style={css(`width:100%; max-width:390px;`)}>
+            <div style={css(`font:600 26px/1.3 'Anuphan',sans-serif; color:var(--text-primary); margin-bottom:6px;`)}>
+              เข้าสู่ระบบ
+            </div>
+            <div style={css(`font:400 15.5px/1.6 'Sarabun',sans-serif; color:var(--text-tertiary); margin-bottom:26px;`)}>
+              กรอกชื่อผู้ใช้และรหัสผ่านเพื่อเข้าใช้งานระบบ
+            </div>
+
+            <div style={css(`display:flex; flex-direction:column; gap:16px;`)}>
+              <Input label="ชื่อผู้ใช้ (Username)" placeholder="เช่น admin" value={loginForm.username} onChange={lfUser} />
+              <Input label="รหัสผ่าน (Password)" type="password" placeholder="••••••••" value={loginForm.password} onChange={lfPass} />
+              
+              {/* Remember me & Forgot Password */}
+              <div style={css(`display:flex; align-items:center; justify-content:space-between; font:400 13px/1 'Sarabun',sans-serif;`)}>
+                <label style={css(`display:flex; align-items:center; gap:6px; cursor:pointer; color:var(--text-secondary);`)}>
+                  <input 
+                    type="checkbox" 
+                    checked={remember} 
+                    onChange={() => setRemember(!remember)}
+                    style={css(`cursor:pointer; width:14px; height:14px;`)} 
+                  />
+                  จดจำรหัสผ่าน
+                </label>
+                <span 
+                  style={css(`color:var(--text-tertiary); cursor:pointer; text-decoration:underline; font-size:12.5px;`)}
+                  onClick={() => alert('หากลืมรหัสผ่าน กรุณาติดต่อหน่วยควบคุมคลังน้ำยา (ห้องปฏิบัติการเทคนิคการแพทย์ รพ.ธรรมศาสตร์ฯ โทรภายใน 1125)')}
+                >
+                  หากลืมรหัสติดต่อผู้ดูแล
+                </span>
+              </div>
+
+              {hasLoginError && (
+                <div style={css(`padding:10px 14px; border-radius:var(--radius-md); background:var(--red-100); color:var(--red-700); font:var(--fw-medium) var(--text-sm)/1.5 var(--font-body);`)}>
+                  {loginError}
+                </div>
+              )}
+
+              <button onClick={submitLogin} style={css(`margin-top:2px; padding:13px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-md)/1 var(--font-body); box-shadow:var(--glow-brand-soft);`)}>
+                เข้าสู่ระบบ
+              </button>
+            </div>
+
+            <div style={css(`margin-top:26px; display:flex; align-items:center; gap:12px;`)}>
+              <div style={css(`flex:1; height:1px; background:var(--border-subtle);`)}></div>
+              <span style={css(`font:400 13px/1 'Sarabun',sans-serif; color:var(--text-tertiary);`)}>หรือเลือกบัญชีสาธิต</span>
+              <div style={css(`flex:1; height:1px; background:var(--border-subtle);`)}></div>
+            </div>
+
+            <div style={css(`margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:10px;`)}>
+              {demoAccounts.map((d, dI) => (
+                <React.Fragment key={dI}>
+                  <button onClick={d.onPick} style={css(`display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--surface-card); cursor:pointer; text-align:left;`)}>
+                    <span style={css(`width:32px; height:32px; border-radius:50%; background:${d.color}; color:#fff; display:grid; place-items:center; font:600 13px/1 'Sarabun',sans-serif; flex-shrink:0;`)}>
+                      {d.initials}
+                    </span>
+                    <div style={css(`min-width:0;`)}>
+                      <div style={css(`font:600 13px/1.3 'Sarabun',sans-serif; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>
+                        {d.th}
+                      </div>
+                      <div style={css(`font:500 11px/1.3 'IBM Plex Mono',monospace; color:var(--text-tertiary);`)}>
+                        {d.username}
+                      </div>
+                    </div>
+                  </button>
+                </React.Fragment>
+              ))}
+            </div>
+
+            <div style={css(`margin-top:16px; font:400 12.5px/1.5 'Sarabun',sans-serif; color:var(--text-tertiary);`)}>
+              รหัสผ่านสาธิตทุกบัญชี: <span style={css(`font-family:var(--font-mono); color:var(--text-secondary);`)}>tuh1234</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  ) : null;
+}

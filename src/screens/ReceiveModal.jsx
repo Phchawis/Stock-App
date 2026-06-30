@@ -1,0 +1,87 @@
+import React from 'react';
+import { css } from '../css.js';
+import { Input } from '../components/Input.jsx';
+import { SearchableSelect } from '../components/SearchableSelect.jsx';
+
+export function ReceiveModal({ v }) {
+  const {
+    stop, ic, modalReceive, closeModal, rf, rfRid,
+    rfLot, rfExpiry, rfQty, reagentOpts,
+    submitReceive, openPrintSticker, reagentsList, user,
+  } = v;
+
+  if (!modalReceive) return null;
+
+  const handlePrint = () => {
+    if (!rf.rid || !rf.lot) {
+      alert('กรุณาเลือกน้ำยาและกรอกเลข Lot ก่อนพิมพ์สติกเกอร์');
+      return;
+    }
+    const reagentObj = reagentsList.find(r => String(r.id) === String(rf.rid));
+    if (!reagentObj) return;
+    const tempLot = {
+      lot: rf.lot,
+      expiry: rf.expiry || '—',
+      qr: 'QR-' + rf.lot
+    };
+    openPrintSticker(tempLot, reagentObj);
+  };
+
+  return (
+    <>
+      <div className="ov-in" onClick={closeModal} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.46); z-index:50; display:grid; place-items:center; padding:24px;`)}>
+        <div className="tt-in" onClick={stop} style={css(`width:min(720px,96vw); max-height:92vh; overflow-y:auto; background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:1px solid var(--border-subtle);`)}>
+          
+          {/* Header */}
+          <div style={css(`padding:18px 22px; border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; gap:11px;`)}>
+            <span style={css(`width:34px; height:34px; border-radius:var(--radius-md); background:var(--brand-50); color:var(--brand-700); display:grid; place-items:center;`)}>{ic.receive}</span>
+            <div style={css(`flex:1;`)}><div style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary);`)}>รับน้ำยาเข้าคลัง</div><div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>บันทึก Lot ใหม่ พร้อมวันหมดอายุและพิมพ์สติกเกอร์รหัส</div></div>
+            <button onClick={closeModal} style={css(`border:none; background:var(--slate-100); cursor:pointer; padding:6px; border-radius:var(--radius-sm); color:var(--text-secondary); display:grid; place-items:center;`)}>{ic.close}</button>
+          </div>
+          
+          {/* Body */}
+          <div style={css(`padding:20px 22px; display:flex; flex-direction:column; gap:14px;`)}>
+            <SearchableSelect label="น้ำยา" required={true} placeholder="ค้นหาหรือเลือกน้ำยา..." options={reagentOpts} value={rf.rid} onChange={rfRid} />
+            <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px;`)}>
+              <Input label="เลข Lot" required={true} placeholder="เช่น G2412C" value={rf.lot} onChange={rfLot} />
+              <Input label="วันหมดอายุ" type="date" required={true} value={rf.expiry} onChange={rfExpiry} />
+            </div>
+            <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px;`)}>
+              <Input label="จำนวนรับเข้า" type="number" required={true} placeholder="0" value={rf.qty} onChange={rfQty} />
+              <Input label="ผู้ทำการรับน้ำยา" disabled={true} value={user ? `${user.name} (${user.role})` : ''} />
+            </div>
+          </div>
+          
+          {/* Footer */}
+          <div style={css(`padding:14px 22px; border-top:1px solid var(--border-subtle); display:flex; justify-content:flex-end; gap:10px; background:var(--slate-50);`)}>
+            <button 
+              onClick={closeModal} 
+              style={css(`padding:9px 18px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body); transition:all var(--dur-fast);`)}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--slate-100)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--white)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+            >
+              ยกเลิก
+            </button>
+            <button 
+              type="button" 
+              onClick={handlePrint} 
+              style={css(`padding:9px 18px; border-radius:var(--radius-md); border:1px solid var(--brand-700); background:transparent; color:var(--brand-700); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body); transition:all var(--dur-fast);`)}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--brand-100)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+            >
+              🖨️ พิมพ์ QR Code (2x4)
+            </button>
+            <button 
+              onClick={submitReceive} 
+              style={css(`padding:9px 18px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body); box-shadow:var(--glow-brand-soft); transition:all var(--dur-fast);`)}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(19,135,166,0.35)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'var(--glow-brand-soft)'; }}
+            >
+              บันทึกรับเข้า
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

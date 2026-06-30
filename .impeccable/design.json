@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-30T04:21:40Z",
+  "title": "Design System: TUH Laboratory Stock Design System",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Laboratory Indigo",
+        "canonical": "#343E9B",
+        "tonalRamp": ["#1B2152", "#262E73", "#343E9B", "#4250BC", "#5E6CD6", "#8893E3", "#B4BBEE", "#E3E6F9"]
+      },
+      "accent": {
+        "role": "accent",
+        "displayName": "Warning Coral",
+        "canonical": "#EC6647",
+        "tonalRamp": ["#9E2D1A", "#B03722", "#C2422A", "#DD5236", "#EC6647", "#F2876E", "#FBE2DA", "#FDF0EC"]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "Cool Slate Background",
+        "canonical": "#F6F7FB",
+        "tonalRamp": ["#11131F", "#181B2A", "#262A3D", "#3A3F55", "#70758C", "#C4C8D6", "#EEEFF5", "#F6F7FB"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display Anuphan",
+        "purpose": "Used for page display titles, covers, and primary numbers."
+      },
+      "body": {
+        "displayName": "Body Sarabun",
+        "purpose": "Used for main reading text, records, and table inputs."
+      }
+    },
+    "shadows": [
+      {
+        "name": "glow-brand-soft",
+        "value": "0 6px 18px -8px rgba(52,62,155,.35)",
+        "purpose": "Soft interactive glow under buttons and dropdown highlights."
+      }
+    ],
+    "motion": [
+      {
+        "name": "transition-standard",
+        "value": "background 0.2s ease, transform 0.2s ease",
+        "purpose": "State feedback on buttons and lists."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Indigo gradient button used for main callouts and printable reports.",
+      "html": "<button class=\"ds-btn-primary\">พิมพ์รายงาน PDF</button>",
+      "css": ".ds-btn-primary { background: linear-gradient(135deg, #343E9B, #262E73); color: #fff; padding: 8px 16px; font-weight: 600; font-family: sans-serif; border: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(52,62,155,0.25); cursor: pointer; transition: all 0.2s; } .ds-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(52,62,155,0.35); }"
+    },
+    {
+      "name": "Reagent Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Reagent container card used on the Reagent Lists catalogue page.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-title\">Glucose Test</div><div class=\"ds-card-desc\">Chemical Diagnostic Reagent</div></div>",
+      "css": ".ds-card { background: #ffffff; border: 1px solid #E0E2EC; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-family: sans-serif; } .ds-card-title { font-size: 14px; font-weight: bold; color: #181B2A; } .ds-card-desc { font-size: 11px; color: #70758C; margin-top: 4px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Clinical Lab Ledger",
+    "overview": "A high-density, high-readability user interface designed specifically for medical laboratory professionals operating under variable lighting conditions. The layout avoids decorative elements in favor of a clean, structured workspace resembling an official lab record book. It rejects the generic warm-neutral SaaS aesthetic in favor of a cool blue-slate palette representing security and scientific precision.",
+    "keyCharacteristics": [
+      "Grid system alignment",
+      "Tonal layering over heavy shadows",
+      "Priority status alerts"
+    ],
+    "rules": [
+      {
+        "name": "The Contrast Rule",
+        "body": "Body text must have a minimum contrast ratio of 4.5:1 against the background. Do not use light grey text on a white background for typography.",
+        "section": "colors"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Surfaces do not float on heavy dropshadows. Shadows appear only on active states (hover) and modal overlays.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do check typography contrast",
+      "Do use IBM Plex Mono for codes/dates",
+      "Do use distinct status icons"
+    ],
+    "donts": [
+      "Don't use text gradients",
+      "Don't use side-stripe borders",
+      "Don't use warm sand-like backgrounds"
+    ]
+  }
+}
