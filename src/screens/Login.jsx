@@ -12,9 +12,9 @@ export function Login({ v }) {
 
   return notAuthed ? (
     <>
-      <div className="ov-in" style={css(`position:fixed; inset:0; z-index:80; display:flex; background:var(--surface-page); overflow:auto;`)}>
+      <div className="ov-in login-container" style={css(`position:fixed; inset:0; z-index:80; display:flex; background:var(--surface-page); overflow:auto;`)}>
         {/* Left branding panel */}
-        <div style={css(`flex:0 0 38%; min-width:340px; background:linear-gradient(155deg,#08202A 0%,#06596F 50%,#1A93B3 124%); color:#fff; padding:48px 44px; display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden;`)}>
+        <div className="login-left-panel" style={css(`flex:0 0 38%; min-width:340px; background:linear-gradient(155deg,#08202A 0%,#06596F 50%,#1A93B3 124%); color:#fff; padding:48px 44px; display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden;`)}>
           <div style={css(`position:absolute; top:-80px; right:-60px; width:260px; height:260px; border-radius:50%; background:radial-gradient(circle,rgba(0,104,132,.6),transparent 70%);`)}></div>
           <div style={css(`position:absolute; bottom:-90px; left:-50px; width:240px; height:240px; border-radius:50%; background:radial-gradient(circle,rgba(94,108,214,.4),transparent 72%);`)}></div>
           
@@ -43,8 +43,18 @@ export function Login({ v }) {
         </div>
 
         {/* Right login form panel */}
-        <div style={css(`flex:1; padding:40px 44px; overflow-y:auto; display:flex; align-items:center; justify-content:center;`)}>
+        <div className="login-right-panel" style={css(`flex:1; padding:40px 44px; overflow-y:auto; display:flex; align-items:center; justify-content:center;`)}>
           <div style={css(`width:100%; max-width:390px;`)}>
+            {/* Mobile Brand Header */}
+            <div className="login-mobile-brand" style={css(`display:flex; align-items:center; gap:12px; margin-bottom:28px;`)}>
+              <div style={css(`width:48px; height:48px; border-radius:50%; background:rgba(255,255,255,.96); display:grid; place-items:center; flex-shrink:0; border:1px solid var(--border-subtle);`)}>
+                <img src="/assets/b082f9ab-2a3d-47e8-a44f-c9a7574496ec.png" alt="ตรา รพธ." style={css(`width:38px; height:38px; object-fit:contain;`)} />
+              </div>
+              <div style={css(`line-height:1.25;`)}>
+                <div style={css(`font:600 11px/1.3 'IBM Plex Mono',monospace; letter-spacing:.08em; color:var(--brand-700);`)}>TUH · REAGENT INVENTORY</div>
+                <div style={css(`font:700 15px/1.2 'Anuphan',sans-serif; color:var(--text-primary);`)}>ระบบจัดการ Stock น้ำยา</div>
+              </div>
+            </div>
             <div style={css(`font:600 26px/1.3 'Anuphan',sans-serif; color:var(--text-primary); margin-bottom:6px;`)}>
               เข้าสู่ระบบ
             </div>

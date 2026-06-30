@@ -1637,13 +1637,27 @@ code, kbd, samp { font-family: var(--font-mono); }
   }
 
   /* Drawer modals sizing on mobile */
-  .tt-in, .ov-in > div {
+  .tt-in, .ov-in > div:not(.login-container) {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
     border-radius: 0 !important;
     height: 100% !important;
     max-height: 100vh !important;
+  }
+
+  /* Login Page Responsiveness */
+  .login-container {
+    flex-direction: column !important;
+  }
+  .login-left-panel {
+    display: none !important;
+  }
+  .login-right-panel {
+    padding: 32px 24px !important;
+  }
+  .login-mobile-brand {
+    display: flex !important;
   }
 }
 
@@ -1652,6 +1666,9 @@ code, kbd, samp { font-family: var(--font-mono); }
     display: none !important;
   }
   .hamburger-btn {
+    display: none !important;
+  }
+  .login-mobile-brand {
     display: none !important;
   }
 }
