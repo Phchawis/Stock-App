@@ -6,7 +6,7 @@ import { Select } from '../components/Select.jsx';
 export function AddUserModal({ v }) {
   const {
     stop, ic, modalAddUser, closeModal, uform,
-    ufName, ufUsername, ufRole, submitAddUser,
+    ufName, ufUsername, ufRole, ufPassword, submitAddUser,
   } = v;
 
   if (!modalAddUser) return null;
@@ -51,6 +51,15 @@ export function AddUserModal({ v }) {
             placeholder="เช่น somkiat" 
             value={uform.username} 
             onChange={ufUsername} 
+          />
+
+          <Input 
+            label="รหัสผ่านเข้าใช้งาน (Password)" 
+            required={true} 
+            type="password"
+            placeholder="เช่น ตะวัน1234" 
+            value={uform.password || ''} 
+            onChange={ufPassword} 
           />
 
           <Select 
