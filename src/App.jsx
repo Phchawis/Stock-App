@@ -15,53 +15,19 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.today = new Date('2026-06-29T00:00:00');
-    const reagents = [
-      { id: 1, code: 'RGT-CHE-001', th: 'น้ำยาตรวจระดับน้ำตาลกลูโคส', en: 'Glucose (GLU)', cat: 'CHE', unit: 'vial', testsPerUnit: 100, storage: 'REFRIGERATED_2_8', min: 2, reorder: 5, supplier: 'i-med', img: '/reagent_placeholder.png' },
-      { id: 2, code: 'RGT-HEM-002', th: 'น้ำยาเจือจางสำหรับเครื่อง CBC', en: 'CBC Diluent', cat: 'HEM', unit: 'mL', storage: 'ROOM_TEMP', min: 5, reorder: 20, supplier: 'Firmer', img: '/reagent_placeholder.png' },
-      { id: 3, code: 'RGT-IMM-003', th: 'น้ำยาตรวจหาแอนติบอดี Anti-HIV', en: 'Anti-HIV', cat: 'IMM', unit: 'kit', testsPerUnit: 50, storage: 'REFRIGERATED_2_8', min: 2, reorder: 6, supplier: 'i-med', img: '/reagent_placeholder.png' },
-      { id: 4, code: 'RGT-CHE-004', th: 'ซีรัมควบคุมคุณภาพ ระดับ 2', en: 'Control Serum L2', cat: 'CHE', unit: 'vial', storage: 'FROZEN_40', min: 10, reorder: 30, supplier: 'Med-one', img: '/reagent_placeholder.png' },
-      { id: 5, code: 'RGT-MIP-005', th: 'ชุดน้ำยาย้อมแกรม', en: 'Gram Stain Kit', cat: 'MIP', unit: 'kit', storage: 'ROOM_TEMP', min: 3, reorder: 10, supplier: 'Firmer', img: '/reagent_placeholder.png' },
-      { id: 6, code: 'RGT-HEM-006', th: 'น้ำยาย้อม Reticulocyte', en: 'Reticulocyte Stain', cat: 'HEM', unit: 'mL', storage: 'REFRIGERATED_2_8', min: 2, reorder: 8, supplier: 'Med-one', img: '/reagent_placeholder.png' },
-    ];
-    const lots = [
-      { id: 101, rid: 1, lot: 'G2407A', expiry: '2026-07-20', recv: 2, qty: 1, loc: 'ตู้เย็น A1', qr: 'QR-G2407A', status: 'ACTIVE' },
-      { id: 102, rid: 1, lot: 'G2410B', expiry: '2026-10-15', recv: 2, qty: 1, loc: 'ตู้เย็น A1', qr: 'QR-G2410B', status: 'ACTIVE' },
-      { id: 103, rid: 2, lot: 'CBC-2508', expiry: '2026-08-05', recv: 20, qty: 8, loc: 'ชั้นวาง B2', qr: 'QR-CBC2508', status: 'ACTIVE' },
-      { id: 104, rid: 2, lot: 'CBC-2601', expiry: '2027-01-10', recv: 20, qty: 15, loc: 'ชั้นวาง B2', qr: 'QR-CBC2601', status: 'ACTIVE' },
-      { id: 105, rid: 3, lot: 'HIV-2509', expiry: '2026-09-12', recv: 2, qty: 1, loc: 'ตู้เย็น A2', qr: 'QR-HIV2509', status: 'ACTIVE' },
-      { id: 106, rid: 3, lot: 'HIV-2512', expiry: '2026-12-01', recv: 3, qty: 2, loc: 'ตู้เย็น A2', qr: 'QR-HIV2512', status: 'ACTIVE' },
-      { id: 107, rid: 4, lot: 'CS2-2507', expiry: '2026-07-05', recv: 30, qty: 4, loc: 'ตู้แช่แข็ง F1', qr: 'QR-CS2507', status: 'ACTIVE' },
-      { id: 108, rid: 5, lot: 'GRAM-2603', expiry: '2027-03-01', recv: 10, qty: 6, loc: 'ชั้นวาง C1', qr: 'QR-GRAM2603', status: 'ACTIVE' },
-      { id: 109, rid: 6, lot: 'RET-2508', expiry: '2026-08-28', recv: 8, qty: 1, loc: 'ตู้เย็น A1', qr: 'QR-RET2508', status: 'ACTIVE' },
-    ];
-    const txns = [
-      { id: 1001, lotId: 101, rid: 1, type: 'RECEIVE', qty: 2, bal: 2, ref: 'PO-2604-018', scan: 'MANUAL', by: 'ภญ. สมหญิง รักษ์ดี', at: '2026-04-10 09:12' },
-      { id: 1002, lotId: 101, rid: 1, type: 'ISSUE', qty: -1, bal: 1, ref: 'REQ-2606-101', scan: 'QR', by: 'ทนพ. สมชาย ใจดี', at: '2026-06-20 13:40' },
-      { id: 1003, lotId: 102, rid: 1, type: 'RECEIVE', qty: 2, bal: 2, ref: 'PO-2605-022', scan: 'MANUAL', by: 'ภญ. สมหญิง รักษ์ดี', at: '2026-05-15 10:05' },
-      { id: 1004, lotId: 102, rid: 1, type: 'ISSUE', qty: -1, bal: 1, ref: 'REQ-2606-140', scan: 'MANUAL', by: 'ทนพ. วิภา แสงทอง', at: '2026-06-25 11:20' },
-      { id: 1005, lotId: 107, rid: 4, type: 'RECEIVE', qty: 30, bal: 30, ref: 'PO-2603-009', scan: 'MANUAL', by: 'ภญ. สมหญิง รักษ์ดี', at: '2026-03-02 14:30' },
-      { id: 1006, lotId: 107, rid: 4, type: 'ISSUE', qty: -26, bal: 4, ref: 'REQ-2606-088', scan: 'QR', by: 'ทนพ. สมชาย ใจดี', at: '2026-06-18 08:55' },
-      { id: 1007, lotId: 103, rid: 2, type: 'ISSUE', qty: -12, bal: 8, ref: 'REQ-2606-150', scan: 'BARCODE', by: 'ทนพ. วิภา แสงทอง', at: '2026-06-27 15:10' },
-    ];
-    const users = [
-      { username: 'admin', name: 'ทนพ. ธนวัฒน์ ผู้ดูแลระบบ', role: 'admin', initials: 'ธว', color: '#1387A6' },
-      { username: 'supervisor', name: 'ภญ. สมหญิง รักษ์ดี', role: 'supervisor', initials: 'สญ', color: '#4E7CB0' },
-      { username: 'technician', name: 'ทนพ. สมชาย ใจดี', role: 'technician', initials: 'สช', color: '#2E9E63' },
-      { username: 'viewer', name: 'คุณวิภา (ผู้สังเกตการณ์)', role: 'viewer', initials: 'วภ', color: '#6E8694' }
-    ];
     this.state = {
       view: 'dashboard', role: null, invTab: 'all', search: '', detailId: null, modal: null, toast: null, acked: {},
-      reagents, lots, txns, seqLot: 200, seqTxn: 2000, seqReagent: 100,
+      reagents: [], lots: [], txns: [],
       perms: this.defaultPerms(), loginForm: { username: '', password: '', error: '' },
       rf: this.blankRf(), iform: this.blankIf(), mform: this.blankMf(),
-      users, uform: { name: '', username: '', role: 'technician' },
+      users: [], uform: { name: '', username: '', role: 'technician' },
       printLotData: null
     };
     this.user = { name: 'ทนพ. สมชาย ใจดี', role: 'นักเทคนิคการแพทย์', initials: 'สช' };
   }
   blankRf() { return { rid: '', lot: '', expiry: '', qty: '', supplier: '', loc: 'ตู้เย็น A1' }; }
   blankIf() { return { rid: '', qty: '', scan: 'MANUAL', ref: '', lotId: '', qrInput: '', searchInput: '' }; }
-  blankMf() { return { code: '', th: '', en: '', cat: 'HMS', unit: 'Vial', subUnit: '', testsPerUnit: '', storage: 'REFRIGERATED_2_8', min: '', reorder: '', supplier: 'i-med', img: '/reagent_placeholder.png' }; }
+  blankMf() { return { code: '', th: '', en: '', cat: 'CHE', unit: 'vial', subUnit: '', testsPerUnit: '', storage: 'REFRIGERATED_2_8', min: '', reorder: '', supplier: 'i-med', img: '/reagent_placeholder.png' }; }
   defaultPerms() { const o = {}; this.ROLES().forEach(r => { o[r.id] = { ...r.perms }; }); return o; }
   USERNAMES() { return { admin: 'admin', supervisor: 'supervisor', technician: 'technician', viewer: 'viewer' }; }
   bindLF(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ loginForm: { ...s.loginForm, [k]: v, error: '' } })); }; }
@@ -84,7 +50,7 @@ class App extends React.Component {
     this.login(userObj.role, userObj.name, userObj.initials);
   }
   bindUf(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ uform: { ...s.uform, [k]: v } })); }; }
-  submitAddUser() {
+  async submitAddUser() {
     const f = this.state.uform;
     const name = (f.name || '').trim();
     const u = (f.username || '').trim().toLowerCase();
@@ -98,14 +64,26 @@ class App extends React.Component {
     const initials = name.split(' ').map(x => x[0]).filter(Boolean).slice(0, 2).join('') || name.slice(0, 2);
     const color = ({ admin: '#1387A6', supervisor: '#4E7CB0', technician: '#2E9E63', viewer: '#6E8694' })[r] || '#6E8694';
     const newUser = { username: u, name, role: r, initials, color };
-    this.setState(s => ({
-      users: [...s.users, newUser],
-      uform: { name: '', username: '', role: 'technician' },
-      modal: null
-    }));
-    this.showToast('เพิ่มผู้ใช้งาน ' + name + ' สำเร็จ');
+
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newUser)
+      });
+      if (!res.ok) throw new Error('เพิ่มผู้ใช้งานล้มเหลว');
+
+      this.setState(s => ({
+        users: [...s.users, newUser],
+        uform: { name: '', username: '', role: 'technician' },
+        modal: null
+      }));
+      this.showToast('เพิ่มผู้ใช้งาน ' + name + ' สำเร็จ');
+    } catch (err) {
+      this.showToast(err.message, 'warn');
+    }
   }
-  deleteUser(username) {
+  async deleteUser(username) {
     if (this.state.role !== 'admin') {
       this.showToast('เฉพาะผู้ดูแลระบบเท่านั้นที่มีสิทธิ์ลบผู้ใช้งาน', 'warn');
       return;
@@ -116,19 +94,35 @@ class App extends React.Component {
       this.showToast('ไม่สามารถลบสิทธิ์บัญชีผู้ดูแลระบบ (Admin) ได้', 'warn');
       return;
     }
-    this.setState(s => ({
-      users: s.users.filter(u => u.username !== username)
-    }));
-    this.showToast('ลบผู้ใช้งาน ' + userObj.name + ' สำเร็จ');
+
+    try {
+      const res = await fetch(`/api/users?username=${encodeURIComponent(username)}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) throw new Error('ลบผู้ใช้งานล้มเหลว');
+
+      this.setState(s => ({
+        users: s.users.filter(u => u.username !== username)
+      }));
+      this.showToast('ลบผู้ใช้งาน ' + userObj.name + ' สำเร็จ');
+    } catch (err) {
+      this.showToast(err.message, 'warn');
+    }
   }
-  clearTxns() {
+  async clearTxns() {
     if (this.state.role !== 'admin') {
       this.showToast('เฉพาะผู้ดูแลระบบเท่านั้นที่มีสิทธิ์ล้างประวัติการเคลื่อนไหว', 'warn');
       return;
     }
     if (window.confirm('คุณต้องการล้างประวัติการเคลื่อนไหวทั้งหมดในระบบใช่หรือไม่? (ประวัติการคุมคลังและ Audit Trail จะเป็นศูนย์และไม่สามารถเรียกคืนได้)')) {
-      this.setState({ txns: [] });
-      this.showToast('ล้างประวัติการเคลื่อนไหวเรียบร้อยแล้ว');
+      try {
+        const res = await fetch('/api/transactions', { method: 'DELETE' });
+        if (!res.ok) throw new Error('ล้างประวัติล้มเหลว');
+        this.fetchData();
+        this.showToast('ล้างประวัติการเคลื่อนไหวเรียบร้อยแล้ว');
+      } catch (err) {
+        this.showToast(err.message, 'warn');
+      }
     }
   }
   openPrintSticker(lot, reagent) {
@@ -161,7 +155,29 @@ class App extends React.Component {
   logout() { this.setState({ role: null, detailId: null, modal: null, loginForm: { username: '', password: '', error: '' } }); }
   can(p) { const m = this.state.perms[this.state.role]; return m ? !!m[p] : false; }
 
+  async fetchData() {
+    try {
+      const [reagentsRes, lotsRes, txnsRes, usersRes] = await Promise.all([
+        fetch('/api/reagents'),
+        fetch('/api/lots'),
+        fetch('/api/transactions'),
+        fetch('/api/users')
+      ]);
+      if (!reagentsRes.ok || !lotsRes.ok || !txnsRes.ok || !usersRes.ok) {
+        throw new Error('ดึงข้อมูลจากเซิร์ฟเวอร์ล้มเหลว');
+      }
+      const reagents = await reagentsRes.json();
+      const lots = await lotsRes.json();
+      const txns = await txnsRes.json();
+      const users = await usersRes.json();
+      this.setState({ reagents, lots, txns, users });
+    } catch (err) {
+      this.showToast('ดึงข้อมูลล้มเหลว: ' + err.message, 'warn');
+    }
+  }
+
   componentDidMount() {
+    this.fetchData();
     if (!(window.lucide && window.lucide.icons)) {
       this._t = setInterval(() => { if (window.lucide && window.lucide.icons) { clearInterval(this._t); this.forceUpdate(); } }, 120);
     }
@@ -204,7 +220,7 @@ class App extends React.Component {
       }
     });
   }
-  submitRegister() {
+  async submitRegister() {
     if (!this.can('manage')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์ลงทะเบียนน้ำยา', 'warn'); return; }
     const f = this.state.mform;
     const min = +f.min;
@@ -213,22 +229,44 @@ class App extends React.Component {
     if (!f.th || !f.cat || !f.unit || !f.storage || !(min >= 0)) {
       this.showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warn'); return;
     }
-    const rId = this.state.seqReagent + 1;
-    const generatedCode = 'RGT-' + f.cat + '-' + String(rId).padStart(3, '0');
-    const newReagent = {
-      id: rId, code: generatedCode, th: f.th, en: f.en || f.th, cat: f.cat, unit: f.unit,
+
+    const tempId = this.state.reagents.length + 1;
+    const generatedCode = 'RGT-' + f.cat + '-' + String(tempId).padStart(3, '0');
+
+    const payload = {
+      code: generatedCode,
+      th: f.th,
+      en: f.en || f.th,
+      cat: f.cat,
+      unit: f.unit,
       subUnit: f.subUnit || '',
       testsPerUnit: (tpu && !isNaN(tpu)) ? tpu : null,
-      storage: f.storage, min, reorder, supplier: f.supplier || 'i-med', img: f.img || '/reagent_placeholder.png'
+      storage: f.storage,
+      min,
+      reorder,
+      supplier: f.supplier || 'i-med',
+      img: f.img || '/reagent_placeholder.png'
     };
-    this.setState(s => ({
-      reagents: [...s.reagents, newReagent],
-      seqReagent: rId,
-      modal: null
-    }));
-    this.showToast(`ลงทะเบียนน้ำยา "${f.th}" สำเร็จ (รหัส: ${generatedCode})`);
+
+    try {
+      const res = await fetch('/api/reagents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('ลงทะเบียนน้ำยาล้มเหลว');
+      const newReagent = await res.json();
+      this.setState(s => ({
+        reagents: [...s.reagents, newReagent],
+        modal: null
+      }));
+      this.showToast(`ลงทะเบียนน้ำยา "${f.th}" สำเร็จ (รหัส: ${newReagent.code})`);
+    } catch (err) {
+      this.showToast(err.message, 'warn');
+    }
   }
-  submitEditReagent() {
+
+  async submitEditReagent() {
     if (this.state.role !== 'admin') { this.showToast('เฉพาะผู้ดูแลระบบ (Admin) เท่านั้นที่มีสิทธิ์แก้ไขข้อมูลน้ำยา', 'warn'); return; }
     const f = this.state.mform;
     const min = +f.min;
@@ -237,35 +275,42 @@ class App extends React.Component {
     if (!f.th || !f.cat || !f.unit || !f.storage || !(min >= 0)) {
       this.showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warn'); return;
     }
-    this.setState(s => {
-      const updatedReagents = s.reagents.map(r => {
-        if (r.id === s.editReagentId) {
-          return {
-            ...r,
-            th: f.th,
-            en: f.en || f.th,
-            cat: f.cat,
-            unit: f.unit,
-            subUnit: f.subUnit || '',
-            testsPerUnit: (tpu && !isNaN(tpu)) ? tpu : null,
-            storage: f.storage,
-            min,
-            reorder,
-            supplier: f.supplier,
-            img: f.img
-          };
-        }
-        return r;
+
+    const payload = {
+      id: this.state.editReagentId,
+      th: f.th,
+      en: f.en || f.th,
+      cat: f.cat,
+      unit: f.unit,
+      subUnit: f.subUnit || '',
+      testsPerUnit: (tpu && !isNaN(tpu)) ? tpu : null,
+      storage: f.storage,
+      min,
+      reorder,
+      supplier: f.supplier,
+      img: f.img || '/reagent_placeholder.png'
+    };
+
+    try {
+      const res = await fetch('/api/reagents', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
-      // Also update currently viewed detail drawer if it matches the edited reagent
-      let updatedDetail = s.detailId ? updatedReagents.find(x => x.id === s.detailId) : null;
-      return {
-        reagents: updatedReagents,
-        modal: null,
-        editReagentId: null
-      };
-    });
-    this.showToast(`แก้ไขข้อมูลน้ำยา "${f.th}" เรียบร้อยแล้ว`);
+      if (!res.ok) throw new Error('แก้ไขข้อมูลน้ำยาล้มเหลว');
+      
+      this.setState(s => {
+        const updatedReagents = s.reagents.map(r => r.id === s.editReagentId ? { ...r, ...payload } : r);
+        return {
+          reagents: updatedReagents,
+          modal: null,
+          editReagentId: null
+        };
+      });
+      this.showToast(`แก้ไขข้อมูลน้ำยา "${f.th}" เรียบร้อยแล้ว`);
+    } catch (err) {
+      this.showToast(err.message, 'warn');
+    }
   }
 
   // ── derivations ──
@@ -423,35 +468,70 @@ class App extends React.Component {
     return { rows, short: short > 0 ? short : 0, need };
   }
 
-  submitReceive() {
+  async submitReceive() {
     const f = this.state.rf; const rid = +f.rid; const qty = +f.qty;
     if (!rid || !f.lot || !f.expiry || !(qty > 0)) { this.showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warn'); return; }
-    const r = this.state.reagents.find(x => x.id === rid);
-    const lotId = this.state.seqLot + 1; const txnId = this.state.seqTxn + 1;
-    const newLot = { id: lotId, rid, lot: f.lot, expiry: f.expiry, recv: qty, qty, loc: f.loc, qr: 'QR-' + f.lot, status: 'ACTIVE' };
-    const newTxn = { id: txnId, lotId, rid, type: 'RECEIVE', qty, bal: qty, ref: r && r.supplier ? 'รับจาก ' + r.supplier : 'รับเข้าใหม่', scan: 'MANUAL', by: this.user.name, at: this.nowStr() };
-    this.setState(s => ({ lots: [...s.lots, newLot], txns: [...s.txns, newTxn], seqLot: lotId, seqTxn: txnId, modal: null }));
-    this.showToast('รับเข้า ' + qty + ' ' + (r ? r.unit : '') + ' · Lot ' + f.lot + ' สำเร็จ');
+    
+    const payload = {
+      rid,
+      lot: f.lot,
+      expiry: f.expiry,
+      qty,
+      loc: f.loc,
+      by: this.user.name
+    };
+
+    try {
+      const res = await fetch('/api/lots', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('รับเข้าน้ำยาเข้าคลังล้มเหลว');
+      
+      this.setState({ modal: null });
+      this.fetchData();
+      const r = this.state.reagents.find(x => x.id === rid);
+      this.showToast('รับเข้า ' + qty + ' ' + (r ? r.unit : '') + ' · Lot ' + f.lot + ' สำเร็จ');
+    } catch (err) {
+      this.showToast(err.message, 'warn');
+    }
   }
 
-  submitIssue() {
+  async submitIssue() {
     const crit = this.props.criticalDays ?? 30;
     const f = this.state.iform; const rid = +f.rid; const qty = +f.qty;
     const plan = this.issuePlan(crit);
     if (!rid || !(qty > 0)) { this.showToast('กรุณาเลือกน้ำยาและจำนวน', 'warn'); return; }
     if (plan.short > 0) { this.showToast('คงเหลือไม่พอเบิก (ขาด ' + plan.short + ')', 'warn'); return; }
-    const r = this.state.reagents.find(x => x.id === rid);
-    const lots = this.state.lots.slice().map(l => ({ ...l }));
-    let seq = this.state.seqTxn; const newTxns = [];
-    for (const row of plan.rows) {
-      const l = lots.find(x => x.id === row.lotId);
-      if (l) {
-        l.qty -= row.take; if (l.qty === 0) l.status = 'DEPLETED';
-        seq += 1; newTxns.push({ id: seq, lotId: l.id, rid, type: 'ISSUE', qty: -row.take, bal: l.qty, ref: f.ref || (f.lotId ? 'เบิกตรง Lot ' + l.lot : 'เบิกจ่าย (FEFO)'), scan: f.scan, by: this.user.name, at: this.nowStr() });
+
+    const payload = {
+      rid,
+      qty,
+      scan: f.scan || 'MANUAL',
+      ref: f.ref || '',
+      lotId: f.lotId || null,
+      by: this.user.name
+    };
+
+    try {
+      const res = await fetch('/api/issue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'เบิกจ่ายล้มเหลว');
       }
+      
+      this.setState({ modal: null });
+      this.fetchData();
+      const r = this.state.reagents.find(x => x.id === rid);
+      this.showToast('เบิกจ่าย ' + qty + ' ' + (r ? r.unit : '') + ' สำเร็จ');
+    } catch (err) {
+      this.showToast(err.message, 'warn');
     }
-    this.setState(s => ({ lots, txns: [...s.txns, ...newTxns], seqTxn: seq, modal: null }));
-    this.showToast('เบิกจ่าย ' + qty + ' ' + (r ? r.unit : '') + ' จาก ' + plan.rows.length + ' Lot สำเร็จ');
   }
   nowStr() { return '2026-06-29 ' + new Date().toTimeString().slice(0, 5); }
 
