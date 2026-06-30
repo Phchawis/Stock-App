@@ -20,7 +20,7 @@ class App extends React.Component {
       reagents: [], lots: [], txns: [],
       perms: this.defaultPerms(), loginForm: { username: '', password: '', error: '' },
       rf: this.blankRf(), iform: this.blankIf(), mform: this.blankMf(),
-      users: [], uform: { name: '', username: '', role: 'technician' },
+      users: [], uform: { name: '', username: '', role: 'technician', password: '' },
       printLotData: null
     };
     this.user = { name: 'ทนพ. สมชาย ใจดี', role: 'นักเทคนิคการแพทย์', initials: 'สช' };
@@ -43,6 +43,10 @@ class App extends React.Component {
       this.setState(s => ({ loginForm: { ...s.loginForm, error: 'กรุณากรอกรหัสผ่าน' } }));
       return;
     }
+    if (userObj.password && f.password !== userObj.password) {
+      this.setState(s => ({ loginForm: { ...s.loginForm, error: 'รหัสผ่านไม่ถูกต้อง' } }));
+      return;
+    }
     this.login(userObj.role, userObj.name, userObj.initials);
   }
   pickDemo(userObj) {
@@ -55,15 +59,17 @@ class App extends React.Component {
     const name = (f.name || '').trim();
     const u = (f.username || '').trim().toLowerCase();
     const r = f.role;
+    const p = (f.password || '').trim();
     if (!name) { this.showToast('กรุณากรอกชื่อ-นามสกุล', 'warn'); return; }
     if (!u) { this.showToast('กรุณากรอกชื่อเข้าใช้งาน (Username)', 'warn'); return; }
+    if (!p) { this.showToast('กรุณากรอกรหัสผ่าน (Password)', 'warn'); return; }
     if (this.state.users.some(x => x.username.toLowerCase() === u)) {
       this.showToast('ชื่อเข้าใช้งานนี้ถูกใช้งานแล้ว', 'warn');
       return;
     }
     const initials = name.split(' ').map(x => x[0]).filter(Boolean).slice(0, 2).join('') || name.slice(0, 2);
     const color = ({ admin: '#1387A6', supervisor: '#4E7CB0', technician: '#2E9E63', viewer: '#6E8694' })[r] || '#6E8694';
-    const newUser = { username: u, name, role: r, initials, color };
+    const newUser = { username: u, name, role: r, initials, color, password: p };
 
     try {
       const res = await fetch('/api/users', {
@@ -75,7 +81,7 @@ class App extends React.Component {
 
       this.setState(s => ({
         users: [...s.users, newUser],
-        uform: { name: '', username: '', role: 'technician' },
+        uform: { name: '', username: '', role: 'technician', password: '' },
         modal: null
       }));
       this.showToast('เพิ่มผู้ใช้งาน ' + name + ' สำเร็จ');
@@ -738,6 +744,7 @@ class App extends React.Component {
       ufName: this.bindUf('name'),
       ufUsername: this.bindUf('username'),
       ufRole: this.bindUf('role'),
+      ufPassword: this.bindUf('password'),
       submitAddUser: () => this.submitAddUser(),
       deleteUser: (username) => this.deleteUser(username),
       clearTxns: () => this.clearTxns(),
