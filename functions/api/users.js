@@ -17,7 +17,7 @@ export async function onRequestPost(context) {
   const { env, request } = context;
   try {
     const body = await request.json();
-    const { username, name, role, initials, color } = body;
+    const { username, name, role, initials, color, password } = body;
 
     if (!username || !name || !role || !initials || !color) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
@@ -27,9 +27,9 @@ export async function onRequestPost(context) {
     }
 
     await env.DB.prepare(
-      `INSERT INTO users (username, name, role, initials, color) 
-       VALUES (?, ?, ?, ?, ?)`
-    ).bind(username, name, role, initials, color).run();
+      `INSERT INTO users (username, name, role, initials, color, password) 
+       VALUES (?, ?, ?, ?, ?, ?)`
+    ).bind(username, name, role, initials, color, password || 'tuh1234').run();
 
     return new Response(JSON.stringify(body), {
       status: 201,
