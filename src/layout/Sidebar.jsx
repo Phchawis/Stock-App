@@ -4,7 +4,7 @@ import { css } from '../css.js';
 export function Sidebar({ v }) {
   const {
     ic, user, onLogout, nav, go, title,
-    openReceive, openIssue, kpi,
+    openReceive, openIssue, kpi, sidebarOpen,
   } = v;
 
   const localStyle = `
@@ -90,7 +90,7 @@ export function Sidebar({ v }) {
     <>
       <style>{localStyle}</style>
 
-      <aside style={css(`width:var(--sidebar-width,264px); flex-shrink:0; background:var(--white); border-right:1px solid var(--border-subtle); display:flex; flex-direction:column; position:sticky; top:0; height:100vh;`)}>
+      <aside className={`main-sidebar ${sidebarOpen ? 'open' : ''}`} style={css(`width:var(--sidebar-width,264px); flex-shrink:0; background:var(--white); border-right:1px solid var(--border-subtle); display:flex; flex-direction:column; position:sticky; top:0; height:100vh;`)}>
         <div onClick={go.dashboard} className="sidebar-logo-container">
           <div className="sidebar-logo-img-wrapper">
             <img 

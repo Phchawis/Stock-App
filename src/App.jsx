@@ -22,7 +22,8 @@ class App extends React.Component {
       perms: this.defaultPerms(), loginForm: { username: '', password: '', error: '' },
       rf: this.blankRf(), iform: this.blankIf(), mform: this.blankMf(),
       users: [], uform: { name: '', username: '', role: 'technician', password: '' },
-      printLotData: null
+      printLotData: null,
+      sidebarOpen: false
     };
     this.user = { name: 'ทนพ. สมชาย ใจดี', role: 'นักเทคนิคการแพทย์', initials: 'สช' };
   }
@@ -394,7 +395,7 @@ class App extends React.Component {
   }
 
   // ── handlers ──
-  nav(v) { this.setState({ view: v, detailId: null }); }
+  nav(v) { this.setState({ view: v, detailId: null, sidebarOpen: false }); }
   showToast(msg, kind) { if (this._toastT) clearTimeout(this._toastT); this.setState({ toast: { msg, kind: kind || 'ok' } }); this._toastT = setTimeout(() => this.setState({ toast: null }), 2800); }
   openDetail(id) { this.setState({ detailId: id }); }
   closeDetail() { this.setState({ detailId: null }); }
@@ -586,7 +587,7 @@ class App extends React.Component {
       qr: I('QrCode', 'currentColor', 16), close: I('X', 'currentColor', 18),
       thermo: I('Thermometer', 'var(--text-tertiary)', 15), pkg: I('Package', 'var(--text-tertiary)', 15),
       cal: I('CalendarClock', 'var(--text-tertiary)', 15), check: I('Check', '#fff', 16), shield: I('ShieldCheck'),
-      help: I('BookOpen'),
+      help: I('BookOpen'), menu: I('Menu', 'currentColor', 20),
     };
     const dn = this.state.view;
     const titles = {
@@ -837,6 +838,9 @@ class App extends React.Component {
       canManage: this.can('manage'),
 
       toast: S.toast, toastBg: S.toast ? (S.toast.kind === 'warn' ? '#5A4410' : 'var(--slate-900)') : '',
+      sidebarOpen: S.sidebarOpen,
+      toggleSidebar: () => this.setState(s => ({ sidebarOpen: !s.sidebarOpen })),
+      closeSidebar: () => this.setState({ sidebarOpen: false }),
     };
   }
 
@@ -845,6 +849,9 @@ class App extends React.Component {
     const { setRoot } = v;
     return (
 <div ref={setRoot} style={css(`--surface-page:#0E1822; --surface-card:#17242E; --surface-sunken:#0B141C; --white:#17242E; --surface-inverse:#E8F0F4; --text-primary:#E8F0F4; --text-secondary:#AAC3CF; --text-tertiary:#7C96A3; --text-link:#5BC0D9; --text-on-brand:#FFFFFF; --text-disabled:#5A6E7A; --border-subtle:#22333E; --border-default:#2F4452; --border-strong:#3D5462; --border-brand:#1A93B3; --brand-900:#5FC8E0; --brand-800:#7FD3E8; --brand-700:#1A93B3; --brand-600:#2BA6C6; --brand-500:#5BC0D9; --brand-400:#8DBBCC; --brand-300:#A9C7EE; --brand-100:rgba(43,166,198,.18); --brand-50:rgba(43,166,198,.12); --accent-700:#A9C7EE; --accent-600:#4E7CB0; --accent-500:#7AA2C4; --accent-400:#93B9E1; --accent-100:rgba(122,162,196,.20); --accent-50:rgba(122,162,196,.12); --green-700:#5FD49A; --green-600:#38B673; --green-100:rgba(56,182,115,.16); --amber-700:#F0C674; --amber-600:#D69A2E; --amber-100:rgba(214,154,46,.16); --red-700:#F18C8C; --red-600:#E2685E; --red-100:rgba(226,104,94,.16); --blue-700:#8DBBCC; --blue-600:#5BC0D9; --blue-100:rgba(91,192,217,.16); --violet-700:#B9A9E8; --violet-600:#9B86D8; --violet-100:rgba(155,134,216,.18); --slate-900:#0B1922; --slate-700:#9DB1BC; --slate-600:#8DBBCC; --slate-500:#7C96A3; --slate-400:#5A6E7A; --slate-300:#3D5462; --slate-200:#2F4452; --slate-100:#1F2E39; --slate-50:#1B2933; --shadow-xs:0 1px 2px rgba(0,0,0,.4); --shadow-sm:0 1px 3px rgba(0,0,0,.5),0 1px 2px rgba(0,0,0,.4); --shadow-md:0 4px 12px -2px rgba(0,0,0,.55); --shadow-lg:0 16px 32px -8px rgba(0,0,0,.6); --glow-brand:0 10px 30px -10px rgba(0,0,0,.6); --glow-brand-soft:0 6px 18px -8px rgba(0,0,0,.5); --glow-accent:0 10px 30px -10px rgba(0,0,0,.55); --text-2xs:0.8125rem; --text-xs:0.875rem; --text-sm:0.9375rem; --text-base:1.0625rem; --text-md:1.1875rem; --text-lg:1.375rem; --text-xl:1.625rem; --text-2xl:2rem; --text-3xl:2.5rem; --text-4xl:3.25rem; display:flex; min-height:100vh; background:var(--surface-page); font-family:var(--font-body); color:var(--text-primary);`)}>
+      {v.sidebarOpen && (
+        <div className="sidebar-backdrop" onClick={v.closeSidebar} />
+      )}
       <Sidebar v={v} />
       <Main v={v} />
       <DetailDrawer v={v} />

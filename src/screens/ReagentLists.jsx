@@ -259,7 +259,7 @@ export function ReagentLists({ v }) {
               </div>
 
               {/* Modal Body - 2 Columns (Side-by-Side) */}
-              <div style={css(`padding:20px; overflow-y:auto; display:flex; gap:24px; flex-direction:row; flex-wrap:wrap; box-sizing:border-box;`)}>
+              <div className="reagent-detail-body" style={css(`padding:20px; overflow-y:auto; display:flex; gap:24px; flex-direction:row; flex-wrap:wrap; box-sizing:border-box;`)}>
                 
                 {/* Left Column: Reagent details & Lots */}
                 <div style={css(`flex:1; min-width:300px; display:flex; flex-direction:column; gap:16px;`)}>
@@ -399,7 +399,7 @@ export function ReagentLists({ v }) {
                 </div>
 
                 {/* Right Column: Transaction history (Separated) */}
-                <div style={css(`flex:1.2; min-width:320px; display:flex; flex-direction:column; gap:12px; border-left:1px solid var(--border-subtle); padding-left:24px; box-sizing:border-box;`)}>
+                <div className="reagent-detail-right" style={css(`flex:1.2; min-width:320px; display:flex; flex-direction:column; gap:12px; border-left:1px solid var(--border-subtle); padding-left:24px; box-sizing:border-box;`)}>
                   <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.4 var(--font-body); color:var(--text-primary); margin-bottom:4px;`)}>
                     ประวัติการนำเข้า–เบิกจ่ายทั้งหมด (Transaction Logs)
                   </div>
