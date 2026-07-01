@@ -27,8 +27,41 @@ export function ReceiveModal({ v }) {
     openPrintSticker(tempLot, reagentObj);
   };
 
+  const localStyle = `
+    .modal-grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .modal-footer-responsive {
+      padding: 14px 22px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: var(--slate-50);
+    }
+    @media (max-width: 768px) {
+      .modal-grid-2col {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+      }
+      .modal-footer-responsive {
+        flex-direction: column !important;
+        gap: 8px !important;
+        padding: 16px !important;
+      }
+      .modal-footer-responsive button {
+        width: 100% !important;
+        padding: 12px 18px !important;
+        font-size: 15px !important;
+      }
+    }
+  `;
+
   return (
     <>
+      <style>{localStyle}</style>
       <div className="ov-in" onClick={closeModal} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.46); z-index:50; display:grid; place-items:center; padding:24px;`)}>
         <div className="tt-in" onClick={stop} style={css(`width:min(720px,96vw); max-height:92vh; overflow-y:auto; background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:1px solid var(--border-subtle);`)}>
           
@@ -42,18 +75,18 @@ export function ReceiveModal({ v }) {
           {/* Body */}
           <div style={css(`padding:20px 22px; display:flex; flex-direction:column; gap:14px;`)}>
             <SearchableSelect label="น้ำยา" required={true} placeholder="ค้นหาหรือเลือกน้ำยา..." options={reagentOpts} value={rf.rid} onChange={rfRid} />
-            <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px;`)}>
+            <div className="modal-grid-2col">
               <Input label="เลข Lot" required={true} placeholder="เช่น G2412C" value={rf.lot} onChange={rfLot} />
               <Input label="วันหมดอายุ" type="date" required={true} value={rf.expiry} onChange={rfExpiry} />
             </div>
-            <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px;`)}>
+            <div className="modal-grid-2col">
               <Input label="จำนวนรับเข้า" type="number" required={true} placeholder="0" value={rf.qty} onChange={rfQty} />
               <Input label="ผู้ทำการรับน้ำยา" disabled={true} value={user ? `${user.name} (${user.role})` : ''} />
             </div>
           </div>
           
           {/* Footer */}
-          <div style={css(`padding:14px 22px; border-top:1px solid var(--border-subtle); display:flex; justify-content:flex-end; gap:10px; background:var(--slate-50);`)}>
+          <div className="modal-footer-responsive">
             <button 
               onClick={closeModal} 
               style={css(`padding:9px 18px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body); transition:all var(--dur-fast);`)}
