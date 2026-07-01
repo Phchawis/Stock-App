@@ -99,7 +99,7 @@ export function PrintStickerModal({ v }) {
       aside, header, main, .sidebar-backdrop, .dr-in, .toast-container, .no-print {
         display: none !important;
       }
-      /* Reset layout wrappers to transparent background so they don't print colors */
+      /* Reset layout wrappers to natural block flow with transparent background */
       html, body, #root, #root > div {
         width: 4cm !important;
         height: 2cm !important;
@@ -109,15 +109,15 @@ export function PrintStickerModal({ v }) {
         background: transparent !important;
         background-color: transparent !important;
         min-height: auto !important;
+        display: block !important;
+        position: static !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
-      /* Force print area to display and fill the sticker paper */
+      /* Force print area to display and flow naturally to fill the page */
       .sticker-print-area {
         display: flex !important;
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
+        position: static !important;
         width: 4cm !important;
         height: 2cm !important;
         padding: 2mm 3mm !important;
