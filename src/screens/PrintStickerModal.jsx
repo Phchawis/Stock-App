@@ -1,39 +1,38 @@
 import React from 'react';
+import QRCode from 'qrcode';
 import { css } from '../css.js';
 
 export function QRCodeSVG({ value = '' }) {
-  let hash = 0;
-  for (let i = 0; i < value.length; i++) {
-    hash = value.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const cells = [];
-  for (let r = 0; r < 12; r++) {
-    for (let c = 0; c < 12; c++) {
-      // finder patterns at top-left, bottom-left, top-right corners
-      const isTL = r < 4 && c < 4;
-      const isBL = r > 7 && c < 4;
-      const isTR = r < 4 && c > 7;
-      if (isTL || isBL || isTR) {
-        const subR = isTL ? r : (isBL ? r - 8 : r);
-        const subC = isTL ? c : (isBL ? c : c - 8);
-        const isFinderDot = (subR === 0 || subR === 3 || subC === 0 || subC === 3) || (subR === 1.5 || subC === 1.5) || (subR === 1 && subC === 1) || (subR === 2 && subC === 2) || (subR === 1 && subC === 2) || (subR === 2 && subC === 1);
-        cells.push(isFinderDot);
-      } else {
-        const val = ((hash >> (r + c * 2)) & 1) === 1;
-        cells.push(val);
-      }
+  const [svgStr, setSvgStr] = React.useState('');
+
+  React.useEffect(() => {
+    if (value) {
+      QRCode.toString(value, {
+        type: 'svg',
+        margin: 0,
+        color: {
+          dark: '#000000',
+          light: '#ffffff'
+        }
+      }, (err, string) => {
+        if (!err) {
+          // Make sure the SVG is styled to scale to 100% of its container
+          const responsiveSvg = string.replace('<svg ', '<svg width="100%" height="100%" ');
+          setSvgStr(responsiveSvg);
+        }
+      });
     }
+  }, [value]);
+
+  if (!svgStr) {
+    return <div style={{ width: '100%', height: '100%', background: '#fff' }} />;
   }
+
   return (
-    <svg width="100%" height="100%" viewBox="0 0 12 12" style={{ shapeRendering: 'crispEdges' }}>
-      <rect width="12" height="12" fill="#fff" />
-      {cells.map((fill, idx) => {
-        if (!fill) return null;
-        const r = Math.floor(idx / 12);
-        const c = idx % 12;
-        return <rect key={idx} x={c} y={r} width="1" height="1" fill="#000" />;
-      })}
-    </svg>
+    <div 
+      style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      dangerouslySetInnerHTML={{ __html: svgStr }} 
+    />
   );
 }
 
@@ -127,7 +126,7 @@ export function PrintStickerModal({ v }) {
               fontFamily: "'Inter', 'Sarabun', sans-serif"
             }}>
               {/* QR Code */}
-              <div style={{ width: '1.5cm', height: '1.5cm', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, alignSelf: 'center' }}>
+              <div style={{ width: '1.7cm', height: '1.7cm', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, alignSelf: 'center' }}>
                 <QRCodeSVG value={lot.qr} />
               </div>
 
