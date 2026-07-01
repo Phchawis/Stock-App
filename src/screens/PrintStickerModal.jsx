@@ -96,6 +96,7 @@ export function PrintStickerModal({ v }) {
   const printStyle = `
     @media print {
       @page {
+        size: 40mm 20mm;
         margin: 0;
       }
       /* Hide all visual interface wrappers during print */
