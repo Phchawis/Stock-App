@@ -261,15 +261,18 @@ class App extends React.Component {
     const min = +f.min;
     const reorder = f.reorder ? +f.reorder : min; // Default reorder to min
     const tpu = f.testsPerUnit ? parseInt(f.testsPerUnit, 10) : null;
-    if (!f.th || !f.cat || !f.unit || !f.storage || !(min >= 0)) {
-      this.showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warn'); return;
+    if (!f.code || !f.code.trim() || !f.th || !f.cat || !f.unit || !f.storage || !(min >= 0)) {
+      this.showToast('กรุณากรอกข้อมูลให้ครบถ้วน รวมถึงรหัสทะเบียนน้ำยา', 'warn'); return;
     }
 
-    const tempId = this.state.reagents.length + 1;
-    const generatedCode = 'RGT-' + f.cat + '-' + String(tempId).padStart(3, '0');
+    const cleanCode = f.code.trim().toUpperCase();
+    const exists = this.state.reagents.some(r => r.code.toUpperCase() === cleanCode);
+    if (exists) {
+      this.showToast(`รหัสทะเบียนน้ำยา "${cleanCode}" นี้มีอยู่ในระบบแล้ว`, 'warn'); return;
+    }
 
     const payload = {
-      code: generatedCode,
+      code: cleanCode,
       th: f.th,
       en: f.en || f.th,
       cat: f.cat,

@@ -116,12 +116,23 @@ export function RegisterModal({ v }) {
                   {mform.th || 'ชื่อน้ำยาเคมีคลังหลัก'}
                 </div>
                 <div style={css(`font:var(--text-2xs)/1.3 var(--font-mono); color:var(--text-tertiary); margin-top:2px;`)}>
-                  {editReagentId ? mform.code : `RGT-${mform.cat || 'XXX'}-[ระบบรันเลขให้อัตโนมัติ]`}
+                  {mform.code || (editReagentId ? '' : 'ยังไม่ได้ระบุรหัส')}
                 </div>
                 <span style={css(`display:inline-block; margin-top:6px; padding:1px 6px; border-radius:var(--radius-pill); background:var(--brand-50); color:var(--brand-700); font:var(--fw-semibold) var(--text-3xs)/1.3 var(--font-body);`)}>
                   {editReagentId ? 'กำลังแก้ไขข้อมูลน้ำยา' : 'พร้อมลงทะเบียนน้ำยาหลัก'}
                 </span>
               </div>
+            </div>
+
+            <div style={css(`display:grid; grid-template-columns:1fr; gap:14px;`)}>
+              <Input 
+                label="รหัสทะเบียนน้ำยา (Reagent Code)" 
+                required={true} 
+                placeholder="กรอกรหัสทะเบียนน้ำยา เช่น CHEM-GLU-001" 
+                value={mform.code || ''} 
+                onChange={(e) => mfCode(e.target.value)}
+                disabled={!!editReagentId}
+              />
             </div>
 
             <div style={css(`display:grid; grid-template-columns:1fr; gap:14px;`)}>
