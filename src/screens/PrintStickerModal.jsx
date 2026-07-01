@@ -59,7 +59,7 @@ export function PrintStickerModal({ v }) {
     if (modalPrintSticker && printLotData && qrReady) {
       const timer = setTimeout(() => {
         window.print();
-      }, 250);
+      }, 800); // Increased delay to 800ms to allow full DOM and style sheet stabilization
       return () => clearTimeout(timer);
     }
   }, [modalPrintSticker, printLotData, qrReady]);
@@ -127,6 +127,12 @@ export function PrintStickerModal({ v }) {
         background: #ffffff !important;
         color: #000000 !important;
         gap: 1.5mm !important;
+      }
+      /* Force all children (text, labels, EXP) to solid black color for thermal printheads */
+      .sticker-print-area * {
+        color: #000000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
     }
   `;
