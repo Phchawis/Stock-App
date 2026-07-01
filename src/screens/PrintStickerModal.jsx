@@ -3,24 +3,21 @@ import QRCode from 'qrcode';
 import { css } from '../css.js';
 
 export function QRCodeSVG({ value = '', onReady }) {
-  const [svgStr, setSvgStr] = React.useState('');
+  const [qrUrl, setQrUrl] = React.useState('');
 
   React.useEffect(() => {
     if (value) {
-      QRCode.toString(value, {
-        type: 'svg',
+      QRCode.toDataURL(value, {
         margin: 0,
+        width: 200, // High-density bitmap resolution for crisp printing
         color: {
           dark: '#000000',
           light: '#ffffff'
         }
-      }, (err, string) => {
+      }, (err, url) => {
         if (!err) {
-          // Make sure the SVG is styled to scale to 100% of its container
-          const responsiveSvg = string.replace('<svg ', '<svg width="100%" height="100%" ');
-          setSvgStr(responsiveSvg);
+          setQrUrl(url);
           if (onReady) {
-            // Wait a micro-tick for React to complete state commit
             setTimeout(onReady, 50);
           }
         }
@@ -28,14 +25,21 @@ export function QRCodeSVG({ value = '', onReady }) {
     }
   }, [value, onReady]);
 
-  if (!svgStr) {
+  if (!qrUrl) {
     return <div style={{ width: '100%', height: '100%', background: '#fff' }} />;
   }
 
   return (
-    <div 
-      style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-      dangerouslySetInnerHTML={{ __html: svgStr }} 
+    <img 
+      src={qrUrl} 
+      alt="QR Code"
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'contain',
+        imageRendering: 'pixelated', // Keep corners crisp and square for optical scanning
+        display: 'block'
+      }} 
     />
   );
 }
