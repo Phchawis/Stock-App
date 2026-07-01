@@ -318,34 +318,10 @@ export function IssueModal({ v }) {
                 </div>
               ) : null}
 
-              {/* Simulated Scannable demo lists */}
-              <div>
-                <div style={css(`font:var(--fw-medium) var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary); margin-bottom:6px;`)}>
-                  คลิกเพื่อจำลองการสแกนรหัส (สำหรับทดสอบเดโม):
-                </div>
-                <div style={css(`display:flex; flex-wrap:wrap; gap:6px; max-height:100px; overflow-y:auto; padding:2px;`)}>
-                  {activeLotsList.map(l => {
-                    const r = reagentsList.find(re => re.id === l.rid);
-                    return (
-                      <button
-                        key={l.id}
-                        type="button"
-                        onClick={() => scanQRCode(l.qr)}
-                        style={css(`background:var(--slate-100); border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:4px 8px; font:var(--text-2xs)/1.2 var(--font-mono); color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; gap:4px;`)}
-                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--brand-700)'; e.currentTarget.style.color = 'var(--brand-700)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
-                      >
-                        {ic.qr} {l.qr} ({r ? r.en : ''})
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
               {/* Manual Text Input QR Code */}
               <div style={css(`display:grid; grid-template-columns:1fr auto; gap:8px; align-items:flex-end;`)}>
                 <Input 
-                  label="หรือกรอกรหัส QR Code ตรงนี้" 
+                  label="กรอกรหัส QR Code ตรงนี้" 
                   placeholder="เช่น QR-G2407A" 
                   value={iform.qrInput || ''} 
                   onChange={ifQrInput} 
@@ -356,7 +332,7 @@ export function IssueModal({ v }) {
                   onClick={() => scanQRCode(iform.qrInput)}
                   style={css(`background:var(--brand-700); color:#fff; border:none; border-radius:var(--radius-md); padding:0 14px; height:40px; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); cursor:pointer; display:flex; align-items:center;`)}
                 >
-                  จำลองสแกน
+                  เชื่อมโยง
                 </button>
               </div>
             </div>
