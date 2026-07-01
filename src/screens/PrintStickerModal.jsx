@@ -68,6 +68,15 @@ export function PrintStickerModal({ v }) {
 
   const printStyle = `
     @media print {
+      @page {
+        size: 4cm 2cm;
+        margin: 0;
+      }
+      body {
+        margin: 0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
       body * {
         visibility: hidden !important;
       }
@@ -80,10 +89,15 @@ export function PrintStickerModal({ v }) {
         top: 0 !important;
         width: 4cm !important;
         height: 2cm !important;
-        padding: 0 !important;
+        padding: 1.5mm 2mm !important;
         margin: 0 !important;
         border: none !important;
         box-shadow: none !important;
+        box-sizing: border-box !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        display: flex !important;
+        gap: 1.5mm !important;
       }
     }
   `;
