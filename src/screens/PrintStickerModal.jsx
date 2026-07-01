@@ -116,17 +116,20 @@ export function PrintStickerModal({ v }) {
       /* Force print area to display and stretch to 100% of selected paper size */
       .sticker-print-area {
         display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
         position: static !important;
         width: 100% !important;
         height: 100% !important;
-        padding: 2mm 3mm !important;
+        padding: 1.5mm 2mm !important;
         margin: 0 !important;
         border: none !important;
         box-shadow: none !important;
         box-sizing: border-box !important;
         background: #ffffff !important;
         color: #000000 !important;
-        gap: 1.5mm !important;
+        gap: 0.8mm !important;
       }
       /* Force all children (text, labels, EXP) to solid black color for thermal printheads */
       .sticker-print-area * {
@@ -146,38 +149,29 @@ export function PrintStickerModal({ v }) {
         display: 'none',
         width: '100%',
         height: '100%',
-        padding: '2mm 3mm',
+        padding: '1.5mm 2mm',
         boxSizing: 'border-box',
         background: '#ffffff',
         color: '#000000',
+        flexDirection: 'column',
         alignItems: 'center',
-        gap: '1.5mm',
+        justifyContent: 'center',
+        gap: '0.8mm',
         fontFamily: "'Inter', 'Sarabun', sans-serif"
       }}>
         {/* QR Code */}
-        <div style={{ width: '1.4cm', height: '1.4cm', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div style={{ width: '1.1cm', height: '1.1cm', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <QRCodeSVG value={lot.qr} onReady={() => setQrReady(true)} />
         </div>
 
         {/* Reagent Details */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '1.4cm', overflow: 'hidden', textAlign: 'left' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', overflow: 'hidden', textAlign: 'center', gap: '0.2mm' }}>
           {/* Name */}
-          <div style={{ fontSize: '7.2px', fontWeight: 'bold', color: '#000', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.2' }}>
+          <div style={{ fontSize: '7.2px', fontWeight: 'bold', color: '#000', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.1' }}>
             {reagent.th}
           </div>
-          <div style={{ fontSize: '6.2px', color: '#000', fontFamily: 'monospace', lineHeight: '1.1' }}>
-            Lot: <strong>{lot.lot}</strong>
-          </div>
-          {/* Expiry */}
-          <div style={{ fontSize: '6.2px', fontWeight: 'bold', color: '#c2410c', lineHeight: '1.1' }}>
-            EXP: {lot.expiry}
-          </div>
-          {/* Category & Location */}
-          <div style={{ fontSize: '5.5px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.1' }}>
-            หมวด: {catLabel}
-          </div>
-          <div style={{ fontSize: '5.5px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.1' }}>
-            ที่เก็บ: {locLabel}
+          <div style={{ fontSize: '6.2px', color: '#000', fontFamily: 'monospace', lineHeight: '1.0' }}>
+            Lot: <strong>{lot.lot}</strong> | EXP: <strong style={{ color: '#000' }}>{lot.expiry}</strong>
           </div>
         </div>
       </div>
@@ -202,47 +196,37 @@ export function PrintStickerModal({ v }) {
           {/* Body */}
           <div style={css(`padding:24px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; background:var(--slate-50);`)}>
             
-            {/* Sticker Visual Preview (Dashed border, only on screen) */}
+            {/* Sticker Visual Preview (Dashed border, only on screen, centered layout) */}
             <div style={{
               width: '4cm',
               height: '2cm',
               border: '1px dashed var(--border-strong)',
               borderRadius: '2px',
-              padding: '2mm 3mm',
+              padding: '1.5mm 2mm',
               boxSizing: 'border-box',
               background: '#ffffff',
               color: '#000000',
               display: 'flex',
-              gap: '1.5mm',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.8mm',
               fontFamily: "'Inter', 'Sarabun', sans-serif"
             }}>
               {/* QR Code */}
-              <div style={{ width: '1.4cm', height: '1.4cm', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, alignSelf: 'center' }}>
+              <div style={{ width: '1.1cm', height: '1.1cm', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, alignSelf: 'center' }}>
                 <QRCodeSVG value={lot.qr} onReady={() => setQrReady(true)} />
               </div>
 
               {/* Reagent Details */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '1.4cm', overflow: 'hidden', textAlign: 'left', alignSelf: 'center' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', overflow: 'hidden', textAlign: 'center', gap: '0.2mm' }}>
                 {/* Name */}
-                <div style={{ fontSize: '7.2px', fontWeight: 'bold', color: '#000', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.2' }}>
+                <div style={{ fontSize: '7.2px', fontWeight: 'bold', color: '#000', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.1' }}>
                   {reagent.th}
                 </div>
 
-                <div style={{ fontSize: '6.2px', color: '#000', fontFamily: 'monospace', lineHeight: '1.1' }}>
-                  Lot: <strong>{lot.lot}</strong>
-                </div>
-
-                {/* Expiry */}
-                <div style={{ fontSize: '6.2px', fontWeight: 'bold', color: '#c2410c', lineHeight: '1.1' }}>
-                  EXP: {lot.expiry}
-                </div>
-
-                {/* Category & Location */}
-                <div style={{ fontSize: '5.5px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.1' }}>
-                  หมวด: {catLabel}
-                </div>
-                <div style={{ fontSize: '5.5px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.1' }}>
-                  ที่เก็บ: {locLabel}
+                <div style={{ fontSize: '6.2px', color: '#000', fontFamily: 'monospace', lineHeight: '1.0' }}>
+                  Lot: <strong>{lot.lot}</strong> | EXP: <strong style={{ color: '#c2410c' }}>{lot.expiry}</strong>
                 </div>
               </div>
             </div>
