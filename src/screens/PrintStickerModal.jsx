@@ -2,14 +2,24 @@ import React from 'react';
 import QRCode from 'qrcode';
 import { css } from '../css.js';
 
-export function QRCodeSVG({ value = '', onReady }) {
-  const [qrUrl, setQrUrl] = React.useState('');
+export function PrintStickerModal({ v }) {
+  const {
+    stop, modalPrintSticker, closePrintSticker, printLotData, ic,
+  } = v;
 
+  const [qrUrl, setQrUrl] = React.useState('');
+  const [qrReady, setQrReady] = React.useState(false);
+
+  // Generate high-resolution QR base64 URL when lot data changes
   React.useEffect(() => {
-    if (value) {
-      QRCode.toDataURL(value, {
-        margin: 0,
-        width: 200, // High-density bitmap resolution for crisp printing
+    if (modalPrintSticker && printLotData) {
+      setQrReady(false);
+      setQrUrl('');
+      const { lot } = printLotData;
+
+      QRCode.toDataURL(lot.qr, {
+        margin: 1, // standard clear margin for printing compatibility
+        width: 600, // 600px high resolution for copy-pasting in MS Word
         color: {
           dark: '#000000',
           light: '#ffffff'
@@ -17,53 +27,18 @@ export function QRCodeSVG({ value = '', onReady }) {
       }, (err, url) => {
         if (!err) {
           setQrUrl(url);
-          if (onReady) {
-            setTimeout(onReady, 50);
-          }
+          setQrReady(true);
         }
       });
     }
-  }, [value, onReady]);
-
-  if (!qrUrl) {
-    return <div style={{ width: '100%', height: '100%', background: '#fff' }} />;
-  }
-
-  return (
-    <img 
-      src={qrUrl} 
-      alt="QR Code"
-      style={{
-        width: '100%',
-        height: '100%',
-        objectFit: 'contain',
-        imageRendering: 'pixelated', // Keep corners crisp and square for optical scanning
-        display: 'block'
-      }} 
-    />
-  );
-}
-
-export function PrintStickerModal({ v }) {
-  const {
-    stop, modalPrintSticker, closePrintSticker, printLotData, ic,
-  } = v;
-
-  const [qrReady, setQrReady] = React.useState(false);
-
-  // Reset ready state when modal is opened or lot changes
-  React.useEffect(() => {
-    if (modalPrintSticker) {
-      setQrReady(false);
-    }
   }, [modalPrintSticker, printLotData]);
 
-  // Trigger print dialog only after QR code is verified ready in DOM
+  // Trigger browser print dialog after QR code is fully loaded in state
   React.useEffect(() => {
     if (modalPrintSticker && printLotData && qrReady) {
       const timer = setTimeout(() => {
         window.print();
-      }, 800); // Increased delay to 800ms to allow full DOM and style sheet stabilization
+      }, 800); // 800ms delay for stylesheet and state stabilization
       return () => clearTimeout(timer);
     }
   }, [modalPrintSticker, printLotData, qrReady]);
@@ -80,7 +55,7 @@ export function PrintStickerModal({ v }) {
     MIP: 'จุลทรรศนศาสตร์',
     MDC: 'หมวดงานศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
     HMS: 'บริการศูนย์การแพทย์',
-    ADV: 'ตรวจวินิจฉัยขั้นสูง'
+    ADV: 'ตรวจวินิจฉัยชั้นสูง'
   };
   const catLabel = catMap[reagent.cat] || reagent.cat;
 
@@ -92,6 +67,19 @@ export function PrintStickerModal({ v }) {
   })[reagent.storage] || reagent.storage;
 
   const locLabel = lot.loc || storageLabel;
+
+  // Download high-resolution QR code PNG function
+  const downloadQR = () => {
+    if (!qrUrl) return;
+    const link = document.createElement('a');
+    link.href = qrUrl;
+    // Filename structure: QR_Lot_ReagentName.png
+    const safeReagentName = (reagent.en || reagent.th).replace(/[^a-zA-Z0-9ก-๙]/g, '_');
+    link.download = `QR_${lot.lot}_${safeReagentName}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const printStyle = `
     @media print {
@@ -165,7 +153,15 @@ export function PrintStickerModal({ v }) {
       }}>
         {/* QR Code */}
         <div style={{ width: '1.5cm', height: '1.5cm', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <QRCodeSVG value={lot.qr} onReady={() => setQrReady(true)} />
+          {qrUrl ? (
+            <img 
+              src={qrUrl} 
+              alt="QR Code" 
+              style={{ width: '100%', height: '100%', objectFit: 'contain', imageRendering: 'pixelated', display: 'block' }} 
+            />
+          ) : (
+            <div style={{ width: '100%', height: '100%', background: '#ffffff' }} />
+          )}
         </div>
 
         {/* Reagent Details */}
@@ -229,7 +225,15 @@ export function PrintStickerModal({ v }) {
             }}>
               {/* QR Code */}
               <div style={{ width: '1.5cm', height: '1.5cm', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <QRCodeSVG value={lot.qr} onReady={() => setQrReady(true)} />
+                {qrUrl ? (
+                  <img 
+                    src={qrUrl} 
+                    alt="QR Code" 
+                    style={{ width: '100%', height: '100%', objectFit: 'contain', imageRendering: 'pixelated', display: 'block' }} 
+                  />
+                ) : (
+                  <div style={{ width: '100%', height: '100%', background: '#ffffff' }} />
+                )}
               </div>
 
               {/* Reagent Details */}
@@ -267,6 +271,9 @@ export function PrintStickerModal({ v }) {
           <div style={css(`padding:12px 20px; border-top:1px solid var(--border-subtle); display:flex; justify-content:flex-end; gap:10px;`)}>
             <button onClick={closePrintSticker} style={css(`padding:8px 14px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body);`)}>
               ยกเลิก
+            </button>
+            <button onClick={downloadQR} disabled={!qrUrl} style={css(`padding:8px 14px; border-radius:var(--radius-md); border:1px solid var(--brand-200); background:var(--brand-50); color:var(--brand-700); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body);`)}>
+              📥 ดาวน์โหลดรูปภาพ QR Code (PNG)
             </button>
             <button onClick={() => window.print()} style={css(`padding:8px 14px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); box-shadow:var(--glow-brand-soft);`)}>
               🖨️ สั่งพิมพ์สติกเกอร์
