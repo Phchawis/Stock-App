@@ -248,7 +248,6 @@ export function ReagentLists({ v }) {
               <div style={css(`padding:16px 20px; border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; justify-content:space-between;`)}>
                 <div>
                   <div style={css(`font:var(--fw-bold) var(--text-md)/1.2 var(--font-display); color:var(--text-primary);`)}>ข้อมูลการลงทะเบียนน้ำยา</div>
-                  <div style={css(`font:var(--text-3xs)/1.2 var(--font-mono); color:var(--text-tertiary); letter-spacing:.02em; margin-top:2px;`)}>{r.code}</div>
                 </div>
                 <button 
                   onClick={() => setSelectedReagent(null)} 
@@ -283,10 +282,6 @@ export function ReagentLists({ v }) {
                   {/* Registration Data Grid */}
                   <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:14px 16px; display:flex; flex-direction:column; gap:10px;`)}>
                     <div style={css(`display:grid; grid-template-columns:repeat(2, 1fr); gap:10px 20px; font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>
-                      <div>
-                        <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs); text-transform:uppercase;`)}>รหัสทะเบียนน้ำยา</div>
-                        <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-mono); color:var(--text-primary); margin-top:2px;`)}>{r.code}</div>
-                      </div>
                       <div>
                         <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs); text-transform:uppercase;`)}>หมวดหมู่การใช้งาน</div>
                         <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); margin-top:2px;`)}>{getCategoryLabel(r.cat)}</div>
