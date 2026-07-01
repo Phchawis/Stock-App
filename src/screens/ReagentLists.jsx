@@ -235,6 +235,7 @@ export function ReagentLists({ v }) {
 
         return (
           <div 
+            className="no-print"
             onClick={() => setSelectedReagent(null)} 
             style={css(`position:fixed; inset:0; background:rgba(14,24,34,0.75); backdrop-filter:blur(4px); z-index:100; display:grid; place-items:center; padding:20px; box-sizing:border-box;`)}
           >

@@ -95,7 +95,7 @@ export function PrintStickerModal({ v }) {
         margin: 0;
       }
       /* Hide all visual interface wrappers during print */
-      aside, header, main, .sidebar-backdrop, .dr-in, .toast-container, .no-print {
+      aside, header, main, .sidebar-backdrop, .dr-in, .toast-container, .no-print, .ov-in {
         display: none !important;
       }
       /* Reset layout wrappers to 100% viewport width/height */
