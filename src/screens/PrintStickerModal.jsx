@@ -2,7 +2,7 @@ import React from 'react';
 import QRCode from 'qrcode';
 import { css } from '../css.js';
 
-export function QRCodeSVG({ value = '' }) {
+export function QRCodeSVG({ value = '', onReady }) {
   const [svgStr, setSvgStr] = React.useState('');
 
   React.useEffect(() => {
@@ -19,10 +19,14 @@ export function QRCodeSVG({ value = '' }) {
           // Make sure the SVG is styled to scale to 100% of its container
           const responsiveSvg = string.replace('<svg ', '<svg width="100%" height="100%" ');
           setSvgStr(responsiveSvg);
+          if (onReady) {
+            // Wait a micro-tick for React to complete state commit
+            setTimeout(onReady, 50);
+          }
         }
       });
     }
-  }, [value]);
+  }, [value, onReady]);
 
   if (!svgStr) {
     return <div style={{ width: '100%', height: '100%', background: '#fff' }} />;
@@ -41,14 +45,24 @@ export function PrintStickerModal({ v }) {
     stop, modalPrintSticker, closePrintSticker, printLotData, ic,
   } = v;
 
+  const [qrReady, setQrReady] = React.useState(false);
+
+  // Reset ready state when modal is opened or lot changes
   React.useEffect(() => {
-    if (modalPrintSticker && printLotData) {
-      const timer = setTimeout(() => {
-        window.print();
-      }, 400); // 400ms delay to ensure SVG QR is fully rendered before dialog pops up
-      return () => clearTimeout(timer);
+    if (modalPrintSticker) {
+      setQrReady(false);
     }
   }, [modalPrintSticker, printLotData]);
+
+  // Trigger print dialog only after QR code is verified ready in DOM
+  React.useEffect(() => {
+    if (modalPrintSticker && printLotData && qrReady) {
+      const timer = setTimeout(() => {
+        window.print();
+      }, 250);
+      return () => clearTimeout(timer);
+    }
+  }, [modalPrintSticker, printLotData, qrReady]);
 
   if (!modalPrintSticker || !printLotData) return null;
 
@@ -137,7 +151,7 @@ export function PrintStickerModal({ v }) {
       }}>
         {/* QR Code */}
         <div style={{ width: '1.4cm', height: '1.4cm', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <QRCodeSVG value={lot.qr} />
+          <QRCodeSVG value={lot.qr} onReady={() => setQrReady(true)} />
         </div>
 
         {/* Reagent Details */}
@@ -199,7 +213,7 @@ export function PrintStickerModal({ v }) {
             }}>
               {/* QR Code */}
               <div style={{ width: '1.4cm', height: '1.4cm', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, alignSelf: 'center' }}>
-                <QRCodeSVG value={lot.qr} />
+                <QRCodeSVG value={lot.qr} onReady={() => setQrReady(true)} />
               </div>
 
               {/* Reagent Details */}
