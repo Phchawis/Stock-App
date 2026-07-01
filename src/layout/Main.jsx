@@ -12,38 +12,95 @@ export function Main({ v }) {
   const {
     ic, title, subtitle, openReceive, openIssue, toggleSidebar,
   } = v;
-  return (
-<div style={css(`flex:1; min-width:0; display:flex; flex-direction:column;`)}>
-    <header className="main-header" style={css(`height:var(--topbar-height,60px); flex-shrink:0; background:var(--white); border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; gap:16px; padding:0 var(--page-gutter,28px); position:sticky; top:0; z-index:5;`)}>
-      <button 
-        onClick={toggleSidebar} 
-        className="hamburger-btn"
-        style={css(`display:grid; place-items:center; background:none; border:none; color:var(--text-primary); cursor:pointer; padding:6px; margin-left:-6px; border-radius:var(--radius-sm);`)}
-      >
-        {ic.menu}
-      </button>
-      <div style={css(`min-width:0;`)}>
-        <div className="title-text" style={css(`font:var(--fw-bold) var(--text-lg)/1.1 var(--font-display); color:var(--text-primary);`)}>{title}</div>
-        <div className="subtitle-text" style={css(`font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary);`)}>{subtitle}</div>
-      </div>
-      <div style={css(`flex:1;`)}></div>
-      <button onClick={openReceive} style={css(`display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body);`)}>
-        <span style={css(`width:16px; height:16px; display:grid; place-items:center;`)}>{ic.receive}</span>รับเข้า
-      </button>
-      <button onClick={openIssue} style={css(`display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body); box-shadow:var(--glow-brand-soft);`)}>
-        <span style={css(`width:16px; height:16px; display:grid; place-items:center;`)}>{ic.issue}</span>เบิกจ่าย (Withdraw)
-      </button>
-    </header>
 
-    <main className="main-content" style={css(`flex:1; padding:var(--page-gutter,28px); overflow-y:auto;`)}>
-      <Dashboard v={v} />
-      <Inventory v={v} />
-      <ReagentLists v={v} />
-      <Alerts v={v} />
-      <Audit v={v} />
-      <Perms v={v} />
-      <Help v={v} />
-    </main>
-  </div>
+  const localStyle = `
+    .header-btn-receive {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--brand-300);
+      background: var(--white);
+      color: var(--brand-700) !important;
+      cursor: pointer;
+      font: var(--fw-semibold) 14px/1 var(--font-body);
+      transition: all var(--dur-fast) ease-in-out;
+    }
+    .header-btn-receive:hover {
+      border-color: var(--brand-600);
+      background: var(--brand-50);
+      color: var(--brand-800) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(52, 62, 155, 0.12);
+    }
+    .header-btn-receive:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(52, 62, 155, 0.08);
+    }
+
+    .header-btn-withdraw {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      border: none;
+      background: linear-gradient(135deg, var(--brand-700) 0%, var(--brand-800) 100%);
+      color: #ffffff !important;
+      cursor: pointer;
+      font: var(--fw-semibold) 14px/1 var(--font-body);
+      transition: all var(--dur-fast) ease-in-out;
+      box-shadow: 0 2px 8px rgba(52, 62, 155, 0.2);
+    }
+    .header-btn-withdraw:hover {
+      background: linear-gradient(135deg, var(--brand-600) 0%, var(--brand-700) 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(52, 62, 155, 0.3);
+    }
+    .header-btn-withdraw:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(52, 62, 155, 0.15);
+    }
+  `;
+
+  return (
+    <div style={css(`flex:1; min-width:0; display:flex; flex-direction:column;`)}>
+      <style>{localStyle}</style>
+      <header className="main-header" style={css(`height:var(--topbar-height,60px); flex-shrink:0; background:var(--white); border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; gap:16px; padding:0 var(--page-gutter,28px); position:sticky; top:0; z-index:5;`)}>
+        <button 
+          onClick={toggleSidebar} 
+          className="hamburger-btn"
+          style={css(`display:grid; place-items:center; background:none; border:none; color:var(--text-primary); cursor:pointer; padding:6px; margin-left:-6px; border-radius:var(--radius-sm);`)}
+        >
+          {ic.menu}
+        </button>
+        <div style={css(`min-width:0;`)}>
+          <div className="title-text" style={css(`font:var(--fw-bold) var(--text-lg)/1.1 var(--font-display); color:var(--text-primary);`)}>{title}</div>
+          <div className="subtitle-text" style={css(`font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary);`)}>{subtitle}</div>
+        </div>
+        <div style={css(`flex:1;`)}></div>
+        
+        <button onClick={openReceive} className="header-btn-receive">
+          <span style={css(`width:16px; height:16px; display:grid; place-items:center;`)}>{ic.receive}</span>
+          รับเข้า
+        </button>
+        
+        <button onClick={openIssue} className="header-btn-withdraw">
+          <span style={css(`width:16px; height:16px; display:grid; place-items:center;`)}>{ic.issue}</span>
+          เบิกจ่าย (Withdraw)
+        </button>
+      </header>
+
+      <main className="main-content" style={css(`flex:1; padding:var(--page-gutter,28px); overflow-y:auto;`)}>
+        <Dashboard v={v} />
+        <Inventory v={v} />
+        <ReagentLists v={v} />
+        <Alerts v={v} />
+        <Audit v={v} />
+        <Perms v={v} />
+        <Help v={v} />
+      </main>
+    </div>
   );
 }
