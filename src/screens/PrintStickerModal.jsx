@@ -72,18 +72,26 @@ export function PrintStickerModal({ v }) {
         size: 4cm 2cm;
         margin: 0;
       }
-      body {
-        margin: 0;
+      /* Hide all visual interface wrappers during print */
+      aside, header, main, .sidebar-backdrop, .dr-in, .toast-container, .no-print {
+        display: none !important;
+      }
+      /* Reset layout wrappers to transparent background so they don't print colors */
+      html, body, #root, #root > div {
+        width: 4cm !important;
+        height: 2cm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        min-height: auto !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
-      body * {
-        visibility: hidden !important;
-      }
-      .sticker-print-area, .sticker-print-area * {
-        visibility: visible !important;
-      }
+      /* Force print area to display and fill the sticker paper */
       .sticker-print-area {
+        display: flex !important;
         position: absolute !important;
         left: 0 !important;
         top: 0 !important;
@@ -96,7 +104,6 @@ export function PrintStickerModal({ v }) {
         box-sizing: border-box !important;
         background: #ffffff !important;
         color: #000000 !important;
-        display: flex !important;
         gap: 1.5mm !important;
       }
     }
@@ -106,6 +113,48 @@ export function PrintStickerModal({ v }) {
     <>
       <style>{printStyle}</style>
 
+      {/* 1. Real Sticker Print Area (Only rendered in printing, hidden on screen) */}
+      <div className="sticker-print-area" style={{
+        display: 'none',
+        width: '4cm',
+        height: '2cm',
+        padding: '1.5mm 2mm',
+        boxSizing: 'border-box',
+        background: '#ffffff',
+        color: '#000000',
+        alignItems: 'center',
+        gap: '1.5mm',
+        fontFamily: "'Inter', 'Sarabun', sans-serif"
+      }}>
+        {/* QR Code */}
+        <div style={{ width: '1.7cm', height: '1.7cm', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <QRCodeSVG value={lot.qr} />
+        </div>
+
+        {/* Reagent Details */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '1.7cm', overflow: 'hidden', textAlign: 'left' }}>
+          {/* Name */}
+          <div style={{ fontSize: '7.5px', fontWeight: 'bold', color: '#000', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.2' }}>
+            {reagent.th}
+          </div>
+          <div style={{ fontSize: '6.8px', color: '#000', fontFamily: 'monospace', lineHeight: '1.1' }}>
+            Lot: <strong>{lot.lot}</strong>
+          </div>
+          {/* Expiry */}
+          <div style={{ fontSize: '6.8px', fontWeight: 'bold', color: '#c2410c', lineHeight: '1.1' }}>
+            EXP: {lot.expiry}
+          </div>
+          {/* Category & Location */}
+          <div style={{ fontSize: '6px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.1' }}>
+            หมวด: {catLabel}
+          </div>
+          <div style={{ fontSize: '6px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.1' }}>
+            ที่เก็บ: {locLabel}
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Visual Screen Modal (Hidden during printing) */}
       <div className="ov-in no-print" onClick={closePrintSticker} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.46); z-index:99; display:grid; place-items:center; padding:24px;`)}>
         <div className="tt-in" onClick={stop} style={css(`width:min(440px,96vw); background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); overflow:hidden; border:1px solid var(--border-subtle);`)}>
           {/* Header */}
@@ -125,8 +174,8 @@ export function PrintStickerModal({ v }) {
           {/* Body */}
           <div style={css(`padding:24px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; background:var(--slate-50);`)}>
             
-            {/* Sticker Preview Box (2x4 cm) */}
-            <div className="sticker-print-area" style={{
+            {/* Sticker Visual Preview (Dashed border, only on screen) */}
+            <div style={{
               width: '4cm',
               height: '2cm',
               border: '1px dashed var(--border-strong)',
