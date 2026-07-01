@@ -105,8 +105,32 @@ export function IssueModal({ v }) {
     right: ${right ? '12px' : 'auto'};
   `);
 
+  const localStyle = `
+    .modal-footer-responsive {
+      padding: 14px 22px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: var(--slate-50);
+    }
+    @media (max-width: 768px) {
+      .modal-footer-responsive {
+        flex-direction: column !important;
+        gap: 8px !important;
+        padding: 16px !important;
+      }
+      .modal-footer-responsive button {
+        width: 100% !important;
+        padding: 12px 18px !important;
+        font-size: 15px !important;
+      }
+    }
+  `;
+
   return (
     <>
+      <style>{localStyle}</style>
       <div className="ov-in" onClick={closeModal} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.46); z-index:50; display:grid; place-items:center; padding:24px;`)}>
         <div className="tt-in" onClick={stop} style={css(`width:min(720px,96vw); max-height:92vh; overflow-y:auto; background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:1px solid var(--border-subtle);`)}>
           
@@ -374,7 +398,7 @@ export function IssueModal({ v }) {
           </div>
 
           {/* Footer Buttons */}
-          <div style={css(`padding:14px 22px; border-top:1px solid var(--border-subtle); display:flex; justify-content:flex-end; gap:10px; background:var(--slate-50);`)}>
+          <div className="modal-footer-responsive">
             <button 
               onClick={closeModal} 
               style={css(`padding:8px 16px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
