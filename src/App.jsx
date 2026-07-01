@@ -429,9 +429,9 @@ class App extends React.Component {
     });
   }
   scanQRCode(code) {
-    const cleanCode = (code || '').trim();
+    const cleanCode = (code || '').trim().toLowerCase();
     if (!cleanCode) return;
-    const foundLot = this.state.lots.find(l => l.qr === cleanCode && l.qty > 0 && l.status === 'ACTIVE');
+    const foundLot = this.state.lots.find(l => (l.qr || '').toLowerCase() === cleanCode && l.qty > 0 && l.status === 'ACTIVE');
     if (foundLot) {
       const r = this.state.reagents.find(x => x.id === foundLot.rid);
       this.setState(s => ({
@@ -441,7 +441,7 @@ class App extends React.Component {
           lotId: String(foundLot.id),
           scan: 'QR',
           searchInput: r ? r.th : '',
-          qrInput: cleanCode
+          qrInput: foundLot.qr
         }
       }));
       this.showToast(`สแกนพบ Lot ${foundLot.lot} ของ ${r ? r.th : ''} และทำการเชื่อมโยงข้อมูลแล้ว`, 'success');

@@ -47,6 +47,7 @@ export function IssueModal({ v }) {
               }
             },
             (msg) => {
+              if (iform.lotId) return;
               scanQRCode(msg);
               if (navigator.vibrate) navigator.vibrate(100);
             },
@@ -264,9 +265,10 @@ export function IssueModal({ v }) {
                             }
                           },
                           (msg) => {
-                            scanQRCode(msg);
-                            if (navigator.vibrate) navigator.vibrate(100);
-                          },
+                             if (iform.lotId) return;
+                             scanQRCode(msg);
+                             if (navigator.vibrate) navigator.vibrate(100);
+                           },
                           () => {}
                         ).catch(err => {
                           setCameraError("ไม่สามารถเปิดกล้องได้ (โปรดอนุญาตสิทธิ์กล้อง)");
