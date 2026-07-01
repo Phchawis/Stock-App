@@ -92,17 +92,16 @@ export function PrintStickerModal({ v }) {
   const printStyle = `
     @media print {
       @page {
-        size: 4cm 2cm landscape;
         margin: 0;
       }
       /* Hide all visual interface wrappers during print */
       aside, header, main, .sidebar-backdrop, .dr-in, .toast-container, .no-print {
         display: none !important;
       }
-      /* Reset layout wrappers to natural block flow with transparent background */
+      /* Reset layout wrappers to 100% viewport width/height */
       html, body, #root, #root > div {
-        width: 4cm !important;
-        height: 2cm !important;
+        width: 100% !important;
+        height: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         overflow: hidden !important;
@@ -114,12 +113,12 @@ export function PrintStickerModal({ v }) {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
-      /* Force print area to display and flow naturally to fill the page */
+      /* Force print area to display and stretch to 100% of selected paper size */
       .sticker-print-area {
         display: flex !important;
         position: static !important;
-        width: 4cm !important;
-        height: 2cm !important;
+        width: 100% !important;
+        height: 100% !important;
         padding: 2mm 3mm !important;
         margin: 0 !important;
         border: none !important;
@@ -139,8 +138,8 @@ export function PrintStickerModal({ v }) {
       {/* 1. Real Sticker Print Area (Only rendered in printing, hidden on screen) */}
       <div className="sticker-print-area" style={{
         display: 'none',
-        width: '4cm',
-        height: '2cm',
+        width: '100%',
+        height: '100%',
         padding: '2mm 3mm',
         boxSizing: 'border-box',
         background: '#ffffff',
