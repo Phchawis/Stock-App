@@ -84,6 +84,75 @@ export function Sidebar({ v }) {
     .sidebar-logo-container:hover .sidebar-logo-subtitle {
       color: var(--text-secondary);
     }
+
+    .sidebar-btn-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      text-align: left;
+      padding: 11px 14px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: all var(--dur-fast) ease;
+      font: var(--fw-medium) 15px/1.2 var(--font-body) !important;
+    }
+    .sidebar-btn-item:hover {
+      transform: translateX(4px);
+    }
+
+    .sidebar-op-receive {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      text-align: left;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
+      color: #10B981 !important;
+      cursor: pointer;
+      transition: all var(--dur-medium) cubic-bezier(0.25, 1, 0.5, 1);
+      font: var(--fw-semibold) 15px/1.2 var(--font-body) !important;
+      box-shadow: 0 1px 3px rgba(16, 185, 129, 0.05);
+    }
+    .sidebar-op-receive:hover {
+      transform: translateY(-2px) scale(1.02);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.20) 0%, rgba(16, 185, 129, 0.08) 100%);
+      border-color: #10B981;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+    .sidebar-op-receive:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .sidebar-op-withdraw {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      text-align: left;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0.02) 100%);
+      color: #F59E0B !important;
+      cursor: pointer;
+      transition: all var(--dur-medium) cubic-bezier(0.25, 1, 0.5, 1);
+      font: var(--fw-semibold) 15px/1.2 var(--font-body) !important;
+      box-shadow: 0 1px 3px rgba(245, 158, 11, 0.05);
+    }
+    .sidebar-op-withdraw:hover {
+      transform: translateY(-2px) scale(1.02);
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.08) 100%);
+      border-color: #F59E0B;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+    }
+    .sidebar-op-withdraw:active {
+      transform: translateY(0) scale(0.98);
+    }
   `;
 
   return (
@@ -101,49 +170,58 @@ export function Sidebar({ v }) {
           </div>
           <div style={css(`line-height:1.25;`)}>
             <div className="sidebar-logo-title">คลังน้ำยาห้องปฏิบัติการ</div>
-            <div className="sidebar-logo-subtitle">TUH · Reagent Inventory</div>
-          </div>
-        </div>
-
-        <div style={css(`padding:12px; display:flex; flex-direction:column; gap:3px; flex:1; overflow-y:auto;`)}>
-          <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.06em; padding:8px 12px 6px;`)}>เมนูหลัก</div>
-          <button onClick={go.dashboard} style={css(`display:flex; align-items:center; gap:11px; width:100%; text-align:left; padding:9px 12px; border-radius:var(--radius-sm); border:none; cursor:pointer; transition:background var(--dur-fast); background:${nav.dashBg}; color:${nav.dashFg}; font:var(--fw-medium) var(--text-sm)/1 var(--font-body);`)}>
-            <span style={css(`width:18px; height:18px; display:grid; place-items:center; color:${nav.dashIc};`)}>{ic.dashboard}</span>
+            <div className="sidebar-logo-subtitle">TUH �        <div style={css(`padding:12px; display:flex; flex-direction:column; gap:5px; flex:1; overflow-y:auto;`)}>
+          <div style={css(`font:var(--fw-bold) 12px/1 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.08em; padding:8px 12px 6px;`)}>เมนูหลัก</div>
+          
+          <button onClick={go.dashboard} className="sidebar-btn-item" style={css(`background:${nav.dashBg}; color:${nav.dashFg};`)}>
+            <span style={css(`width:20px; height:20px; display:grid; place-items:center; color:${nav.dashIc};`)}>{ic.dashboard}</span>
             <span style={css(`flex:1;`)}>Dashboard</span>
           </button>
-          <button onClick={go.alerts} style={css(`display:flex; align-items:center; gap:11px; width:100%; text-align:left; padding:9px 12px; border-radius:var(--radius-sm); border:none; cursor:pointer; transition:background var(--dur-fast); background:${nav.alBg}; color:${nav.alFg}; font:var(--fw-medium) var(--text-sm)/1 var(--font-body);`)}>
-            <span style={css(`width:18px; height:18px; display:grid; place-items:center; color:${nav.alIc};`)}>{ic.bell}</span>
+          
+          <button onClick={go.alerts} className="sidebar-btn-item" style={css(`background:${nav.alBg}; color:${nav.alFg};`)}>
+            <span style={css(`width:20px; height:20px; display:grid; place-items:center; color:${nav.alIc};`)}>{ic.bell}</span>
             <span style={css(`flex:1;`)}>การแจ้งเตือน</span>
             <span style={css(`min-width:20px; text-align:center; padding:1px 6px; border-radius:var(--radius-pill); background:var(--red-600); color:#fff; font:var(--fw-bold) var(--text-2xs)/1.5 var(--font-mono);`)}>{nav.alertCount}</span>
           </button>
-          <button onClick={go.inventory} style={css(`display:flex; align-items:center; gap:11px; width:100%; text-align:left; padding:9px 12px; border-radius:var(--radius-sm); border:none; cursor:pointer; transition:background var(--dur-fast); background:${nav.invBg}; color:${nav.invFg}; font:var(--fw-medium) var(--text-sm)/1 var(--font-body);`)}>
-            <span style={css(`width:18px; height:18px; display:grid; place-items:center; color:${nav.invIc};`)}>{ic.boxes}</span>
+          
+          <button onClick={go.inventory} className="sidebar-btn-item" style={css(`background:${nav.invBg}; color:${nav.invFg};`)}>
+            <span style={css(`width:20px; height:20px; display:grid; place-items:center; color:${nav.invIc};`)}>{ic.boxes}</span>
             <span style={css(`flex:1;`)}>คลังน้ำยา</span>
             <span style={css(`font:var(--fw-semibold) var(--text-2xs)/1 var(--font-mono); color:${nav.invIc};`)}>{kpi.total}</span>
           </button>
-          <button onClick={go.reagentLists} style={css(`display:flex; align-items:center; gap:11px; width:100%; text-align:left; padding:9px 12px; border-radius:var(--radius-sm); border:none; cursor:pointer; transition:background var(--dur-fast); background:${nav.rlistBg}; color:${nav.rlistFg}; font:var(--fw-medium) var(--text-sm)/1 var(--font-body);`)}>
-            <span style={css(`width:18px; height:18px; display:grid; place-items:center; color:${nav.rlistIc};`)}>{ic.list}</span>
+          
+          <button onClick={go.reagentLists} className="sidebar-btn-item" style={css(`background:${nav.rlistBg}; color:${nav.rlistFg};`)}>
+            <span style={css(`width:20px; height:20px; display:grid; place-items:center; color:${nav.rlistIc};`)}>{ic.list}</span>
             <span style={css(`flex:1;`)}>Reagent Lists</span>
           </button>
-          <button onClick={go.audit} style={css(`display:flex; align-items:center; gap:11px; width:100%; text-align:left; padding:9px 12px; border-radius:var(--radius-sm); border:none; cursor:pointer; transition:background var(--dur-fast); background:${nav.auBg}; color:${nav.auFg}; font:var(--fw-medium) var(--text-sm)/1 var(--font-body);`)}>
-            <span style={css(`width:18px; height:18px; display:grid; place-items:center; color:${nav.auIc};`)}>{ic.history}</span>
+          
+          <button onClick={go.audit} className="sidebar-btn-item" style={css(`background:${nav.auBg}; color:${nav.auFg};`)}>
+            <span style={css(`width:20px; height:20px; display:grid; place-items:center; color:${nav.auIc};`)}>{ic.history}</span>
             <span style={css(`flex:1;`)}>ประวัติการเคลื่อนไหว</span>
           </button>
-          <button onClick={go.perms} style={css(`display:flex; align-items:center; gap:11px; width:100%; text-align:left; padding:9px 12px; border-radius:var(--radius-sm); border:none; cursor:pointer; transition:background var(--dur-fast); background:${nav.pmBg}; color:${nav.pmFg}; font:var(--fw-medium) var(--text-sm)/1 var(--font-body);`)}>
-            <span style={css(`width:18px; height:18px; display:grid; place-items:center; color:${nav.pmIc};`)}>{ic.shield}</span>
+          
+          <button onClick={go.perms} className="sidebar-btn-item" style={css(`background:${nav.pmBg}; color:${nav.pmFg};`)}>
+            <span style={css(`width:20px; height:20px; display:grid; place-items:center; color:${nav.pmIc};`)}>{ic.shield}</span>
             <span style={css(`flex:1;`)}>สิทธิ์การใช้งาน</span>
           </button>
-          <button onClick={go.help} style={css(`display:flex; align-items:center; gap:11px; width:100%; text-align:left; padding:9px 12px; border-radius:var(--radius-sm); border:none; cursor:pointer; transition:background var(--dur-fast); background:${nav.helpBg}; color:${nav.helpFg}; font:var(--fw-medium) var(--text-sm)/1 var(--font-body);`)}>
-            <span style={css(`width:18px; height:18px; display:grid; place-items:center; color:${nav.helpIc};`)}>{ic.help || ic.list}</span>
+          
+          <button onClick={go.help} className="sidebar-btn-item" style={css(`background:${nav.helpBg}; color:${nav.helpFg};`)}>
+            <span style={css(`width:20px; height:20px; display:grid; place-items:center; color:${nav.helpIc};`)}>{ic.help || ic.list}</span>
             <span style={css(`flex:1;`)}>คู่มือการใช้งาน</span>
           </button>
 
-          <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.06em; padding:16px 12px 6px;`)}>การทำงาน</div>
-          <button onClick={openReceive} style={css(`display:flex; align-items:center; gap:11px; width:100%; text-align:left; padding:9px 12px; border-radius:var(--radius-sm); border:1px solid var(--brand-100); cursor:pointer; background:var(--brand-50); color:var(--brand-700); font:var(--fw-semibold) var(--text-sm)/1 var(--font-body);`)}>
-            <span style={css(`width:18px; height:18px; display:grid; place-items:center; color:var(--brand-600);`)}>{ic.receive}</span>
+          <div style={css(`font:var(--fw-bold) 12px/1 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.08em; padding:16px 12px 6px;`)}>การทำงาน</div>
+          
+          <button onClick={openReceive} className="sidebar-op-receive">
+            <span style={css(`width:20px; height:20px; display:grid; place-items:center; color:#10B981;`)}>{ic.receive}</span>
             <span style={css(`flex:1;`)}>รับเข้า (Receive)</span>
           </button>
-          <button onClick={openIssue} style={css(`display:flex; align-items:center; gap:11px; width:100%; text-align:left; padding:9px 12px; border-radius:var(--radius-sm); border:1px solid var(--accent-100); cursor:pointer; background:var(--accent-50); color:var(--accent-700); font:var(--fw-semibold) var(--text-sm)/1 var(--font-body);`)}>
+          
+          <button onClick={openIssue} className="sidebar-op-withdraw">
+            <span style={css(`width:20px; height:20px; display:grid; place-items:center; color:#F59E0B;`)}>{ic.issue}</span>
+            <span style={css(`flex:1;`)}>เบิกจ่าย (Withdraw)</span>
+          </button>
+        </div>ody);`)}>
             <span style={css(`width:18px; height:18px; display:grid; place-items:center; color:var(--accent-600);`)}>{ic.issue}</span>
             <span style={css(`flex:1;`)}>เบิกจ่าย (Withdraw)</span>
           </button>
