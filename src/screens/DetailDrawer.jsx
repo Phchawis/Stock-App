@@ -35,11 +35,19 @@ export function DetailDrawer({ v }) {
           <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:10px;`)}>
             <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:11px 13px;`)}>
               <div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>คงเหลือรวม</div>
-              <div style={css(`font:var(--fw-bold) var(--text-lg)/1.1 var(--font-mono); color:${detail.onHandColor};`)}>{detail.onHand} <span style={css(`font:var(--fw-regular) var(--text-xs)/1 var(--font-mono); color:var(--text-tertiary);`)}>{detail.unit}{detail.testsPerUnit ? ` (${(detail.onHand * detail.testsPerUnit).toLocaleString()} test)` : ''}</span></div>
+              <div style={css(`font:var(--fw-bold) var(--text-sm)/1.1 var(--font-mono); color:${detail.onHandColor}; margin-top:2px;`)}>
+                {detail.testsPerUnit 
+                  ? `${(detail.onHand * detail.testsPerUnit).toLocaleString()} ${detail.subUnit || 'test'} (${detail.onHand} ${detail.unit})` 
+                  : `${detail.onHand} ${detail.unit}`}
+              </div>
             </div>
             <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:11px 13px;`)}>
               <div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>จุดสั่งซื้อซ้ำ</div>
-              <div style={css(`font:var(--fw-bold) var(--text-lg)/1.1 var(--font-mono); color:var(--text-primary);`)}>{detail.min} <span style={css(`font:var(--fw-regular) var(--text-xs)/1 var(--font-mono); color:var(--text-tertiary);`)}>{detail.unit}{detail.testsPerUnit ? ` (${(detail.min * detail.testsPerUnit).toLocaleString()} test)` : ''}</span></div>
+              <div style={css(`font:var(--fw-bold) var(--text-sm)/1.1 var(--font-mono); color:var(--text-primary); margin-top:2px;`)}>
+                {detail.testsPerUnit 
+                  ? `${(detail.min * detail.testsPerUnit).toLocaleString()} ${detail.subUnit || 'test'} (${detail.min} ${detail.unit})` 
+                  : `${detail.min} ${detail.unit}`}
+              </div>
             </div>
           </div>
           <div style={css(`display:flex; flex-direction:column; gap:7px;`)}>

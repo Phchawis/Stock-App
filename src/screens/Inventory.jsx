@@ -239,11 +239,10 @@ export function Inventory({ v }) {
               </div>
               
               <div style={css(`text-align:right;`)}>
-                <div style={css(`font:var(--fw-bold) var(--text-md)/1 var(--font-mono); color:${r.onHandColor};`)}>
-                  {r.onHand} 
-                  <span style={css(`font:var(--fw-regular) var(--text-xs)/1 var(--font-mono); color:var(--text-tertiary);`)}>
-                    / {r.min} {r.unit}{r.testsPerUnit ? ` (${(r.onHand * r.testsPerUnit).toLocaleString()} test)` : ''}
-                  </span>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1 var(--font-mono); color:${r.onHandColor};`)}>
+                  {r.testsPerUnit 
+                    ? `${(r.onHand * r.testsPerUnit).toLocaleString()} ${r.subUnit || 'test'} (${r.onHand} / ${r.min} ${r.unit})` 
+                    : `${r.onHand} / ${r.min} ${r.unit}`}
                 </div>
               </div>
               

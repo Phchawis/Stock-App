@@ -610,7 +610,7 @@ class App extends React.Component {
       const low = oh <= r.min;
       const lotCount = this.activeLots(r.id).length;
       return { id: r.id, code: r.code, th: r.th, en: showEn ? r.en : '', cat: r.cat, catLabel: this.CAT_LABEL(r.cat),
-        unit: r.unit, onHand: oh, min: r.min, low, lotCount, storageLabel: this.STORAGE_LABEL(r.storage), onHandColor: low ? 'var(--red-700)' : 'var(--text-primary)',
+        unit: r.unit, subUnit: r.subUnit, onHand: oh, min: r.min, low, lotCount, storageLabel: this.STORAGE_LABEL(r.storage), onHandColor: low ? 'var(--red-700)' : 'var(--text-primary)',
         expDays: d, expLabel: d != null ? this.dayLabel(d) : '—', expColor: d != null ? sc.fg : 'var(--text-tertiary)',
         expiring: d != null && d <= crit * 3, sev: s, img: r.img || '/reagent_placeholder.png', onOpen: () => this.openDetail(r.id),
         testsPerUnit: r.testsPerUnit, testsTotal: r.testsPerUnit ? oh * r.testsPerUnit : null };

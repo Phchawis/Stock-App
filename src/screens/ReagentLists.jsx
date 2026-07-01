@@ -24,6 +24,14 @@ export function ReagentLists({ v }) {
   const getCategoryLabel = (c) => ({ CHE: 'เคมีคลินิก', HEM: 'โลหิตวิทยา', IMM: 'ภูมิคุ้มกันวิทยา', MIP: 'จุลทรรศนศาสตร์', MDC: 'หมวดงานศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HMS: 'หมวดบริการศูนย์การแพทย์', ADV: 'หมวดตรวจวินิจฉัยชั้นสูง' })[c] || c;
   const getStorageLabel = (s) => ({ REFRIGERATED_2_8: '2–8°C', FROZEN_40: '−40°C', ROOM_TEMP: 'อุณหภูมิห้อง' })[s] || s;
 
+  const formatStock = (qty, reagent) => {
+    if (reagent.testsPerUnit) {
+      const totalTests = qty * reagent.testsPerUnit;
+      return `${totalTests.toLocaleString()} ${reagent.subUnit || 'test'} (${qty} ${reagent.unit})`;
+    }
+    return `${qty} ${reagent.unit}`;
+  };
+
   const localStyle = `
     /* Reagent Card Button */
     .reagent-card-btn {
@@ -193,7 +201,7 @@ export function ReagentLists({ v }) {
                       <div>
                         <div style={css(`font:var(--text-3xs)/1 var(--font-body); color:var(--text-tertiary);`)}>ยอดคงคลังรวม</div>
                         <div style={css(`font:var(--fw-bold) var(--text-sm)/1.3 var(--font-mono); color:${isOutOfStock ? 'var(--red-700)' : (isLowStock ? 'var(--amber-700)' : 'var(--green-700)')}; margin-top:2px;`)}>
-                          {totalStock} {r.unit}{r.testsPerUnit ? ` (${(totalStock * r.testsPerUnit).toLocaleString()} test)` : ''}
+                          {formatStock(totalStock, r)}
                         </div>
                       </div>
                       <div>
@@ -288,13 +296,10 @@ export function ReagentLists({ v }) {
                       </div>
                       
                       <div style={css(`grid-column:1/3; border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
-                        <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs);`)}>ชื่อน้ำยา (ภาษาไทย)</div>
-                        <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); margin-top:2px;`)}>{r.th}</div>
-                      </div>
-                      
-                      <div style={css(`grid-column:1/3; border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
-                        <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs);`)}>ชื่อน้ำยา (ภาษาอังกฤษ)</div>
-                        <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-mono); color:var(--text-primary); margin-top:2px;`)}>{r.en}</div>
+                        <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs);`)}>ชื่อน้ำยา</div>
+                        <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); margin-top:2px;`)}>
+                          {r.th === r.en || !r.en ? r.th : `${r.en} (${r.th})`}
+                        </div>
                       </div>
                       
                       <div style={css(`border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
@@ -303,16 +308,22 @@ export function ReagentLists({ v }) {
                       </div>
                       <div style={css(`border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
                         <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs);`)}>หน่วยนับสินค้า</div>
-                        <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); margin-top:2px;`)}>{r.unit}{r.testsPerUnit ? ` (1 ${r.unit} = ${r.testsPerUnit} test)` : ''}</div>
+                        <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); margin-top:2px;`)}>
+                          {r.unit}{r.subUnit ? ` / ${r.subUnit}` : ''}{r.testsPerUnit ? ` (1 ${r.unit} = ${r.testsPerUnit} ${r.subUnit || 'test'})` : ''}
+                        </div>
                       </div>
                       
                       <div style={css(`border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
                         <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs);`)}>จุดเตือนสต็อกต่ำสุด (Min)</div>
-                        <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-mono); color:var(--text-primary); margin-top:2px;`)}>{r.min} {r.unit}{r.testsPerUnit ? ` (${(r.min * r.testsPerUnit).toLocaleString()} test)` : ''}</div>
+                        <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-mono); color:var(--text-primary); margin-top:2px;`)}>
+                          {formatStock(r.min, r)}
+                        </div>
                       </div>
                       <div style={css(`border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
                         <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs);`)}>ปริมาณสั่งซื้อแนะนำ (Reorder)</div>
-                        <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-mono); color:var(--text-primary); margin-top:2px;`)}>{r.reorder} {r.unit}{r.testsPerUnit ? ` (${(r.reorder * r.testsPerUnit).toLocaleString()} test)` : ''}</div>
+                        <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-mono); color:var(--text-primary); margin-top:2px;`)}>
+                          {formatStock(r.reorder, r)}
+                        </div>
                       </div>
 
                       <div style={css(`grid-column:1/3; border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
@@ -323,7 +334,9 @@ export function ReagentLists({ v }) {
                       <div style={css(`grid-column:1/3; border-top:1px dashed var(--border-subtle); padding-top:6px; display:flex; justify-content:space-between; align-items:center;`)}>
                         <div>
                           <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs);`)}>ยอดคงคลังรวมปัจจุบัน</div>
-                          <div style={css(`font:var(--fw-bold) var(--text-sm)/1.3 var(--font-mono); color:${totalStock <= r.min ? 'var(--red-700)' : 'var(--green-700)'}; margin-top:2px;`)}>{totalStock} {r.unit}{r.testsPerUnit ? ` (${(totalStock * r.testsPerUnit).toLocaleString()} test)` : ''}</div>
+                          <div style={css(`font:var(--fw-bold) var(--text-sm)/1.3 var(--font-mono); color:${totalStock <= r.min ? 'var(--red-700)' : 'var(--green-700)'}; margin-top:2px;`)}>
+                            {formatStock(totalStock, r)}
+                          </div>
                         </div>
                         <span style={css(`padding:4px 10px; border-radius:var(--radius-pill); background:${totalStock === 0 ? 'var(--red-100)' : (totalStock <= r.min ? 'var(--amber-100)' : 'var(--green-100)')}; color:${totalStock === 0 ? 'var(--red-700)' : (totalStock <= r.min ? 'var(--amber-700)' : 'var(--green-700)')}; font:var(--fw-semibold) var(--text-3xs)/1 var(--font-body);`)}>
                           {totalStock === 0 ? 'สินค้าหมดคลัง' : (totalStock <= r.min ? 'สต็อกต่ำกว่าเกณฑ์' : 'สินค้าพร้อมใช้งาน')}
