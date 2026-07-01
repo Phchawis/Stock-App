@@ -370,7 +370,9 @@ export function ReagentLists({ v }) {
                                   <button
                                     type="button"
                                     onClick={() => openPrintSticker(l, r)}
-                                    style={css(`border:none; background:transparent; color:var(--brand-700); cursor:pointer; font:var(--fw-semibold) var(--text-3xs)/1 var(--font-body); padding:0; text-decoration:underline; display:inline-flex; align-items:center; gap:2px;`)}
+                                    style={css(`background:var(--slate-50); border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-3xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; display:inline-flex; align-items:center; gap:3px; transition:all var(--dur-fast);`)}
+                                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--slate-100)'; e.currentTarget.style.borderColor = 'var(--border-strong)'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--slate-50)'; e.currentTarget.style.borderColor = 'var(--border-default)'; }}
                                   >
                                     🖨️ พิมพ์ QR Code (2x4 cm)
                                   </button>

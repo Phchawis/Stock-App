@@ -41,6 +41,15 @@ export function PrintStickerModal({ v }) {
     stop, modalPrintSticker, closePrintSticker, printLotData, ic,
   } = v;
 
+  React.useEffect(() => {
+    if (modalPrintSticker && printLotData) {
+      const timer = setTimeout(() => {
+        window.print();
+      }, 400); // 400ms delay to ensure SVG QR is fully rendered before dialog pops up
+      return () => clearTimeout(timer);
+    }
+  }, [modalPrintSticker, printLotData]);
+
   if (!modalPrintSticker || !printLotData) return null;
 
   const { lot, reagent } = printLotData;
