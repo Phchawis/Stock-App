@@ -1,6 +1,7 @@
 import React from 'react';
 import { css } from '../css.js';
 import { Input } from '../components/Input.jsx';
+import { Html5Qrcode } from 'html5-qrcode';
 
 export function IssueModal({ v }) {
   const {
@@ -19,6 +20,64 @@ export function IssueModal({ v }) {
     window.addEventListener('click', handleOutsideClick);
     return () => window.removeEventListener('click', handleOutsideClick);
   }, []);
+
+  const [scanning, setScanning] = React.useState(false);
+  const [cameraError, setCameraError] = React.useState(null);
+  const html5QrCodeRef = React.useRef(null);
+
+  React.useEffect(() => {
+    let active = true;
+    if (modalIssue) {
+      setScanning(true);
+      setCameraError(null);
+
+      // Start the scanner after element is rendered
+      setTimeout(() => {
+        if (!active) return;
+        try {
+          const html5QrCode = new Html5Qrcode("qr-reader");
+          html5QrCodeRef.current = html5QrCode;
+          html5QrCode.start(
+            { facingMode: "environment" },
+            {
+              fps: 10,
+              qrbox: (w, h) => {
+                const s = Math.min(w, h) * 0.7;
+                return { width: s, height: s };
+              }
+            },
+            (msg) => {
+              scanQRCode(msg);
+              if (navigator.vibrate) navigator.vibrate(100);
+            },
+            () => {}
+          ).catch(err => {
+            if (active) {
+              console.error("Camera start error:", err);
+              setCameraError("ไม่สามารถเปิดกล้องได้ (โปรดอนุญาตสิทธิ์กล้อง)");
+              setScanning(false);
+            }
+          });
+        } catch (e) {
+          if (active) {
+            setCameraError("ไม่สามารถเริ่มต้นระบบกล้องได้");
+            setScanning(false);
+          }
+        }
+      }, 250);
+    }
+
+    return () => {
+      active = false;
+      const scanner = html5QrCodeRef.current;
+      if (scanner) {
+        if (scanner.isScanning) {
+          scanner.stop().catch(e => console.log("Failed to stop camera:", e));
+        }
+        html5QrCodeRef.current = null;
+      }
+    };
+  }, [modalIssue]);
 
   if (!modalIssue) return null;
 
@@ -147,32 +206,79 @@ export function IssueModal({ v }) {
                 }
               `}</style>
               
-              {/* Viewfinder Grid */}
-              <div style={css(`position:relative; height:140px; background:#050a10; border:1px solid var(--border-strong); border-radius:var(--radius-md); overflow:hidden; display:flex; flex-direction:column; justify-content:center; align-items:center;`)}>
+              {/* Viewfinder Grid (Live Camera Feed) */}
+              <div style={css(`position:relative; height:180px; background:#050a10; border:1px solid var(--border-strong); border-radius:var(--radius-md); overflow:hidden; display:flex; flex-direction:column; justify-content:center; align-items:center;`)}>
+                <div id="qr-reader" style={{ width: '100%', height: '100%', display: scanning ? 'block' : 'none' }}></div>
+                
                 <div style={cornerStyle(true, true, false, false)} />
                 <div style={cornerStyle(true, false, true, false)} />
                 <div style={cornerStyle(false, true, false, true)} />
                 <div style={cornerStyle(false, false, true, true)} />
                 
                 {/* Laser Scanline */}
-                <div style={{
-                  position: 'absolute',
-                  left: '12px',
-                  right: '12px',
-                  top: '12px',
-                  height: '2px',
-                  background: 'var(--green-600)',
-                  boxShadow: '0 0 8px var(--green-600)',
-                  animation: 'scanline 3s infinite linear',
-                  pointerEvents: 'none'
-                }} />
+                {scanning && (
+                  <div style={{
+                    position: 'absolute',
+                    left: '12px',
+                    right: '12px',
+                    top: '12px',
+                    height: '2px',
+                    background: 'var(--green-600)',
+                    boxShadow: '0 0 8px var(--green-600)',
+                    animation: 'scanline 3s infinite linear',
+                    pointerEvents: 'none',
+                    zIndex: 10
+                  }} />
+                )}
+
+                {/* Laser line height animation container size */}
+                {scanning && (
+                  <style>{`
+                    @keyframes scanline {
+                      0% { transform: translateY(0); opacity: 0.3; }
+                      50% { transform: translateY(156px); opacity: 1; }
+                      100% { transform: translateY(0); opacity: 0.3; }
+                    }
+                  `}</style>
+                )}
                 
-                <div style={css(`opacity:0.25; transform:scale(2.5); color:var(--green-600); display:grid; place-items:center;`)}>
-                  {ic.qr}
-                </div>
-                <div style={css(`position:absolute; bottom:12px; font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--green-600); letter-spacing:1px; text-transform:uppercase;`)}>
-                  จำลองกล้องแสกนคิวอาร์โค้ด...
-                </div>
+                {!scanning && (
+                  <div style={css(`position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; background:rgba(5, 10, 16, 0.92); z-index:10; padding:16px; text-align:center; box-sizing:border-box; width:100%; height:100%;`)}>
+                    <div style={css(`color:var(--red-700); margin-bottom:8px; font-weight:600; font-size:var(--text-2xs); line-height:1.4;`)}>
+                      ⚠️ {cameraError || "กล้องปิดการทำงาน"}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setScanning(true);
+                        setCameraError(null);
+                        const html5QrCode = new Html5Qrcode("qr-reader");
+                        html5QrCodeRef.current = html5QrCode;
+                        html5QrCode.start(
+                          { facingMode: "environment" },
+                          {
+                            fps: 10,
+                            qrbox: (w, h) => {
+                              const s = Math.min(w, h) * 0.7;
+                              return { width: s, height: s };
+                            }
+                          },
+                          (msg) => {
+                            scanQRCode(msg);
+                            if (navigator.vibrate) navigator.vibrate(100);
+                          },
+                          () => {}
+                        ).catch(err => {
+                          setCameraError("ไม่สามารถเปิดกล้องได้ (โปรดอนุญาตสิทธิ์กล้อง)");
+                          setScanning(false);
+                        });
+                      }}
+                      style={css(`padding:6px 12px; border-radius:var(--radius-sm); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-3xs)/1 var(--font-body);`)}
+                    >
+                      เปิดกล้องสแกน
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Linked Lot Status */}

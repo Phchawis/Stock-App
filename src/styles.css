@@ -1672,3 +1672,10 @@ code, kbd, samp { font-family: var(--font-mono); }
     display: none !important;
   }
 }
+
+/* Headless QR reader video fill */
+#qr-reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
