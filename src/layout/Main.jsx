@@ -62,6 +62,53 @@ export function Main({ v }) {
       transform: translateY(0);
       box-shadow: 0 2px 4px rgba(52, 62, 155, 0.15);
     }
+
+    @media (max-width: 768px) {
+      .mobile-action-bar {
+        display: flex !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-top: 1px solid var(--border-subtle);
+        padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 8px));
+        gap: 12px;
+        z-index: 40;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+      }
+      .mobile-action-btn {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px;
+        border-radius: var(--radius-md);
+        font: var(--fw-bold) 15px/1 var(--font-body) !important;
+        cursor: pointer;
+        transition: all var(--dur-fast);
+      }
+      .mobile-action-btn.receive {
+        border: 1.5px solid var(--brand-300);
+        background: var(--white);
+        color: var(--brand-700) !important;
+      }
+      .mobile-action-btn.withdraw {
+        border: none;
+        background: linear-gradient(135deg, var(--brand-700) 0%, var(--brand-800) 100%);
+        color: #ffffff !important;
+        box-shadow: 0 2px 8px rgba(52, 62, 155, 0.2);
+      }
+      .header-btn-receive, .header-btn-withdraw {
+        display: none !important;
+      }
+      main.main-content {
+        padding-bottom: 90px !important;
+      }
+    }
   `;
 
   return (
@@ -91,6 +138,18 @@ export function Main({ v }) {
           เบิกจ่าย (Withdraw)
         </button>
       </header>
+
+      {/* Mobile Bottom Action Bar */}
+      <div className="mobile-action-bar" style={css(`display:none;`)}>
+        <button onClick={openReceive} className="mobile-action-btn receive">
+          <span style={css(`width:18px; height:18px; display:grid; place-items:center;`)}>{ic.receive}</span>
+          รับเข้า
+        </button>
+        <button onClick={openIssue} className="mobile-action-btn withdraw">
+          <span style={css(`width:18px; height:18px; display:grid; place-items:center;`)}>{ic.issue}</span>
+          เบิกจ่าย
+        </button>
+      </div>
 
       <main className="main-content" style={css(`flex:1; padding:var(--page-gutter,28px); overflow-y:auto;`)}>
         <Dashboard v={v} />
