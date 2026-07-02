@@ -137,38 +137,29 @@ export function RegisterModal({ v }) {
             </div>
 
             <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px;`)}>
-              <Select
-                label="หมวดงาน"
-                required={true}
+              <Input 
+                label="หมวดงาน" 
+                value={
+                  ['CHE', 'HEM', 'IMM', 'MIP', 'MDC'].includes(mform.cat) 
+                    ? 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์' 
+                    : (mform.cat === 'HMS' ? 'บริการศูนย์การแพทย์' : 'ตรวจวินิจฉัยขั้นสูง')
+                } 
+                disabled={true} 
+              />
+              <Select 
+                label="หมวด" 
+                required={true} 
                 options={[
-                  { value: 'MDC', label: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์' },
+                  { value: 'CHE', label: 'เคมีคลินิก' },
+                  { value: 'HEM', label: 'โลหิตวิทยา' },
+                  { value: 'IMM', label: 'ภูมิคุ้มกันวิทยา' },
+                  { value: 'MIP', label: 'จุลทรรศนศาสตร์' },
                   { value: 'HMS', label: 'บริการศูนย์การแพทย์' },
                   { value: 'ADV', label: 'ตรวจวินิจฉัยขั้นสูง' }
-                ]}
-                value={
-                  ['CHE', 'HEM', 'IMM', 'MIP', 'MDC'].includes(mform.cat) ? 'MDC' : mform.cat
-                }
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (val === 'MDC') {
-                    mfCat('MDC');
-                  } else {
-                    mfCat(val);
-                  }
-                }}
+                ]} 
+                value={mform.cat} 
+                onChange={mfCat} 
               />
-              {!['CHE', 'HEM', 'IMM', 'MIP', 'MDC'].includes(mform.cat) && (
-                <Select
-                  label="หมวด"
-                  required={true}
-                  options={[
-                    { value: 'HMS', label: 'บริการศูนย์การแพทย์' },
-                    { value: 'ADV', label: 'ตรวจวินิจฉัยขั้นสูง' }
-                  ]}
-                  value={mform.cat}
-                  onChange={mfCat}
-                />
-              )}
             </div>
 
             <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px;`)}>
