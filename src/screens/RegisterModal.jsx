@@ -137,8 +137,45 @@ export function RegisterModal({ v }) {
             </div>
 
             <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px;`)}>
-              <Select label="หมวดงาน" required={true} options={parentCatOpts} value="MDC" disabled={true} />
-              <Select label="หมวด" required={true} options={catOpts} value={mform.cat} onChange={mfCat} />
+              <Select 
+                label="หมวดงาน" 
+                required={true} 
+                options={[
+                  { value: 'MDC', label: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์' },
+                  { value: 'HMS', label: 'บริการศูนย์การแพทย์' },
+                  { value: 'ADV', label: 'ตรวจวินิจฉัยขั้นสูง' }
+                ]} 
+                value={
+                  ['CHE', 'HEM', 'IMM', 'MIP'].includes(mform.cat) ? 'MDC' : mform.cat
+                } 
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === 'MDC') {
+                    mfCat('CHE');
+                  } else {
+                    mfCat(val);
+                  }
+                }}
+              />
+              <Select 
+                label="หมวด" 
+                required={true} 
+                options={
+                  ['CHE', 'HEM', 'IMM', 'MIP'].includes(mform.cat) 
+                    ? [
+                        { value: 'CHE', label: 'เคมีคลินิก' },
+                        { value: 'HEM', label: 'โลหิตวิทยา' },
+                        { value: 'IMM', label: 'ภูมิคุ้มกันวิทยา' },
+                        { value: 'MIP', label: 'จุลทรรศนศาสตร์' }
+                      ]
+                    : [
+                        { value: 'HMS', label: 'บริการศูนย์การแพทย์' },
+                        { value: 'ADV', label: 'ตรวจวินิจฉัยขั้นสูง' }
+                      ]
+                } 
+                value={mform.cat} 
+                onChange={mfCat} 
+              />
             </div>
 
             <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px;`)}>
