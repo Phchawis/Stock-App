@@ -15,7 +15,9 @@ import { PrintStickerModal } from './screens/PrintStickerModal.jsx';
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.today = new Date('2026-06-29T00:00:00');
+    const t = new Date(); t.setHours(0, 0, 0, 0);
+    this.today = t;
+    this.token = localStorage.getItem('authToken') || null;
     this.state = {
       view: 'dashboard', role: null, invTab: 'all', search: '', detailId: null, modal: null, toast: null, acked: {},
       reagents: [], lots: [], txns: [],
@@ -402,7 +404,7 @@ class App extends React.Component {
 
   // ── derivations ──
   STORAGE_LABEL(s) { return ({ REFRIGERATED_2_8: '2–8°C', FROZEN_40: '−40°C', ROOM_TEMP: 'อุณหภูมิห้อง' })[s] || s; }
-  CAT_LABEL(c) { return ({ CHE: 'เคมีคลินิก', HEM: 'โลหิตวิทยา', IMM: 'ภูมิคุ้มกันวิทยา', MIP: 'จุลทรรศนศาสตร์', MDC: 'หมวดงานศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HMS: 'บริการศูนย์การแพทย์', ADV: 'ตรวจวินิจฉัยขั้นสูง' })[c] || c; }
+  CAT_LABEL(c) { return ({ CHE: 'เคมีคลินิก', HEM: 'โลหิตวิทยา', IMM: 'ภูมิคุ้มกันวิทยา', MIP: 'จุลทรรศนศาสตร์', MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HMS: 'บริการศูนย์การแพทย์', ADV: 'ตรวจวินิจฉัยขั้นสูง' })[c] || c; }
   days(d) { return Math.round((new Date(d + 'T00:00:00') - this.today) / 86400000); }
   activeLots(rid) { return this.state.lots.filter(l => l.rid === rid && l.qty > 0 && l.status === 'ACTIVE'); }
   onHand(rid) { return this.activeLots(rid).reduce((s, l) => s + l.qty, 0); }
