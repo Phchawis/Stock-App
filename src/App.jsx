@@ -35,27 +35,31 @@ class App extends React.Component {
   defaultPerms() { const o = {}; this.ROLES().forEach(r => { o[r.id] = { ...r.perms }; }); return o; }
   USERNAMES() { return { admin: 'admin', supervisor: 'supervisor', technician: 'technician', viewer: 'viewer' }; }
   bindLF(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ loginForm: { ...s.loginForm, [k]: v, error: '' } })); }; }
-  submitLogin() {
+  async submitLogin() {
     const f = this.state.loginForm;
-    const u = (f.username || '').trim().toLowerCase();
-    const userObj = this.state.users.find(x => x.username.toLowerCase() === u);
-    if (!userObj) {
-      this.setState(s => ({ loginForm: { ...s.loginForm, error: 'ไม่พบชื่อผู้ใช้นี้ในระบบ' } }));
-      return;
+    const username = (f.username || '').trim();
+    if (!username) { this.setState(s => ({ loginForm: { ...s.loginForm, error: 'กรุณากรอกชื่อผู้ใช้' } })); return; }
+    if (!f.password) { this.setState(s => ({ loginForm: { ...s.loginForm, error: 'กรุณากรอกรหัสผ่าน' } })); return; }
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password: f.password })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        this.setState(s => ({ loginForm: { ...s.loginForm, error: data.error || 'เข้าสู่ระบบล้มเหลว' } }));
+        return;
+      }
+      // Persist session, set the authenticated user, then load data.
+      this.token = data.token;
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('authUser', JSON.stringify(data.user));
+      this.login(data.user.role, data.user.name, data.user.initials);
+      this.fetchData();
+    } catch (err) {
+      this.setState(s => ({ loginForm: { ...s.loginForm, error: 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้: ' + err.message } }));
     }
-    if (!f.password) {
-      this.setState(s => ({ loginForm: { ...s.loginForm, error: 'กรุณากรอกรหัสผ่าน' } }));
-      return;
-    }
-    if (userObj.password && f.password !== userObj.password) {
-      this.setState(s => ({ loginForm: { ...s.loginForm, error: 'รหัสผ่านไม่ถูกต้อง' } }));
-      return;
-    }
-    this.login(userObj.role, userObj.name, userObj.initials);
-  }
-  pickDemo(userObj) {
-    this.setState({ loginForm: { username: userObj.username, password: 'tuh1234', error: '' } });
-    this.login(userObj.role, userObj.name, userObj.initials);
   }
   bindUf(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ uform: { ...s.uform, [k]: v } })); }; }
   async submitAddUser() {
@@ -168,7 +172,26 @@ class App extends React.Component {
   closePrintSticker() {
     this.setState({ printLotData: null, modal: null });
   }
-  togglePerm(roleId, key) { if (this.state.role !== 'admin') { this.showToast('เฉพาะผู้ดูแลระบบเท่านั้นที่แก้ไขสิทธิ์ได้', 'warn'); return; } const cur = this.state.perms[roleId][key]; const rname = (this.ROLES().find(r => r.id === roleId) || {}).th; this.setState(s => ({ perms: { ...s.perms, [roleId]: { ...s.perms[roleId], [key]: cur ? 0 : 1 } } })); this.showToast((cur ? 'ยกเลิก' : 'เพิ่ม') + 'สิทธิ์ของ' + rname + 'แล้ว'); }
+  async togglePerm(roleId, key) {
+    if (this.state.role !== 'admin') { this.showToast('เฉพาะผู้ดูแลระบบเท่านั้นที่แก้ไขสิทธิ์ได้', 'warn'); return; }
+    const cur = this.state.perms[roleId][key];
+    const next = cur ? 0 : 1;
+    const rname = (this.ROLES().find(r => r.id === roleId) || {}).th;
+    // Optimistic update, then persist; revert on failure.
+    this.setState(s => ({ perms: { ...s.perms, [roleId]: { ...s.perms[roleId], [key]: next } } }));
+    try {
+      const res = await this.api('/api/permissions', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: roleId, perm: key, allowed: next })
+      });
+      if (!res.ok) throw new Error('บันทึกสิทธิ์ล้มเหลว');
+      this.showToast((cur ? 'ยกเลิก' : 'เพิ่ม') + 'สิทธิ์ของ' + rname + 'แล้ว');
+    } catch (err) {
+      this.setState(s => ({ perms: { ...s.perms, [roleId]: { ...s.perms[roleId], [key]: cur } } }));
+      this.showToast(err.message, 'warn');
+    }
+  }
   ROLES() {
     return [
       { id: 'admin', th: 'ผู้ดูแลระบบ', en: 'Administrator', name: 'ทนพ. ธนวัฒน์ ผู้ดูแลระบบ', initials: 'ธว', color: '#1387A6', perms: { view: 1, receive: 1, issue: 1, manage: 1, ack: 1, users: 1, settings: 1 } },
@@ -189,32 +212,71 @@ class App extends React.Component {
     ];
   }
   login(id, name, initials) { const r = this.ROLES().find(x => x.id === id); if (!r) return; this.user = { name: name || r.name, role: r.th, initials: initials || r.initials, roleId: r.id }; this.setState({ role: id, view: 'dashboard', detailId: null, modal: null }); }
-  logout() { this.setState({ role: null, detailId: null, modal: null, loginForm: { username: '', password: '', error: '' } }); }
+  async logout() {
+    try { await this.api('/api/logout', { method: 'POST' }); } catch (e) { /* best effort */ }
+    this.token = null;
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('authUser');
+    this.user = { name: 'ทนพ. สมชาย ใจดี', role: 'นักเทคนิคการแพทย์', initials: 'สช' };
+    this.setState({ role: null, detailId: null, modal: null, reagents: [], lots: [], txns: [], users: [], loginForm: { username: '', password: '', error: '' } });
+  }
   can(p) { const m = this.state.perms[this.state.role]; return m ? !!m[p] : false; }
+
+  // Authenticated fetch — attaches the session token and auto-signs-out on 401.
+  async api(path, opts = {}) {
+    const headers = { ...(opts.headers || {}) };
+    if (this.token) headers['Authorization'] = 'Bearer ' + this.token;
+    const res = await fetch(path, { ...opts, headers });
+    if (res.status === 401) {
+      this.handleAuthExpired();
+      throw new Error('หมดเวลาการเข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่');
+    }
+    return res;
+  }
+  handleAuthExpired() {
+    this.token = null;
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('authUser');
+    this.user = { name: 'ทนพ. สมชาย ใจดี', role: 'นักเทคนิคการแพทย์', initials: 'สช' };
+    this.setState({ role: null, detailId: null, modal: null, reagents: [], lots: [], txns: [], users: [], loginForm: { username: '', password: '', error: '' } });
+  }
 
   async fetchData() {
     try {
-      const [reagentsRes, lotsRes, txnsRes, usersRes] = await Promise.all([
-        fetch('/api/reagents'),
-        fetch('/api/lots'),
-        fetch('/api/transactions'),
-        fetch('/api/users')
+      const [reagentsRes, lotsRes, txnsRes, usersRes, permsRes] = await Promise.all([
+        this.api('/api/reagents'),
+        this.api('/api/lots'),
+        this.api('/api/transactions'),
+        this.api('/api/users'),
+        this.api('/api/permissions')
       ]);
-      if (!reagentsRes.ok || !lotsRes.ok || !txnsRes.ok || !usersRes.ok) {
+      if (!reagentsRes.ok || !lotsRes.ok || !txnsRes.ok || !usersRes.ok || !permsRes.ok) {
         throw new Error('ดึงข้อมูลจากเซิร์ฟเวอร์ล้มเหลว');
       }
       const reagents = await reagentsRes.json();
       const lots = await lotsRes.json();
       const txns = await txnsRes.json();
       const users = await usersRes.json();
-      this.setState({ reagents, lots, txns, users });
+      const perms = await permsRes.json();
+      this.setState(s => ({ reagents, lots, txns, users, perms: (perms && Object.keys(perms).length) ? perms : s.perms }));
     } catch (err) {
       this.showToast('ดึงข้อมูลล้มเหลว: ' + err.message, 'warn');
     }
   }
 
   componentDidMount() {
-    this.fetchData();
+    // Restore a prior session (token + cached user) if present.
+    if (this.token) {
+      try {
+        const cached = JSON.parse(localStorage.getItem('authUser') || 'null');
+        if (cached) {
+          const r = this.ROLES().find(x => x.id === cached.role);
+          this.user = { name: cached.name, role: r ? r.th : cached.role, initials: cached.initials, roleId: cached.role };
+          this.setState({ role: cached.role });
+        }
+      } catch (e) { /* ignore corrupt cache */ }
+      this.fetchData();
+    }
     if (!(window.lucide && window.lucide.icons)) {
       this._t = setInterval(() => { if (window.lucide && window.lucide.icons) { clearInterval(this._t); this.forceUpdate(); } }, 120);
     }
