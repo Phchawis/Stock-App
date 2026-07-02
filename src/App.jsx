@@ -11,6 +11,8 @@ import { Login } from './screens/Login.jsx';
 import { RegisterModal } from './screens/RegisterModal.jsx';
 import { AddUserModal } from './screens/AddUserModal.jsx';
 import { PrintStickerModal } from './screens/PrintStickerModal.jsx';
+import { EditLotModal } from './screens/EditLotModal.jsx';
+import { EditTransactionModal } from './screens/EditTransactionModal.jsx';
 
 class App extends React.Component {
   constructor(props) {
@@ -25,12 +27,16 @@ class App extends React.Component {
       rf: this.blankRf(), iform: this.blankIf(), mform: this.blankMf(),
       users: [], uform: { name: '', username: '', role: 'technician', password: '' },
       printLotData: null,
-      sidebarOpen: false
+      sidebarOpen: false,
+      editingLotId: null, elForm: this.blankElf(),
+      editingTxnId: null, etForm: this.blankEtf(),
     };
     this.user = { name: 'ทนพ. สมชาย ใจดี', role: 'นักเทคนิคการแพทย์', initials: 'สช' };
   }
   blankRf() { return { rid: '', lot: '', expiry: '', qty: '', supplier: '', loc: 'ตู้เย็น A1' }; }
   blankIf() { return { rid: '', qty: '', scan: 'MANUAL', ref: '', lotId: '', qrInput: '', searchInput: '' }; }
+  blankElf() { return { expiry: '', qty: '', loc: '' }; }
+  blankEtf() { return { qty: '', ref: '' }; }
   blankMf() { return { code: '', th: '', en: '', cat: 'CHE', unit: 'vial', subUnit: '', subUnitQty: '', testsPerSubUnit: '', testsPerUnit: '', storage: 'REFRIGERATED_2_8', min: '', reorder: '', supplier: 'i-med', img: '/reagent_placeholder.png' }; }
   defaultPerms() { const o = {}; this.ROLES().forEach(r => { o[r.id] = { ...r.perms }; }); return o; }
   USERNAMES() { return { admin: 'admin', supervisor: 'supervisor', technician: 'technician', viewer: 'viewer' }; }
@@ -493,6 +499,73 @@ class App extends React.Component {
     }
   }
 
+  bindElf(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ elForm: { ...s.elForm, [k]: v } })); }; }
+  openEditLot(lotId) {
+    if (!this.can('manage')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์แก้ไขข้อมูล Lot', 'warn'); return; }
+    const l = this.state.lots.find(x => x.id === lotId);
+    if (!l) return;
+    this.setState({ modal: 'editLot', editingLotId: lotId, elForm: { expiry: l.expiry, qty: l.qty, loc: l.loc } });
+  }
+  async submitEditLot() {
+    if (!this.can('manage')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์แก้ไขข้อมูล Lot', 'warn'); return; }
+    const id = this.state.editingLotId;
+    const f = this.state.elForm;
+    const qty = +f.qty;
+    if (!f.expiry || !f.loc || isNaN(qty) || qty < 0) { this.showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warn'); return; }
+    try {
+      const res = await this.api('/api/lots', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, expiry: f.expiry, qty, loc: f.loc })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'แก้ไขข้อมูล Lot ล้มเหลว');
+      this.setState(s => ({
+        lots: s.lots.map(l => l.id === id ? { ...l, ...data.lot } : l),
+        txns: data.txn ? [...s.txns, data.txn] : s.txns,
+        modal: null, editingLotId: null
+      }));
+      this.showToast('แก้ไขข้อมูล Lot เรียบร้อยแล้ว');
+    } catch (err) {
+      this.showToast(err.message, 'warn');
+    }
+  }
+
+  bindEtf(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ etForm: { ...s.etForm, [k]: v } })); }; }
+  openEditTxn(txnId) {
+    if (!this.can('manage')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์แก้ไขรายการนี้', 'warn'); return; }
+    const t = this.state.txns.find(x => x.id === txnId);
+    if (!t) return;
+    this.setState({ modal: 'editTxn', editingTxnId: txnId, etForm: { qty: Math.abs(t.qty), ref: t.ref || '' } });
+  }
+  async submitEditTxn() {
+    if (!this.can('manage')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์แก้ไขรายการนี้', 'warn'); return; }
+    const id = this.state.editingTxnId;
+    const t = this.state.txns.find(x => x.id === id);
+    if (!t) return;
+    const f = this.state.etForm;
+    const magnitude = +f.qty;
+    if (isNaN(magnitude) || magnitude <= 0) { this.showToast('กรุณากรอกจำนวนให้ถูกต้อง', 'warn'); return; }
+    const signedQty = t.type === 'ISSUE' ? -magnitude : magnitude;
+    try {
+      const res = await this.api('/api/transactions', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, qty: signedQty, ref: f.ref })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'แก้ไขรายการล้มเหลว');
+      this.setState(s => ({
+        txns: s.txns.map(x => x.id === id ? { ...x, ...data.txn } : x),
+        lots: s.lots.map(l => l.id === data.lot.id ? { ...l, ...data.lot } : l),
+        modal: null, editingTxnId: null
+      }));
+      this.showToast('แก้ไขรายการเรียบร้อยแล้ว');
+    } catch (err) {
+      this.showToast(err.message, 'warn');
+    }
+  }
+
   // ── derivations ──
   STORAGE_LABEL(s) { return ({ REFRIGERATED_2_8: '2–8°C', FROZEN_40: '−40°C', ROOM_TEMP: 'อุณหภูมิห้อง' })[s] || s; }
   CAT_LABEL(c) { return ({ CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', IMM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', MIP: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HMS: 'บริการศูนย์การแพทย์', ADV: 'ตรวจวินิจฉัยขั้นสูง' })[c] || c; }
@@ -592,7 +665,7 @@ class App extends React.Component {
       this.showToast(`สแกนพบ Lot ${foundLot.lot} ของ ${r ? r.th : ''} และทำการเชื่อมโยงข้อมูลแล้ว`, 'success');
       return;
     }
-    const foundReagent = this.state.reagents.find(r => r.code === cleanCode);
+    const foundReagent = this.state.reagents.find(r => r.code.toLowerCase() === cleanCode);
     if (foundReagent) {
       this.setState(s => ({
         iform: {
@@ -810,7 +883,8 @@ class App extends React.Component {
           return { id: l.id, lot: l.lot, expiry: l.expiry, qty: l.qty, recv: l.recv, loc: l.loc, qr: l.qr,
             dayLabel: dep ? 'หมดแล้ว' : this.dayLabel(d), dayColor: dep ? 'var(--text-tertiary)' : sc.fg,
             fefoBadge: (i === 0 && !dep) ? 'FEFO ถัดไป' : '', statusLabel: dep ? 'หมด' : 'พร้อมใช้',
-            statusFg: dep ? 'var(--slate-600)' : 'var(--green-700)', statusBg: dep ? 'var(--slate-100)' : 'var(--green-100)' };
+            statusFg: dep ? 'var(--slate-600)' : 'var(--green-700)', statusBg: dep ? 'var(--slate-100)' : 'var(--green-100)',
+            onEdit: () => this.openEditLot(l.id) };
         });
         detail = { ...vm, supplier: r.supplier, reorder: r.reorder, lots, img: r.img || '/reagent_placeholder.png',
           onReceive: () => this.openReceive(r.id), onIssue: () => this.openIssue(r.id) };
@@ -828,7 +902,8 @@ class App extends React.Component {
       const scanLabel = ({ MANUAL: 'พิมพ์ชื่อ', QR: 'QR code', BARCODE: 'บาร์โค้ด' })[t.scan] || t.scan;
       return { id: t.id, rid: t.rid, name: r ? r.th : '—', code: r ? r.code : '', lot: l ? l.lot : '—', typeLabel: m.label, fg: m.fg, bg: m.bg,
         qtyLabel: (t.qty > 0 ? '+' : '') + t.qty + ' ' + (r ? r.unit : ''), qtyColor: t.qty > 0 ? 'var(--green-700)' : 'var(--accent-700)',
-        scanLabel, ref: t.ref, by: t.by, at: t.at, qty: t.qty, type: t.type };
+        scanLabel, ref: t.ref, by: t.by, at: t.at, qty: t.qty, type: t.type, unit: r ? r.unit : '',
+        onEdit: () => this.openEditTxn(t.id) };
     });
 
     // usage stats list
@@ -989,6 +1064,31 @@ class App extends React.Component {
       canManage: this.can('manage'),
       updateReagentCategory: (id, cat) => this.updateReagentCategory(id, cat),
 
+      // edit lot (correct qty/expiry/location of existing stock)
+      openEditLot: (id) => this.openEditLot(id),
+      modalEditLot: S.modal === 'editLot',
+      elForm: S.elForm, elExpiry: this.bindElf('expiry'), elQty: this.bindElf('qty'), elLoc: this.bindElf('loc'),
+      submitEditLot: () => this.submitEditLot(),
+      editingLotData: (() => {
+        const l = S.lots.find(x => x.id === S.editingLotId);
+        if (!l) return null;
+        const r = S.reagents.find(x => x.id === l.rid);
+        return { lot: l.lot, reagentName: r ? r.th : '—', unit: r ? r.unit : '' };
+      })(),
+
+      // edit transaction (correct qty/reference of a past receive/issue/adjust record)
+      modalEditTxn: S.modal === 'editTxn',
+      etForm: S.etForm, etQty: this.bindEtf('qty'), etRef: this.bindEtf('ref'),
+      submitEditTxn: () => this.submitEditTxn(),
+      editingTxnData: (() => {
+        const t = S.txns.find(x => x.id === S.editingTxnId);
+        if (!t) return null;
+        const r = S.reagents.find(x => x.id === t.rid);
+        const l = S.lots.find(x => x.id === t.lotId);
+        const m = this.txnMeta(t.type);
+        return { reagentName: r ? r.th : '—', unit: r ? r.unit : '', lot: l ? l.lot : '—', typeLabel: m.label, type: t.type };
+      })(),
+
       toast: S.toast, toastBg: S.toast ? (S.toast.kind === 'warn' ? '#5A4410' : 'var(--slate-900)') : '',
       showToast: (msg, kind) => this.showToast(msg, kind),
       sidebarOpen: S.sidebarOpen,
@@ -1013,6 +1113,8 @@ class App extends React.Component {
       <RegisterModal v={v} />
       <AddUserModal v={v} />
       <PrintStickerModal v={v} />
+      <EditLotModal v={v} />
+      <EditTransactionModal v={v} />
       <Toast v={v} />
       <Login v={v} />
     </div>
