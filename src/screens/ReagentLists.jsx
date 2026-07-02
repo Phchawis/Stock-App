@@ -5,6 +5,7 @@ export function ReagentLists({ v }) {
   const {
     isReagentLists, reagentsList, activeLotsList, ic,
     canManage, openRegister, txnRows, openPrintSticker, deleteReagent, user,
+    updateReagentCategory,
   } = v;
 
   const isAdmin = user && user.roleId === 'admin';
@@ -288,7 +289,7 @@ export function ReagentLists({ v }) {
                   <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:14px 16px; display:flex; flex-direction:column; gap:10px;`)}>
                     <div style={css(`display:grid; grid-template-columns:repeat(2, 1fr); gap:10px 20px; font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>
                       <div>
-                        <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs); text-transform:uppercase;`)}>หมวดหมู่การใช้งาน</div>
+                        <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs); text-transform:uppercase;`)}>หมวดงาน</div>
                         <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); margin-top:2px;`)}>
                           {(() => {
                             const getParent = (c) => ({
@@ -296,6 +297,7 @@ export function ReagentLists({ v }) {
                               HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
                               IMM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
                               MIP: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
+                              MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
                               HMS: 'บริการศูนย์การแพทย์',
                               ADV: 'ตรวจวินิจฉัยขั้นสูง'
                             })[c] || c;
@@ -303,7 +305,27 @@ export function ReagentLists({ v }) {
                           })()}
                         </div>
                       </div>
-                      
+                      {['HMS', 'ADV'].includes(r.cat) && (
+                        <div>
+                          <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs); text-transform:uppercase;`)}>หมวด</div>
+                          {canManage ? (
+                            <select
+                              value={r.cat}
+                              onChange={(e) => updateReagentCategory(r.id, e.target.value)}
+                              onClick={(e) => e.stopPropagation()}
+                              style={css(`margin-top:2px; width:100%; font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:3px 6px; cursor:pointer;`)}
+                            >
+                              <option value="HMS">บริการศูนย์การแพทย์</option>
+                              <option value="ADV">ตรวจวินิจฉัยขั้นสูง</option>
+                            </select>
+                          ) : (
+                            <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); margin-top:2px;`)}>
+                              {r.cat === 'HMS' ? 'บริการศูนย์การแพทย์' : 'ตรวจวินิจฉัยขั้นสูง'}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       <div style={css(`grid-column:1/3; border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
                         <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs);`)}>ชื่อน้ำยา</div>
                         <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); margin-top:2px;`)}>
