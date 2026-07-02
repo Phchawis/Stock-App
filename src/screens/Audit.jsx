@@ -3,7 +3,7 @@ import { css } from '../css.js';
 
 export function Audit({ v }) {
   const {
-    isAudit, txnRows, user, clearTxns,
+    isAudit, txnRows, user, clearTxns, canManage,
   } = v;
 
   const [search, setSearch] = React.useState('');
