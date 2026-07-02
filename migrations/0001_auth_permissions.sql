@@ -22,6 +22,3 @@ INSERT OR IGNORE INTO permissions (role, perm, allowed) VALUES
 ('supervisor','view',1),('supervisor','receive',1),('supervisor','issue',1),('supervisor','manage',1),('supervisor','ack',1),('supervisor','users',0),('supervisor','settings',0),
 ('technician','view',1),('technician','receive',0),('technician','issue',1),('technician','manage',0),('technician','ack',1),('technician','users',0),('technician','settings',0),
 ('viewer','view',1),('viewer','receive',0),('viewer','issue',0),('viewer','manage',0),('viewer','ack',0),('viewer','users',0),('viewer','settings',0);
-
--- Existing plaintext passwords are upgraded to salted hashes automatically on
--- each user's next successful login (see functions/api/login.js).
