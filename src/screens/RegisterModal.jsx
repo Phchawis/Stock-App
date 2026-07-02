@@ -9,7 +9,7 @@ export function RegisterModal({ v }) {
     mfCode, mfTh, mfEn, mfCat, mfUnit, mfSubUnit, mfTestsPerUnit, mfStorage,
     mfMin, mfReorder, mfSupplier, mfImg,
     submitRegister, submitEditReagent, editReagentId, supplierOpts,
-    mfSubUnitQty, mfTestsPerSubUnit,
+    mfSubUnitQty, mfTestsPerSubUnit, showToast,
   } = v;
 
   if (!modalRegister) return null;
@@ -56,6 +56,14 @@ export function RegisterModal({ v }) {
   const handleFileChange = (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
+    // A 0-byte file usually means the OS hasn't actually downloaded it yet —
+    // common with iCloud Drive/Photos "Optimize Mac Storage", OneDrive Files
+    // On-Demand, or Dropbox smart sync placeholders that Finder shows as present.
+    if (file.size === 0) {
+      showToast(`ไฟล์ "${file.name}" มีขนาด 0 ไบต์ — อาจเป็นไฟล์ที่ยังไม่ได้ดาวน์โหลดเต็ม (เช่น จาก iCloud/OneDrive) กรุณาเปิดไฟล์ในเครื่องก่อนแล้วลองใหม่`, 'warn');
+      e.target.value = '';
+      return;
+    }
     const objectUrl = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
@@ -71,7 +79,8 @@ export function RegisterModal({ v }) {
     };
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl);
-      alert('ไม่สามารถอ่านไฟล์รูปภาพนี้ได้ กรุณาเลือกไฟล์ภาพอื่น');
+      showToast(`ไม่สามารถอ่านไฟล์ "${file.name}" เป็นรูปภาพได้ (${(file.size / 1024).toFixed(0)} KB) กรุณาเลือกไฟล์ภาพอื่น`, 'warn');
+      e.target.value = '';
     };
     img.src = objectUrl;
   };
