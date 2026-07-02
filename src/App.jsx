@@ -566,6 +566,33 @@ class App extends React.Component {
     }
   }
 
+  async deleteTxn(txnId) {
+    if (!this.can('manage')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์ลบรายการนี้', 'warn'); return; }
+    const t = this.state.txns.find(x => x.id === txnId);
+    if (!t) return;
+    const kindLabel = t.type === 'RECEIVE' ? 'รายการรับเข้า (และ Lot ที่สร้างขึ้น)' : t.type === 'ISSUE' ? 'รายการเบิกจ่าย' : 'รายการปรับปรุง';
+    if (!window.confirm(`ยืนยันลบ${kindLabel}นี้ใช่หรือไม่? การลบนี้ไม่สามารถเรียกคืนได้`)) return;
+    try {
+      const res = await this.api(`/api/transactions?id=${txnId}`, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'ลบรายการล้มเหลว');
+      this.setState(s => ({
+        txns: s.txns.filter(x => x.id !== txnId),
+        lots: data.deletedLotId
+          ? s.lots.filter(l => l.id !== data.deletedLotId)
+          : s.lots.map(l => (data.lot && l.id === data.lot.id) ? { ...l, ...data.lot } : l)
+      }));
+      this.showToast(`ลบ${kindLabel}เรียบร้อยแล้ว`);
+    } catch (err) {
+      this.showToast(err.message, 'warn');
+    }
+  }
+  deleteLotReceive(lotId) {
+    const receiveTxn = this.state.txns.find(t => t.lotId === lotId && t.type === 'RECEIVE');
+    if (!receiveTxn) { this.showToast('ไม่พบรายการรับเข้าต้นทางของ Lot นี้ (อาจถูกลบไปแล้วหรือข้อมูลเก่า)', 'warn'); return; }
+    this.deleteTxn(receiveTxn.id);
+  }
+
   // ── derivations ──
   STORAGE_LABEL(s) { return ({ REFRIGERATED_2_8: '2–8°C', FROZEN_40: '−40°C', ROOM_TEMP: 'อุณหภูมิห้อง' })[s] || s; }
   CAT_LABEL(c) { return ({ CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', IMM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', MIP: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HMS: 'บริการศูนย์การแพทย์', ADV: 'ตรวจวินิจฉัยขั้นสูง' })[c] || c; }
@@ -884,7 +911,7 @@ class App extends React.Component {
             dayLabel: dep ? 'หมดแล้ว' : this.dayLabel(d), dayColor: dep ? 'var(--text-tertiary)' : sc.fg,
             fefoBadge: (i === 0 && !dep) ? 'FEFO ถัดไป' : '', statusLabel: dep ? 'หมด' : 'พร้อมใช้',
             statusFg: dep ? 'var(--slate-600)' : 'var(--green-700)', statusBg: dep ? 'var(--slate-100)' : 'var(--green-100)',
-            onEdit: () => this.openEditLot(l.id) };
+            onEdit: () => this.openEditLot(l.id), onDelete: () => this.deleteLotReceive(l.id) };
         });
         detail = { ...vm, supplier: r.supplier, reorder: r.reorder, lots, img: r.img || '/reagent_placeholder.png',
           onReceive: () => this.openReceive(r.id), onIssue: () => this.openIssue(r.id) };
@@ -903,7 +930,7 @@ class App extends React.Component {
       return { id: t.id, rid: t.rid, name: r ? r.th : '—', code: r ? r.code : '', lot: l ? l.lot : '—', typeLabel: m.label, fg: m.fg, bg: m.bg,
         qtyLabel: (t.qty > 0 ? '+' : '') + t.qty + ' ' + (r ? r.unit : ''), qtyColor: t.qty > 0 ? 'var(--green-700)' : 'var(--accent-700)',
         scanLabel, ref: t.ref, by: t.by, at: t.at, qty: t.qty, type: t.type, unit: r ? r.unit : '',
-        onEdit: () => this.openEditTxn(t.id) };
+        onEdit: () => this.openEditTxn(t.id), onDelete: () => this.deleteTxn(t.id) };
     });
 
     // usage stats list
@@ -1066,6 +1093,7 @@ class App extends React.Component {
 
       // edit lot (correct qty/expiry/location of existing stock)
       openEditLot: (id) => this.openEditLot(id),
+      deleteLotReceive: (id) => this.deleteLotReceive(id),
       modalEditLot: S.modal === 'editLot',
       elForm: S.elForm, elExpiry: this.bindElf('expiry'), elQty: this.bindElf('qty'), elLoc: this.bindElf('loc'),
       submitEditLot: () => this.submitEditLot(),
