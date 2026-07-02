@@ -404,6 +404,20 @@ export function ReagentLists({ v }) {
                                   >
                                     🖨️ พิมพ์ QR Code (2x4 cm)
                                   </button>
+                                  {canManage && (
+                                    <>
+                                      <span style={{ color: 'var(--border-strong)' }}>|</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => v.openEditLot(l.id)}
+                                        style={css(`background:var(--slate-50); border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-3xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; display:inline-flex; align-items:center; gap:3px; transition:all var(--dur-fast);`)}
+                                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--slate-100)'; e.currentTarget.style.borderColor = 'var(--border-strong)'; }}
+                                        onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--slate-50)'; e.currentTarget.style.borderColor = 'var(--border-default)'; }}
+                                      >
+                                        ✏️ แก้ไข
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
                               </div>
 
