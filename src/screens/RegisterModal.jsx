@@ -9,6 +9,7 @@ export function RegisterModal({ v }) {
     mfCode, mfTh, mfEn, mfCat, mfUnit, mfSubUnit, mfTestsPerUnit, mfStorage,
     mfMin, mfReorder, mfSupplier, mfImg,
     submitRegister, submitEditReagent, editReagentId, supplierOpts,
+    mfSubUnitQty, mfTestsPerSubUnit,
   } = v;
 
   if (!modalRegister) return null;
@@ -142,22 +143,65 @@ export function RegisterModal({ v }) {
 
             <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px;`)}>
               <Select label="หน่วยนับของสินค้า" required={true} options={unitOpts} value={mform.unit} onChange={mfUnit} />
-              <div style={css(`display:grid; grid-template-columns:100px 1fr; gap:10px; align-items:flex-end;`)}>
+              <Select 
+                label="หน่วยนับย่อย (ถ้ามี)" 
+                options={subUnitOpts} 
+                value={mform.subUnit || ''} 
+                onChange={mfSubUnit} 
+              />
+            </div>
+
+            {mform.subUnit ? (
+              <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px; background:var(--brand-50); border:1px solid var(--brand-100); border-radius:var(--radius-md); padding:12px 14px; margin-top:-6px;`)}>
+                <div>
+                  <Input 
+                    label={`จำนวน ${mform.subUnit} ต่อ ${unitOpts.find(o => o.value === mform.unit)?.label || mform.unit || 'หน่วยหลัก'} *`}
+                    type="number" 
+                    placeholder="เช่น 10" 
+                    required={true}
+                    value={mform.subUnitQty || ''} 
+                    onChange={mfSubUnitQty} 
+                  />
+                </div>
+                <div>
+                  <Input 
+                    label={`จำนวน test ต่อ ${mform.subUnit} (ถ้ามี)`}
+                    type="number" 
+                    placeholder="เช่น 400" 
+                    value={mform.testsPerSubUnit || ''} 
+                    onChange={mfTestsPerSubUnit} 
+                  />
+                </div>
+                <div style={css(`grid-column: span 2; font:var(--fw-bold) var(--text-2xs)/1.2 var(--font-body); color:var(--brand-800); margin-top:4px; display:flex; align-items:center; gap:6px;`)}>
+                  <span>💡</span>
+                  <span>
+                    แสดงทั้งหมด: {(() => {
+                      const qty = parseInt(mform.subUnitQty, 10);
+                      const tps = parseInt(mform.testsPerSubUnit, 10);
+                      const unitLabel = unitOpts.find(o => o.value === mform.unit)?.label || mform.unit || 'หน่วยหลัก';
+                      if (!isNaN(qty) && qty > 0) {
+                        if (!isNaN(tps) && tps > 0) {
+                          return `${(qty * tps).toLocaleString()} test ต่อ ${unitLabel}`;
+                        }
+                        return `${qty} ${mform.subUnit} ต่อ ${unitLabel}`;
+                      }
+                      return '—';
+                    })()}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px;`)}>
                 <Input 
-                  label="จำนวนย่อย" 
+                  label="จำนวน test ต่อหน่วยหลัก (ถ้ามี)" 
                   type="number" 
-                  placeholder="เช่น 400" 
+                  placeholder="เช่น 100" 
                   value={mform.testsPerUnit || ''} 
                   onChange={mfTestsPerUnit} 
                 />
-                <Select 
-                  label="หน่วยนับย่อย (ถ้ามี)" 
-                  options={subUnitOpts} 
-                  value={mform.subUnit || ''} 
-                  onChange={mfSubUnit} 
-                />
+                <div />
               </div>
-            </div>
+            )}
 
             <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px;`)}>
               <Select label="สภาวะจัดเก็บน้ำยา" required={true} options={storageOpts} value={mform.storage} onChange={mfStorage} />
