@@ -163,7 +163,7 @@ export function RegisterModal({ v }) {
                 options={
                   ['CHE', 'HEM', 'IMM', 'MIP'].includes(mform.cat) 
                     ? [
-                        { value: 'CHE', label: 'เคมีคลินิก' },
+                        { value: 'CHE', label: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์' },
                         { value: 'HEM', label: 'โลหิตวิทยา' },
                         { value: 'IMM', label: 'ภูมิคุ้มกันวิทยา' },
                         { value: 'MIP', label: 'จุลทรรศนศาสตร์' }
