@@ -138,13 +138,16 @@ export function Audit({ v }) {
         {/* Movement Table */}
         <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); overflow:hidden;`)}>
           
-          <div style={css(`display:grid; grid-template-columns:0.85fr 1.6fr 0.8fr 0.8fr 0.9fr 1.2fr; gap:12px; padding:11px 18px; background:var(--slate-50); border-bottom:1px solid var(--border-subtle);`)}>
+          <div style={css(`display:grid; grid-template-columns:0.85fr 1.6fr 0.8fr 0.8fr 0.9fr 1.2fr${canManage ? ' 1fr' : ''}; gap:12px; padding:11px 18px; background:var(--slate-50); border-bottom:1px solid var(--border-subtle);`)}>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em;`)}>ประเภท</div>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em;`)}>น้ำยา · Lot</div>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em; text-align:right;`)}>จำนวน</div>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em;`)}>วิธีระบุ</div>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em;`)}>ผู้ทำรายการ</div>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em; text-align:right;`)}>เวลา · อ้างอิง</div>
+            {canManage && (
+              <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em; text-align:right;`)}>ดำเนินการ</div>
+            )}
           </div>
           
           {sortedDates.length > 0 ? (
@@ -162,7 +165,7 @@ export function Audit({ v }) {
 
                   {/* Transactions of this day */}
                   {groupedRows[dateStr].map((t, tI) => (
-                    <div key={tI} style={css(`display:grid; grid-template-columns:0.85fr 1.6fr 0.8fr 0.8fr 0.9fr 1.2fr; gap:12px; align-items:center; padding:11px 18px; border-bottom:${tI === groupedRows[dateStr].length - 1 ? 'none' : '1px solid var(--border-subtle)'};`)}>
+                    <div key={tI} style={css(`display:grid; grid-template-columns:0.85fr 1.6fr 0.8fr 0.8fr 0.9fr 1.2fr${canManage ? ' 1fr' : ''}; gap:12px; align-items:center; padding:11px 18px; border-bottom:${tI === groupedRows[dateStr].length - 1 ? 'none' : '1px solid var(--border-subtle)'};`)}>
                       <div><span style={css(`padding:3px 9px; border-radius:var(--radius-sm); background:${t.bg}; color:${t.fg}; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); white-space:nowrap;`)}>{t.typeLabel}</span></div>
                       <div style={css(`min-width:0;`)}>
                         <div style={css(`font:var(--fw-medium) var(--text-sm)/1.3 var(--font-body); color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>{t.name}</div>
@@ -175,6 +178,24 @@ export function Audit({ v }) {
                         <div style={css(`font:var(--text-2xs)/1.3 var(--font-mono); color:var(--text-secondary);`)}>{t.at.substring(11)}</div> {/* Show time part only as date is header */}
                         <div style={css(`font:var(--text-2xs)/1.3 var(--font-mono); color:var(--text-tertiary);`)}>{t.ref}</div>
                       </div>
+                      {canManage && (
+                        <div style={css(`display:flex; justify-content:flex-end; gap:6px;`)}>
+                          <button
+                            type="button"
+                            onClick={t.onEdit}
+                            style={css(`background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:3px 8px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer;`)}
+                          >
+                            ✏️ แก้ไข
+                          </button>
+                          <button
+                            type="button"
+                            onClick={t.onDelete}
+                            style={css(`background:transparent; border:1px solid var(--red-600); border-radius:var(--radius-sm); padding:3px 8px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--red-600); cursor:pointer;`)}
+                          >
+                            🗑️ ลบ
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
