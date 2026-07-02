@@ -106,13 +106,22 @@ export function DetailDrawer({ v }) {
                           🖨️ พิมพ์ (2x4)
                         </button>
                         {canManage && (
-                          <button
-                            type="button"
-                            onClick={l.onEdit}
-                            style={css(`background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; gap:3px;`)}
-                          >
-                            ✏️ แก้ไข
-                          </button>
+                          <>
+                            <button
+                              type="button"
+                              onClick={l.onEdit}
+                              style={css(`background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; gap:3px;`)}
+                            >
+                              ✏️ แก้ไข
+                            </button>
+                            <button
+                              type="button"
+                              onClick={l.onDelete}
+                              style={css(`background:transparent; border:1px solid var(--red-600); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--red-600); cursor:pointer; display:flex; align-items:center; gap:3px;`)}
+                            >
+                              🗑️ ลบ
+                            </button>
+                          </>
                         )}
                         {l.qty > 0 && (
                           <button
