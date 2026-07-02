@@ -49,16 +49,31 @@ export function RegisterModal({ v }) {
     { value: '/reagent_placeholder.png', label: 'ขวดน้ำยาเคมีหลอดฟ้า (CYAN-ZYME)' },
   ];
 
+  // Uploaded photos are stored inline as a base64 string in D1 (no object storage
+  // configured), so downscale + recompress here — an uncompressed phone photo
+  // (several MB) exceeds D1's per-value size limit and fails with SQLITE_TOOBIG.
+  const MAX_IMG_DIM = 480;
   const handleFileChange = (e) => {
     const file = e.target.files && e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        const result = uploadEvent.target.result;
-        mfImg(result);
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      const scale = Math.min(1, MAX_IMG_DIM / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width * scale));
+      const h = Math.max(1, Math.round(img.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      mfImg(canvas.toDataURL('image/jpeg', 0.72));
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      alert('ไม่สามารถอ่านไฟล์รูปภาพนี้ได้ กรุณาเลือกไฟล์ภาพอื่น');
+    };
+    img.src = objectUrl;
   };
 
   const localStyle = `
