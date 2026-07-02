@@ -464,6 +464,29 @@ class App extends React.Component {
     }
   }
 
+  async updateReagentCategory(id, newCat) {
+    if (!this.can('manage')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์แก้ไขหมวดน้ำยา', 'warn'); return; }
+    const r = this.state.reagents.find(x => x.id === id);
+    if (!r) return;
+    const payload = {
+      id, th: r.th, en: r.en, cat: newCat, unit: r.unit, subUnit: r.subUnit,
+      testsPerUnit: r.testsPerUnit, storage: r.storage, min: r.min, reorder: r.reorder,
+      supplier: r.supplier, img: r.img
+    };
+    try {
+      const res = await this.api('/api/reagents', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('เปลี่ยนหมวดน้ำยาล้มเหลว');
+      this.setState(s => ({ reagents: s.reagents.map(x => x.id === id ? { ...x, cat: newCat } : x) }));
+      this.showToast(`เปลี่ยนหมวดของ "${r.th}" เรียบร้อยแล้ว`);
+    } catch (err) {
+      this.showToast(err.message, 'warn');
+    }
+  }
+
   // ── derivations ──
   STORAGE_LABEL(s) { return ({ REFRIGERATED_2_8: '2–8°C', FROZEN_40: '−40°C', ROOM_TEMP: 'อุณหภูมิห้อง' })[s] || s; }
   CAT_LABEL(c) { return ({ CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', IMM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', MIP: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HMS: 'บริการศูนย์การแพทย์', ADV: 'ตรวจวินิจฉัยขั้นสูง' })[c] || c; }
@@ -958,6 +981,7 @@ class App extends React.Component {
       editReagentId: S.editReagentId,
       role: S.role,
       canManage: this.can('manage'),
+      updateReagentCategory: (id, cat) => this.updateReagentCategory(id, cat),
 
       toast: S.toast, toastBg: S.toast ? (S.toast.kind === 'warn' ? '#5A4410' : 'var(--slate-900)') : '',
       sidebarOpen: S.sidebarOpen,
