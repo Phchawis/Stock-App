@@ -16,5 +16,5 @@ pages_build_output_dir = "dist"
 # Fill database_id from your D1 database (Dashboard → Workers & Pages → D1).
 [[d1_databases]]
 binding = "DB"
-database_name = "stock-app-db"        # ← your D1 database name
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_name = "tuh-reagent-db"
+database_id = "48793752-5aaa-4a9e-a928-549b41fe8a47"
