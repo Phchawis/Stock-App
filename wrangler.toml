@@ -1,0 +1,20 @@
+# Cloudflare Pages + Functions configuration.
+#
+# Documents the D1 binding this app needs. When you create a NEW Pages project
+# you must still bind the database in the dashboard (Settings → Functions → D1
+# bindings) OR run `wrangler pages deploy` with this file present — the binding
+# does NOT travel automatically with the Git repo.
+#
+# Local dev with a real API + DB:  npx wrangler pages dev -- npm run dev
+# (plain `npm run dev` serves the UI only; /api/* returns 404 without Functions.)
+
+name = "labtuh-stock"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "dist"
+
+# The binding name MUST be "DB" — the Functions read env.DB.
+# Fill database_id from your D1 database (Dashboard → Workers & Pages → D1).
+[[d1_databases]]
+binding = "DB"
+database_name = "stock-app-db"        # ← your D1 database name
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
