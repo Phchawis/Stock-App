@@ -17,7 +17,7 @@ class App extends React.Component {
     super(props);
     const t = new Date(); t.setHours(0, 0, 0, 0);
     this.today = t;
-    this.token = localStorage.getItem('authToken') || null;
+    this.token = sessionStorage.getItem('authToken') || null;
     this.state = {
       view: 'dashboard', role: null, invTab: 'all', search: '', detailId: null, modal: null, toast: null, acked: {},
       reagents: [], lots: [], txns: [],
@@ -53,8 +53,8 @@ class App extends React.Component {
       }
       // Persist session, set the authenticated user, then load data.
       this.token = data.token;
-      localStorage.setItem('authToken', data.token);
-      localStorage.setItem('authUser', JSON.stringify(data.user));
+      sessionStorage.setItem('authToken', data.token);
+      sessionStorage.setItem('authUser', JSON.stringify(data.user));
       this.login(data.user.role, data.user.name, data.user.initials);
       this.fetchData();
     } catch (err) {
@@ -215,8 +215,8 @@ class App extends React.Component {
   async logout() {
     try { await this.api('/api/logout', { method: 'POST' }); } catch (e) { /* best effort */ }
     this.token = null;
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('authUser');
+    sessionStorage.removeItem('authToken');
+    sessionStorage.removeItem('authUser');
     this.user = { name: 'ทนพ. สมชาย ใจดี', role: 'นักเทคนิคการแพทย์', initials: 'สช' };
     this.setState({ role: null, detailId: null, modal: null, reagents: [], lots: [], txns: [], users: [], loginForm: { username: '', password: '', error: '' } });
   }
@@ -235,8 +235,8 @@ class App extends React.Component {
   }
   handleAuthExpired() {
     this.token = null;
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('authUser');
+    sessionStorage.removeItem('authToken');
+    sessionStorage.removeItem('authUser');
     this.user = { name: 'ทนพ. สมชาย ใจดี', role: 'นักเทคนิคการแพทย์', initials: 'สช' };
     this.setState({ role: null, detailId: null, modal: null, reagents: [], lots: [], txns: [], users: [], loginForm: { username: '', password: '', error: '' } });
   }
@@ -268,7 +268,7 @@ class App extends React.Component {
     // Restore a prior session (token + cached user) if present.
     if (this.token) {
       try {
-        const cached = JSON.parse(localStorage.getItem('authUser') || 'null');
+        const cached = JSON.parse(sessionStorage.getItem('authUser') || 'null');
         if (cached) {
           const r = this.ROLES().find(x => x.id === cached.role);
           this.user = { name: cached.name, role: r ? r.th : cached.role, initials: cached.initials, roleId: cached.role };
@@ -865,7 +865,7 @@ class App extends React.Component {
     };
 
     // modal forms
-    const reagentOpts = S.reagents.map(r => ({ value: String(r.id), label: r.code + ' · ' + r.th }));
+    const reagentOpts = S.reagents.map(r => ({ value: String(r.id), label: r.th }));
     const locOpts = ['ตู้เย็น A1', 'ตู้เย็น A2', 'ตู้แช่แข็ง F1', 'ชั้นวาง B2', 'ชั้นวาง C1'].map(x => ({ value: x, label: x }));
     const supplierOpts = ['i-med', 'Firmer', 'Med-one'].map(x => ({ value: x, label: x }));
     const scanOpts = [{ value: 'MANUAL', label: 'พิมพ์ชื่อ / เลือกเอง' }, { value: 'QR', label: 'สแกน QR code' }, { value: 'BARCODE', label: 'สแกนบาร์โค้ด' }];
