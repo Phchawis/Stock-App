@@ -12,7 +12,38 @@ originally authored in Claude Design and converted to a standard React + Vite ap
   exports each icon as a full `["svg", attrs, children]` node, but `App.icon()`
   expects just the **children array**, so main.jsx unwraps `node[2]`. Keep this if
   you change the icon source.
-- No router, no backend, no global state lib. One class component holds everything.
+- No router, no global state lib. One class component (`App`) holds all UI state.
+- **Backend**: Cloudflare Pages Functions in `functions/api/*` backed by a **D1
+  (SQLite) database** bound as `env.DB`. The frontend talks to it over `/api/*`.
+  The binding is configured per Pages project (dashboard → Settings → Functions →
+  D1 bindings) and documented in `wrangler.toml` — it does NOT travel with the Git
+  repo, so a new Pages project needs the binding re-added or login breaks.
+
+## Backend & auth (`functions/api/`)
+
+- `_middleware.js` runs before every `/api/*` request: it validates the session
+  token (D1 `sessions` table) and attaches `context.data.auth = { username, role }`.
+  Only `/api/login` and `/api/logout` are public.
+- `_lib.js` — shared helpers: PBKDF2 password hashing/verify, session token
+  issue/lookup, `requirePerm(context, { perm | adminOnly })` authorization guard,
+  `actorName()` (trustworthy audit "by"), and `nowStr()` (Bangkok UTC+7 timestamp).
+- **Authorization is enforced server-side**, not just in the UI. Each write
+  endpoint calls `requirePerm`: reagents POST/PUT → `manage`, DELETE → adminOnly;
+  lots POST → `receive`; issue POST → `issue`; users POST/DELETE → `users`;
+  transactions DELETE + permissions PUT → adminOnly. The role→perm matrix lives in
+  the D1 `permissions` table and is editable by admins (persisted, not just state).
+- Passwords are salted+hashed (PBKDF2). Legacy plaintext rows upgrade transparently
+  on the user's next successful login. `GET /api/users` never returns passwords.
+- Login flow: `POST /api/login` → `{ token, user }`; the frontend stores the token
+  in `localStorage` (`authToken`/`authUser`) and sends `Authorization: Bearer` via
+  `App.api()`, which auto-signs-out on 401.
+
+## Database
+
+- Schema + seed: `migrations/0000_init.sql`; auth tables: `migrations/0001_auth_permissions.sql`.
+- Apply with `wrangler d1 execute <db> --file=migrations/000X_*.sql` (add `--local`
+  for local dev). Local end-to-end dev: `wrangler pages dev dist` (serves Functions
+  + D1). Plain `npm run dev` serves the UI only — `/api/*` will 404.
 
 ## Component structure
 
@@ -102,13 +133,19 @@ handlers in `App` accept either an event or a raw value.
 
 ## Suggested next steps (not yet done)
 
-- **Persistence**: state is in-memory only. Add localStorage or a real API.
 - **Bundle size**: importing all of `lucide` is ~1 MB. Switch to per-icon imports
   (or `lucide-react`) and adapt `icon()` to trim it.
-- **Un-pin the date**: replace the fixed `this.today` / `nowStr()` with `new Date()`
-  once real data exists.
+- **Session hardening**: tokens live in `localStorage` (12 h expiry). For higher
+  security consider httpOnly cookies and CSRF protection; add rate-limiting on
+  `/api/login`.
+- **Pagination**: `transactions`/`lots` GET return the whole table — add paging
+  once history grows large.
 - Form validation is minimal (toast-based); add inline field errors via the
   `Input`/`Select` `error`/`hint` props (already supported by the components).
+
+Done previously: converted from the standalone prototype to Vite+React, split into
+components, moved to a D1 backend with **server-side auth + hashed passwords +
+persisted permissions**, and un-pinned the system date (`new Date()`).
 
 ## History
 
