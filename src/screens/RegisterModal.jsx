@@ -137,14 +137,14 @@ export function RegisterModal({ v }) {
             </div>
 
             <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px;`)}>
-              <Input 
+              <Select 
                 label="หมวดงาน" 
-                value={
-                  ['CHE', 'HEM', 'IMM', 'MIP', 'MDC'].includes(mform.cat) 
-                    ? 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์' 
-                    : (mform.cat === 'HMS' ? 'บริการศูนย์การแพทย์' : 'ตรวจวินิจฉัยขั้นสูง')
-                } 
-                disabled={true} 
+                required={true}
+                options={[
+                  { value: 'MDC', label: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์' }
+                ]}
+                value="MDC"
+                onChange={() => {}}
               />
               <Select 
                 label="หมวด" 
