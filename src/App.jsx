@@ -466,7 +466,7 @@ class App extends React.Component {
 
   // ── derivations ──
   STORAGE_LABEL(s) { return ({ REFRIGERATED_2_8: '2–8°C', FROZEN_40: '−40°C', ROOM_TEMP: 'อุณหภูมิห้อง' })[s] || s; }
-  CAT_LABEL(c) { return ({ CHE: 'เคมีคลินิก', HEM: 'โลหิตวิทยา', IMM: 'ภูมิคุ้มกันวิทยา', MIP: 'จุลทรรศนศาสตร์', MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HMS: 'บริการศูนย์การแพทย์', ADV: 'ตรวจวินิจฉัยขั้นสูง' })[c] || c; }
+  CAT_LABEL(c) { return ({ CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HEM: 'โลหิตวิทยา', IMM: 'ภูมิคุ้มกันวิทยา', MIP: 'จุลทรรศนศาสตร์', MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HMS: 'บริการศูนย์การแพทย์', ADV: 'ตรวจวินิจฉัยขั้นสูง' })[c] || c; }
   days(d) { return Math.round((new Date(d + 'T00:00:00') - this.today) / 86400000); }
   activeLots(rid) { return this.state.lots.filter(l => l.rid === rid && l.qty > 0 && l.status === 'ACTIVE'); }
   onHand(rid) { return this.activeLots(rid).reduce((s, l) => s + l.qty, 0); }
@@ -853,7 +853,7 @@ class App extends React.Component {
     ];
 
     const topCatObj = [...catStats].sort((a,b) => b.issue - a.issue)[0];
-    const topCatLabel = ({ CHE: 'เคมีคลินิก', HEM: 'โลหิตวิทยา', IMM: 'ภูมิคุ้มกันวิทยา', MIP: 'จุลทรรศนศาสตร์', MDC: 'หมวดงานศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HMS: 'หมวดบริการศูนย์การแพทย์', ADV: 'หมวดตรวจวินิจฉัยชั้นสูง' })[topCatObj.cat] || topCatObj.cat;
+    const topCatLabel = ({ CHE: 'หมวดงานศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HEM: 'โลหิตวิทยา', IMM: 'ภูมิคุ้มกันวิทยา', MIP: 'จุลทรรศนศาสตร์', MDC: 'หมวดงานศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HMS: 'หมวดบริการศูนย์การแพทย์', ADV: 'หมวดตรวจวินิจฉัยชั้นสูง' })[topCatObj.cat] || topCatObj.cat;
     const lowStockCount = S.reagents.filter(r => this.onHand(r.id) <= r.min).length;
     const insights = {
       topCatLabel,
