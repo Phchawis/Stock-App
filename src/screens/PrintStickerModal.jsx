@@ -169,21 +169,21 @@ export function PrintStickerModal({ v }) {
         {/* Reagent Details */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '1.5cm', overflow: 'hidden', textAlign: 'left' }}>
           {/* Name */}
-          <div style={{ fontSize: '7.5px', fontWeight: 'bold', color: '#000', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.2' }}>
+          <div style={{ fontSize: '7.5px', fontWeight: 'bold', color: '#000', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.5' }}>
             {reagent.th}
           </div>
-          <div style={{ fontSize: '6.8px', color: '#000', fontFamily: 'monospace', lineHeight: '1.1' }}>
+          <div style={{ fontSize: '6.8px', color: '#000', fontFamily: 'monospace', lineHeight: '1.4' }}>
             Lot: <strong>{lot.lot}</strong>
           </div>
           {/* Expiry */}
-          <div style={{ fontSize: '6.8px', fontWeight: 'bold', color: '#c2410c', lineHeight: '1.1' }}>
+          <div style={{ fontSize: '6.8px', fontWeight: 'bold', color: '#c2410c', lineHeight: '1.4' }}>
             EXP: {lot.expiry}
           </div>
           {/* Category & Location */}
-          <div style={{ fontSize: '6px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.1' }}>
+          <div style={{ fontSize: '6px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.5' }}>
             หมวด: {catLabel}
           </div>
-          <div style={{ fontSize: '6px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.1' }}>
+          <div style={{ fontSize: '6px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.5' }}>
             ที่เก็บ: {locLabel}
           </div>
         </div>
@@ -241,24 +241,24 @@ export function PrintStickerModal({ v }) {
               {/* Reagent Details */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '1.5cm', overflow: 'hidden', textAlign: 'left' }}>
                 {/* Name */}
-                <div style={{ fontSize: '7.5px', fontWeight: 'bold', color: '#000', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.2' }}>
+                <div style={{ fontSize: '7.5px', fontWeight: 'bold', color: '#000', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.5' }}>
                   {reagent.th}
                 </div>
 
-                <div style={{ fontSize: '6.8px', color: '#000', fontFamily: 'monospace', lineHeight: '1.1' }}>
+                <div style={{ fontSize: '6.8px', color: '#000', fontFamily: 'monospace', lineHeight: '1.4' }}>
                   Lot: <strong>{lot.lot}</strong>
                 </div>
 
                 {/* Expiry */}
-                <div style={{ fontSize: '6.8px', fontWeight: 'bold', color: '#c2410c', lineHeight: '1.1' }}>
+                <div style={{ fontSize: '6.8px', fontWeight: 'bold', color: '#c2410c', lineHeight: '1.4' }}>
                   EXP: {lot.expiry}
                 </div>
 
                 {/* Category & Location */}
-                <div style={{ fontSize: '6px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.1' }}>
+                <div style={{ fontSize: '6px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.5' }}>
                   หมวด: {catLabel}
                 </div>
-                <div style={{ fontSize: '6px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.1' }}>
+                <div style={{ fontSize: '6px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.5' }}>
                   ที่เก็บ: {locLabel}
                 </div>
               </div>
