@@ -29,7 +29,7 @@ class App extends React.Component {
   }
   blankRf() { return { rid: '', lot: '', expiry: '', qty: '', supplier: '', loc: 'ตู้เย็น A1' }; }
   blankIf() { return { rid: '', qty: '', scan: 'MANUAL', ref: '', lotId: '', qrInput: '', searchInput: '' }; }
-  blankMf() { return { code: '', th: '', en: '', cat: 'CHE', unit: 'vial', subUnit: '', testsPerUnit: '', storage: 'REFRIGERATED_2_8', min: '', reorder: '', supplier: 'i-med', img: '/reagent_placeholder.png' }; }
+  blankMf() { return { code: '', th: '', en: '', cat: 'CHE', unit: 'vial', subUnit: '', subUnitQty: '', testsPerSubUnit: '', testsPerUnit: '', storage: 'REFRIGERATED_2_8', min: '', reorder: '', supplier: 'i-med', img: '/reagent_placeholder.png' }; }
   defaultPerms() { const o = {}; this.ROLES().forEach(r => { o[r.id] = { ...r.perms }; }); return o; }
   USERNAMES() { return { admin: 'admin', supervisor: 'supervisor', technician: 'technician', viewer: 'viewer' }; }
   bindLF(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ loginForm: { ...s.loginForm, [k]: v, error: '' } })); }; }
@@ -236,6 +236,17 @@ class App extends React.Component {
     if (this.state.role !== 'admin') { this.showToast('เฉพาะผู้ดูแลระบบ (Admin) เท่านั้นที่มีสิทธิ์แก้ไขข้อมูลน้ำยา', 'warn'); return; }
     const r = this.state.reagents.find(x => x.id === reagentId);
     if (!r) return;
+
+    let subUnitName = '';
+    let subUnitQty = '';
+    let testsPerSubUnit = '';
+    if (r.subUnit) {
+      const parts = r.subUnit.split(':');
+      subUnitName = parts[0] || '';
+      subUnitQty = parts[1] || '';
+      testsPerSubUnit = parts[2] || '';
+    }
+
     this.setState({
       modal: 'register', // Reuse Register modal UI
       editReagentId: reagentId,
@@ -245,7 +256,9 @@ class App extends React.Component {
         en: r.en,
         cat: r.cat,
         unit: r.unit,
-        subUnit: r.subUnit || '',
+        subUnit: subUnitName,
+        subUnitQty: subUnitQty,
+        testsPerSubUnit: testsPerSubUnit,
         testsPerUnit: r.testsPerUnit || '',
         storage: r.storage,
         min: r.min,
@@ -260,7 +273,27 @@ class App extends React.Component {
     const f = this.state.mform;
     const min = +f.min;
     const reorder = f.reorder ? +f.reorder : min; // Default reorder to min
-    const tpu = f.testsPerUnit ? parseInt(f.testsPerUnit, 10) : null;
+    
+    let subUnitValue = '';
+    let calculatedTestsPerUnit = null;
+    if (f.subUnit) {
+      const subQty = parseInt(f.subUnitQty, 10);
+      const subTests = parseInt(f.testsPerSubUnit, 10);
+      if (!isNaN(subQty) && subQty > 0) {
+        if (!isNaN(subTests) && subTests > 0) {
+          calculatedTestsPerUnit = subQty * subTests;
+          subUnitValue = `${f.subUnit}:${subQty}:${subTests}`;
+        } else {
+          calculatedTestsPerUnit = subQty;
+          subUnitValue = `${f.subUnit}:${subQty}:`;
+        }
+      } else {
+        subUnitValue = f.subUnit;
+      }
+    } else {
+      calculatedTestsPerUnit = f.testsPerUnit ? parseInt(f.testsPerUnit, 10) : null;
+    }
+
     if (!f.th || !f.cat || !f.unit || !f.storage || !(min >= 0)) {
       this.showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warn'); return;
     }
@@ -273,8 +306,8 @@ class App extends React.Component {
       en: f.en || f.th,
       cat: f.cat,
       unit: f.unit,
-      subUnit: f.subUnit || '',
-      testsPerUnit: (tpu && !isNaN(tpu)) ? tpu : null,
+      subUnit: subUnitValue,
+      testsPerUnit: calculatedTestsPerUnit,
       storage: f.storage,
       min,
       reorder,
@@ -305,7 +338,27 @@ class App extends React.Component {
     const f = this.state.mform;
     const min = +f.min;
     const reorder = f.reorder ? +f.reorder : min;
-    const tpu = f.testsPerUnit ? parseInt(f.testsPerUnit, 10) : null;
+    
+    let subUnitValue = '';
+    let calculatedTestsPerUnit = null;
+    if (f.subUnit) {
+      const subQty = parseInt(f.subUnitQty, 10);
+      const subTests = parseInt(f.testsPerSubUnit, 10);
+      if (!isNaN(subQty) && subQty > 0) {
+        if (!isNaN(subTests) && subTests > 0) {
+          calculatedTestsPerUnit = subQty * subTests;
+          subUnitValue = `${f.subUnit}:${subQty}:${subTests}`;
+        } else {
+          calculatedTestsPerUnit = subQty;
+          subUnitValue = `${f.subUnit}:${subQty}:`;
+        }
+      } else {
+        subUnitValue = f.subUnit;
+      }
+    } else {
+      calculatedTestsPerUnit = f.testsPerUnit ? parseInt(f.testsPerUnit, 10) : null;
+    }
+
     if (!f.th || !f.cat || !f.unit || !f.storage || !(min >= 0)) {
       this.showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warn'); return;
     }
@@ -316,8 +369,8 @@ class App extends React.Component {
       en: f.en || f.th,
       cat: f.cat,
       unit: f.unit,
-      subUnit: f.subUnit || '',
-      testsPerUnit: (tpu && !isNaN(tpu)) ? tpu : null,
+      subUnit: subUnitValue,
+      testsPerUnit: calculatedTestsPerUnit,
       storage: f.storage,
       min,
       reorder,
@@ -608,8 +661,14 @@ class App extends React.Component {
       const s = d != null ? this.sev(d, crit) : 'ok'; const sc = this.sevCol(s);
       const low = oh <= r.min;
       const lotCount = this.activeLots(r.id).length;
+      
+      let subUnitName = r.subUnit || '';
+      if (subUnitName.includes(':')) {
+        subUnitName = subUnitName.split(':')[0];
+      }
+
       return { id: r.id, code: r.code, th: r.th, en: showEn ? r.en : '', cat: r.cat, catLabel: this.CAT_LABEL(r.cat),
-        unit: r.unit, subUnit: r.subUnit, onHand: oh, min: r.min, low, lotCount, storageLabel: this.STORAGE_LABEL(r.storage), onHandColor: low ? 'var(--red-700)' : 'var(--text-primary)',
+        unit: r.unit, subUnit: subUnitName, onHand: oh, min: r.min, low, lotCount, storageLabel: this.STORAGE_LABEL(r.storage), onHandColor: low ? 'var(--red-700)' : 'var(--text-primary)',
         expDays: d, expLabel: d != null ? this.dayLabel(d) : '—', expColor: d != null ? sc.fg : 'var(--text-tertiary)',
         expiring: d != null && d <= crit * 3, sev: s, img: r.img || '/reagent_placeholder.png', onOpen: () => this.openDetail(r.id),
         testsPerUnit: r.testsPerUnit, testsTotal: r.testsPerUnit ? oh * r.testsPerUnit : null };
@@ -808,7 +867,13 @@ class App extends React.Component {
       iform: S.iform, ifRid: this.bindIf('rid'), ifQty: this.bindIf('qty'), ifScan: this.bindIf('scan'), ifRef: this.bindIf('ref'), ifSearchInput: this.bindIf('searchInput'), ifQrInput: this.bindIf('qrInput'), submitIssue: () => this.submitIssue(),
       scanQRCode: (code) => this.scanQRCode(code), unlinkLot: () => this.unlinkLot(), selectReagentForIssue: (rid) => this.selectReagentForIssue(rid),
       activeLotsList: S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE'),
-      reagentsList: S.reagents,
+      reagentsList: S.reagents.map(r => {
+        let subUnitName = r.subUnit || '';
+        if (subUnitName.includes(':')) {
+          subUnitName = subUnitName.split(':')[0];
+        }
+        return { ...r, subUnit: subUnitName };
+      }),
       onIssueLot: (rid, lotId) => this.openIssueWithLot(rid, lotId),
       issuePlanRows: plan.rows, issueShort: plan.short, issueHasPlan: plan.rows.length > 0, issueOnHand,
       issueReagentName: issueReagent ? issueReagent.th : '', issueUnit: issueReagent ? issueReagent.unit : '',
@@ -822,6 +887,8 @@ class App extends React.Component {
       mfCat: this.bindMf('cat'),
       mfUnit: this.bindMf('unit'),
       mfSubUnit: this.bindMf('subUnit'),
+      mfSubUnitQty: this.bindMf('subUnitQty'),
+      mfTestsPerSubUnit: this.bindMf('testsPerSubUnit'),
       mfTestsPerUnit: this.bindMf('testsPerUnit'),
       mfStorage: this.bindMf('storage'),
       mfMin: this.bindMf('min'),
