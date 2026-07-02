@@ -10,7 +10,7 @@ export function IssueModal({ v }) {
     issuePlanRows, issueShort, issueHasPlan, issueUnit,
     scanQRCode, unlinkLot, selectReagentForIssue,
     activeLotsList, reagentsList, issueOnHand,
-    ifSearchInput, ifQrInput,
+    ifSearchInput,
   } = v;
 
   const [showDropdown, setShowDropdown] = React.useState(false);
@@ -208,7 +208,6 @@ export function IssueModal({ v }) {
               <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:10px 14px; display:flex; align-items:center; justify-content:space-between; font:var(--text-xs)/1.3 var(--font-body); margin-top:-6px;`)}>
                 <div>
                   <span style={css(`font-weight:600; color:var(--text-primary);`)}>{selectedReagentObj.th}</span>
-                  <span style={css(`font:var(--text-2xs)/1 var(--font-mono); color:var(--text-tertiary); margin-left:8px;`)}>{selectedReagentObj.code}</span>
                 </div>
                 <div style={css(`font-family:var(--font-mono); font-weight:600; color:var(--brand-800);`)}>
                   คงเหลือรวมในคลัง: {issueOnHand} {selectedReagentObj.unit}
@@ -341,24 +340,6 @@ export function IssueModal({ v }) {
                   </button>
                 </div>
               ) : null}
-
-              {/* Manual Text Input QR Code */}
-              <div style={css(`display:grid; grid-template-columns:1fr auto; gap:8px; align-items:flex-end;`)}>
-                <Input 
-                  label="กรอกรหัส QR Code ตรงนี้" 
-                  placeholder="เช่น QR-G2407A" 
-                  value={iform.qrInput || ''} 
-                  onChange={ifQrInput} 
-                  style={{ flex: 1 }}
-                />
-                <button
-                  type="button"
-                  onClick={() => scanQRCode(iform.qrInput)}
-                  style={css(`background:var(--brand-700); color:#fff; border:none; border-radius:var(--radius-md); padding:0 14px; height:40px; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); cursor:pointer; display:flex; align-items:center;`)}
-                >
-                  เชื่อมโยง
-                </button>
-              </div>
             </div>
 
             {/* 3. Withdraw Quantity */}
