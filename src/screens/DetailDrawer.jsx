@@ -25,11 +25,6 @@ export function DetailDrawer({ v }) {
               style={css(`width:100%; height:100%; object-fit:cover;`)}
             />
             <div style={css(`position:absolute; inset:0; background:linear-gradient(to top, rgba(14,24,34,0.92) 0%, rgba(14,24,34,0.3) 60%, rgba(14,24,34,0) 100%);`)} />
-            <div style={css(`position:absolute; bottom:12px; left:14px; right:14px;`)}>
-              <span style={css(`padding:2px 8px; border-radius:var(--radius-pill); background:rgba(43,166,198,.24); border:1px solid rgba(43,166,198,.4); color:var(--brand-800); font:var(--fw-semibold) var(--text-3xs)/1.2 var(--font-body); text-transform:uppercase;`)}>
-                {detail.catLabel}
-              </span>
-            </div>
           </div>
 
           <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:10px;`)}>
@@ -58,10 +53,10 @@ export function DetailDrawer({ v }) {
               <strong style={css(`color:var(--text-primary); font-weight:600;`)}>
                 {(() => {
                   const getParent = (c) => ({
-                    CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์ (เคมีคลินิก)',
-                    HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์ (โลหิตวิทยา)',
-                    IMM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์ (ภูมิคุ้มกันวิทยา)',
-                    MIP: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์ (จุลทรรศนศาสตร์)',
+                    CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
+                    HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
+                    IMM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
+                    MIP: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
                     MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
                     HMS: 'บริการศูนย์การแพทย์',
                     ADV: 'ตรวจวินิจฉัยขั้นสูง'
