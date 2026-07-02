@@ -990,6 +990,7 @@ class App extends React.Component {
       updateReagentCategory: (id, cat) => this.updateReagentCategory(id, cat),
 
       toast: S.toast, toastBg: S.toast ? (S.toast.kind === 'warn' ? '#5A4410' : 'var(--slate-900)') : '',
+      showToast: (msg, kind) => this.showToast(msg, kind),
       sidebarOpen: S.sidebarOpen,
       toggleSidebar: () => this.setState(s => ({ sidebarOpen: !s.sidebarOpen })),
       closeSidebar: () => this.setState({ sidebarOpen: false }),
