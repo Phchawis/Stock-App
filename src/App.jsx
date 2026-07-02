@@ -80,7 +80,7 @@ class App extends React.Component {
     const newUser = { username: u, name, role: r, initials, color, password: p };
 
     try {
-      const res = await fetch('/api/users', {
+      const res = await this.api('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newUser)
@@ -113,7 +113,7 @@ class App extends React.Component {
     }
 
     try {
-      const res = await fetch(`/api/users?username=${encodeURIComponent(username)}`, {
+      const res = await this.api(`/api/users?username=${encodeURIComponent(username)}`, {
         method: 'DELETE'
       });
       if (!res.ok) throw new Error('ลบผู้ใช้งานล้มเหลว');
@@ -135,7 +135,7 @@ class App extends React.Component {
     if (!reagentObj) return;
 
     try {
-      const res = await fetch(`/api/reagents?id=${encodeURIComponent(id)}`, {
+      const res = await this.api(`/api/reagents?id=${encodeURIComponent(id)}`, {
         method: 'DELETE'
       });
       if (!res.ok) throw new Error('ลบข้อมูลน้ำยาล้มเหลว');
@@ -157,7 +157,7 @@ class App extends React.Component {
     }
     if (window.confirm('คุณต้องการล้างประวัติการเคลื่อนไหวทั้งหมดในระบบใช่หรือไม่? (ประวัติการคุมคลังและ Audit Trail จะเป็นศูนย์และไม่สามารถเรียกคืนได้)')) {
       try {
-        const res = await fetch('/api/transactions', { method: 'DELETE' });
+        const res = await this.api('/api/transactions', { method: 'DELETE' });
         if (!res.ok) throw new Error('ล้างประวัติล้มเหลว');
         this.fetchData();
         this.showToast('ล้างประวัติการเคลื่อนไหวเรียบร้อยแล้ว');
@@ -380,7 +380,7 @@ class App extends React.Component {
     };
 
     try {
-      const res = await fetch('/api/reagents', {
+      const res = await this.api('/api/reagents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -443,7 +443,7 @@ class App extends React.Component {
     };
 
     try {
-      const res = await fetch('/api/reagents', {
+      const res = await this.api('/api/reagents', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -633,7 +633,7 @@ class App extends React.Component {
     };
 
     try {
-      const res = await fetch('/api/lots', {
+      const res = await this.api('/api/lots', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -666,7 +666,7 @@ class App extends React.Component {
     };
 
     try {
-      const res = await fetch('/api/issue', {
+      const res = await this.api('/api/issue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -684,7 +684,7 @@ class App extends React.Component {
       this.showToast(err.message, 'warn');
     }
   }
-  nowStr() { return '2026-06-29 ' + new Date().toTimeString().slice(0, 5); }
+  nowStr() { const d = new Date(); const p = (n) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
 
   navStyle(v) {
     const a = this.state.view === v;
@@ -877,17 +877,9 @@ class App extends React.Component {
       setRoot: (el) => { this.rootRef = el; }, stop: (e) => e.stopPropagation(), ic, user: this.user,
       notAuthed: !S.role, onLogout: () => this.logout(), currentRoleLabel: this.user.role, canEditPerms: S.role === 'admin',
       loginForm: S.loginForm, lfUser: this.bindLF('username'), lfPass: this.bindLF('password'), loginError: S.loginForm.error, hasLoginError: !!S.loginForm.error, submitLogin: () => this.submitLogin(),
-      demoAccounts: S.users.map(u => {
-        const r = this.ROLES().find(x => x.id === u.role);
-        return {
-          th: r ? r.th : u.role,
-          initials: u.initials,
-          color: u.color,
-          username: u.username,
-          onPick: () => this.pickDemo(u)
-        };
-      }),
-      canAddUser: S.role === 'admin' || S.role === 'supervisor',
+      // No demo/quick-login on a real system — credentials must be entered.
+      demoAccounts: [],
+      canAddUser: S.role === 'admin',
       usersList: S.users,
       openAddUser: () => this.setState({ modal: 'addUser' }),
       modalAddUser: S.modal === 'addUser',
