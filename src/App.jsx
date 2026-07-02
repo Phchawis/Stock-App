@@ -676,7 +676,11 @@ class App extends React.Component {
   scanQRCode(code) {
     const cleanCode = (code || '').trim().toLowerCase();
     if (!cleanCode) return;
-    const foundLot = this.state.lots.find(l => (l.qr || '').toLowerCase() === cleanCode && l.qty > 0 && l.status === 'ACTIVE');
+    // Match by QR string ("qr-g2407a") OR the raw lot number ("g2407a") so a
+    // typed/scanned lot code works even without the "QR-" prefix.
+    const foundLot = this.state.lots.find(l =>
+      ((l.qr || '').toLowerCase() === cleanCode || (l.lot || '').toLowerCase() === cleanCode)
+      && l.qty > 0 && l.status === 'ACTIVE');
     if (foundLot) {
       const r = this.state.reagents.find(x => x.id === foundLot.rid);
       this.setState(s => ({
