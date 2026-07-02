@@ -4,7 +4,7 @@ import { css } from '../css.js';
 export function DetailDrawer({ v }) {
   const {
     stop, ic, detailOpen, detail, closeDetail, openPrintSticker,
-    role, openEditReagent,
+    role, openEditReagent, canManage,
   } = v;
   return detailOpen ? (<>
     <div className="ov-in" onClick={closeDetail} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.42); z-index:40; display:flex; justify-content:flex-end;`)}>
@@ -105,6 +105,15 @@ export function DetailDrawer({ v }) {
                         >
                           🖨️ พิมพ์ (2x4)
                         </button>
+                        {canManage && (
+                          <button
+                            type="button"
+                            onClick={l.onEdit}
+                            style={css(`background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; gap:3px;`)}
+                          >
+                            ✏️ แก้ไข
+                          </button>
+                        )}
                         {l.qty > 0 && (
                           <button
                             type="button"
