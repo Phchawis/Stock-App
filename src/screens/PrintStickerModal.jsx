@@ -18,7 +18,9 @@ export function PrintStickerModal({ v }) {
       const { lot } = printLotData;
 
       QRCode.toDataURL(lot.qr, {
-        margin: 1, // standard clear margin for printing compatibility
+        errorCorrectionLevel: 'H', // 30% damage tolerance — needed at this print size (1.5x1.5cm):
+        // thermal-print blur/ink bleed and off-angle phone-camera scans otherwise fail to decode.
+        margin: 3, // wider quiet zone so the scanner reliably locks onto the finder patterns
         width: 600, // 600px high resolution for copy-pasting in MS Word
         color: {
           dark: '#000000',
