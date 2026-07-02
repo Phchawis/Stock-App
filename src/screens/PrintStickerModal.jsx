@@ -49,7 +49,7 @@ export function PrintStickerModal({ v }) {
 
   // Category translation
   const catMap = {
-    CHE: 'เคมีคลินิก',
+    CHE: 'หมวดงานศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
     HEM: 'โลหิตวิทยา',
     IMM: 'ภูมิคุ้มกันวิทยา',
     MIP: 'จุลทรรศนศาสตร์',
