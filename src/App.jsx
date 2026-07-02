@@ -675,7 +675,7 @@ class App extends React.Component {
   }
   scanQRCode(code) {
     const cleanCode = (code || '').trim().toLowerCase();
-    if (!cleanCode) return;
+    if (!cleanCode) return false;
     // Match by QR string ("qr-g2407a") OR the raw lot number ("g2407a") so a
     // typed/scanned lot code works even without the "QR-" prefix.
     const foundLot = this.state.lots.find(l =>
@@ -694,7 +694,7 @@ class App extends React.Component {
         }
       }));
       this.showToast(`สแกนพบ Lot ${foundLot.lot} ของ ${r ? r.th : ''} และทำการเชื่อมโยงข้อมูลแล้ว`, 'success');
-      return;
+      return true;
     }
     const foundReagent = this.state.reagents.find(r => r.code.toLowerCase() === cleanCode);
     if (foundReagent) {
@@ -709,9 +709,10 @@ class App extends React.Component {
         }
       }));
       this.showToast(`สแกนพบน้ำยา ${foundReagent.th} แล้ว (จะจ่ายโดยใช้ระบบ FEFO)`, 'success');
-      return;
+      return true;
     }
     this.showToast(`ไม่พบข้อมูล QR Code "${cleanCode}" หรือน้ำยาใน Lot นี้หมดคลังแล้ว`, 'warn');
+    return false;
   }
   unlinkLot() {
     this.setState(s => ({ iform: { ...s.iform, lotId: '' } }));
