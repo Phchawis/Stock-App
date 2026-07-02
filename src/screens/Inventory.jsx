@@ -228,9 +228,6 @@ export function Inventory({ v }) {
                   <div style={css(`font:var(--fw-semibold) var(--text-sm)/1.3 var(--font-body); color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>
                     {r.th}
                   </div>
-                  <div style={css(`font:var(--text-2xs)/1.3 var(--font-mono); color:var(--text-tertiary);`)}>
-                    {r.code} · {r.en}
-                  </div>
                 </div>
               </div>
               
