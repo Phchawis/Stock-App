@@ -292,18 +292,7 @@ export function ReagentLists({ v }) {
                       <div>
                         <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs); text-transform:uppercase;`)}>หมวดงาน</div>
                         <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); margin-top:2px;`)}>
-                          {(() => {
-                            const getParent = (c) => ({
-                              CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-                              HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-                              IMM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-                              MIP: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-                              MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-                              HMS: 'บริการศูนย์การแพทย์',
-                              ADV: 'ตรวจวินิจฉัยขั้นสูง'
-                            })[c] || c;
-                            return getParent(r.cat);
-                          })()}
+                          ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์
                         </div>
                       </div>
                       <div>
