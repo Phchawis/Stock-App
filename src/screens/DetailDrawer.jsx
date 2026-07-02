@@ -52,7 +52,25 @@ export function DetailDrawer({ v }) {
           </div>
           <div style={css(`display:flex; flex-direction:column; gap:7px;`)}>
             <div style={css(`display:flex; align-items:center; gap:9px; font:var(--text-sm)/1.4 var(--font-body); color:var(--text-secondary);`)}><span style={css(`display:grid; place-items:center;`)}>{ic.thermo}</span>สภาวะจัดเก็บ <strong style={css(`color:var(--text-primary); font-weight:600;`)}>{detail.storageLabel}</strong></div>
-            <div style={css(`display:flex; align-items:center; gap:9px; font:var(--text-sm)/1.4 var(--font-body); color:var(--text-secondary);`)}><span style={css(`display:grid; place-items:center;`)}>{ic.pkg}</span>หมวดงาน <strong style={css(`color:var(--text-primary); font-weight:600;`)}>{detail.catLabel}</strong> · ผู้ขาย {detail.supplier}</div>
+            <div style={css(`display:flex; align-items:center; gap:9px; font:var(--text-sm)/1.4 var(--font-body); color:var(--text-secondary);`)}>
+              <span style={css(`display:grid; place-items:center;`)}>{ic.pkg}</span>
+              หมวดงาน&nbsp;
+              <strong style={css(`color:var(--text-primary); font-weight:600;`)}>
+                {(() => {
+                  const getParent = (c) => ({
+                    CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์ (เคมีคลินิก)',
+                    HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์ (โลหิตวิทยา)',
+                    IMM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์ (ภูมิคุ้มกันวิทยา)',
+                    MIP: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์ (จุลทรรศนศาสตร์)',
+                    MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
+                    HMS: 'บริการศูนย์การแพทย์',
+                    ADV: 'ตรวจวินิจฉัยขั้นสูง'
+                  })[c] || c;
+                  return getParent(detail.cat);
+                })()}
+              </strong>
+              &nbsp;· ผู้ขาย {detail.supplier}
+            </div>
           </div>
 
           <div style={css(`display:flex; gap:10px;`)}>
