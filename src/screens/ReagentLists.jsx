@@ -232,7 +232,8 @@ export function ReagentLists({ v }) {
 
       {/* Detail Popup Modal */}
       {selectedReagent && (() => {
-        const r = selectedReagent;
+        // Re-derive from the live list so in-place edits (e.g. category change) refresh immediately.
+        const r = reagentsList.find(x => x.id === selectedReagent.id) || selectedReagent;
         const rLots = activeLotsList.filter(l => l.rid === r.id && l.qty > 0 && l.status === 'ACTIVE')
           .slice()
           .sort((a, b) => a.expiry.localeCompare(b.expiry)); // FEFO sort
