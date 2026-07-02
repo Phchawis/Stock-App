@@ -142,28 +142,31 @@ export function RegisterModal({ v }) {
 
             <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px;`)}>
               <Select label="หน่วยนับของสินค้า" required={true} options={unitOpts} value={mform.unit} onChange={mfUnit} />
-              <Select 
-                label="หน่วยนับย่อย (ถ้ามี)" 
-                options={subUnitOpts} 
-                value={mform.subUnit || ''} 
-                onChange={mfSubUnit} 
-              />
+              <div style={css(`display:grid; grid-template-columns:100px 1fr; gap:10px; align-items:flex-end;`)}>
+                <Input 
+                  label="จำนวนย่อย" 
+                  type="number" 
+                  placeholder="เช่น 400" 
+                  value={mform.testsPerUnit || ''} 
+                  onChange={mfTestsPerUnit} 
+                />
+                <Select 
+                  label="หน่วยนับย่อย (ถ้ามี)" 
+                  options={subUnitOpts} 
+                  value={mform.subUnit || ''} 
+                  onChange={mfSubUnit} 
+                />
+              </div>
             </div>
 
             <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px;`)}>
-              <Input 
-                label="จำนวนต่อหน่วยนับหลัก (ถ้ามี)" 
-                type="number" 
-                placeholder="เช่น 100" 
-                value={mform.testsPerUnit || ''} 
-                onChange={mfTestsPerUnit} 
-              />
               <Select label="สภาวะจัดเก็บน้ำยา" required={true} options={storageOpts} value={mform.storage} onChange={mfStorage} />
+              <Input label="เกณฑ์แจ้งเตือนสต็อกต่ำสุด (Min)" type="number" required={true} placeholder="เช่น 50" value={mform.min} onChange={mfMin} />
             </div>
 
             <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px;`)}>
-              <Input label="เกณฑ์แจ้งเตือนสต็อกต่ำสุด (Min)" type="number" required={true} placeholder="เช่น 50" value={mform.min} onChange={mfMin} />
               <Select label="ผู้จัดจำหน่าย / Supplier" options={supplierOpts} value={mform.supplier} onChange={mfSupplier} />
+              <div />
             </div>
 
             <div style={css(`display:grid; grid-template-columns:1fr; gap:14px;`)}>
