@@ -43,3 +43,42 @@ export async function onRequestPost(context) {
     return json({ error: err.message }, 500);
   }
 }
+
+// PUT — correct an existing lot's qty/expiry/location (perm: manage; admin + supervisor).
+// A qty change auto-logs an ADJUST transaction so the audit trail still reflects the correction.
+export async function onRequestPut(context) {
+  const denied = await requirePerm(context, { perm: 'manage' });
+  if (denied) return denied;
+  const { env, request } = context;
+  try {
+    const { id, expiry, qty, loc } = await request.json();
+    if (!id || !expiry || qty === undefined || !loc) {
+      return json({ error: 'Missing required fields' }, 400);
+    }
+    const numQty = +qty;
+    if (isNaN(numQty) || numQty < 0) return json({ error: 'Quantity must be zero or a positive number' }, 400);
+
+    const existing = await env.DB.prepare('SELECT * FROM lots WHERE id = ?').bind(id).first();
+    if (!existing) return json({ error: 'ไม่พบ Lot นี้' }, 404);
+
+    const newStatus = numQty === 0 ? 'DEPLETED' : 'ACTIVE';
+    await env.DB.prepare('UPDATE lots SET expiry = ?, qty = ?, loc = ?, status = ? WHERE id = ?')
+      .bind(expiry, numQty, loc, newStatus, id).run();
+
+    let txn = null;
+    const delta = numQty - existing.qty;
+    if (delta !== 0) {
+      const by = await actorName(context);
+      const at = nowStr();
+      const result = await env.DB.prepare(
+        `INSERT INTO transactions (lot_id, rid, type, qty, bal, ref, scan, by, at)
+         VALUES (?, ?, 'ADJUST', ?, ?, ?, 'MANUAL', ?, ?)`
+      ).bind(id, existing.rid, delta, numQty, 'ปรับปรุงคงคลังโดยผู้ดูแลระบบ/หัวหน้าคลัง', by, at).run();
+      txn = { id: result.meta.last_row_id, lotId: +id, rid: existing.rid, type: 'ADJUST', qty: delta, bal: numQty, ref: 'ปรับปรุงคงคลังโดยผู้ดูแลระบบ/หัวหน้าคลัง', scan: 'MANUAL', by, at };
+    }
+
+    return json({ success: true, lot: { id: +id, expiry, qty: numQty, loc, status: newStatus }, txn });
+  } catch (err) {
+    return json({ error: err.message }, 500);
+  }
+}
