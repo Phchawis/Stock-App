@@ -109,30 +109,40 @@ export function Dashboard({ v }) {
   });
 
   // Insights
+  const issueTxns = filteredTxns.filter(t => t.type === 'ISSUE');
+  const totalRecInRange = filteredTxns.filter(t => t.type === 'RECEIVE').reduce((sum, t) => sum + t.qty, 0);
+  const totalIssueInRange = filteredTxns.filter(t => t.type === 'ISSUE').reduce((sum, t) => sum + Math.abs(t.qty), 0);
+
   const sortedCats = [...catStats].sort((a, b) => b.issue - a.issue);
   const topCatLabel = sortedCats.length > 0 && sortedCats[0].issue > 0 ? getCategoryLabel(sortedCats[0].cat) : '—';
-  
-  const juneData = monthlyData.find(m => m.label.startsWith('มิ.ย.')) || { rec: 240, issue: 142 };
-  const juneIssue = juneData.issue;
-  const juneRec = juneData.rec;
 
   const insights = {
     topCatLabel,
     totalStock: activeLots.filter(l => filteredReagentIds.includes(l.rid)).reduce((sum, l) => sum + l.qty, 0),
     lowStockCount: lowCount,
     totalReagents: filteredReagents.length,
-    juneIssue,
-    juneRec
+    totalRecInRange,
+    totalIssueInRange
   };
 
   const printStyle = `
     @media print {
-      body {
-        background: #ffffff !important;
-        color: #000000 !important;
-        font-family: 'Inter', 'Sarabun', sans-serif !important;
+      @page {
+        size: A4 portrait;
+        margin: 15mm 12mm 15mm 12mm;
       }
-      aside, header, button, .no-print, nav, .qms-rise > *:not(.print-report-container) {
+      *, *::before, *::after {
+        background-color: transparent !important;
+        color: #000000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+      }
+      html, body, #root, main, .qms-rise, .print-report-container, .print-report-container * {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        color: #000000 !important;
+      }
+      aside, header, button, .no-print, nav, .qms-rise > *:not(.print-report-container), [class*="Sidebar"], [class*="Header"] {
         display: none !important;
       }
       main, .qms-rise {
@@ -140,42 +150,43 @@ export function Dashboard({ v }) {
         margin: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        background: transparent !important;
       }
       .print-report-container {
         display: block !important;
         width: 100% !important;
         box-sizing: border-box;
-        padding: 20px !important;
+        padding: 0 !important;
+        margin: 0 !important;
       }
       .report-table {
         width: 100% !important;
         border-collapse: collapse !important;
-        margin-top: 14px !important;
-        margin-bottom: 20px !important;
+        margin-top: 10px !important;
+        margin-bottom: 15px !important;
       }
       .report-table th, .report-table td {
-        border: 1px solid #dddddd !important;
-        padding: 8px 10px !important;
+        border: 1px solid #bcbcbc !important;
+        padding: 5px 7px !important;
         text-align: left !important;
-        font-size: 11px !important;
+        font-size: 9px !important;
+        color: #000000 !important;
       }
       .report-table th {
-        background-color: #f5f5f5 !important;
+        background-color: #f2f2f2 !important;
         font-weight: bold !important;
-        color: #000 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
       .report-header {
-        text-align: center !important;
-        margin-bottom: 20px !important;
-        border-bottom: 2px solid #333333 !important;
+        border-bottom: 2px solid #000000 !important;
         padding-bottom: 12px !important;
+        margin-bottom: 15px !important;
       }
       .print-grid {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important;
-        gap: 20px !important;
-        margin-bottom: 20px !important;
+        gap: 15px !important;
+        margin-bottom: 15px !important;
         page-break-inside: avoid !important;
       }
       .print-chart-box {
@@ -183,6 +194,10 @@ export function Dashboard({ v }) {
         padding: 10px !important;
         border-radius: 4px !important;
         background: #ffffff !important;
+      }
+      rect {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
     }
   `;
@@ -512,16 +527,30 @@ export function Dashboard({ v }) {
 
       {/* Printable PDF Report Template */}
       <div className="print-report-container" style={{ display: 'none' }}>
-        <div className="report-header">
-          <div style={css(`display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:10px;`)}>
-            <img src="/assets/b082f9ab-2a3d-47e8-a44f-c9a7574496ec.png" alt="TUH Logo" style={css(`width:50px; height:50px; object-fit:contain;`)} />
-            <div style={css(`text-align:left;`)}>
-              <h1 style={css(`margin:0; font-size:16px; font-weight:bold; color:#000; font-family:var(--font-display);`)}>โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ</h1>
-              <h2 style={css(`margin:2px 0 0; font-size:11px; font-weight:normal; color:#555;`)}>Thammasat University Hospital Laboratory Center</h2>
-            </div>
+        <div className="report-header" style={{ display: 'flex', alignItems: 'center', gap: '15px', borderBottom: '2px solid #000000', paddingBottom: '12px', marginBottom: '15px', textAlign: 'left' }}>
+          <img src="/assets/b082f9ab-2a3d-47e8-a44f-c9a7574496ec.png" alt="TUH Logo" style={css(`width:55px; height:55px; object-fit:contain; flex-shrink:0;`)} />
+          <div style={css(`flex:1; text-align:left;`)}>
+            <h1 style={css(`margin:0; font-size:15px; font-weight:bold; color:#000; font-family:var(--font-display);`)}>โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ</h1>
+            <h2 style={css(`margin:1px 0 0; font-size:10px; font-weight:normal; color:#444;`)}>Thammasat University Hospital Laboratory Center</h2>
+            <h3 style={css(`margin:6px 0 0; font-size:12px; font-weight:bold; color:#111;`)}>รายงานสถิติดัชนีชี้วัดประสิทธิภาพคลังน้ำยาแล็บ (KPI Dashboard Report)</h3>
+            <p style={css(`margin:3px 0 0; font-size:9px; color:#555;`)}>
+              ช่วงเวลาวิเคราะห์: {(() => {
+                const getThaiDate = (dStr) => {
+                  if (!dStr) return '';
+                  return new Date(dStr).toLocaleDateString('th-TH', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                };
+                if (startDate && endDate) {
+                  return `${getThaiDate(startDate)} ถึง ${getThaiDate(endDate)}`;
+                } else if (startDate) {
+                  return `เริ่มต้น ${getThaiDate(startDate)}`;
+                } else if (endDate) {
+                  return `ถึง ${getThaiDate(endDate)}`;
+                }
+                return '01/01/2569 ถึง 30/06/2569';
+              })()} 
+              &nbsp;· พิมพ์เอกสารเมื่อ: {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} น. · ผู้พิมพ์: {user.name}
+            </p>
           </div>
-          <h3 style={css(`margin:12px 0 4px; font-size:14px; font-weight:bold; text-align:center; color:#000; text-transform:uppercase;`)}>รายงานสถิติดัชนีชี้วัดประสิทธิภาพคลังน้ำยาแล็บประจำเดือน (KPI Dashboard)</h3>
-          <p style={css(`margin:0; font-size:10px; text-align:center; color:#666;`)}>ช่วงเวลาวิเคราะห์: 01/01/2026 ถึง 30/06/2026 · พิมพ์เอกสารเมื่อ: {new Date('2026-06-30T11:15:00').toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} น. · ผู้พิมพ์รายงาน: {user.name}</p>
         </div>
 
         {/* Printable KPI Cards row */}
@@ -580,6 +609,7 @@ export function Dashboard({ v }) {
                   <g key={idx}>
                     <rect x={x} y={80 - recH} width={printBarW} height={recH} fill="#555555" />
                     <rect x={x + printBarW + 2} y={80 - issH} width={printBarW} height={issH} fill="#000000" />
+                    <text x={x + printBarW} y="92" fontSize="6" textAnchor="middle" fill="#666666" style={{ fontFamily: 'var(--font-body)' }}>{m.label}</text>
                   </g>
                 );
               })}
@@ -616,16 +646,51 @@ export function Dashboard({ v }) {
           )}
         </div>
 
+        {/* Print Layout Row 3: Reagent Issue/Withdraw transaction logs (dynamic based on selected range) */}
+        <div style={{ border: '1px solid #cccccc', borderRadius: '4px', padding: '10px', fontSize: '10px', color: '#333', marginTop: '10px', pageBreakInside: 'avoid' }}>
+          <h4 style={{ margin: '0 0 6px 0', fontSize: '11px', fontWeight: 'bold', color: '#000' }}>ประวัติการเบิกจ่ายน้ำยาในช่วงเวลาวิเคราะห์ (Usage Transaction Logs)</h4>
+          {issueTxns.length > 0 ? (
+            <table className="report-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8px', marginTop: '6px' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f5f5f5' }}>
+                  <th style={{ padding: '4px 6px', fontWeight: 'bold' }}>วันเวลาที่เบิกจ่าย</th>
+                  <th style={{ padding: '4px 6px', fontWeight: 'bold' }}>รหัสทะเบียนน้ำยา</th>
+                  <th style={{ padding: '4px 6px', fontWeight: 'bold' }}>ชื่อน้ำยา</th>
+                  <th style={{ padding: '4px 6px', fontWeight: 'bold' }}>Lot</th>
+                  <th style={{ padding: '4px 6px', fontWeight: 'bold', textAlign: 'right' }}>จำนวนเบิก</th>
+                  <th style={{ padding: '4px 6px', fontWeight: 'bold' }}>ผู้เบิกจ่าย</th>
+                  <th style={{ padding: '4px 6px', fontWeight: 'bold' }}>เอกสารอ้างอิง</th>
+                </tr>
+              </thead>
+              <tbody>
+                {issueTxns.map((t, idx) => (
+                  <tr key={idx}>
+                    <td style={{ padding: '4px 6px', fontFamily: 'var(--font-mono)' }}>{t.at}</td>
+                    <td style={{ padding: '4px 6px', fontFamily: 'var(--font-mono)' }}>{t.code}</td>
+                    <td style={{ padding: '4px 6px' }}>{t.name}</td>
+                    <td style={{ padding: '4px 6px', fontFamily: 'var(--font-mono)' }}>{t.lot}</td>
+                    <td style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold' }}>{t.qtyLabel}</td>
+                    <td style={{ padding: '4px 6px' }}>{t.by}</td>
+                    <td style={{ padding: '4px 6px' }}>{t.ref || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p style={{ margin: 0, padding: '6px 0', color: '#666', textAlign: 'center' }}>ไม่มีข้อมูลการเบิกจ่ายน้ำยาในช่วงเวลาวิเคราะห์</p>
+          )}
+        </div>
+
         {/* Executive summary list */}
         <div style={{ border: '1px solid #cccccc', borderRadius: '4px', padding: '10px', fontSize: '10px', color: '#333', marginTop: '10px', pageBreakInside: 'avoid' }}>
           <h4 style={{ margin: '0 0 6px 0', fontSize: '11px', fontWeight: 'bold', color: '#000' }}>สรุปสาระสำคัญเชิงวิเคราะห์</h4>
-          <p style={{ margin: '2px 0' }}>• หมวดหมู่ที่มีอัตราจ่ายใช้งานสะสมสูงสุดในเดือนนี้ คือ <strong>กลุ่ม{insights.topCatLabel}</strong></p>
-          <p style={{ margin: '2px 0' }}>• ยอดรับเข้ารวมสะสมเดือนนี้ <strong>{insights.juneRec} ชิ้น</strong> ยอดจ่ายออกสะสม <strong>{insights.juneIssue} ชิ้น</strong></p>
+          <p style={{ margin: '2px 0' }}>• หมวดหมู่ที่มีอัตราจ่ายใช้งานสะสมสูงสุดในช่วงเวลาวิเคราะห์ คือ <strong>กลุ่ม{insights.topCatLabel}</strong></p>
+          <p style={{ margin: '2px 0' }}>• ยอดรับเข้ารวมสะสมในช่วงเวลาวิเคราะห์ <strong>{insights.totalRecInRange.toLocaleString()} ชิ้น</strong> ยอดเบิกจ่ายออกสะสม <strong>{insights.totalIssueInRange.toLocaleString()} ชิ้น</strong></p>
           <p style={{ margin: '2px 0' }}>• ตรวจพบรายการน้ำยาต่ำกว่าระดับต่ำสุดแนะนำ (Min) <strong>{insights.lowStockCount} รายการ</strong></p>
         </div>
 
         {/* Sign-off signatures */}
-        <div style={css(`margin-top:40px; display:flex; justify-content:space-between; page-break-inside:avoid;`)}>
+        <div style={css(`margin-top:35px; display:flex; justify-content:space-between; page-break-inside:avoid;`)}>
           <div style={css(`text-align:center; width:220px; font-size:10px; color:#333;`)}>
             <p>ลงชื่อ.......................................................</p>
             <p style={css(`margin-top:6px; font-weight:bold;`)}>( {user.name} )</p>
