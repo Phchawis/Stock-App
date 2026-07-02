@@ -81,7 +81,7 @@ export function ReceiveModal({ v }) {
             </div>
             <div className="modal-grid-2col">
               <Input label="จำนวนรับเข้า" type="number" required={true} placeholder="0" value={rf.qty} onChange={rfQty} />
-              <Input label="ผู้ทำการรับน้ำยา" disabled={true} value={user ? `${user.name} (${user.role})` : ''} />
+              <Input label="ผู้ทำการรับน้ำยา" disabled={true} value={user ? user.name : ''} />
             </div>
           </div>
           
