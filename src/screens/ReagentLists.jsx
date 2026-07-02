@@ -165,12 +165,9 @@ export function ReagentLists({ v }) {
                       style={css(`width:100%; height:100%; object-fit:cover;`)}
                     />
                     <div style={css(`position:absolute; inset:0; background:linear-gradient(to top, rgba(23,36,46,0.95) 0%, rgba(23,36,46,0.2) 60%, rgba(23,36,46,0) 100%);`)} />
-                    <div style={css(`position:absolute; bottom:10px; left:12px; right:12px; display:flex; justify-content:space-between; align-items:center;`)}>
+                    <div style={css(`position:absolute; bottom:10px; left:12px; right:12px;`)}>
                       <span style={css(`padding:2px 6px; border-radius:var(--radius-pill); background:rgba(43,166,198,.2); border:1px solid rgba(43,166,198,.3); color:var(--brand-800); font:var(--fw-semibold) var(--text-3xs)/1.2 var(--font-body);`)}>
                         {getCategoryLabel(r.cat)}
-                      </span>
-                      <span style={css(`font:var(--text-3xs)/1 var(--font-mono); color:var(--text-tertiary); font-weight:600;`)}>
-                        {r.code}
                       </span>
                     </div>
                   </div>
@@ -292,7 +289,19 @@ export function ReagentLists({ v }) {
                     <div style={css(`display:grid; grid-template-columns:repeat(2, 1fr); gap:10px 20px; font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>
                       <div>
                         <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs); text-transform:uppercase;`)}>หมวดหมู่การใช้งาน</div>
-                        <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); margin-top:2px;`)}>{getCategoryLabel(r.cat)}</div>
+                        <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); margin-top:2px;`)}>
+                          {(() => {
+                            const getParent = (c) => ({
+                              CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์ (เคมีคลินิก)',
+                              HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์ (โลหิตวิทยา)',
+                              IMM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์ (ภูมิคุ้มกันวิทยา)',
+                              MIP: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์ (จุลทรรศนศาสตร์)',
+                              HMS: 'บริการศูนย์การแพทย์',
+                              ADV: 'ตรวจวินิจฉัยขั้นสูง'
+                            })[c] || c;
+                            return getParent(r.cat);
+                          })()}
+                        </div>
                       </div>
                       
                       <div style={css(`grid-column:1/3; border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
@@ -309,20 +318,32 @@ export function ReagentLists({ v }) {
                       <div style={css(`border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
                         <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs);`)}>หน่วยนับสินค้า</div>
                         <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); margin-top:2px;`)}>
-                          {r.unit}{r.subUnit ? ` / ${r.subUnit}` : ''}{r.testsPerUnit ? ` (1 ${r.unit} = ${r.testsPerUnit} ${r.subUnit || 'test'})` : ''}
+                          {(() => {
+                            if (r.subUnit) {
+                              const qty = r.subUnitQty || 1;
+                              if (r.testsPerSubUnit) {
+                                return `${r.unit} / ${qty} ${r.subUnit} / ${r.testsPerSubUnit} tests`;
+                              }
+                              return `${r.unit} / ${qty} ${r.subUnit}`;
+                            }
+                            if (r.testsPerUnit) {
+                              return `${r.unit} / ${r.testsPerUnit} tests`;
+                            }
+                            return r.unit;
+                          })()}
                         </div>
                       </div>
                       
                       <div style={css(`border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
                         <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs);`)}>จุดเตือนสต็อกต่ำสุด (Min)</div>
                         <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-mono); color:var(--text-primary); margin-top:2px;`)}>
-                          {formatStock(r.min, r)}
+                          {r.min} {r.unit}
                         </div>
                       </div>
                       <div style={css(`border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
                         <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs);`)}>ปริมาณสั่งซื้อแนะนำ (Reorder)</div>
                         <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-mono); color:var(--text-primary); margin-top:2px;`)}>
-                          {formatStock(r.reorder, r)}
+                          {r.reorder || r.min} {r.unit}
                         </div>
                       </div>
 
