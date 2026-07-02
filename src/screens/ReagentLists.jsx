@@ -167,7 +167,7 @@ export function ReagentLists({ v }) {
                     />
                     <div style={css(`position:absolute; inset:0; background:linear-gradient(to top, rgba(23,36,46,0.95) 0%, rgba(23,36,46,0.2) 60%, rgba(23,36,46,0) 100%);`)} />
                     <div style={css(`position:absolute; bottom:10px; left:12px; right:12px;`)}>
-                      <span style={css(`padding:2px 6px; border-radius:var(--radius-pill); background:rgba(43,166,198,.2); border:1px solid rgba(43,166,198,.3); color:var(--brand-800); font:var(--fw-semibold) var(--text-3xs)/1.2 var(--font-body);`)}>
+                      <span style={css(`padding:2px 6px; border-radius:var(--radius-pill); background:rgba(43,166,198,.2); border:1px solid rgba(43,166,198,.3); color:var(--brand-800); font:var(--fw-semibold) 8px/1.2 var(--font-body); white-space:nowrap; display:inline-block; max-width:calc(100% - 4px); overflow:hidden; text-overflow:ellipsis;`)}>
                         {getCategoryLabel(r.cat)}
                       </span>
                     </div>
