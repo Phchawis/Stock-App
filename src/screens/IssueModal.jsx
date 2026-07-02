@@ -23,7 +23,15 @@ export function IssueModal({ v }) {
 
   const [scanning, setScanning] = React.useState(false);
   const [cameraError, setCameraError] = React.useState(null);
+  const [manualCode, setManualCode] = React.useState('');
   const html5QrCodeRef = React.useRef(null);
+
+  // Keep latest handler + form in refs so the scanner's success callback (created
+  // once when the camera starts) always reads current values, not a stale snapshot.
+  const scanRef = React.useRef(scanQRCode);
+  scanRef.current = scanQRCode;
+  const lotIdRef = React.useRef(iform.lotId);
+  lotIdRef.current = iform.lotId;
 
   React.useEffect(() => {
     let active = true;
@@ -41,14 +49,16 @@ export function IssueModal({ v }) {
             { facingMode: "environment" },
             {
               fps: 10,
+              aspectRatio: 1.0,
+              disableFlip: true,
               qrbox: (w, h) => {
-                const s = Math.min(w, h) * 0.7;
+                const s = Math.floor(Math.min(w, h) * 0.8);
                 return { width: s, height: s };
               }
             },
             (msg) => {
-              if (iform.lotId) return;
-              scanQRCode(msg);
+              if (lotIdRef.current) return;
+              scanRef.current(msg);
               if (navigator.vibrate) navigator.vibrate(100);
             },
             () => {}
@@ -215,6 +225,44 @@ export function IssueModal({ v }) {
               </div>
             )}
 
+            {/* Direct lot picker — works without the camera (FEFO order) */}
+            {selectedReagentObj && (() => {
+              const lots = activeLotsList
+                .filter(l => l.rid === selectedReagentObj.id)
+                .slice()
+                .sort((a, b) => a.expiry.localeCompare(b.expiry));
+              if (lots.length === 0) return null;
+              return (
+                <div style={css(`display:flex; flex-direction:column; gap:8px; margin-top:-4px;`)}>
+                  <div style={css(`font:var(--fw-medium) var(--text-2xs)/1.3 var(--font-body); color:var(--text-secondary);`)}>
+                    เลือก Lot ที่ต้องการเบิก (หรือปล่อยว่างเพื่อจ่ายแบบ FEFO อัตโนมัติ)
+                  </div>
+                  <div style={css(`display:flex; flex-wrap:wrap; gap:8px;`)}>
+                    {lots.map((l, i) => {
+                      const linked = String(l.id) === String(iform.lotId);
+                      return (
+                        <button
+                          key={l.id}
+                          type="button"
+                          onClick={() => scanQRCode(l.qr)}
+                          style={css(`display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:8px 12px; border-radius:var(--radius-md); cursor:pointer; text-align:left; border:1px solid ${linked ? 'var(--green-700)' : 'var(--border-default)'}; background:${linked ? 'rgba(56,182,115,.12)' : 'var(--white)'}; transition:all var(--dur-fast);`)}
+                          onMouseEnter={(e) => { if (!linked) e.currentTarget.style.borderColor = 'var(--border-brand)'; }}
+                          onMouseLeave={(e) => { if (!linked) e.currentTarget.style.borderColor = 'var(--border-default)'; }}
+                        >
+                          <span style={css(`font:var(--fw-bold) var(--text-xs)/1 var(--font-mono); color:var(--text-primary);`)}>
+                            Lot {l.lot}{i === 0 ? ' · FEFO ถัดไป' : ''}
+                          </span>
+                          <span style={css(`font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary);`)}>
+                            เหลือ {l.qty} {selectedReagentObj.unit} · หมดอายุ {l.expiry}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* 2. QR code scanner section */}
             <div style={css(`display:flex; flex-direction:column; gap:14px; border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:16px; background:var(--surface-sunken);`)}>
               <style>{`
@@ -282,14 +330,16 @@ export function IssueModal({ v }) {
                           { facingMode: "environment" },
                           {
                             fps: 10,
+                            aspectRatio: 1.0,
+                            disableFlip: true,
                             qrbox: (w, h) => {
-                              const s = Math.min(w, h) * 0.7;
+                              const s = Math.floor(Math.min(w, h) * 0.8);
                               return { width: s, height: s };
                             }
                           },
                           (msg) => {
-                             if (iform.lotId) return;
-                             scanQRCode(msg);
+                             if (lotIdRef.current) return;
+                             scanRef.current(msg);
                              if (navigator.vibrate) navigator.vibrate(100);
                            },
                           () => {}
@@ -340,6 +390,25 @@ export function IssueModal({ v }) {
                   </button>
                 </div>
               ) : null}
+
+              {/* Manual code fallback — type the lot number or QR code by hand */}
+              <div style={css(`display:grid; grid-template-columns:1fr auto; gap:8px; align-items:flex-end;`)}>
+                <Input
+                  label="หรือพิมพ์รหัส Lot / QR Code เอง (กรณีสแกนไม่ติด)"
+                  placeholder="เช่น G2407A หรือ QR-G2407A"
+                  value={manualCode}
+                  onChange={(e) => setManualCode(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && manualCode.trim()) { scanQRCode(manualCode); setManualCode(''); } }}
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => { if (manualCode.trim()) { scanQRCode(manualCode); setManualCode(''); } }}
+                  style={css(`background:var(--brand-700); color:#fff; border:none; border-radius:var(--radius-md); padding:0 14px; height:40px; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); cursor:pointer; display:flex; align-items:center;`)}
+                >
+                  เชื่อมโยง
+                </button>
+              </div>
             </div>
 
             {/* 3. Withdraw Quantity */}
