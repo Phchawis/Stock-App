@@ -22,7 +22,7 @@ export function ReagentLists({ v }) {
     (r.en || '').toLowerCase().includes(query)
   );
 
-  const getCategoryLabel = (c) => ({ CHE: 'หมวดงานศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HEM: 'หมวดงานศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', IMM: 'หมวดงานศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', MIP: 'หมวดงานศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', MDC: 'หมวดงานศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HMS: 'หมวดบริการศูนย์การแพทย์', ADV: 'หมวดตรวจวินิจฉัยชั้นสูง' })[c] || c;
+  const getCategoryLabel = (c) => ({ CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', IMM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', MIP: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HMS: 'บริการศูนย์การแพทย์', ADV: 'ตรวจวินิจฉัยขั้นสูง' })[c] || c;
   const getStorageLabel = (s) => ({ REFRIGERATED_2_8: '2–8°C', FROZEN_40: '−40°C', ROOM_TEMP: 'อุณหภูมิห้อง' })[s] || s;
 
   const formatStock = (qty, reagent) => {
@@ -306,26 +306,12 @@ export function ReagentLists({ v }) {
                           })()}
                         </div>
                       </div>
-                      {['HMS', 'ADV'].includes(r.cat) && (
-                        <div>
-                          <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs); text-transform:uppercase;`)}>หมวด</div>
-                          {canManage ? (
-                            <select
-                              value={r.cat}
-                              onChange={(e) => updateReagentCategory(r.id, e.target.value)}
-                              onClick={(e) => e.stopPropagation()}
-                              style={css(`margin-top:2px; width:100%; font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:3px 6px; cursor:pointer;`)}
-                            >
-                              <option value="HMS">บริการศูนย์การแพทย์</option>
-                              <option value="ADV">ตรวจวินิจฉัยขั้นสูง</option>
-                            </select>
-                          ) : (
-                            <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); margin-top:2px;`)}>
-                              {r.cat === 'HMS' ? 'บริการศูนย์การแพทย์' : 'ตรวจวินิจฉัยขั้นสูง'}
-                            </div>
-                          )}
+                      <div>
+                        <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs); text-transform:uppercase;`)}>หมวด</div>
+                        <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); margin-top:2px;`)}>
+                          {getCategoryLabel(r.cat)}
                         </div>
-                      )}
+                      </div>
 
                       <div style={css(`grid-column:1/3; border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
                         <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs);`)}>ชื่อน้ำยา</div>
