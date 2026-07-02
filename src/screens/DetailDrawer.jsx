@@ -51,18 +51,7 @@ export function DetailDrawer({ v }) {
               <span style={css(`display:grid; place-items:center;`)}>{ic.pkg}</span>
               หมวดงาน&nbsp;
               <strong style={css(`color:var(--text-primary); font-weight:600;`)}>
-                {(() => {
-                  const getParent = (c) => ({
-                    CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-                    HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-                    IMM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-                    MIP: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-                    MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-                    HMS: 'บริการศูนย์การแพทย์',
-                    ADV: 'ตรวจวินิจฉัยขั้นสูง'
-                  })[c] || c;
-                  return getParent(detail.cat);
-                })()}
+                ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์
               </strong>
               &nbsp;· ผู้ขาย {detail.supplier}
             </div>
