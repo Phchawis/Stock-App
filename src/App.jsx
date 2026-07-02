@@ -860,13 +860,20 @@ class App extends React.Component {
       const low = oh <= r.min;
       const lotCount = this.activeLots(r.id).length;
       
-      let subUnitName = r.subUnit || '';
-      if (subUnitName.includes(':')) {
-        subUnitName = subUnitName.split(':')[0];
+      let subUnitName = '';
+      let subUnitQty = null;
+      let testsPerSubUnit = null;
+      if (r.subUnit && r.subUnit.includes(':')) {
+        const parts = r.subUnit.split(':');
+        subUnitName = parts[0] || '';
+        subUnitQty = parts[1] ? parseInt(parts[1], 10) : null;
+        testsPerSubUnit = parts[2] ? parseInt(parts[2], 10) : null;
+      } else {
+        subUnitName = r.subUnit || '';
       }
 
       return { id: r.id, code: r.code, th: r.th, en: showEn ? r.en : '', cat: r.cat, catLabel: this.CAT_LABEL(r.cat),
-        unit: r.unit, subUnit: subUnitName, onHand: oh, min: r.min, low, lotCount, storageLabel: this.STORAGE_LABEL(r.storage), onHandColor: low ? 'var(--red-700)' : 'var(--text-primary)',
+        unit: r.unit, subUnit: subUnitName, subUnitQty, testsPerSubUnit, onHand: oh, min: r.min, low, lotCount, storageLabel: this.STORAGE_LABEL(r.storage), onHandColor: low ? 'var(--red-700)' : 'var(--text-primary)',
         expDays: d, expLabel: d != null ? this.dayLabel(d) : '—', expColor: d != null ? sc.fg : 'var(--text-tertiary)',
         expiring: d != null && d <= crit * 3, sev: s, img: r.img || '/reagent_placeholder.png', onOpen: () => this.openDetail(r.id),
         testsPerUnit: r.testsPerUnit, testsTotal: r.testsPerUnit ? oh * r.testsPerUnit : null };
@@ -1060,11 +1067,18 @@ class App extends React.Component {
       scanQRCode: (code) => this.scanQRCode(code), unlinkLot: () => this.unlinkLot(), selectReagentForIssue: (rid) => this.selectReagentForIssue(rid),
       activeLotsList: S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE'),
       reagentsList: S.reagents.map(r => {
-        let subUnitName = r.subUnit || '';
-        if (subUnitName.includes(':')) {
-          subUnitName = subUnitName.split(':')[0];
+        let subUnitName = '';
+        let subUnitQty = null;
+        let testsPerSubUnit = null;
+        if (r.subUnit && r.subUnit.includes(':')) {
+          const parts = r.subUnit.split(':');
+          subUnitName = parts[0] || '';
+          subUnitQty = parts[1] ? parseInt(parts[1], 10) : null;
+          testsPerSubUnit = parts[2] ? parseInt(parts[2], 10) : null;
+        } else {
+          subUnitName = r.subUnit || '';
         }
-        return { ...r, subUnit: subUnitName };
+        return { ...r, subUnit: subUnitName, subUnitQty, testsPerSubUnit };
       }),
       onIssueLot: (rid, lotId) => this.openIssueWithLot(rid, lotId),
       issuePlanRows: plan.rows, issueShort: plan.short, issueHasPlan: plan.rows.length > 0, issueOnHand,
