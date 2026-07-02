@@ -385,7 +385,10 @@ class App extends React.Component {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (!res.ok) throw new Error('ลงทะเบียนน้ำยาล้มเหลว');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'ลงทะเบียนน้ำยาล้มเหลว');
+      }
       const newReagent = await res.json();
       this.setState(s => ({
         reagents: [...s.reagents, newReagent],
@@ -448,7 +451,10 @@ class App extends React.Component {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (!res.ok) throw new Error('แก้ไขข้อมูลน้ำยาล้มเหลว');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'แก้ไขข้อมูลน้ำยาล้มเหลว');
+      }
       
       this.setState(s => {
         const updatedReagents = s.reagents.map(r => r.id === s.editReagentId ? { ...r, ...payload } : r);
