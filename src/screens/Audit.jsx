@@ -179,7 +179,7 @@ export function Audit({ v }) {
                       <div><span style={css(`padding:3px 9px; border-radius:var(--radius-sm); background:${t.bg}; color:${t.fg}; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); white-space:nowrap;`)}>{t.typeLabel}</span></div>
                       <div style={css(`min-width:0;`)}>
                         <div style={css(`font:var(--fw-medium) var(--text-sm)/1.3 var(--font-body); color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>{t.name}</div>
-                        <div style={css(`font:var(--text-2xs)/1.3 var(--font-mono); color:var(--text-tertiary);`)}>{t.code} · Lot {t.lot}</div>
+                        <div style={css(`font:var(--text-2xs)/1.3 var(--font-mono); color:var(--text-tertiary);`)}>Lot {t.lot}</div>
                       </div>
                       <div style={css(`text-align:right; font:var(--fw-bold) var(--text-sm)/1 var(--font-mono); color:${t.qtyColor};`)}>{t.qtyLabel}</div>
                       <div style={css(`font:var(--text-xs)/1.3 var(--font-body); color:var(--text-secondary);`)}>{t.scanLabel}</div>
@@ -217,7 +217,7 @@ export function Audit({ v }) {
 
                       <div>
                         <div style={css(`font:var(--fw-semibold) var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>{t.name}</div>
-                        <div style={css(`font:var(--text-2xs)/1.4 var(--font-mono); color:var(--text-tertiary); margin-top:3px; word-break:break-all;`)}>{t.code} · Lot {t.lot}</div>
+                        <div style={css(`font:var(--text-2xs)/1.4 var(--font-mono); color:var(--text-tertiary); margin-top:3px; word-break:break-all;`)}>Lot {t.lot}</div>
                       </div>
 
                       <div style={css(`display:flex; flex-direction:column; gap:6px; padding-top:10px; border-top:1px dashed var(--border-subtle);`)}>
