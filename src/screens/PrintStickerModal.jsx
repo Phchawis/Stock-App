@@ -8,42 +8,25 @@ export function PrintStickerModal({ v }) {
   } = v;
 
   const [qrUrl, setQrUrl] = React.useState('');
-  const [qrReady, setQrReady] = React.useState(false);
 
   // Generate high-resolution QR base64 URL when lot data changes
   React.useEffect(() => {
     if (modalPrintSticker && printLotData) {
-      setQrReady(false);
       setQrUrl('');
       const { lot } = printLotData;
 
       QRCode.toDataURL(lot.qr, {
-        errorCorrectionLevel: 'H', // 30% damage tolerance — needed at this print size (1.5x1.5cm):
-        // thermal-print blur/ink bleed and off-angle phone-camera scans otherwise fail to decode.
-        margin: 3, // wider quiet zone so the scanner reliably locks onto the finder patterns
-        width: 600, // 600px high resolution for copy-pasting in MS Word
-        color: {
-          dark: '#000000',
-          light: '#ffffff'
-        }
+        errorCorrectionLevel: 'H', // 30% damage tolerance for reliable scanning at small print sizes
+        margin: 3,                 // wider quiet zone so scanners lock onto the finder patterns
+        width: 600,                // high resolution
+        color: { dark: '#000000', light: '#ffffff' }
       }, (err, url) => {
-        if (!err) {
-          setQrUrl(url);
-          setQrReady(true);
-        }
+        if (!err) setQrUrl(url);
       });
     }
   }, [modalPrintSticker, printLotData]);
 
-  // Trigger browser print dialog after QR code is fully loaded in state
-  React.useEffect(() => {
-    if (modalPrintSticker && printLotData && qrReady) {
-      const timer = setTimeout(() => {
-        window.print();
-      }, 800); // 800ms delay for stylesheet and state stabilization
-      return () => clearTimeout(timer);
-    }
-  }, [modalPrintSticker, printLotData, qrReady]);
+  const [downloading, setDownloading] = React.useState(false);
 
   if (!modalPrintSticker || !printLotData) return null;
 
@@ -58,17 +41,67 @@ export function PrintStickerModal({ v }) {
 
   const locLabel = lot.loc || storageLabel;
 
-  // Download high-resolution QR code PNG function
-  const downloadQR = () => {
-    if (!qrUrl) return;
-    const link = document.createElement('a');
-    link.href = qrUrl;
-    // Filename structure: QR_Lot_ReagentName.png
-    const safeReagentName = (reagent.en || reagent.th).replace(/[^a-zA-Z0-9ก-๙]/g, '_');
-    link.download = `QR_${lot.lot}_${safeReagentName}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // Render the WHOLE sticker (QR + all text) to a single 40x20mm PNG and download it.
+  // Printing one image via the printer's own label utility is far more reliable than
+  // browser HTML/CSS printing on ZPL thermal label printers.
+  const downloadSticker = async () => {
+    if (!qrUrl || downloading) return;
+    setDownloading(true);
+    try {
+      try { await document.fonts.ready; } catch (e) { /* fonts best-effort */ }
+      const scale = 20;                 // px per mm → 40x20mm label at ~500dpi
+      const W = 40 * scale, H = 20 * scale; // 800 x 400
+      const canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, W, H);
+
+      // QR on the left
+      const pad = 26;
+      const qrSize = H - pad * 2;
+      await new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => { ctx.imageSmoothingEnabled = false; ctx.drawImage(img, pad, pad, qrSize, qrSize); resolve(); };
+        img.onerror = resolve;
+        img.src = qrUrl;
+      });
+
+      // Text on the right
+      const tx = pad + qrSize + 22;
+      const tw = W - tx - pad;
+      ctx.fillStyle = '#000000';
+      ctx.textBaseline = 'alphabetic';
+      const clip = (text, font) => {
+        ctx.font = font;
+        if (ctx.measureText(text).width <= tw) return text;
+        let t = text;
+        while (t.length > 1 && ctx.measureText(t + '…').width > tw) t = t.slice(0, -1);
+        return t + '…';
+      };
+      const nameFont = "bold 40px 'Sarabun', sans-serif";
+      const locFont = "30px 'Sarabun', sans-serif";
+      ctx.font = nameFont;
+      ctx.fillText(clip(reagent.th, nameFont), tx, 92);
+      ctx.font = "600 34px 'IBM Plex Mono', monospace";
+      ctx.fillText('Lot: ' + lot.lot, tx, 158);
+      ctx.font = "bold 34px 'IBM Plex Mono', monospace";
+      ctx.fillText('EXP: ' + lot.expiry, tx, 222);
+      ctx.font = locFont;
+      ctx.fillText(clip('ที่เก็บ: ' + locLabel, locFont), tx, 288);
+
+      const url = canvas.toDataURL('image/png');
+      const safe = (reagent.en || reagent.th).replace(/[^a-zA-Z0-9ก-๙]/g, '_');
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Sticker_${lot.lot}_${safe}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const printStyle = `
@@ -150,9 +183,70 @@ export function PrintStickerModal({ v }) {
     </>
   );
 
+  const buttonStyle = `
+    .sticker-dl-btn {
+      position: relative;
+      overflow: hidden;
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 12px 18px;
+      border: none;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--brand-600) 0%, var(--brand-800) 100%);
+      color: #ffffff;
+      cursor: pointer;
+      font: var(--fw-bold) var(--text-sm)/1 var(--font-body);
+      box-shadow: 0 6px 18px rgba(26,147,179,0.35);
+      transition: transform .18s cubic-bezier(.25,.8,.25,1), box-shadow .18s ease, filter .18s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .sticker-dl-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(26,147,179,0.5);
+    }
+    .sticker-dl-btn:active:not(:disabled) {
+      transform: translateY(0) scale(.98);
+      box-shadow: 0 4px 12px rgba(26,147,179,0.4);
+    }
+    .sticker-dl-btn:disabled {
+      opacity: .6;
+      cursor: default;
+      filter: grayscale(.3);
+    }
+    .sticker-dl-btn .sticker-dl-ic {
+      transition: transform .25s ease;
+    }
+    .sticker-dl-btn:hover:not(:disabled) .sticker-dl-ic {
+      transform: translateY(2px);
+    }
+    /* diagonal shine sweep on hover */
+    .sticker-dl-btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -130%;
+      width: 55%;
+      height: 100%;
+      background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.38) 50%, transparent 100%);
+      transform: skewX(-20deg);
+      pointer-events: none;
+    }
+    .sticker-dl-btn:hover:not(:disabled)::after {
+      animation: sticker-shine .85s ease;
+    }
+    @keyframes sticker-shine {
+      from { left: -130%; }
+      to { left: 140%; }
+    }
+  `;
+
   return (
     <>
       <style>{printStyle}</style>
+      <style>{buttonStyle}</style>
 
       {/* 1. Real Sticker Print Area (Only rendered in printing, hidden on screen) */}
       <div className="sticker-print-area" style={{
@@ -180,8 +274,8 @@ export function PrintStickerModal({ v }) {
               {ic.qr}
             </span>
             <div style={css(`flex:1;`)}>
-              <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary);`)}>พิมพ์สติกเกอร์รหัส QR Code</div>
-              <div style={css(`font:var(--text-3xs)/1.2 var(--font-body); color:var(--text-tertiary);`)}>ขนาดสติกเกอร์มาตรฐาน 2 x 4 เซนติเมตร (Landscape)</div>
+              <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary);`)}>สติกเกอร์ QR Code น้ำยา</div>
+              <div style={css(`font:var(--text-3xs)/1.2 var(--font-body); color:var(--text-tertiary);`)}>ขนาดมาตรฐาน 2 x 4 เซนติเมตร (40 x 20 mm)</div>
             </div>
             <button onClick={closePrintSticker} style={css(`border:none; background:var(--slate-100); cursor:pointer; padding:5px; border-radius:var(--radius-sm); color:var(--text-secondary); display:grid; place-items:center;`)}>
               {ic.close}
@@ -210,21 +304,19 @@ export function PrintStickerModal({ v }) {
               {stickerBody}
             </div>
 
-            <div style={css(`font:var(--text-3xs)/1.4 var(--font-body); color:var(--text-secondary); text-align:center; max-width:280px;`)}>
-              💡 แนะนำให้ตั้งค่าการพิมพ์ในเบราว์เซอร์เป็นขนาดกระดาษสติกเกอร์ <strong>2x4 cm (หรือ 40x20 mm)</strong> และปรับขอบกระดาษ (Margins) เป็น <strong>None (ไม่มี)</strong> ก่อนสั่งพิมพ์
+            <div style={css(`font:var(--text-3xs)/1.5 var(--font-body); color:var(--text-secondary); text-align:center; max-width:300px;`)}>
+              💡 กด <strong>ดาวน์โหลดสติกเกอร์</strong> เพื่อบันทึกเป็นไฟล์รูป PNG แล้วนำไปสั่งพิมพ์ผ่านโปรแกรมฉลากของเครื่องพิมพ์ (หรือ Windows Photos) โดยเลือกกระดาษ <strong>40 x 20 mm</strong>
             </div>
           </div>
 
           {/* Footer */}
-          <div style={css(`padding:12px 20px; border-top:1px solid var(--border-subtle); display:flex; justify-content:flex-end; gap:10px;`)}>
-            <button onClick={closePrintSticker} style={css(`padding:8px 14px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body);`)}>
+          <div style={css(`padding:14px 20px; border-top:1px solid var(--border-subtle); display:flex; align-items:center; gap:10px;`)}>
+            <button onClick={closePrintSticker} style={css(`padding:11px 16px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body);`)}>
               ยกเลิก
             </button>
-            <button onClick={downloadQR} disabled={!qrUrl} style={css(`padding:8px 14px; border-radius:var(--radius-md); border:1px solid var(--brand-200); background:var(--brand-50); color:var(--brand-700); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body);`)}>
-              📥 ดาวน์โหลดรูปภาพ QR Code (PNG)
-            </button>
-            <button onClick={() => window.print()} style={css(`padding:8px 14px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); box-shadow:var(--glow-brand-soft);`)}>
-              🖨️ สั่งพิมพ์สติกเกอร์
+            <button className="sticker-dl-btn" onClick={downloadSticker} disabled={!qrUrl || downloading}>
+              <span className="sticker-dl-ic" style={{ display: 'grid', placeItems: 'center' }}>{ic.receive}</span>
+              {downloading ? 'กำลังสร้างไฟล์…' : 'ดาวน์โหลดสติกเกอร์ (PNG)'}
             </button>
           </div>
         </div>
