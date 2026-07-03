@@ -2,7 +2,7 @@ import { requirePerm, json } from './_lib.js';
 
 export async function onRequestGet(context) {
   try {
-    const { results } = await context.env.DB.prepare('SELECT * FROM transactions').all();
+    const { results } = await context.env.DB.prepare('SELECT *, lot_id AS lotId FROM transactions').all();
     return json(results);
   } catch (err) {
     return json({ error: err.message }, 500);
