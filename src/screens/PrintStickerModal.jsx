@@ -40,9 +40,20 @@ export function PrintStickerModal({ v }) {
     ROOM_TEMP: 'อุณหภูมิห้อง'
   })[reagent.storage] || reagent.storage || '—';
 
+  // "YYYY-MM-DD" -> "3 Jul 2026" (day, English abbreviated month, year) for the sticker.
+  const formatStickerDate = (isoDate) => {
+    if (!isoDate) return null;
+    const [y, m, d] = isoDate.split('-');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const mi = parseInt(m, 10) - 1;
+    if (!y || !d || mi < 0 || mi > 11) return isoDate;
+    return `${parseInt(d, 10)} ${months[mi]} ${y}`;
+  };
+
   // Date the lot was received into stock (from its RECEIVE transaction). Older
   // lots created before this field existed won't have one — fall back to '—'.
-  const recvLabel = lot.recvDate || '—';
+  const recvLabel = formatStickerDate(lot.recvDate) || '—';
+  const expLabel = formatStickerDate(lot.expiry) || lot.expiry;
 
   // Render the WHOLE sticker (QR + all text) to a single 40x20mm PNG and download it.
   // Printing one image via the printer's own label utility is far more reliable than
@@ -95,7 +106,7 @@ export function PrintStickerModal({ v }) {
       ctx.font = recvFont;
       ctx.fillText(clip('รับเข้า: ' + recvLabel, recvFont), tx, 190);
       ctx.font = expFont;
-      ctx.fillText('EXP: ' + lot.expiry, tx, 244);
+      ctx.fillText(clip('EXP: ' + expLabel, expFont), tx, 244);
       ctx.font = locFont;
       ctx.fillText(clip('สภาวะจัดเก็บ: ' + storageLabel, locFont), tx, 292);
 
@@ -184,8 +195,8 @@ export function PrintStickerModal({ v }) {
         <div style={{ fontSize: '7px', color: '#333', lineHeight: 1.3, whiteSpace: 'nowrap' }}>
           รับเข้า: {recvLabel}
         </div>
-        <div style={{ fontSize: '7.5px', fontWeight: 'bold', color: '#c2410c', lineHeight: 1.3 }}>
-          EXP: {lot.expiry}
+        <div style={{ fontSize: '7.5px', fontWeight: 'bold', color: '#c2410c', lineHeight: 1.3, whiteSpace: 'nowrap' }}>
+          EXP: {expLabel}
         </div>
         <div style={{ fontSize: '7px', color: '#333', lineHeight: 1.4, whiteSpace: 'nowrap' }}>
           สภาวะจัดเก็บ: {storageLabel}
