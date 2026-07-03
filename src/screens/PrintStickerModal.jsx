@@ -40,6 +40,10 @@ export function PrintStickerModal({ v }) {
     ROOM_TEMP: 'อุณหภูมิห้อง'
   })[reagent.storage] || reagent.storage || '—';
 
+  // Date the lot was received into stock (from its RECEIVE transaction). Older
+  // lots created before this field existed won't have one — fall back to '—'.
+  const recvLabel = lot.recvDate || '—';
+
   // Render the WHOLE sticker (QR + all text) to a single 40x20mm PNG and download it.
   // Printing one image via the printer's own label utility is far more reliable than
   // browser HTML/CSS printing on ZPL thermal label printers.
@@ -79,16 +83,21 @@ export function PrintStickerModal({ v }) {
         while (t.length > 1 && ctx.measureText(t + '…').width > tw) t = t.slice(0, -1);
         return t + '…';
       };
-      const nameFont = "bold 40px 'Sarabun', sans-serif";
-      const locFont = "30px 'Sarabun', sans-serif";
+      const nameFont = "bold 36px 'Sarabun', sans-serif";
+      const dataFont = "600 30px 'IBM Plex Mono', monospace";
+      const recvFont = "600 28px 'Sarabun', sans-serif";
+      const expFont = "bold 30px 'IBM Plex Mono', monospace";
+      const locFont = "24px 'Sarabun', sans-serif";
       ctx.font = nameFont;
-      ctx.fillText(clip(reagent.th, nameFont), tx, 92);
-      ctx.font = "600 34px 'IBM Plex Mono', monospace";
-      ctx.fillText('Lot: ' + lot.lot, tx, 158);
-      ctx.font = "bold 34px 'IBM Plex Mono', monospace";
-      ctx.fillText('EXP: ' + lot.expiry, tx, 222);
+      ctx.fillText(clip(reagent.th, nameFont), tx, 82);
+      ctx.font = dataFont;
+      ctx.fillText('Lot: ' + lot.lot, tx, 136);
+      ctx.font = recvFont;
+      ctx.fillText(clip('รับเข้า: ' + recvLabel, recvFont), tx, 190);
+      ctx.font = expFont;
+      ctx.fillText('EXP: ' + lot.expiry, tx, 244);
       ctx.font = locFont;
-      ctx.fillText(clip('สภาวะจัดเก็บ: ' + storageLabel, locFont), tx, 288);
+      ctx.fillText(clip('สภาวะจัดเก็บ: ' + storageLabel, locFont), tx, 292);
 
       const url = canvas.toDataURL('image/png');
       const safe = (reagent.en || reagent.th).replace(/[^a-zA-Z0-9ก-๙]/g, '_');
@@ -165,17 +174,20 @@ export function PrintStickerModal({ v }) {
           <div style={{ width: '100%', height: '100%', background: '#ffffff' }} />
         )}
       </div>
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.7mm', textAlign: 'left' }}>
-        <div style={{ fontSize: '8.5px', fontWeight: 'bold', color: '#000', lineHeight: 1.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.5mm', textAlign: 'left' }}>
+        <div style={{ fontSize: '8.5px', fontWeight: 'bold', color: '#000', lineHeight: 1.35, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {reagent.th}
         </div>
-        <div style={{ fontSize: '7.5px', color: '#000', fontFamily: 'monospace', lineHeight: 1.4 }}>
+        <div style={{ fontSize: '7.5px', color: '#000', fontFamily: 'monospace', lineHeight: 1.3 }}>
           Lot: <strong>{lot.lot}</strong>
         </div>
-        <div style={{ fontSize: '7.5px', fontWeight: 'bold', color: '#c2410c', lineHeight: 1.4 }}>
+        <div style={{ fontSize: '7px', color: '#333', lineHeight: 1.3, whiteSpace: 'nowrap' }}>
+          รับเข้า: {recvLabel}
+        </div>
+        <div style={{ fontSize: '7.5px', fontWeight: 'bold', color: '#c2410c', lineHeight: 1.3 }}>
           EXP: {lot.expiry}
         </div>
-        <div style={{ fontSize: '7px', color: '#333', lineHeight: 1.5, whiteSpace: 'nowrap' }}>
+        <div style={{ fontSize: '7px', color: '#333', lineHeight: 1.4, whiteSpace: 'nowrap' }}>
           สภาวะจัดเก็บ: {storageLabel}
         </div>
       </div>
