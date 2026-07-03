@@ -402,7 +402,7 @@ export function ReagentLists({ v }) {
                                     onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--slate-100)'; e.currentTarget.style.borderColor = 'var(--border-strong)'; }}
                                     onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--slate-50)'; e.currentTarget.style.borderColor = 'var(--border-default)'; }}
                                   >
-                                    🖨️ พิมพ์ QR Code (2x4 cm)
+                                    🏷️ สติกเกอร์ QR
                                   </button>
                                   {canManage && (
                                     <>
