@@ -7,25 +7,10 @@ export function ReceiveModal({ v }) {
   const {
     stop, ic, modalReceive, closeModal, rf, rfRid,
     rfLot, rfExpiry, rfQty, reagentOpts,
-    submitReceive, openPrintSticker, reagentsList, user,
+    submitReceive, user,
   } = v;
 
   if (!modalReceive) return null;
-
-  const handlePrint = () => {
-    if (!rf.rid || !rf.lot) {
-      alert('กรุณาเลือกน้ำยาและกรอกเลข Lot ก่อนพิมพ์สติกเกอร์');
-      return;
-    }
-    const reagentObj = reagentsList.find(r => String(r.id) === String(rf.rid));
-    if (!reagentObj) return;
-    const tempLot = {
-      lot: rf.lot,
-      expiry: rf.expiry || '—',
-      qr: 'QR-' + rf.lot
-    };
-    openPrintSticker(tempLot, reagentObj);
-  };
 
   const localStyle = `
     .modal-grid-2col {
@@ -68,7 +53,7 @@ export function ReceiveModal({ v }) {
           {/* Header */}
           <div style={css(`padding:18px 22px; border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; gap:11px;`)}>
             <span style={css(`width:34px; height:34px; border-radius:var(--radius-md); background:var(--brand-50); color:var(--brand-700); display:grid; place-items:center;`)}>{ic.receive}</span>
-            <div style={css(`flex:1;`)}><div style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary);`)}>รับน้ำยาเข้าคลัง</div><div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>บันทึก Lot ใหม่ พร้อมวันหมดอายุและพิมพ์สติกเกอร์รหัส</div></div>
+            <div style={css(`flex:1;`)}><div style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary);`)}>รับน้ำยาเข้าคลัง</div><div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>บันทึก Lot ใหม่ พร้อมระบุวันหมดอายุ</div></div>
             <button onClick={closeModal} style={css(`border:none; background:var(--slate-100); cursor:pointer; padding:6px; border-radius:var(--radius-sm); color:var(--text-secondary); display:grid; place-items:center;`)}>{ic.close}</button>
           </div>
           
@@ -94,15 +79,6 @@ export function ReceiveModal({ v }) {
               onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--white)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
             >
               ยกเลิก
-            </button>
-            <button 
-              type="button" 
-              onClick={handlePrint} 
-              style={css(`padding:9px 18px; border-radius:var(--radius-md); border:1px solid var(--brand-700); background:transparent; color:var(--brand-700); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body); transition:all var(--dur-fast);`)}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--brand-100)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-            >
-              🖨️ พิมพ์ QR Code (2x4)
             </button>
             <button 
               onClick={submitReceive} 
