@@ -839,6 +839,10 @@ class App extends React.Component {
       cal: I('CalendarClock', 'var(--text-tertiary)', 15), check: I('Check', '#fff', 16), shield: I('ShieldCheck'),
       help: I('BookOpen'), menu: I('Menu', 'currentColor', 20),
     };
+    const recvDateOf = (lotId) => {
+      const t = S.txns.find(t => t.lotId === lotId && t.type === 'RECEIVE');
+      return t ? t.at.slice(0, 10) : null;
+    };
     const dn = this.state.view;
     const titles = {
       dashboard: ['Dashboard', 'ภาพรวมคลังน้ำยาและการแจ้งเตือน'],
@@ -919,7 +923,8 @@ class App extends React.Component {
         const vm = rvm(r);
         const lots = S.lots.filter(l => l.rid === r.id).slice().sort((a, b) => a.expiry.localeCompare(b.expiry)).map((l, i) => {
           const d = this.days(l.expiry); const sc = this.sevCol(this.sev(d, crit)); const dep = l.qty === 0 || l.status === 'DEPLETED';
-          return { id: l.id, lot: l.lot, expiry: l.expiry, qty: l.qty, recv: l.recv, loc: l.loc, qr: l.qr,
+          const recvDate = recvDateOf(l.id);
+          return { id: l.id, lot: l.lot, expiry: l.expiry, qty: l.qty, recv: l.recv, recvDate, loc: l.loc, qr: l.qr,
             dayLabel: dep ? 'หมดแล้ว' : this.dayLabel(d), dayColor: dep ? 'var(--text-tertiary)' : sc.fg,
             fefoBadge: (i === 0 && !dep) ? 'FEFO ถัดไป' : '', statusLabel: dep ? 'หมด' : 'พร้อมใช้',
             statusFg: dep ? 'var(--slate-600)' : 'var(--green-700)', statusBg: dep ? 'var(--slate-100)' : 'var(--green-100)',
@@ -1065,7 +1070,7 @@ class App extends React.Component {
       reagentOpts, locOpts, supplierOpts, scanOpts, submitReceive: () => this.submitReceive(),
       iform: S.iform, ifRid: this.bindIf('rid'), ifQty: this.bindIf('qty'), ifScan: this.bindIf('scan'), ifRef: this.bindIf('ref'), ifSearchInput: this.bindIf('searchInput'), ifQrInput: this.bindIf('qrInput'), submitIssue: () => this.submitIssue(),
       scanQRCode: (code) => this.scanQRCode(code), unlinkLot: () => this.unlinkLot(), selectReagentForIssue: (rid) => this.selectReagentForIssue(rid),
-      activeLotsList: S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE'),
+      activeLotsList: S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE').map(l => ({ ...l, recvDate: recvDateOf(l.id) })),
       reagentsList: S.reagents.map(r => {
         let subUnitName = '';
         let subUnitQty = null;
