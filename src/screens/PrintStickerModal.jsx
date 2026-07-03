@@ -49,18 +49,6 @@ export function PrintStickerModal({ v }) {
 
   const { lot, reagent } = printLotData;
 
-  // Category translation
-  const catMap = {
-    CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-    HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-    IMM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-    MIP: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-    MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-    HMS: 'บริการศูนย์การแพทย์',
-    ADV: 'ตรวจวินิจฉัยขั้นสูง'
-  };
-  const catLabel = catMap[reagent.cat] || reagent.cat;
-
   // Storage Condition fallback if lot location is empty
   const storageLabel = ({
     REFRIGERATED_2_8: '2–8°C',
@@ -135,6 +123,35 @@ export function PrintStickerModal({ v }) {
     }
   `;
 
+  // Shared sticker content (QR + details) — used by BOTH the print area and the
+  // on-screen preview so they can never drift apart. No fixed-height + overflow:hidden
+  // on the text column (that was clipping the tops of Thai vowels/tone marks).
+  const stickerBody = (
+    <>
+      <div style={{ width: '1.5cm', height: '1.5cm', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        {qrUrl ? (
+          <img src={qrUrl} alt="QR Code" style={{ width: '100%', height: '100%', objectFit: 'contain', imageRendering: 'pixelated', display: 'block' }} />
+        ) : (
+          <div style={{ width: '100%', height: '100%', background: '#ffffff' }} />
+        )}
+      </div>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.7mm', textAlign: 'left' }}>
+        <div style={{ fontSize: '8.5px', fontWeight: 'bold', color: '#000', lineHeight: 1.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {reagent.th}
+        </div>
+        <div style={{ fontSize: '7.5px', color: '#000', fontFamily: 'monospace', lineHeight: 1.4 }}>
+          Lot: <strong>{lot.lot}</strong>
+        </div>
+        <div style={{ fontSize: '7.5px', fontWeight: 'bold', color: '#c2410c', lineHeight: 1.4 }}>
+          EXP: {lot.expiry}
+        </div>
+        <div style={{ fontSize: '7px', color: '#333', lineHeight: 1.5, whiteSpace: 'nowrap' }}>
+          ที่เก็บ: {locLabel}
+        </div>
+      </div>
+    </>
+  );
+
   return (
     <>
       <style>{printStyle}</style>
@@ -153,40 +170,7 @@ export function PrintStickerModal({ v }) {
         gap: '2mm',
         fontFamily: "'Inter', 'Sarabun', sans-serif"
       }}>
-        {/* QR Code */}
-        <div style={{ width: '1.5cm', height: '1.5cm', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          {qrUrl ? (
-            <img 
-              src={qrUrl} 
-              alt="QR Code" 
-              style={{ width: '100%', height: '100%', objectFit: 'contain', imageRendering: 'pixelated', display: 'block' }} 
-            />
-          ) : (
-            <div style={{ width: '100%', height: '100%', background: '#ffffff' }} />
-          )}
-        </div>
-
-        {/* Reagent Details */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '1.5cm', overflow: 'hidden', textAlign: 'left' }}>
-          {/* Name */}
-          <div style={{ fontSize: '7.5px', fontWeight: 'bold', color: '#000', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.5' }}>
-            {reagent.th}
-          </div>
-          <div style={{ fontSize: '6.8px', color: '#000', fontFamily: 'monospace', lineHeight: '1.4' }}>
-            Lot: <strong>{lot.lot}</strong>
-          </div>
-          {/* Expiry */}
-          <div style={{ fontSize: '6.8px', fontWeight: 'bold', color: '#c2410c', lineHeight: '1.4' }}>
-            EXP: {lot.expiry}
-          </div>
-          {/* Category & Location */}
-          <div style={{ fontSize: '6px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.5' }}>
-            หมวด: {catLabel}
-          </div>
-          <div style={{ fontSize: '6px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.5' }}>
-            ที่เก็บ: {locLabel}
-          </div>
-        </div>
+        {stickerBody}
       </div>
 
       {/* 2. Visual Screen Modal (Hidden during printing) */}
@@ -225,43 +209,7 @@ export function PrintStickerModal({ v }) {
               gap: '2mm',
               fontFamily: "'Inter', 'Sarabun', sans-serif"
             }}>
-              {/* QR Code */}
-              <div style={{ width: '1.5cm', height: '1.5cm', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                {qrUrl ? (
-                  <img 
-                    src={qrUrl} 
-                    alt="QR Code" 
-                    style={{ width: '100%', height: '100%', objectFit: 'contain', imageRendering: 'pixelated', display: 'block' }} 
-                  />
-                ) : (
-                  <div style={{ width: '100%', height: '100%', background: '#ffffff' }} />
-                )}
-              </div>
-
-              {/* Reagent Details */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '1.5cm', overflow: 'hidden', textAlign: 'left' }}>
-                {/* Name */}
-                <div style={{ fontSize: '7.5px', fontWeight: 'bold', color: '#000', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.5' }}>
-                  {reagent.th}
-                </div>
-
-                <div style={{ fontSize: '6.8px', color: '#000', fontFamily: 'monospace', lineHeight: '1.4' }}>
-                  Lot: <strong>{lot.lot}</strong>
-                </div>
-
-                {/* Expiry */}
-                <div style={{ fontSize: '6.8px', fontWeight: 'bold', color: '#c2410c', lineHeight: '1.4' }}>
-                  EXP: {lot.expiry}
-                </div>
-
-                {/* Category & Location */}
-                <div style={{ fontSize: '6px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.5' }}>
-                  หมวด: {catLabel}
-                </div>
-                <div style={{ fontSize: '6px', color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.5' }}>
-                  ที่เก็บ: {locLabel}
-                </div>
-              </div>
+              {stickerBody}
             </div>
 
             <div style={css(`font:var(--text-3xs)/1.4 var(--font-body); color:var(--text-secondary); text-align:center; max-width:280px;`)}>
