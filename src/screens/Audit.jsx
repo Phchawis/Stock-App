@@ -50,6 +50,14 @@ export function Audit({ v }) {
 
   return (
     <>
+      <style>{`
+        .audit-row-mobile { display: none; }
+        @media (max-width: 768px) {
+          .audit-thead { display: none !important; }
+          .audit-row-desktop { display: none !important; }
+          .audit-row-mobile { display: flex !important; }
+        }
+      `}</style>
       <div className="qms-rise" style={css(`max-width:1180px; display:flex; flex-direction:column; gap:16px;`)}>
         {/* Controls Grid */}
         <div style={css(`display:flex; flex-direction:column; gap:12px;`)}>
@@ -138,7 +146,7 @@ export function Audit({ v }) {
         {/* Movement Table */}
         <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); overflow:hidden;`)}>
           
-          <div style={css(`display:grid; grid-template-columns:0.85fr 1.6fr 0.8fr 0.8fr 0.9fr 1.2fr${canManage ? ' 1fr' : ''}; gap:12px; padding:11px 18px; background:var(--slate-50); border-bottom:1px solid var(--border-subtle);`)}>
+          <div className="audit-thead" style={css(`display:grid; grid-template-columns:0.85fr 1.6fr 0.8fr 0.8fr 0.9fr 1.2fr${canManage ? ' 1fr' : ''}; gap:12px; padding:11px 18px; background:var(--slate-50); border-bottom:1px solid var(--border-subtle);`)}>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em;`)}>ประเภท</div>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em;`)}>น้ำยา · Lot</div>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em; text-align:right;`)}>จำนวน</div>
@@ -165,7 +173,9 @@ export function Audit({ v }) {
 
                   {/* Transactions of this day */}
                   {groupedRows[dateStr].map((t, tI) => (
-                    <div key={tI} style={css(`display:grid; grid-template-columns:0.85fr 1.6fr 0.8fr 0.8fr 0.9fr 1.2fr${canManage ? ' 1fr' : ''}; gap:12px; align-items:center; padding:11px 18px; border-bottom:${tI === groupedRows[dateStr].length - 1 ? 'none' : '1px solid var(--border-subtle)'};`)}>
+                    <React.Fragment key={tI}>
+                    {/* Desktop table row */}
+                    <div className="audit-row-desktop" style={css(`display:grid; grid-template-columns:0.85fr 1.6fr 0.8fr 0.8fr 0.9fr 1.2fr${canManage ? ' 1fr' : ''}; gap:12px; align-items:center; padding:11px 18px; border-bottom:${tI === groupedRows[dateStr].length - 1 ? 'none' : '1px solid var(--border-subtle)'};`)}>
                       <div><span style={css(`padding:3px 9px; border-radius:var(--radius-sm); background:${t.bg}; color:${t.fg}; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); white-space:nowrap;`)}>{t.typeLabel}</span></div>
                       <div style={css(`min-width:0;`)}>
                         <div style={css(`font:var(--fw-medium) var(--text-sm)/1.3 var(--font-body); color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>{t.name}</div>
@@ -197,6 +207,54 @@ export function Audit({ v }) {
                         </div>
                       )}
                     </div>
+
+                    {/* Mobile card row */}
+                    <div className="audit-row-mobile" style={css(`flex-direction:column; gap:11px; padding:15px 16px; border-bottom:${tI === groupedRows[dateStr].length - 1 ? 'none' : '1px solid var(--border-subtle)'};`)}>
+                      <div style={css(`display:flex; align-items:center; justify-content:space-between; gap:10px;`)}>
+                        <span style={css(`padding:4px 11px; border-radius:var(--radius-sm); background:${t.bg}; color:${t.fg}; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); white-space:nowrap;`)}>{t.typeLabel}</span>
+                        <span style={css(`font:var(--fw-bold) var(--text-lg)/1 var(--font-mono); color:${t.qtyColor}; white-space:nowrap;`)}>{t.qtyLabel}</span>
+                      </div>
+
+                      <div>
+                        <div style={css(`font:var(--fw-semibold) var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>{t.name}</div>
+                        <div style={css(`font:var(--text-2xs)/1.4 var(--font-mono); color:var(--text-tertiary); margin-top:3px; word-break:break-all;`)}>{t.code} · Lot {t.lot}</div>
+                      </div>
+
+                      <div style={css(`display:flex; flex-direction:column; gap:6px; padding-top:10px; border-top:1px dashed var(--border-subtle);`)}>
+                        <div style={css(`display:flex; align-items:baseline; justify-content:space-between; gap:12px;`)}>
+                          <span style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary); flex-shrink:0;`)}>วิธีระบุ</span>
+                          <span style={css(`font:var(--text-xs)/1.3 var(--font-body); color:var(--text-secondary); text-align:right;`)}>{t.scanLabel}</span>
+                        </div>
+                        <div style={css(`display:flex; align-items:baseline; justify-content:space-between; gap:12px;`)}>
+                          <span style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary); flex-shrink:0;`)}>ผู้ทำรายการ</span>
+                          <span style={css(`font:var(--text-xs)/1.3 var(--font-body); color:var(--text-secondary); text-align:right;`)}>{t.by}</span>
+                        </div>
+                        <div style={css(`display:flex; align-items:baseline; justify-content:space-between; gap:12px;`)}>
+                          <span style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary); flex-shrink:0;`)}>เวลา · อ้างอิง</span>
+                          <span style={css(`font:var(--text-2xs)/1.3 var(--font-mono); color:var(--text-secondary); text-align:right;`)}>{t.at.substring(11)}{t.ref ? ` · ${t.ref}` : ''}</span>
+                        </div>
+                      </div>
+
+                      {canManage && (
+                        <div style={css(`display:flex; justify-content:flex-end; gap:8px; padding-top:10px; border-top:1px dashed var(--border-subtle);`)}>
+                          <button
+                            type="button"
+                            onClick={t.onEdit}
+                            style={css(`flex:1; background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-md); padding:9px; font:var(--fw-semibold) var(--text-xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer;`)}
+                          >
+                            ✏️ แก้ไข
+                          </button>
+                          <button
+                            type="button"
+                            onClick={t.onDelete}
+                            style={css(`flex:1; background:transparent; border:1px solid var(--red-600); border-radius:var(--radius-md); padding:9px; font:var(--fw-semibold) var(--text-xs)/1.2 var(--font-body); color:var(--red-600); cursor:pointer;`)}
+                          >
+                            🗑️ ลบ
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    </React.Fragment>
                   ))}
                 </div>
               );
