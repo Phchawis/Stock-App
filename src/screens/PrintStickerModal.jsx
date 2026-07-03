@@ -77,46 +77,44 @@ export function PrintStickerModal({ v }) {
         size: 40mm 20mm;
         margin: 0;
       }
-      /* Hide all visual interface wrappers during print */
-      aside, header, main, .sidebar-backdrop, .dr-in, .toast-container, .no-print, .ov-in {
-        display: none !important;
+      /* Bulletproof "print only the sticker": hide EVERYTHING via visibility, then
+         re-show just the sticker. This avoids stray fixed elements (e.g. the mobile
+         action bar) leaking onto the label — enumerating elements to hide missed them. */
+      body * {
+        visibility: hidden !important;
       }
-      /* Reset layout wrappers to 100% viewport width/height */
-      html, body, #root, #root > div {
-        width: 100% !important;
-        height: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: hidden !important;
-        background: transparent !important;
-        background-color: transparent !important;
-        min-height: auto !important;
-        display: block !important;
-        position: static !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+      .sticker-print-area,
+      .sticker-print-area * {
+        visibility: visible !important;
       }
-      /* Force print area to display and stretch to 100% of selected paper size */
+      /* Pin the sticker to the top-left of the page and fill the 40x20mm label */
       .sticker-print-area {
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
         justify-content: flex-start !important;
-        position: static !important;
-        width: 100% !important;
-        height: 100% !important;
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 40mm !important;
+        height: 20mm !important;
         padding: 1.5mm 2mm !important;
         margin: 0 !important;
         border: none !important;
         box-shadow: none !important;
         box-sizing: border-box !important;
         background: #ffffff !important;
-        color: #000000 !important;
         gap: 2mm !important;
+        overflow: hidden !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
-      /* Force all children (text, labels, EXP) to solid black color for thermal printheads */
-      .sticker-print-area * {
+      /* Force text to solid black for thermal printheads (keep the QR image as-is) */
+      .sticker-print-area div,
+      .sticker-print-area strong {
         color: #000000 !important;
+      }
+      .sticker-print-area img {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
