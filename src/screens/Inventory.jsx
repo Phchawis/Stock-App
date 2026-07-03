@@ -237,8 +237,8 @@ export function Inventory({ v }) {
               
               <div style={css(`text-align:right;`)}>
                 <div style={css(`font:var(--fw-bold) var(--text-sm)/1 var(--font-mono); color:${r.onHandColor};`)}>
-                  {r.testsPerUnit 
-                    ? `${(r.onHand * r.testsPerUnit).toLocaleString()} ${r.subUnit || 'test'} (${r.onHand} / ${r.min} ${r.unit})` 
+                  {r.subUnit && r.subUnitQty 
+                    ? `${(r.onHand * r.subUnitQty).toLocaleString()} ${r.subUnit} (${r.onHand} / ${r.min} ${r.unit})` 
                     : `${r.onHand} / ${r.min} ${r.unit}`}
                 </div>
               </div>
