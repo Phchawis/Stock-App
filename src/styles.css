@@ -1679,3 +1679,64 @@ code, kbd, samp { font-family: var(--font-mono); }
   height: 100% !important;
   object-fit: cover !important;
 }
+
+/* ── Polish layer · typography & micro-interaction refinements ──
+   Global vocabulary applied through element selectors so the
+   inline-styled markup inherits it without per-screen edits.
+   Uses only properties the inline styles do not set (transition,
+   :active transform, focus box-shadow, scrollbar, placeholder),
+   so nothing existing is overridden. Screen-scoped effects
+   (Inventory rows, sticker button) keep their own rules. */
+
+/* Digits align vertically in tables, KPI values and lot codes */
+body { font-variant-numeric: tabular-nums; }
+
+/* Kill the grey mobile tap flash — press feedback below replaces it */
+html { -webkit-tap-highlight-color: transparent; }
+
+/* Buttons: one consistent motion vocabulary (fast, ease-out) */
+button {
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color    var(--dur-fast) var(--ease-out),
+    color           var(--dur-fast) var(--ease-out),
+    box-shadow      var(--dur-base) var(--ease-out),
+    transform       var(--dur-fast) var(--ease-out),
+    opacity         var(--dur-fast) var(--ease-out),
+    filter          var(--dur-fast) var(--ease-out);
+}
+/* Tactile press: every enabled button dips 1px while held */
+button:not(:disabled):active { transform: translateY(1px); }
+button:disabled { cursor: not-allowed; }
+
+/* Inputs: calm focus ring via box-shadow so inline borders stay intact */
+input, select, textarea {
+  transition:
+    border-color    var(--dur-fast) var(--ease-out),
+    box-shadow      var(--dur-base) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--brand-100);
+}
+
+/* Placeholders: readable, consistent everywhere */
+::placeholder { color: var(--text-tertiary); opacity: 1; }
+
+/* Scrollbars: thin and theme-matched instead of OS chrome */
+* { scrollbar-width: thin; scrollbar-color: var(--border-default) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background-color: var(--border-default);
+  border-radius: var(--radius-pill);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: var(--border-strong); }
+
+@media (prefers-reduced-motion: reduce) {
+  button, input, select, textarea { transition: none; }
+  button:not(:disabled):active { transform: none; }
+}
