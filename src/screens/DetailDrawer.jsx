@@ -12,7 +12,7 @@ export function DetailDrawer({ v }) {
         <div style={css(`padding:18px 22px; border-bottom:1px solid var(--border-subtle); display:flex; align-items:flex-start; gap:12px;`)}>
           <div style={css(`flex:1; min-width:0;`)}>
             <div style={css(`font:var(--fw-bold) var(--text-lg)/1.25 var(--font-display); color:var(--text-primary);`)}>{detail.th}</div>
-            <div style={css(`font:var(--text-2xs)/1.4 var(--font-mono); color:var(--text-tertiary); margin-top:2px;`)}>{detail.code} · {detail.en}</div>
+            <div style={css(`font:var(--text-2xs)/1.4 var(--font-mono); color:var(--text-tertiary); margin-top:2px;`)}>{detail.en}</div>
           </div>
           <button onClick={closeDetail} style={css(`border:none; background:var(--slate-100); cursor:pointer; padding:6px; border-radius:var(--radius-sm); color:var(--text-secondary); display:grid; place-items:center;`)}>{ic.close}</button>
         </div>
@@ -31,16 +31,16 @@ export function DetailDrawer({ v }) {
             <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:11px 13px;`)}>
               <div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>คงเหลือรวม</div>
               <div style={css(`font:var(--fw-bold) var(--text-sm)/1.1 var(--font-mono); color:${detail.onHandColor}; margin-top:2px;`)}>
-                {detail.testsPerUnit 
-                  ? `${(detail.onHand * detail.testsPerUnit).toLocaleString()} ${detail.subUnit || 'test'} (${detail.onHand} ${detail.unit})` 
+                {detail.subUnit && detail.subUnitQty 
+                  ? `${(detail.onHand * detail.subUnitQty).toLocaleString()} ${detail.subUnit} (${detail.onHand} ${detail.unit})` 
                   : `${detail.onHand} ${detail.unit}`}
               </div>
             </div>
             <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:11px 13px;`)}>
               <div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>จุดสั่งซื้อซ้ำ</div>
               <div style={css(`font:var(--fw-bold) var(--text-sm)/1.1 var(--font-mono); color:var(--text-primary); margin-top:2px;`)}>
-                {detail.testsPerUnit 
-                  ? `${(detail.min * detail.testsPerUnit).toLocaleString()} ${detail.subUnit || 'test'} (${detail.min} ${detail.unit})` 
+                {detail.subUnit && detail.subUnitQty 
+                  ? `${(detail.min * detail.subUnitQty).toLocaleString()} ${detail.subUnit} (${detail.min} ${detail.unit})` 
                   : `${detail.min} ${detail.unit}`}
               </div>
             </div>
