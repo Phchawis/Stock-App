@@ -32,14 +32,13 @@ export function PrintStickerModal({ v }) {
 
   const { lot, reagent } = printLotData;
 
-  // Storage Condition fallback if lot location is empty
-  const storageLabel = ({
+  // Storage condition (temperature) shown on the sticker. The reagent may arrive
+  // as a raw record (has .storage) or as a view-model (has .storageLabel), so accept both.
+  const storageLabel = reagent.storageLabel || ({
     REFRIGERATED_2_8: '2–8°C',
     FROZEN_40: '−40°C',
     ROOM_TEMP: 'อุณหภูมิห้อง'
-  })[reagent.storage] || reagent.storage;
-
-  const locLabel = lot.loc || storageLabel;
+  })[reagent.storage] || reagent.storage || '—';
 
   // Render the WHOLE sticker (QR + all text) to a single 40x20mm PNG and download it.
   // Printing one image via the printer's own label utility is far more reliable than
@@ -89,7 +88,7 @@ export function PrintStickerModal({ v }) {
       ctx.font = "bold 34px 'IBM Plex Mono', monospace";
       ctx.fillText('EXP: ' + lot.expiry, tx, 222);
       ctx.font = locFont;
-      ctx.fillText(clip('ที่เก็บ: ' + locLabel, locFont), tx, 288);
+      ctx.fillText(clip('สภาวะจัดเก็บ: ' + storageLabel, locFont), tx, 288);
 
       const url = canvas.toDataURL('image/png');
       const safe = (reagent.en || reagent.th).replace(/[^a-zA-Z0-9ก-๙]/g, '_');
@@ -177,7 +176,7 @@ export function PrintStickerModal({ v }) {
           EXP: {lot.expiry}
         </div>
         <div style={{ fontSize: '7px', color: '#333', lineHeight: 1.5, whiteSpace: 'nowrap' }}>
-          ที่เก็บ: {locLabel}
+          สภาวะจัดเก็บ: {storageLabel}
         </div>
       </div>
     </>
