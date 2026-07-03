@@ -26,9 +26,9 @@ export function ReagentLists({ v }) {
   const getStorageLabel = (s) => ({ REFRIGERATED_2_8: '2–8°C', FROZEN_40: '−40°C', ROOM_TEMP: 'อุณหภูมิห้อง' })[s] || s;
 
   const formatStock = (qty, reagent) => {
-    if (reagent.testsPerUnit) {
-      const totalTests = qty * reagent.testsPerUnit;
-      return `${totalTests.toLocaleString()} ${reagent.subUnit || 'test'} (${qty} ${reagent.unit})`;
+    if (reagent.subUnit && reagent.subUnitQty) {
+      const totalSubUnits = qty * reagent.subUnitQty;
+      return `${totalSubUnits.toLocaleString()} ${reagent.subUnit} (${qty} ${reagent.unit})`;
     }
     return `${qty} ${reagent.unit}`;
   };
