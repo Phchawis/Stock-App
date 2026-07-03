@@ -350,8 +350,13 @@ export function Dashboard({ v }) {
           )}
         </div>
 
-        {/* KPI Summary Cards */}
-        <div style={css(`display:grid; grid-template-columns:repeat(4,1fr); gap:16px;`)}>
+        {/* KPI Summary Cards (hidden on mobile — the 4-up grid is too cramped on narrow screens) */}
+        <style>{`
+          @media (max-width: 768px) {
+            .kpi-cards-grid { display: none !important; }
+          }
+        `}</style>
+        <div className="kpi-cards-grid" style={css(`display:grid; grid-template-columns:repeat(4,1fr); gap:16px;`)}>
           {kpis.map((k, kI) => (
             <div key={kI} style={css(`position:relative; background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:16px 18px; overflow:hidden; box-shadow:var(--shadow-sm);`)}>
               <div style={css(`position:absolute; top:0; left:0; right:0; height:3px; background:${k.color}; opacity:.85;`)}></div>
