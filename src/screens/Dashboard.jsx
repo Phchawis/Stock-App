@@ -327,7 +327,7 @@ export function Dashboard({ v }) {
           <div style={css(`display:flex; flex-direction:column; gap:4px; min-width:240px; flex:1.2; max-width:340px;`)}>
             <SearchableSelect
               placeholder="ค้นหาชนิดน้ำยา..."
-              options={[{ value: 'all', label: 'ทุกชนิดน้ำยาเคมี' }, ...reagents.map(r => ({ value: String(r.id), label: `[${r.code}] ${r.th}` }))]}
+              options={[{ value: 'all', label: 'ทุกชนิดน้ำยาเคมี' }, ...reagents.map(r => ({ value: String(r.id), label: r.th }))]}
               value={selectedReagentId}
               onChange={(val) => setSelectedReagentId(val)}
             />
@@ -507,7 +507,7 @@ export function Dashboard({ v }) {
                     {criticalReorders.map((r, idx) => (
                       <tr key={idx} className="qrow" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                         <td style={{ padding: '8px 12px', fontWeight: '500', color: 'var(--text-primary)' }}>
-                          <span style={css(`font-family:var(--font-mono); font-size:10px; color:var(--text-tertiary);`)}>[{r.code}]</span> {r.th}
+                          {r.th}
                         </td>
                         <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 'bold', color: 'var(--red-700)', fontFamily: 'var(--font-mono)' }}>{r.onHand} {r.unit}</td>
                         <td style={{ padding: '8px 12px', textAlign: 'right', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>{r.min} {r.unit}</td>
@@ -629,7 +629,7 @@ export function Dashboard({ v }) {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9px', marginTop: '6px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #ddd' }}>
-                  <th style={{ textAlign: 'left', padding: '4px' }}>รหัส / ชื่อน้ำยา</th>
+                  <th style={{ textAlign: 'left', padding: '4px' }}>ชื่อน้ำยา</th>
                   <th style={{ textAlign: 'right', padding: '4px' }}>คงคลัง</th>
                   <th style={{ textAlign: 'right', padding: '4px' }}>เกณฑ์ Min</th>
                   <th style={{ textAlign: 'left', padding: '4px' }}>ผู้จัดจำหน่าย</th>
@@ -638,7 +638,7 @@ export function Dashboard({ v }) {
               <tbody>
                 {criticalReorders.map((r, idx) => (
                   <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: '4px' }}>[{r.code}] {r.th}</td>
+                    <td style={{ padding: '4px' }}>{r.th}</td>
                     <td style={{ padding: '4px', textAlign: 'right', fontWeight: 'bold' }}>{r.onHand} {r.unit}</td>
                     <td style={{ padding: '4px', textAlign: 'right' }}>{r.min} {r.unit}</td>
                     <td style={{ padding: '4px' }}>{r.supplier}</td>
@@ -659,7 +659,6 @@ export function Dashboard({ v }) {
               <thead>
                 <tr style={{ backgroundColor: '#f5f5f5' }}>
                   <th style={{ padding: '4px 6px', fontWeight: 'bold' }}>วันเวลาที่เบิกจ่าย</th>
-                  <th style={{ padding: '4px 6px', fontWeight: 'bold' }}>รหัสทะเบียนน้ำยา</th>
                   <th style={{ padding: '4px 6px', fontWeight: 'bold' }}>ชื่อน้ำยา</th>
                   <th style={{ padding: '4px 6px', fontWeight: 'bold' }}>Lot</th>
                   <th style={{ padding: '4px 6px', fontWeight: 'bold', textAlign: 'right' }}>จำนวนเบิก</th>
@@ -671,7 +670,6 @@ export function Dashboard({ v }) {
                 {issueTxns.map((t, idx) => (
                   <tr key={idx}>
                     <td style={{ padding: '4px 6px', fontFamily: 'var(--font-mono)' }}>{t.at}</td>
-                    <td style={{ padding: '4px 6px', fontFamily: 'var(--font-mono)' }}>{t.code}</td>
                     <td style={{ padding: '4px 6px' }}>{t.name}</td>
                     <td style={{ padding: '4px 6px', fontFamily: 'var(--font-mono)' }}>{t.lot}</td>
                     <td style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold' }}>{t.qtyLabel}</td>
