@@ -203,7 +203,7 @@ export function IssueModal({ v }) {
                       >
                         <div>
                           <div style={css(`font-weight:600; color:var(--text-primary);`)}>{r.th}</div>
-                          <div style={css(`font:var(--text-2xs)/1 var(--font-mono); color:var(--text-tertiary); margin-top:2px;`)}>{r.code} · {r.en}</div>
+                          <div style={css(`font:var(--text-2xs)/1 var(--font-mono); color:var(--text-tertiary); margin-top:2px;`)}>{r.en}</div>
                         </div>
                         <div style={css(`font:var(--fw-semibold) var(--text-xs)/1 var(--font-mono); color:var(--brand-800);`)}>
                           คงเหลือ {totalStock} {r.unit}
