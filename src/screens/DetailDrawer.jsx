@@ -77,16 +77,20 @@ export function DetailDrawer({ v }) {
           )}
 
           <div>
-            <div style={css(`font:var(--fw-semibold) var(--text-sm)/1.4 var(--font-body); color:var(--text-primary); margin-bottom:9px;`)}>รายการ Lot · เรียงตาม FEFO (หมดอายุก่อน–เบิกก่อน)</div>
+            <div style={css(`font:var(--fw-semibold) var(--text-sm)/1.4 var(--font-body); color:var(--text-primary); margin-bottom:9px;`)}>รายการ Lot · เรียงตามหมดอายุก่อน–เบิกก่อน</div>
             <div style={css(`display:flex; flex-direction:column; gap:9px;`)}>
               {detail.lots.map((l, lI) => (<React.Fragment key={lI}>
                 <div style={css(`border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:12px 14px;`)}>
                   <div style={css(`display:flex; align-items:center; gap:8px; margin-bottom:6px;`)}>
                     <span style={css(`font:var(--fw-bold) var(--text-sm)/1 var(--font-mono); color:var(--text-primary);`)}>Lot {l.lot}</span>
-                    {l.fefoBadge ? (<><span style={css(`padding:1px 7px; border-radius:var(--radius-pill); background:var(--brand-700); color:#fff; font:var(--fw-semibold) var(--text-2xs)/1.5 var(--font-body);`)}>{l.fefoBadge}</span></>) : null}
                     <span style={css(`flex:1;`)}></span>
                     <span style={css(`padding:1px 8px; border-radius:var(--radius-pill); background:${l.statusBg}; color:${l.statusFg}; font:var(--fw-semibold) var(--text-2xs)/1.5 var(--font-body);`)}>{l.statusLabel}</span>
                   </div>
+                  {l.fefoBadge ? (
+                    <div style={css(`margin:-2px 0 8px;`)}>
+                      <span style={css(`display:inline-block; padding:2px 9px; border-radius:var(--radius-pill); background:var(--brand-700); color:#fff; font:var(--fw-semibold) var(--text-2xs)/1.4 var(--font-body);`)}>{l.fefoBadge}</span>
+                    </div>
+                  ) : null}
                   <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:6px 14px; font:var(--text-2xs)/1.5 var(--font-body); color:var(--text-secondary);`)}>
                     <div>หมดอายุ <span style={css(`font-family:var(--font-mono); color:${l.dayColor}; font-weight:600;`)}>{l.expiry}</span></div>
                     <div style={css(`color:${l.dayColor}; font-weight:600;`)}>{l.dayLabel}</div>
