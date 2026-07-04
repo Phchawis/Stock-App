@@ -190,6 +190,15 @@ export function Audit({ v }) {
                       </div>
                       {canManage && (
                         <div style={css(`display:flex; justify-content:flex-end; gap:6px;`)}>
+                          {t.onPrintSticker && (
+                            <button
+                              type="button"
+                              onClick={t.onPrintSticker}
+                              style={css(`background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:3px 8px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer;`)}
+                            >
+                              🏷️ สติกเกอร์
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={t.onEdit}
@@ -237,6 +246,15 @@ export function Audit({ v }) {
 
                       {canManage && (
                         <div style={css(`display:flex; justify-content:flex-end; gap:8px; padding-top:10px; border-top:1px dashed var(--border-subtle);`)}>
+                          {t.onPrintSticker && (
+                            <button
+                              type="button"
+                              onClick={t.onPrintSticker}
+                              style={css(`flex:1; background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-md); padding:9px; font:var(--fw-semibold) var(--text-xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer;`)}
+                            >
+                              🏷️ สติกเกอร์
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={t.onEdit}
