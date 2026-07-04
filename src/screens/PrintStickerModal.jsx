@@ -79,11 +79,10 @@ export function PrintStickerModal({ v }) {
       // Drawing each module as its own rect keeps every edge pixel-crisp at any
       // final print resolution.
       const pad = 26;
-      // Slightly smaller than the full label height — still generous for reliable
-      // scanning (~15mm), and frees extra width for the larger text alongside it.
-      // Centered vertically since it no longer fills the full column height.
-      const qrSize = H - pad * 2 - 48;
-      const qrY = pad + (H - pad * 2 - qrSize) / 2;
+      // Full label height — matches the width of the info column next to it
+      // rather than leaving the QR looking small in comparison.
+      const qrSize = H - pad * 2;
+      const qrY = pad;
       const qrMatrix = QRCode.create(lot.qr, { errorCorrectionLevel: 'H' }).modules;
       const moduleCount = qrMatrix.size;
       const marginModules = 3; // matches the on-screen QR's quiet-zone margin
