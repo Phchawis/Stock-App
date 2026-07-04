@@ -1,5 +1,6 @@
 import React from 'react';
 import { css } from '../css.js';
+import { contentTheme } from '../theme.js';
 import { Dashboard } from '../screens/Dashboard.jsx';
 import { Inventory } from '../screens/Inventory.jsx';
 import { Alerts } from '../screens/Alerts.jsx';
@@ -90,14 +91,14 @@ export function Main({ v }) {
         bottom: 0;
         left: 0;
         right: 0;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-top: 1px solid var(--border-subtle);
+        background: rgba(8, 17, 25, 0.85);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-top: 1px solid var(--border-default);
         padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 8px));
         gap: 12px;
         z-index: 40;
-        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
       }
       .mobile-action-btn {
         flex: 1;
@@ -136,9 +137,9 @@ export function Main({ v }) {
   `;
 
   return (
-    <div style={css(`flex:1; min-width:0; display:flex; flex-direction:column;`)}>
+    <div style={css(`flex:1; min-width:0; display:flex; flex-direction:column; background:var(--surface-page); ${contentTheme}`)}>
       <style>{localStyle}</style>
-      <header className="main-header" style={css(`height:var(--topbar-height,60px); flex-shrink:0; background:var(--white); border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; gap:16px; padding:0 var(--page-gutter,28px); position:sticky; top:0; z-index:5;`)}>
+      <header className="main-header" style={css(`height:var(--topbar-height,60px); flex-shrink:0; background:rgba(8,17,25,0.72); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--border-default); display:flex; align-items:center; gap:16px; padding:0 var(--page-gutter,28px); position:sticky; top:0; z-index:5;`)}>
         <button 
           onClick={toggleSidebar} 
           className="hamburger-btn"
@@ -175,7 +176,7 @@ export function Main({ v }) {
         </button>
       </div>
 
-      <main className="main-content" style={css(`flex:1; padding:var(--page-gutter,28px); overflow-y:auto;`)}>
+      <main className="main-content" style={css(`flex:1; padding:var(--page-gutter,28px); overflow-y:auto; background:radial-gradient(1100px 520px at 85% -10%, rgba(158,215,230,.10), transparent 60%), radial-gradient(900px 480px at -10% 30%, rgba(175,218,224,.06), transparent 55%), radial-gradient(760px 420px at 55% 115%, rgba(141,187,204,.08), transparent 60%), var(--surface-page);`)}>
         <Dashboard v={v} />
         <Inventory v={v} />
         <ReagentLists v={v} />
