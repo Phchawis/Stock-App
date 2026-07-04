@@ -947,7 +947,8 @@ class App extends React.Component {
       return { id: t.id, rid: t.rid, name: r ? r.th : '—', code: r ? r.code : '', lot: l ? l.lot : '—', typeLabel: m.label, fg: m.fg, bg: m.bg,
         qtyLabel: (t.qty > 0 ? '+' : '') + t.qty + ' ' + (r ? r.unit : ''), qtyColor: t.qty > 0 ? 'var(--green-700)' : 'var(--accent-700)',
         scanLabel, ref: t.ref, by: t.by, at: t.at, qty: t.qty, type: t.type, unit: r ? r.unit : '',
-        onEdit: () => this.openEditTxn(t.id), onDelete: () => this.deleteTxn(t.id) };
+        onEdit: () => this.openEditTxn(t.id), onDelete: () => this.deleteTxn(t.id),
+        onPrintSticker: (l && r) ? () => this.openPrintSticker({ ...l, recvDate: recvDateOf(l.id) }, r) : null };
     });
 
     // usage stats list
