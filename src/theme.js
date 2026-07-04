@@ -229,10 +229,10 @@ export const modalHeaderStyle = `
   display:flex;
   align-items:center;
   gap:11px;
-  background:linear-gradient(135deg, #7AA2C4 0%, #93B9E1 100%);
+  background:linear-gradient(135deg, #a4b0be 0%, #b8c5d4 100%);
   border-radius:10px 10px 0 0;
   border-bottom:1px solid rgba(255,255,255,.28);
-  box-shadow:0 2px 10px -4px rgba(58,90,120,.45);
+  box-shadow:0 2px 10px -4px rgba(80,90,105,.3);
 `;
 export const modalHeaderBadgeStyle = `
   width:34px; height:34px;
