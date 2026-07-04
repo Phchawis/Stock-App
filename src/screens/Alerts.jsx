@@ -8,6 +8,28 @@ export function Alerts({ v }) {
 
   if (!isAlerts) return null;
 
+  const [selectedCategory, setSelectedCategory] = React.useState('all');
+  const [selectedSupplier, setSelectedSupplier] = React.useState('all');
+
+  const cats = ['CHE', 'HEM', 'IMM', 'MIP', 'MDC', 'HMS', 'ADV'];
+  const getCategoryLabel = (c) => ({
+    CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
+    HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
+    IMM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
+    MIP: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
+    MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
+    HMS: 'บริการศูนย์การแพทย์',
+    ADV: 'ตรวจวินิจฉัยขั้นสูง'
+  })[c] || c;
+
+  const suppliers = Array.from(new Set(reorderReportRows.map(r => r.supplier).filter(Boolean)));
+
+  const filteredReportRows = reorderReportRows.filter(r => {
+    if (selectedCategory !== 'all' && r.cat !== selectedCategory) return false;
+    if (selectedSupplier !== 'all' && r.supplier !== selectedSupplier) return false;
+    return true;
+  });
+
   const printStyle = `
     @media print {
       @page {
@@ -38,7 +60,7 @@ export function Alerts({ v }) {
         display: block !important;
         width: 100% !important;
         box-sizing: border-box;
-        padding: 0 !important;
+        padding: 10mm 10mm !important;
         margin: 0 !important;
       }
       .report-table {
@@ -146,13 +168,42 @@ export function Alerts({ v }) {
 
         {/* Header row with print action */}
         <div className="alerts-header-row" style={css(`display:flex; align-items:center; justify-content:space-between; gap:12px;`)}>
-          <div style={css(`font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-tertiary);`)}>
-            พบน้ำยาที่ต้องสั่งซื้อ <strong style={css(`color:var(--text-secondary);`)}>{reorderReportRows.length}</strong> รายการ
+          <div style={css(`font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>
+            พบน้ำยาที่ต้องสั่งซื้อ <strong style={css(`color:var(--text-primary);`)}>{filteredReportRows.length}</strong> รายการ
           </div>
           <button className="alert-print-btn" onClick={() => window.print()}>
             <span style={css(`display:grid; place-items:center;`)}>{ic.list}</span>
             พิมพ์รายงาน PDF (น้ำยาที่ต้องสั่งซื้อ)
           </button>
+        </div>
+
+        {/* Filters Row */}
+        <div className="no-print" style={css(`display:flex; gap:12px; flex-wrap:wrap; background:var(--surface-sunken); padding:10px 14px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); align-items:center; margin-bottom:4px;`)}>
+          <div style={css(`font:var(--fw-semibold) var(--text-3xs)/1 var(--font-body); color:var(--text-secondary); text-transform:uppercase;`)}>ตัวกรองใบสั่งซื้อ:</div>
+          <div style={css(`display:flex; flex-direction:column; min-width:140px;`)}>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              style={css(`box-sizing:border-box; padding:6px 10px; border:1px solid var(--border-default); border-radius:var(--radius-sm); background:var(--white); font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-primary); outline:none; height:34px; cursor:pointer;`)}
+            >
+              <option value="all">ทุกหมวดงาน</option>
+              {cats.map((c) => (
+                <option key={c} value={c}>{getCategoryLabel(c)} ({c})</option>
+              ))}
+            </select>
+          </div>
+          <div style={css(`display:flex; flex-direction:column; min-width:160px;`)}>
+            <select
+              value={selectedSupplier}
+              onChange={(e) => setSelectedSupplier(e.target.value)}
+              style={css(`box-sizing:border-box; padding:6px 10px; border:1px solid var(--border-default); border-radius:var(--radius-sm); background:var(--white); font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-primary); outline:none; height:34px; cursor:pointer;`)}
+            >
+              <option value="all">ทุกผู้จัดจำหน่าย</option>
+              {suppliers.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div style={css(`display:flex; flex-direction:column; gap:12px;`)}>
@@ -189,7 +240,7 @@ export function Alerts({ v }) {
             <h3 style={css(`margin:6px 0 0; font-size:12px; font-weight:bold; color:#111;`)}>รายงานน้ำยาที่ต้องสั่งซื้อ (Reorder Report)</h3>
             <p style={css(`margin:3px 0 0; font-size:9px; color:#555;`)}>
               พิมพ์เอกสารเมื่อ: {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} น. · ผู้พิมพ์: {user.name}
-              &nbsp;· จำนวนรายการที่ต้องสั่งซื้อ: {reorderReportRows.length} รายการ
+              &nbsp;· จำนวนรายการที่ต้องสั่งซื้อ: {filteredReportRows.length} รายการ
             </p>
           </div>
         </div>
@@ -197,7 +248,6 @@ export function Alerts({ v }) {
         <table className="report-table">
           <thead>
             <tr>
-              <th>รหัส</th>
               <th>ชื่อน้ำยา</th>
               <th>หมวดงาน</th>
               <th style={{ textAlign: 'right' }}>คงเหลือ</th>
@@ -207,10 +257,9 @@ export function Alerts({ v }) {
             </tr>
           </thead>
           <tbody>
-            {reorderReportRows.length > 0 ? reorderReportRows.map((r, idx) => (
+            {filteredReportRows.length > 0 ? filteredReportRows.map((r, idx) => (
               <tr key={idx}>
-                <td style={{ fontFamily: 'monospace' }}>{r.code}</td>
-                <td><strong>{r.th}</strong>{r.en ? <span style={{ color: '#666' }}> · {r.en}</span> : null}</td>
+                <td><strong>{r.th}</strong>{r.en && r.en.toLowerCase() !== r.th.toLowerCase() ? <span style={{ color: '#666' }}> · {r.en}</span> : null}</td>
                 <td>{r.catLabel}</td>
                 <td style={{ textAlign: 'right', fontWeight: 'bold', color: r.onHand === 0 ? '#a31621' : '#000' }}>{r.onHand} {r.unit}</td>
                 <td style={{ textAlign: 'right' }}>{r.min} {r.unit}</td>
@@ -218,7 +267,7 @@ export function Alerts({ v }) {
                 <td>{r.supplier || '—'}</td>
               </tr>
             )) : (
-              <tr><td colSpan="7" style={{ textAlign: 'center', color: '#666', padding: '14px' }}>ไม่มีรายการน้ำยาที่ต้องสั่งซื้อในขณะนี้</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: '#666', padding: '14px' }}>ไม่มีรายการน้ำยาที่ต้องสั่งซื้อในขณะนี้</td></tr>
             )}
           </tbody>
         </table>
