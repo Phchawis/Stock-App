@@ -863,7 +863,7 @@ class App extends React.Component {
     const reorderReportRows = S.reagents
       .filter(r => this.onHand(r.id) <= r.min)
       .map(r => ({
-        id: r.id, code: r.code, th: r.th, en: r.en,
+        id: r.id, code: r.code, th: r.th, en: r.en, cat: r.cat,
         catLabel: this.CAT_LABEL(r.cat), unit: r.unit,
         onHand: this.onHand(r.id), min: r.min, reorder: r.reorder,
         supplier: r.supplier,
