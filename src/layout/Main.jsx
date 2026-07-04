@@ -297,6 +297,33 @@ export function Main({ v }) {
         <Perms v={v} />
         <Help v={v} />
       </main>
+
+      {/* Floating Theme Switcher Widget */}
+      <div className="no-print" style={css(`position:fixed; bottom:24px; right:24px; z-index:100; display:flex; flex-direction:column; gap:8px; background:var(--surface-card); padding:10px 12px; border-radius:var(--radius-lg); border:2px solid var(--border-brand); box-shadow:var(--shadow-lg); transition:all 0.3s ease;`)}>
+        <div style={css(`font:var(--fw-bold) var(--text-3xs)/1 var(--font-body); color:var(--text-primary); margin-bottom:4px; display:flex; align-items:center; gap:4px;`)}>
+          🎨 ปรับธีมอินเตอร์เฟสหลัก:
+        </div>
+        <div style={css(`display:flex; flex-direction:column; gap:6px;`)}>
+          <button
+            onClick={() => v.changeThemeOption('option1')}
+            style={css(`border:none; cursor:pointer; padding:7px 12px; border-radius:var(--radius-md); text-align:left; font:var(--fw-bold) var(--text-2xs)/1 var(--font-body); transition:all 0.2s ease; ${v.themeOption === 'option1' ? 'background:#8DBBCC; color:#060b13; box-shadow:var(--shadow-sm);' : 'background:var(--surface-sunken); color:var(--text-secondary);'}`)}
+          >
+            {v.themeOption === 'option1' ? '✓ ' : ''}แบบที่ 1 (Glass Dark)
+          </button>
+          <button
+            onClick={() => v.changeThemeOption('option2')}
+            style={css(`border:none; cursor:pointer; padding:7px 12px; border-radius:var(--radius-md); text-align:left; font:var(--fw-bold) var(--text-2xs)/1 var(--font-body); transition:all 0.2s ease; ${v.themeOption === 'option2' ? 'background:#8DBBCC; color:#101c24; box-shadow:var(--shadow-sm);' : 'background:var(--surface-sunken); color:var(--text-secondary);'}`)}
+          >
+            {v.themeOption === 'option2' ? '✓ ' : ''}แบบที่ 2 (Arctic Light)
+          </button>
+          <button
+            onClick={() => v.changeThemeOption('option3')}
+            style={css(`border:none; cursor:pointer; padding:7px 12px; border-radius:var(--radius-md); text-align:left; font:var(--fw-bold) var(--text-2xs)/1 var(--font-body); transition:all 0.2s ease; ${v.themeOption === 'option3' ? 'background:#8DBBCC; color:#e8ecef; box-shadow:var(--shadow-sm);' : 'background:var(--surface-sunken); color:var(--text-secondary);'}`)}
+          >
+            {v.themeOption === 'option3' ? '✓ ' : ''}แบบที่ 3 (Nord Slate)
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
