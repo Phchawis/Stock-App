@@ -14,29 +14,40 @@ export function Main({ v }) {
   } = v;
 
   const localStyle = `
+    /* Matches the sidebar's "การทำงาน" receive/withdraw buttons — same green/amber
+       theme and hover language (lift + gradient fill + icon nudge) so the action
+       reads the same whether it's triggered from the sidebar or the header. */
     .header-btn-receive {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       padding: 8px 16px;
       border-radius: var(--radius-md);
-      border: 1.5px solid var(--brand-300);
-      background: var(--white);
-      color: var(--brand-700) !important;
+      border: 1.5px solid rgba(16, 185, 129, 0.35);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
+      color: #10B981 !important;
       cursor: pointer;
-      font: var(--fw-semibold) 14px/1 var(--font-body);
-      transition: all var(--dur-fast) ease-in-out;
+      font: var(--fw-bold) 14px/1 var(--font-body);
+      transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: 0 2px 4px rgba(16, 185, 129, 0.05);
+    }
+    .header-btn-receive svg {
+      transition: transform 0.25s ease, color 0.25s ease;
     }
     .header-btn-receive:hover {
-      border-color: var(--brand-600);
-      background: var(--brand-50);
-      color: var(--brand-800) !important;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(52, 62, 155, 0.12);
+      transform: translateY(-2px) scale(1.02);
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      border-color: #10B981;
+      color: #ffffff !important;
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+    }
+    .header-btn-receive:hover svg {
+      color: #ffffff !important;
+      transform: translateY(2px) scale(1.1);
     }
     .header-btn-receive:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 4px rgba(52, 62, 155, 0.08);
+      transform: translateY(-1px) scale(0.99);
+      box-shadow: 0 3px 10px rgba(16, 185, 129, 0.2);
     }
 
     .header-btn-withdraw {
@@ -45,22 +56,31 @@ export function Main({ v }) {
       gap: 8px;
       padding: 8px 16px;
       border-radius: var(--radius-md);
-      border: none;
-      background: linear-gradient(135deg, var(--brand-700) 0%, var(--brand-800) 100%);
-      color: #ffffff !important;
+      border: 1.5px solid rgba(245, 158, 11, 0.35);
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0.02) 100%);
+      color: #F59E0B !important;
       cursor: pointer;
-      font: var(--fw-semibold) 14px/1 var(--font-body);
-      transition: all var(--dur-fast) ease-in-out;
-      box-shadow: 0 2px 8px rgba(52, 62, 155, 0.2);
+      font: var(--fw-bold) 14px/1 var(--font-body);
+      transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: 0 2px 4px rgba(245, 158, 11, 0.05);
+    }
+    .header-btn-withdraw svg {
+      transition: transform 0.25s ease, color 0.25s ease;
     }
     .header-btn-withdraw:hover {
-      background: linear-gradient(135deg, var(--brand-600) 0%, var(--brand-700) 100%);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 14px rgba(52, 62, 155, 0.3);
+      transform: translateY(-2px) scale(1.02);
+      background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+      border-color: #F59E0B;
+      color: #ffffff !important;
+      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35);
+    }
+    .header-btn-withdraw:hover svg {
+      color: #ffffff !important;
+      transform: translateY(-2px) scale(1.1);
     }
     .header-btn-withdraw:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 4px rgba(52, 62, 155, 0.15);
+      transform: translateY(-1px) scale(0.99);
+      box-shadow: 0 3px 10px rgba(245, 158, 11, 0.2);
     }
 
     @media (max-width: 768px) {
@@ -92,15 +112,19 @@ export function Main({ v }) {
         transition: all var(--dur-fast);
       }
       .mobile-action-btn.receive {
-        border: 1.5px solid var(--brand-300);
-        background: var(--white);
-        color: var(--brand-600) !important;
+        border: 1.5px solid rgba(16, 185, 129, 0.35);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
+        color: #10B981 !important;
+      }
+      .mobile-action-btn.receive:active {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: #ffffff !important;
       }
       .mobile-action-btn.withdraw {
         border: none;
-        background: linear-gradient(135deg, var(--brand-700) 0%, var(--brand-800) 100%);
+        background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
         color: #ffffff !important;
-        box-shadow: 0 2px 8px rgba(52, 62, 155, 0.2);
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
       }
       .header-btn-receive, .header-btn-withdraw {
         display: none !important;
