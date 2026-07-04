@@ -237,22 +237,22 @@ export const modalHeaderStyle = `
 export const modalHeaderBadgeStyle = `
   width:34px; height:34px;
   border-radius:var(--radius-md);
-  background:rgba(255,255,255,.22);
-  border:1px solid rgba(255,255,255,.38);
-  color:#ffffff;
+  background:rgba(0,0,0,.06);
+  border:1px solid rgba(0,0,0,.15);
+  color:#10222a;
   display:grid;
   place-items:center;
   flex-shrink:0;
 `;
-export const modalHeaderTitleStyle = `font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:#ffffff;`;
-export const modalHeaderSubtitleStyle = `font:var(--text-2xs)/1.3 var(--font-body); color:rgba(255,255,255,.85);`;
+export const modalHeaderTitleStyle = `font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:#10222a;`;
+export const modalHeaderSubtitleStyle = `font:var(--text-2xs)/1.3 var(--font-body); color:#475569;`;
 export const modalHeaderCloseStyle = `
   border:none;
-  background:rgba(255,255,255,.2);
+  background:rgba(0,0,0,.05);
   cursor:pointer;
   padding:6px;
   border-radius:var(--radius-sm);
-  color:#ffffff;
+  color:#10222a;
   display:grid;
   place-items:center;
   transition:background var(--dur-fast);
