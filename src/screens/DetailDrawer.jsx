@@ -6,7 +6,46 @@ export function DetailDrawer({ v }) {
     stop, ic, detailOpen, detail, closeDetail, openPrintSticker,
     role, openEditReagent, canManage,
   } = v;
+  const localStyle = `
+    /* Matches the sidebar/header receive-withdraw color language (green/amber
+       with a lift + gradient-fill hover) so this drawer's actions read the same
+       as everywhere else in the app instead of a plain brand-indigo pair. */
+    .detail-btn-receive {
+      border: 1.5px solid rgba(16, 185, 129, 0.35);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
+      color: #10B981 !important;
+      transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: 0 2px 4px rgba(16, 185, 129, 0.05);
+    }
+    .detail-btn-receive:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      border-color: #10B981;
+      color: #ffffff !important;
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+    }
+    .detail-btn-receive:active {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(16, 185, 129, 0.2);
+    }
+    .detail-btn-issue {
+      border: none;
+      background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+      color: #ffffff !important;
+      transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+    }
+    .detail-btn-issue:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35);
+    }
+    .detail-btn-issue:active {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(245, 158, 11, 0.2);
+    }
+  `;
   return detailOpen ? (<>
+    <style>{localStyle}</style>
     <div className="ov-in" onClick={closeDetail} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.42); z-index:40; display:flex; justify-content:flex-end;`)}>
       <div className="dr-in" onClick={stop} style={css(`width:min(480px,94vw); height:100vh; background:var(--surface-card); box-shadow:var(--shadow-lg); display:flex; flex-direction:column; overflow:hidden;`)}>
         <div style={css(`padding:18px 22px; border-bottom:1px solid var(--border-subtle); display:flex; align-items:flex-start; gap:12px;`)}>
@@ -58,8 +97,8 @@ export function DetailDrawer({ v }) {
           </div>
 
           <div style={css(`display:flex; gap:10px;`)}>
-            <button onClick={detail.onReceive} style={css(`flex:1; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:10px; border-radius:var(--radius-md); border:1px solid var(--brand-100); background:var(--brand-50); color:var(--brand-700); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body);`)}><span style={css(`display:grid; place-items:center;`)}>{ic.receive}</span>รับเข้า Lot</button>
-            <button onClick={detail.onIssue} style={css(`flex:1; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:10px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body);`)}><span style={css(`display:grid; place-items:center;`)}>{ic.issue}</span>เบิกจ่าย (Withdraw)</button>
+            <button onClick={detail.onReceive} className="detail-btn-receive" style={css(`flex:1; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:10px; border-radius:var(--radius-md); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body);`)}><span style={css(`display:grid; place-items:center;`)}>{ic.receive}</span>รับเข้า Lot</button>
+            <button onClick={detail.onIssue} className="detail-btn-issue" style={css(`flex:1; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:10px; border-radius:var(--radius-md); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body);`)}><span style={css(`display:grid; place-items:center;`)}>{ic.issue}</span>เบิกจ่าย (Withdraw)</button>
           </div>
 
           {role === 'admin' && (
