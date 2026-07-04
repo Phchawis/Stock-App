@@ -58,9 +58,21 @@ export function Dashboard({ v }) {
     { value: activeLots.filter(l => filteredReagentIds.includes(l.rid)).length, label: 'Lot คงคลัง', color: 'var(--green-700)', bg: 'var(--green-100)', icon: ic.dashboard },
   ];
 
-  // Category Overview Table
-  const getCategoryLabel = (c) => ({ HMS: 'บริการศูนย์การแพทย์', ADV: 'ตรวจวินิจฉัยขั้นสูง' })[c] || c;
-  const cats = ['HMS', 'ADV'];
+  // Category Overview Table — labels match App.jsx's CAT_LABEL() so the same
+  // code always reads the same way across screens (Inventory, Reagent Lists, here).
+  const getCategoryLabel = (c) => ({
+    CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
+    HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
+    IMM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
+    MIP: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
+    MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
+    HMS: 'บริการศูนย์การแพทย์',
+    ADV: 'ตรวจวินิจฉัยขั้นสูง',
+  })[c] || c;
+  // Derived from the real reagents in the system, not a hardcoded guess — HMS/ADV
+  // never match any actual reagent's `cat` field (real values are CHE/HEM/IMM/MIP/MDC),
+  // which is why this table and the category filter below always showed zero.
+  const cats = [...new Set(reagents.map(r => r.cat))].sort();
   const catStats = cats.map(c => {
     const cReagents = filteredReagents.filter(r => r.cat === c);
     const rIds = cReagents.map(r => r.id);
@@ -304,8 +316,9 @@ export function Dashboard({ v }) {
               style={css(`box-sizing:border-box; padding:6px 10px; border:1px solid var(--border-default); border-radius:var(--radius-sm); background:var(--white); font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-primary); outline:none; height:38px; cursor:pointer;`)}
             >
               <option value="all">ทุกหมวดงาน</option>
-              <option value="HMS">บริการศูนย์การแพทย์</option>
-              <option value="ADV">ตรวจวินิจฉัยขั้นสูง</option>
+              {cats.map((c) => (
+                <option key={c} value={c}>{getCategoryLabel(c)} ({c})</option>
+              ))}
             </select>
           </div>
 
@@ -350,10 +363,13 @@ export function Dashboard({ v }) {
           )}
         </div>
 
-        {/* KPI Summary Cards (hidden on mobile — the 4-up grid is too cramped on narrow screens) */}
+        {/* KPI Summary Cards — condensed to a 2x2 grid on mobile instead of a squeezed
+            4-up row, so the headline numbers stay visible on narrow screens */}
         <style>{`
           @media (max-width: 768px) {
-            .kpi-cards-grid { display: none !important; }
+            .kpi-cards-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+            .kpi-cards-grid > div { padding: 12px 14px !important; }
+            .dash-two-col-grid { grid-template-columns: 1fr !important; }
           }
         `}</style>
         <div className="kpi-cards-grid" style={css(`display:grid; grid-template-columns:repeat(4,1fr); gap:16px;`)}>
@@ -371,8 +387,9 @@ export function Dashboard({ v }) {
           ))}
         </div>
 
-        {/* Row 2: Category Stats Table (Left) & Double Bar Chart (Right) */}
-        <div style={css(`display:grid; grid-template-columns:1.2fr 1fr; gap:20px; flex-wrap:wrap;`)}>
+        {/* Row 2: Category Stats Table (Left) & Double Bar Chart (Right) — stacks to
+            one column on mobile via .dash-two-col-grid above */}
+        <div className="dash-two-col-grid" style={css(`display:grid; grid-template-columns:1.2fr 1fr; gap:20px; flex-wrap:wrap;`)}>
           
           {/* Panel A: Category Overview Table */}
           <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); overflow:hidden; display:flex; flex-direction:column;`)}>
@@ -393,7 +410,7 @@ export function Dashboard({ v }) {
                 <tbody>
                   {catStats.map((s, idx) => (
                     <tr key={idx} className="qrow" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                      <td style={{ padding: '10px 12px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{getCategoryLabel(s.cat)}</td>
+                      <td style={{ padding: '10px 12px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{getCategoryLabel(s.cat)} <span style={{ fontWeight: 500, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', fontSize: '0.9em' }}>({s.cat})</span></td>
                       <td style={{ padding: '10px 12px', textAlign: 'center', color: 'var(--text-secondary)' }}>{s.types} ชนิด</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: '600', color: 'var(--text-primary)' }}>{s.stock}</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-secondary)' }}>{s.issue}</td>
@@ -459,7 +476,7 @@ export function Dashboard({ v }) {
         </div>
 
         {/* Row 3: Executive Insights (Left) & Critical Reorders (Right) */}
-        <div style={css(`display:grid; grid-template-columns:1fr 1.2fr; gap:20px; flex-wrap:wrap;`)}>
+        <div className="dash-two-col-grid" style={css(`display:grid; grid-template-columns:1fr 1.2fr; gap:20px; flex-wrap:wrap;`)}>
           
           {/* Panel C: Monthly Executive Insights */}
           <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); padding:16px; display:flex; flex-direction:column;`)}>
@@ -473,7 +490,7 @@ export function Dashboard({ v }) {
               </div>
               <div style={css(`display:flex; align-items:flex-start; gap:8px;`)}>
                 <span style={{ color: 'var(--brand-700)', fontWeight: 'bold', marginTop: '2px' }}>•</span>
-                <span>ในรอบเดือนมิถุนายนนี้ มีจำนวนยอดรับเข้ารวม <strong>{insights.juneRec} ชิ้น</strong> และมียอดเบิกจ่ายใช้งานสะสม <strong>{insights.juneIssue} ชิ้น</strong></span>
+                <span>ในช่วงเวลาที่วิเคราะห์นี้ มีจำนวนยอดรับเข้ารวม <strong>{insights.totalRecInRange.toLocaleString()} ชิ้น</strong> และมียอดเบิกจ่ายใช้งานสะสม <strong>{insights.totalIssueInRange.toLocaleString()} ชิ้น</strong></span>
               </div>
               <div style={css(`display:flex; align-items:flex-start; gap:8px;`)}>
                 <span style={{ color: 'var(--brand-700)', fontWeight: 'bold', marginTop: '2px' }}>•</span>
@@ -492,7 +509,7 @@ export function Dashboard({ v }) {
                 </span>
               )}
             </div>
-            <div style={css(`flex:1; overflow-y:auto; max-height:220px;`)}>
+            <div style={css(`flex:1; overflow-y:auto; overflow-x:auto; max-height:220px;`)}>
               {criticalReorders.length > 0 ? (
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--text-2xs)', fontFamily: 'var(--font-body)' }}>
                   <thead>
@@ -586,7 +603,7 @@ export function Dashboard({ v }) {
               <tbody>
                 {catStats.map((s, idx) => (
                   <tr key={idx}>
-                    <td><strong>{getCategoryLabel(s.cat)}</strong></td>
+                    <td><strong>{getCategoryLabel(s.cat)}</strong> <span style={{ color: '#666', fontFamily: 'monospace', fontSize: '0.9em' }}>({s.cat})</span></td>
                     <td style={{ textAlign: 'center' }}>{s.types}</td>
                     <td style={{ textAlign: 'right' }}>{s.stock}</td>
                     <td style={{ textAlign: 'right' }}>{s.issue}</td>
