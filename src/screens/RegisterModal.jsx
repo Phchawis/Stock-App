@@ -180,13 +180,9 @@ export function RegisterModal({ v }) {
                 label="หมวด" 
                 required={true} 
                 options={[
-                  { value: 'CHE', label: 'เคมีคลินิก' },
-                  { value: 'HEM', label: 'โลหิตวิทยา' },
-                  { value: 'IMM', label: 'ภูมิคุ้มกันวิทยา' },
-                  { value: 'MIP', label: 'จุลทรรศนศาสตร์' },
                   { value: 'HMS', label: 'บริการศูนย์การแพทย์' },
                   { value: 'ADV', label: 'ตรวจวินิจฉัยขั้นสูง' }
-                ]} 
+                ]}
                 value={mform.cat} 
                 onChange={mfCat} 
               />
