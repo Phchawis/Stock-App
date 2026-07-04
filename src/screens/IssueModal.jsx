@@ -2,7 +2,7 @@ import React from 'react';
 import { css } from '../css.js';
 import { Input } from '../components/Input.jsx';
 import { Html5Qrcode } from 'html5-qrcode';
-import { modalHeaderStyle, modalHeaderBadgeStyle, modalHeaderTitleStyle, modalHeaderSubtitleStyle, modalHeaderCloseStyle } from '../theme.js';
+import { modalHeaderStyle, modalHeaderBadgeStyle, modalHeaderTitleStyle, modalHeaderSubtitleStyle, modalHeaderCloseStyle, modalHeaderResponsiveCSS } from '../theme.js';
 
 export function IssueModal({ v }) {
   const {
@@ -162,13 +162,14 @@ export function IssueModal({ v }) {
         <div className="tt-in theme-light-scope" onClick={stop} style={css(`width:min(720px,96vw); max-height:92vh; overflow-y:auto; background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:2px solid #b2d1da; --surface-card:#e0ecf0; --text-primary:#10222a; --text-secondary:#2d444e; --text-tertiary:#526d79; --border-subtle:#b2d1da; --border-default:#b2d1da; --border-strong:#b2d1da; --slate-50:#d1e2e6; --slate-100:#b2d1da; --slate-200:#9abdc6;`)}>
           
           {/* Header */}
-          <div style={css(modalHeaderStyle)}>
-            <span style={css(modalHeaderBadgeStyle)}>
+          <style>{modalHeaderResponsiveCSS}</style>
+          <div className="tuh-mhead" style={css(modalHeaderStyle)}>
+            <span className="tuh-mhead-badge" style={css(modalHeaderBadgeStyle)}>
               {ic.issue}
             </span>
-            <div style={css(`flex:1;`)}>
-              <div style={css(modalHeaderTitleStyle)}>เบิกจ่ายน้ำยาห้องปฏิบัติการ</div>
-              <div style={css(modalHeaderSubtitleStyle)}>ทำรายการเบิกจ่ายสารเคมีและน้ำยาโดยอิงเกณฑ์หมดอายุก่อน–เบิกก่อน</div>
+            <div style={css(`flex:1; min-width:0;`)}>
+              <div className="tuh-mhead-title" style={css(modalHeaderTitleStyle)}>เบิกจ่ายน้ำยาห้องปฏิบัติการ</div>
+              <div className="tuh-mhead-sub" style={css(modalHeaderSubtitleStyle)}>ทำรายการเบิกจ่ายสารเคมีและน้ำยาโดยอิงเกณฑ์หมดอายุก่อน–เบิกก่อน</div>
             </div>
             <button
               onClick={closeModal}
