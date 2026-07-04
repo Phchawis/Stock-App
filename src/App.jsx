@@ -28,6 +28,7 @@ class App extends React.Component {
       users: [], uform: { name: '', username: '', role: 'technician', password: '' },
       printLotData: null,
       sidebarOpen: false,
+      contentTheme: localStorage.getItem('contentTheme') || 'ocean',
       editingLotId: null, elForm: this.blankElf(),
       editingTxnId: null, etForm: this.blankEtf(),
     };
@@ -1161,6 +1162,9 @@ class App extends React.Component {
       sidebarOpen: S.sidebarOpen,
       toggleSidebar: () => this.setState(s => ({ sidebarOpen: !s.sidebarOpen })),
       closeSidebar: () => this.setState({ sidebarOpen: false }),
+
+      contentThemeId: S.contentTheme,
+      setContentTheme: (id) => { localStorage.setItem('contentTheme', id); this.setState({ contentTheme: id }); },
     };
   }
 
