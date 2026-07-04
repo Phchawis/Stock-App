@@ -167,8 +167,8 @@ export const contentThemes = {
     label: 'แบบที่ 4 · Royal Blue (น้ำเงินเต็มพื้น)',
     swatch: 'linear-gradient(135deg, #26436E 50%, #A9C7EE 50%)',
     vars: `
-      --brand-700:#203D63;
-      --brand-600:#2C4E7D;
+      --brand-700:#6E97BD;
+      --brand-600:#7FA6C9;
       --border-brand:#A9C7EE;
       --surface-page:#26436E;
       --surface-card:#2F4B78;
