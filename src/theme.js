@@ -34,6 +34,14 @@ export const contentTheme = `
   --brand-300:#9FD9CC;
   --brand-100:rgba(112,196,180,.18);
   --brand-50:rgba(112,196,180,.10);
+  --teal-900:#A8E1D6;
+  --teal-800:#70C4B4;
+  --teal-700:#33A593;
+  --teal-600:#1FA090;
+  --teal-500:#33A593;
+  --teal-300:#9FD9CC;
+  --teal-100:rgba(112,196,180,.18);
+  --teal-50:rgba(112,196,180,.10);
   --blue-700:#7FC9DC;
   --blue-600:#9AD6E5;
   --blue-100:rgba(0,104,132,.25);
