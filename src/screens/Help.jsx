@@ -226,7 +226,7 @@ export function Help({ v }) {
           <div style={css(`display:flex; flex-direction:column; gap:24px;`)}>
             <div>
               <h2 style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary); margin:0 0 8px 0;`)}>
-                การเบิกจ่ายระบบจ่ายตามเกณฑ์หมดอายุก่อน (FEFO Withdraw Process)
+                การเบิกจ่ายระบบจ่ายตามเกณฑ์หมดอายุก่อน–เบิกก่อน (Withdraw Process)
               </h2>
               <p style={css(`font:var(--text-sm)/1.6 var(--font-body); color:var(--text-secondary); margin:0;`)}>
                 ระบบบังคับระบบคิวจ่าย **FEFO (First-Expired, First-Out)** โดยเรียงลำดับวันหมดอายุเป็นหลักอัตโนมัติ เพื่อป้องกันแล็บใช้น้ำยาข้ามล็อตจนเหลือล็อตเก่าหมดอายุคาตู้
