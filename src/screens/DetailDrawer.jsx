@@ -1,12 +1,13 @@
 import React from 'react';
 import { css } from '../css.js';
-import { contentTheme } from '../theme.js';
+import { contentThemes } from '../theme.js';
 
 export function DetailDrawer({ v }) {
   const {
     stop, ic, detailOpen, detail, closeDetail, openPrintSticker,
-    role, openEditReagent, canManage,
+    role, openEditReagent, canManage, contentThemeId,
   } = v;
+  const activeTheme = contentThemes[contentThemeId] || contentThemes.ocean;
   const localStyle = `
     /* Matches the sidebar/header receive-withdraw color language (green/amber
        with a lift + gradient-fill hover) so this drawer's actions read the same
@@ -48,7 +49,7 @@ export function DetailDrawer({ v }) {
   return detailOpen ? (<>
     <style>{localStyle}</style>
     <div className="ov-in" onClick={closeDetail} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.42); z-index:40; display:flex; justify-content:flex-end;`)}>
-      <div className="dr-in" onClick={stop} style={css(`width:min(480px,94vw); height:100vh; background:var(--surface-card); box-shadow:var(--shadow-lg); display:flex; flex-direction:column; overflow:hidden; ${contentTheme}`)}>
+      <div className="dr-in" onClick={stop} style={css(`width:min(480px,94vw); height:100vh; background:var(--surface-card); box-shadow:var(--shadow-lg); display:flex; flex-direction:column; overflow:hidden; ${activeTheme.vars}`)}>
         <div style={css(`padding:18px 22px; border-bottom:1px solid var(--border-subtle); display:flex; align-items:flex-start; gap:12px;`)}>
           <div style={css(`flex:1; min-width:0;`)}>
             <div style={css(`font:var(--fw-bold) var(--text-lg)/1.25 var(--font-display); color:var(--text-primary);`)}>{detail.th}</div>
