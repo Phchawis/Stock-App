@@ -14,7 +14,17 @@ export function Perms({ v }) {
 
   return (
     <div className="qms-rise" style={css(`max-width:1080px; display:flex; flex-direction:column; gap:20px;`)}>
-      
+      <style>{`
+        .perm-user-row-mobile { display: none; }
+        @media (max-width: 768px) {
+          .perm-matrix-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+          .perm-matrix-grid { min-width: 560px; }
+          .perm-user-thead-desktop { display: none !important; }
+          .perm-user-row-desktop { display: none !important; }
+          .perm-user-row-mobile { display: flex !important; }
+        }
+      `}</style>
+
       {/* Active Role card */}
       <div style={css(`display:flex; align-items:center; gap:16px; padding:18px 20px; background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm);`)}>
         <span style={css(`width:48px; height:48px; border-radius:50%; background:${myRole.color}; color:#fff; display:grid; place-items:center; font:600 16px/1 var(--font-body); flex-shrink:0;`)}>{myRole.initials}</span>
@@ -31,25 +41,29 @@ export function Perms({ v }) {
         </div>
       )}
 
-      {/* Permissions Matrix */}
+      {/* Permissions Matrix — a true row×role matrix, so on mobile it scrolls
+          horizontally rather than being restructured into cards (that would lose
+          the at-a-glance comparison across roles that a matrix is for). */}
       <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); overflow:hidden;`)}>
-        <div style={css(`display:grid; grid-template-columns:2fr repeat(4,1fr); background:var(--slate-50); border-bottom:1px solid var(--border-subtle);`)}>
-          <div style={css(`padding:13px 18px; font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em;`)}>สิทธิ์การใช้งาน</div>
-          {permRoles.map((r, rI) => (
-            <div key={rI} style={css(`padding:10px 8px; text-align:center; border-left:1px solid var(--border-subtle); background:${r.headBg};`)}>
-              <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.3 var(--font-body); color:${r.headFg};`)}>{r.th}</div>
-              {r.current && <div style={css(`margin-top:4px; font:600 9px/1 var(--font-mono); color:${r.color}; letter-spacing:.04em;`)}>● บทบาทของคุณ</div>}
+        <div className="perm-matrix-scroll">
+          <div className="perm-matrix-grid" style={css(`display:grid; grid-template-columns:2fr repeat(4,1fr); background:var(--slate-50); border-bottom:1px solid var(--border-subtle);`)}>
+            <div style={css(`padding:13px 18px; font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em;`)}>สิทธิ์การใช้งาน</div>
+            {permRoles.map((r, rI) => (
+              <div key={rI} style={css(`padding:10px 8px; text-align:center; border-left:1px solid var(--border-subtle); background:${r.headBg};`)}>
+                <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.3 var(--font-body); color:${r.headFg};`)}>{r.th}</div>
+                {r.current && <div style={css(`margin-top:4px; font:600 9px/1 var(--font-mono); color:${r.color}; letter-spacing:.04em;`)}>● บทบาทของคุณ</div>}
+              </div>
+            ))}
+          </div>
+          {permRows.map((p, pI) => (
+            <div key={pI} className="perm-matrix-grid" style={css(`display:grid; grid-template-columns:2fr repeat(4,1fr); border-bottom:1px solid var(--border-subtle);`)}>
+              <div style={css(`padding:13px 18px; font:var(--fw-medium) var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>{p.label}</div>
+              {p.cells.map((c, cI) => (
+                <div key={cI} onClick={c.onToggle} style={css(`padding:13px 8px; display:grid; place-items:center; border-left:1px solid var(--border-subtle); background:${c.cellBg}; cursor:${c.cursor};`)}>{c.mark}</div>
+              ))}
             </div>
           ))}
         </div>
-        {permRows.map((p, pI) => (
-          <div key={pI} style={css(`display:grid; grid-template-columns:2fr repeat(4,1fr); border-bottom:1px solid var(--border-subtle);`)}>
-            <div style={css(`padding:13px 18px; font:var(--fw-medium) var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>{p.label}</div>
-            {p.cells.map((c, cI) => (
-              <div key={cI} onClick={c.onToggle} style={css(`padding:13px 8px; display:grid; place-items:center; border-left:1px solid var(--border-subtle); background:${c.cellBg}; cursor:${c.cursor};`)}>{c.mark}</div>
-            ))}
-          </div>
-        ))}
       </div>
 
       {/* User List Section */}
@@ -71,7 +85,7 @@ export function Perms({ v }) {
       </div>
 
       <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); overflow:hidden;`)}>
-        <div style={css(`display:grid; grid-template-columns:1.5fr 1fr 1.2fr 1fr 0.6fr; background:var(--slate-50); border-bottom:1px solid var(--border-subtle); padding:12px 18px; font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.04em;`)}>
+        <div className="perm-user-thead-desktop" style={css(`display:grid; grid-template-columns:1.5fr 1fr 1.2fr 1fr 0.6fr; background:var(--slate-50); border-bottom:1px solid var(--border-subtle); padding:12px 18px; font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.04em;`)}>
           <div>ชื่อ-นามสกุล</div>
           <div>ชื่อเข้าใช้งาน (Username)</div>
           <div>บทบาทหน้าที่</div>
@@ -81,7 +95,7 @@ export function Perms({ v }) {
         {usersList.map((u, idx) => {
           const rLabel = ({ admin: 'ผู้ดูแลระบบ', supervisor: 'หัวหน้าคลังน้ำยา', technician: 'นักเทคนิคการแพทย์', viewer: 'ผู้ดูข้อมูล' })[u.role] || u.role;
           return (
-            <div key={idx} style={css(`display:grid; grid-template-columns:1.5fr 1fr 1.2fr 1fr 0.6fr; border-bottom:1px solid var(--border-subtle); padding:12px 18px; align-items:center; font:var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>
+            <div key={idx} className="perm-user-row-desktop" style={css(`display:grid; grid-template-columns:1.5fr 1fr 1.2fr 1fr 0.6fr; border-bottom:1px solid var(--border-subtle); padding:12px 18px; align-items:center; font:var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>
               <div style={css(`display:flex; align-items:center; gap:10px;`)}>
                 <span style={css(`width:28px; height:28px; border-radius:50%; background:${u.color || 'var(--brand-700)'}; color:#fff; display:grid; place-items:center; font:600 11px/1 var(--font-body);`)}>{u.initials}</span>
                 <span style={css(`font-weight:600;`)}>{u.name}</span>
@@ -118,6 +132,45 @@ export function Perms({ v }) {
                     <span style={css(`color:var(--text-tertiary); font-size:var(--text-2xs);`)}>—</span>
                   )
                 )}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Mobile card — same data as the desktop row above, stacked for narrow screens */}
+        {usersList.map((u, idx) => {
+          const rLabel = ({ admin: 'ผู้ดูแลระบบ', supervisor: 'หัวหน้าคลังน้ำยา', technician: 'นักเทคนิคการแพทย์', viewer: 'ผู้ดูข้อมูล' })[u.role] || u.role;
+          const canDelete = isAdmin && !(u.role === 'admin' && usersList.filter(x => x.role === 'admin').length <= 1);
+          return (
+            <div key={'m' + idx} className="perm-user-row-mobile" style={css(`flex-direction:column; gap:10px; padding:14px 16px; border-bottom:1px solid var(--border-subtle);`)}>
+              <div style={css(`display:flex; align-items:center; gap:10px;`)}>
+                <span style={css(`width:32px; height:32px; border-radius:50%; background:${u.color || 'var(--brand-700)'}; color:#fff; display:grid; place-items:center; font:600 12px/1 var(--font-body); flex-shrink:0;`)}>{u.initials}</span>
+                <div style={css(`flex:1; min-width:0;`)}>
+                  <div style={css(`font:var(--fw-semibold) var(--text-sm)/1.3 var(--font-body); color:var(--text-primary);`)}>{u.name}</div>
+                  <div style={css(`font:var(--text-2xs)/1.3 var(--font-mono); color:var(--text-tertiary); margin-top:1px;`)}>{u.username}</div>
+                </div>
+                <span style={css(`color:var(--green-700); display:inline-flex; align-items:center; gap:4px; font:var(--fw-semibold) var(--text-3xs)/1 var(--font-body); flex-shrink:0;`)}>
+                  🟢 พร้อมใช้งาน
+                </span>
+              </div>
+              <div style={css(`display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:10px; border-top:1px dashed var(--border-subtle);`)}>
+                <span style={css(`padding:3px 10px; border-radius:var(--radius-pill); background:var(--brand-50); color:var(--brand-700); font:var(--fw-semibold) var(--text-2xs)/1.3 var(--font-body);`)}>
+                  {rLabel}
+                </span>
+                {canDelete ? (
+                  <button
+                    onClick={() => {
+                      if (window.confirm(`คุณต้องการลบผู้ใช้งาน "${u.name}" ใช่หรือไม่?`)) {
+                        deleteUser(u.username);
+                      }
+                    }}
+                    style={css(`border:1px solid var(--red-600); background:transparent; color:var(--red-600); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); padding:6px 12px; border-radius:var(--radius-sm);`)}
+                  >
+                    ลบผู้ใช้
+                  </button>
+                ) : (u.role === 'admin' && usersList.filter(x => x.role === 'admin').length <= 1) ? (
+                  <span style={css(`font:var(--fw-semibold) var(--text-3xs)/1 var(--font-body); color:var(--text-disabled);`)}>Admin (ลบไม่ได้)</span>
+                ) : null}
               </div>
             </div>
           );
