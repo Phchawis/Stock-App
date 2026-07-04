@@ -11,7 +11,7 @@ export function Help({ v }) {
   const tabs = [
     { id: 'general', label: 'ภาพรวมระบบ & บทบาท', icon: ic.dashboard || '📋' },
     { id: 'receive', label: 'การรับเข้าน้ำยา (Receive)', icon: ic.receive || '📥' },
-    { id: 'issue', label: 'การเบิกจ่าย (FEFO Withdraw)', icon: ic.issue || '📤' },
+    { id: 'issue', label: 'การเบิกจ่าย (หมดอายุก่อน–เบิกก่อน)', icon: ic.issue || '📤' },
     { id: 'register', label: 'การลงทะเบียนหลัก (Catalog)', icon: ic.boxes || '📦' },
     { id: 'reports', label: 'รายงานประจำเดือน (PDF)', icon: ic.list || '📄' },
   ];
@@ -47,7 +47,7 @@ export function Help({ v }) {
               </h2>
               <p style={css(`font:var(--text-sm)/1.6 var(--font-body); color:var(--text-secondary); margin:0;`)}>
                 ระบบจัดการคลังน้ำยาเคมีสำหรับห้องปฏิบัติการ ธรรมศาสตร์เฉลิมพระเกียรติ พัฒนาขึ้นเพื่อช่วยบริหารสต็อก ติดตามล็อตน้ำยา 
-                และควบคุมการใช้งานแบบ **เข้าก่อน-ออกก่อน (FEFO - First-Expired, First-Out)** เพื่อประสิทธิภาพสูงสุดในการตรวจวินิจฉัยทางการแพทย์
+                และควบคุมการใช้งานแบบ **หมดอายุก่อน–เบิกก่อน (First-Expired, First-Out)** เพื่อประสิทธิภาพสูงสุดในการตรวจวินิจฉัยทางการแพทย์
               </p>
             </div>
 
