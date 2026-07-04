@@ -116,16 +116,19 @@ export function PrintStickerModal({ v }) {
         while (t.length > 1 && ctx.measureText(t + '…').width > tw) t = t.slice(0, -1);
         return t + '…';
       };
-      // Larger again, using the extra width freed up by the smaller QR above.
       // Baselines start lower than a Latin-metrics estimate would suggest — Thai
       // stacked tone marks/vowels on a bold face render noticeably taller above
       // the baseline than the nominal font size implies, confirmed by checking
       // actual rendered pixel bounds (a naive ascent estimate left only 6px of
       // margin above the label's physical top edge).
+      // expFont is capped at 38px (not bumped alongside the others) — measured
+      // against the actual available width once the QR went back to full label
+      // height: 42px clipped a realistic "EXP: 20 Jul 2026" down to "20 Jul 20…",
+      // which is not acceptable for the one safety-critical field on the label.
       const nameFont = "bold 48px 'Sarabun', sans-serif";
       const dataFont = "700 40px 'IBM Plex Mono', monospace";
       const recvFont = "700 38px 'Sarabun', sans-serif";
-      const expFont = "bold 42px 'IBM Plex Mono', monospace";
+      const expFont = "bold 38px 'IBM Plex Mono', monospace";
       const locFont = "600 32px 'Sarabun', sans-serif";
       ctx.font = nameFont;
       ctx.fillText(clip(reagent.th, nameFont), tx, 86);
