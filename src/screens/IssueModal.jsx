@@ -167,7 +167,7 @@ export function IssueModal({ v }) {
             </span>
             <div style={css(`flex:1;`)}>
               <div style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary);`)}>เบิกจ่ายน้ำยาห้องปฏิบัติการ</div>
-              <div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>ทำรายการเบิกจ่ายสารเคมีและน้ำยาโดยอิงเกณฑ์หมดอายุก่อน (FEFO)</div>
+              <div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>ทำรายการเบิกจ่ายสารเคมีและน้ำยาโดยอิงเกณฑ์หมดอายุก่อน–เบิกก่อน</div>
             </div>
             <button onClick={closeModal} style={css(`border:none; background:var(--slate-100); cursor:pointer; padding:6px; border-radius:var(--radius-sm); color:var(--text-secondary); display:grid; place-items:center;`)}>
               {ic.close}
@@ -251,7 +251,7 @@ export function IssueModal({ v }) {
               return (
                 <div style={css(`display:flex; flex-direction:column; gap:8px; margin-top:-4px;`)}>
                   <div style={css(`font:var(--fw-medium) var(--text-2xs)/1.3 var(--font-body); color:var(--text-secondary);`)}>
-                    เลือก Lot ที่ต้องการเบิก (หรือปล่อยว่างเพื่อจ่ายแบบ FEFO อัตโนมัติ)
+                    เลือก Lot ที่ต้องการเบิก (หรือปล่อยว่างเพื่อจ่ายแบบหมดอายุก่อน–เบิกก่อนอัตโนมัติ)
                   </div>
                   <div style={css(`display:flex; flex-wrap:wrap; gap:8px;`)}>
                     {lots.map((l, i) => {
@@ -266,7 +266,7 @@ export function IssueModal({ v }) {
                           onMouseLeave={(e) => { if (!linked) e.currentTarget.style.borderColor = 'var(--border-default)'; }}
                         >
                           <span style={css(`font:var(--fw-bold) var(--text-xs)/1 var(--font-mono); color:var(--text-primary);`)}>
-                            Lot {l.lot}{i === 0 ? ' · FEFO ถัดไป' : ''}
+                            Lot {l.lot}{i === 0 ? ' · หมดอายุก่อน–เบิกก่อน ถัดไป' : ''}
                           </span>
                           <span style={css(`font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary);`)}>
                             เหลือ {l.qty} {selectedReagentObj.unit} · หมดอายุ {l.expiry}
@@ -306,7 +306,7 @@ export function IssueModal({ v }) {
                       {ic.shield || ic.check}
                     </span>
                     <div style={{ font: 'var(--text-sm)/1.3 var(--font-body)' }}>
-                      <div style={{ fontWeight: 'bold', color: 'var(--green-700)' }}>เชื่อมโยงข้อมูลล็อตสำเร็จ!</div>
+                      <div style={{ fontWeight: 'bold', color: 'var(--green-700)' }}>สำเร็จ!</div>
                       <div style={{ font: 'var(--text-2xs)/1 var(--font-mono)', color: 'var(--text-secondary)', marginTop: 2 }}>
                         น้ำยา: <strong style={{ color: 'var(--text-primary)' }}>{selectedReagentObj ? selectedReagentObj.th : ''}</strong> · Lot: <strong style={{ color: 'var(--text-primary)' }}>{linkedLotObj ? linkedLotObj.lot : ''}</strong> (คงเหลือ {linkedLotObj ? linkedLotObj.qty : 0} {selectedReagentObj ? selectedReagentObj.unit : ''})
                       </div>
@@ -372,7 +372,7 @@ export function IssueModal({ v }) {
             {issueHasPlan ? (
               <div style={css(`background:var(--brand-50); border:1px solid var(--brand-100); border-radius:var(--radius-md); padding:14px 16px; margin-top:4px;`)}>
                 <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.4 var(--font-body); color:var(--brand-800); margin-bottom:8px;`)}>
-                  {iform.lotId ? 'จัดสรรการเบิกจาก Lot เจาะจงที่สแกนสำเร็จ' : 'การจัดสรรล็อตที่จะทำรายการเบิกจ่าย (เรียงตามลำดับอายุสั้นสุด FEFO)'}
+                  {iform.lotId ? 'จัดสรรการเบิกจาก Lot เจาะจงที่สแกนสำเร็จ' : 'การจัดสรรล็อตที่จะทำรายการเบิกจ่าย (เรียงตามลำดับอายุสั้นสุด)'}
                 </div>
                 {issuePlanRows.map((p, pI) => (
                   <div key={pI} style={css(`display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid var(--brand-100); font:var(--text-sm)/1.3 var(--font-body);`)}>
