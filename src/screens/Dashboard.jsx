@@ -141,7 +141,7 @@ export function Dashboard({ v }) {
     @media print {
       @page {
         size: A4 portrait;
-        margin: 15mm 12mm 15mm 12mm;
+        margin: 20mm 15mm 20mm 15mm;
       }
       *, *::before, *::after {
         background-color: transparent !important;
@@ -153,6 +153,13 @@ export function Dashboard({ v }) {
         background: #ffffff !important;
         background-color: #ffffff !important;
         color: #000000 !important;
+      }
+      html, body, #root, main, .qms-rise {
+        height: auto !important;
+        min-height: auto !important;
+        overflow: visible !important;
+        display: block !important;
+        position: static !important;
       }
       aside, header, button, .no-print, nav, .qms-rise > *:not(.print-report-container), [class*="Sidebar"], [class*="Header"] {
         display: none !important;
@@ -167,7 +174,7 @@ export function Dashboard({ v }) {
         display: block !important;
         width: 100% !important;
         box-sizing: border-box;
-        padding: 10mm 10mm !important;
+        padding: 0 !important;
         margin: 0 !important;
       }
       .report-table {
