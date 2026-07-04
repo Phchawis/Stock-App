@@ -132,6 +132,23 @@ export function PrintStickerModal({ v }) {
       ctx.font = locFont;
       ctx.fillText(clip('สภาวะจัดเก็บ: ' + storageLabel, locFont), tx, 302);
 
+      // Force every pixel to pure black or pure white — canvas text (even with a
+      // solid black fillStyle) is anti-aliased, leaving grey pixels along every
+      // edge. Many label/photo print pipelines run a dithering pass on any
+      // greyscale content, which turns those soft anti-aliased edges into the
+      // speckled halftone pattern that shows up on the printed label. Thresholding
+      // here removes all grey from the source, so there's nothing left to dither —
+      // biased slightly toward black so thin Thai tone marks and QR modules don't
+      // get eaten away by the cutoff.
+      const imageData = ctx.getImageData(0, 0, W, H);
+      const data = imageData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const luminance = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+        const v = luminance < 190 ? 0 : 255;
+        data[i] = data[i + 1] = data[i + 2] = v;
+      }
+      ctx.putImageData(imageData, 0, 0);
+
       const url = canvas.toDataURL('image/png');
       const safe = (reagent.en || reagent.th).replace(/[^a-zA-Z0-9ก-๙]/g, '_');
       const link = document.createElement('a');
