@@ -47,7 +47,7 @@ export function Alerts({ v }) {
         background-color: #ffffff !important;
         color: #000000 !important;
       }
-      html, body, #root, main, .qms-rise {
+      html, body, #root, #root > div, main, .qms-rise {
         height: auto !important;
         min-height: auto !important;
         overflow: visible !important;
