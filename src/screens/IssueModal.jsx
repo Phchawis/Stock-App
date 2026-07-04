@@ -158,7 +158,7 @@ export function IssueModal({ v }) {
     <>
       <style>{localStyle}</style>
       <div className="ov-in" onClick={closeModal} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.46); z-index:50; display:grid; place-items:center; padding:24px; --brand-700:#7AA2C4; --brand-800:#93b9e1; --brand-600:#7AA2C4; --brand-500:#93b9e1; --brand-400:#a9c7ee; --brand-100:rgba(122,162,196,0.22); --brand-50:rgba(122,162,196,0.12); --glow-brand-soft:0 6px 18px -8px rgba(122,162,196,0.5); --accent-700:#a9c7ee; --accent-600:#7AA2C4; --accent-500:#7AA2C4; --accent-400:#93b9e1; --accent-100:rgba(122,162,196,0.20); --accent-50:rgba(122,162,196,0.12); --glow-accent:0 6px 18px -8px rgba(122,162,196,0.5);`)}>
-        <div className="tt-in theme-light-scope" onClick={stop} style={css(`width:min(720px,96vw); max-height:92vh; overflow-y:auto; background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:1px solid var(--border-subtle);`)}>
+        <div className="tt-in theme-light-scope" onClick={stop} style={css(`width:min(720px,96vw); max-height:92vh; overflow-y:auto; background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:2px solid #7AA2C4; --surface-card:#e4effb; --text-primary:#192e4d; --text-secondary:#2c476f; --text-tertiary:#4c6b99; --border-subtle:#7AA2C4; --border-default:#93b9e1; --border-strong:#7AA2C4; --slate-50:#cbdffa; --slate-100:#b6d2f3; --slate-200:#93b9e1;`)}>
           
           {/* Header */}
           <div style={css(`padding:18px 22px; border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; gap:11px;`)}>
@@ -445,7 +445,7 @@ export function IssueModal({ v }) {
               .qr-scanline, .qr-icon-badge, .qr-success-badge { animation: none !important; }
             }
           `}</style>
-          <div onClick={stop} style={css(`width:min(400px,94vw); background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:1px solid var(--border-subtle); overflow:hidden;`)}>
+          <div onClick={stop} style={css(`width:min(400px,94vw); background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:2px solid #7AA2C4; overflow:hidden; --surface-card:#e4effb; --text-primary:#192e4d; --text-secondary:#2c476f; --text-tertiary:#4c6b99; --border-subtle:#7AA2C4; --border-default:#93b9e1; --border-strong:#7AA2C4; --slate-50:#cbdffa; --slate-100:#b6d2f3; --slate-200:#93b9e1; --surface-sunken:#cbdffa;`)}>
             <div style={css(`padding:16px 18px; border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; gap:11px; background:var(--surface-sunken);`)}>
               <span
                 className="qr-icon-badge"
