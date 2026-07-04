@@ -19,46 +19,48 @@ export const contentThemes = {
   indigo: {
     id: 'indigo',
     label: 'แบบที่ 1 · Indigo Night (น้ำเงินเข้มกลางคืน)',
-    swatch: 'linear-gradient(135deg, #0A1220 50%, #A9C7EE 50%)',
+    swatch: 'linear-gradient(135deg, #0A1220 50%, #9ED7E6 50%)',
     vars: `
-      ${brandCore}
-      --surface-page:#0A1220;
-      --surface-card:#121D31;
-      --surface-sunken:#070D18;
-      --white:#121D31;
-      --surface-inverse:#EEF4FC;
-      --text-primary:#EEF4FC;
-      --text-secondary:#A9C7EE;
-      --text-tertiary:#93B9E1;
-      --text-disabled:#55688A;
-      --text-link:#A9C7EE;
-      --border-subtle:rgba(169,199,238,.14);
-      --border-default:rgba(169,199,238,.26);
-      --border-strong:rgba(147,185,225,.44);
-      --brand-900:#D8E6FA;
-      --brand-800:#A9C7EE;
-      --brand-500:#7AA2C4;
-      --brand-400:#93B9E1;
-      --brand-300:#C3D8F4;
-      --brand-100:rgba(169,199,238,.18);
-      --brand-50:rgba(169,199,238,.10);
-      --blue-700:#93B9E1;
-      --blue-600:#A9C7EE;
-      --blue-100:rgba(169,199,238,.16);
-      --slate-700:#AECBEE;
-      --slate-600:#93B9E1;
-      --slate-500:#7C90AE;
-      --slate-400:#4A5F82;
-      --slate-300:#2F4260;
-      --slate-200:#233350;
-      --slate-100:#182740;
-      --slate-50:#131F33;
-      --glow-brand:0 10px 30px -10px rgba(169,199,238,.35);
-      --glow-brand-soft:0 6px 18px -8px rgba(169,199,238,.28);
-      --content-glass-top:rgba(10,18,32,0.72);
-      --content-glass-bottom:rgba(10,18,32,0.85);
-      --content-bar-shadow:0 -8px 24px rgba(0,0,0,.35);
-      --content-ambient:radial-gradient(1100px 520px at 85% -10%, rgba(169,199,238,.10), transparent 60%), radial-gradient(900px 480px at -10% 30%, rgba(147,185,225,.06), transparent 55%), radial-gradient(760px 420px at 55% 115%, rgba(122,162,196,.09), transparent 60%), var(--surface-page);
+      --brand-700:#8DBBCC;
+      --brand-600:#9ED7E6;
+      --border-brand:#9ED7E6;
+      --surface-page: #060b13;
+      --surface-card: rgba(15, 24, 42, 0.75);
+      --surface-sunken: rgba(7, 13, 25, 0.6);
+      --white: rgba(15, 24, 42, 0.85);
+      --surface-inverse: #f0f7f8;
+      --text-primary: #f0f7f8;
+      --text-secondary: #afdae0;
+      --text-tertiary: #8DBBCC;
+      --text-link: #9ED7E6;
+      --text-disabled: #4f6170;
+      --border-subtle: rgba(175, 218, 224, 0.16);
+      --border-default: rgba(175, 218, 224, 0.28);
+      --border-strong: rgba(141, 187, 204, 0.45);
+      --brand-900: #8DBBCC;
+      --brand-800: #9ED7E6;
+      --brand-500: #afdae0;
+      --brand-400: #8DBBCC;
+      --brand-300: #9ED7E6;
+      --brand-100: rgba(158, 215, 230, 0.18);
+      --brand-50: rgba(158, 215, 230, 0.1);
+      --blue-700: #8DBBCC;
+      --blue-600: #9ED7E6;
+      --blue-100: rgba(158, 215, 230, 0.16);
+      --slate-700: #afdae0;
+      --slate-600: #8DBBCC;
+      --slate-500: #5c758a;
+      --slate-400: #445667;
+      --slate-300: #2d3b48;
+      --slate-200: #212c36;
+      --slate-100: #151d24;
+      --slate-50: #0f161b;
+      --glow-brand: 0 0 20px rgba(158, 215, 230, 0.25);
+      --glow-brand-soft: 0 4px 12px rgba(158, 215, 230, 0.15);
+      --content-glass-top: rgba(6, 11, 19, 0.72);
+      --content-glass-bottom: rgba(6, 11, 19, 0.85);
+      --content-bar-shadow: 0 -8px 24px rgba(0,0,0,.35);
+      --content-ambient: radial-gradient(1100px 520px at 85% -10%, rgba(158, 215, 230, 0.1), transparent 60%), radial-gradient(900px 480px at -10% 30%, rgba(141, 187, 204, 0.06), transparent 55%), radial-gradient(760px 420px at 55% 115%, rgba(141, 187, 204, 0.08), transparent 60%), var(--surface-page);
     `,
   },
 
