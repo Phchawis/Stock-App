@@ -1740,3 +1740,80 @@ input:focus, select:focus, textarea:focus {
   button, input, select, textarea { transition: none; }
   button:not(:disabled):active { transform: none; }
 }
+
+/* ── Light-theme scope for individual surfaces ──────────────
+   The whole app runs on a dark theme applied inline on the App root (see
+   App.jsx). This class re-declares every token that override touches, using
+   this file's original light values, so it can be dropped onto any single
+   subtree (e.g. one modal) to make just that surface render light while the
+   rest of the app stays dark. Type-scale tokens (--text-2xs..--text-4xl) are
+   intentionally left alone — sizing isn't part of "theme," only color is. */
+.theme-light-scope {
+  --surface-page:    #F6F7FB;
+  --surface-card:    #FFFFFF;
+  --surface-sunken:  #EEEFF5;
+  --white:           #FFFFFF;
+  --surface-inverse: #181B2A;
+  --text-primary:    #181B2A;
+  --text-secondary:  #54596F;
+  --text-tertiary:   #70758C;
+  --text-link:       #4250BC;
+  --text-on-brand:   #FFFFFF;
+  --text-disabled:   #969BB0;
+  --border-subtle:   #E0E2EC;
+  --border-default:  #C4C8D6;
+  --border-strong:   #969BB0;
+  --border-brand:    #4250BC;
+  --focus-ring:      #5E6CD6;
+  --brand-900: #1B2152;
+  --brand-800: #262E73;
+  --brand-700: #343E9B;
+  --brand-600: #4250BC;
+  --brand-500: #5E6CD6;
+  --brand-400: #8893E3;
+  --brand-300: #B4BBEE;
+  --brand-100: #E3E6F9;
+  --brand-50:  #F1F2FC;
+  --accent-700: #C2422A;
+  --accent-600: #DD5236;
+  --accent-500: #EC6647;
+  --accent-400: #F2876E;
+  --accent-100: #FBE2DA;
+  --accent-50:  #FDF0EC;
+  --blue-700: #1B5E8F;
+  --blue-600: #2374AE;
+  --blue-100: #DEEDF7;
+  --blue-50:  #EFF6FB;
+  --green-700: #1B7A36;
+  --green-600: #259544;
+  --green-100: #DCF0E2;
+  --amber-700: #9A6800;
+  --amber-600: #C28400;
+  --amber-100: #FBEFD0;
+  --red-700: #A31621;
+  --red-600: #C42330;
+  --red-100: #F9E0E2;
+  --violet-700: #5B3FA6;
+  --violet-600: #6E4FC4;
+  --violet-100: #EBE5F8;
+  --slate-950: #11131F;
+  --slate-900: #181B2A;
+  --slate-800: #262A3D;
+  --slate-700: #3A3F55;
+  --slate-600: #54596F;
+  --slate-500: #70758C;
+  --slate-400: #969BB0;
+  --slate-300: #C4C8D6;
+  --slate-200: #E0E2EC;
+  --slate-100: #EEEFF5;
+  --slate-50:  #F6F7FB;
+  --shadow-xs: 0 1px 2px rgba(15, 26, 30, 0.06);
+  --shadow-sm: 0 1px 3px rgba(15, 26, 30, 0.08), 0 1px 2px rgba(15, 26, 30, 0.05);
+  --shadow-md: 0 4px 10px -2px rgba(15, 26, 30, 0.10), 0 2px 4px -2px rgba(15, 26, 30, 0.06);
+  --shadow-lg: 0 12px 24px -6px rgba(15, 26, 30, 0.14), 0 4px 8px -4px rgba(15, 26, 30, 0.08);
+  --glow-brand:      0 10px 30px -8px rgba(52,62,155,.45);
+  --glow-brand-soft: 0 6px 18px -8px rgba(52,62,155,.35);
+  --glow-accent:     0 10px 30px -8px rgba(236,102,71,.40);
+  background: var(--surface-card);
+  color: var(--text-primary);
+}
