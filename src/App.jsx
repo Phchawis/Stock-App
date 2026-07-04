@@ -210,7 +210,7 @@ class App extends React.Component {
     return [
       { key: 'view', label: 'ดูคลังน้ำยาและประวัติการเคลื่อนไหว' },
       { key: 'receive', label: 'รับน้ำยาเข้าคลัง (Receive)' },
-      { key: 'issue', label: 'เบิกจ่ายน้ำยาแบบ FEFO' },
+      { key: 'issue', label: 'เบิกจ่ายน้ำยาแบบหมดอายุก่อน–เบิกก่อน' },
       { key: 'manage', label: 'จัดการข้อมูลน้ำยา (Master)' },
       { key: 'ack', label: 'รับทราบ/จัดการการแจ้งเตือน' },
       { key: 'users', label: 'จัดการผู้ใช้และสิทธิ์' },
@@ -708,7 +708,7 @@ class App extends React.Component {
           qrInput: cleanCode
         }
       }));
-      this.showToast(`สแกนพบน้ำยา ${foundReagent.th} แล้ว (จะจ่ายโดยใช้ระบบ FEFO)`, 'success');
+      this.showToast(`สแกนพบน้ำยา ${foundReagent.th} แล้ว (จะจ่ายโดยใช้ระบบหมดอายุก่อน–เบิกก่อน)`, 'success');
       return true;
     }
     this.showToast(`ไม่พบข้อมูล QR Code "${cleanCode}" หรือน้ำยาใน Lot นี้หมดคลังแล้ว`, 'warn');
@@ -716,7 +716,7 @@ class App extends React.Component {
   }
   unlinkLot() {
     this.setState(s => ({ iform: { ...s.iform, lotId: '' } }));
-    this.showToast('ยกเลิกการเชื่อมโยงล็อตนี้แล้ว ระบบจะใช้ระบบ FEFO ตามปกติ');
+    this.showToast('ยกเลิกการเชื่อมโยงล็อตนี้แล้ว ระบบจะใช้ระบบหมดอายุก่อน–เบิกก่อนตามปกติ');
   }
   selectReagentForIssue(rid) {
     const r = this.state.reagents.find(x => x.id === +rid);
@@ -926,7 +926,7 @@ class App extends React.Component {
           const recvDate = recvDateOf(l.id);
           return { id: l.id, lot: l.lot, expiry: l.expiry, qty: l.qty, recv: l.recv, recvDate, loc: l.loc, qr: l.qr,
             dayLabel: dep ? 'หมดแล้ว' : this.dayLabel(d), dayColor: dep ? 'var(--text-tertiary)' : sc.fg,
-            fefoBadge: (i === 0 && !dep) ? 'FEFO ถัดไป' : '', statusLabel: dep ? 'หมด' : 'พร้อมใช้',
+            fefoBadge: (i === 0 && !dep) ? 'หมดอายุก่อน–เบิกก่อน ถัดไป' : '', statusLabel: dep ? 'หมด' : 'พร้อมใช้',
             statusFg: dep ? 'var(--slate-600)' : 'var(--green-700)', statusBg: dep ? 'var(--slate-100)' : 'var(--green-100)',
             onEdit: () => this.openEditLot(l.id), onDelete: () => this.deleteLotReceive(l.id) };
         });
@@ -1047,7 +1047,7 @@ class App extends React.Component {
       printLotData: S.printLotData,
       roleCards: this.ROLES().map(r => ({ id: r.id, th: r.th, en: r.en, initials: r.initials, color: r.color, onLogin: () => this.login(r.id),
         permCount: this.PERM_LABELS().filter(p => this.state.perms[r.id][p.key]).length,
-        summary: ({ admin: 'เข้าถึงและจัดการได้ทุกส่วนของระบบ รวมถึงการจัดการผู้ใช้และการตั้งค่า', supervisor: 'รับเข้า–เบิกจ่าย จัดการข้อมูลน้ำยา และรับทราบการแจ้งเตือน', technician: 'เบิกจ่ายแบบ FEFO ดูคลัง และรับทราบการแจ้งเตือน', viewer: 'ดูข้อมูลคลังน้ำยาและประวัติได้อย่างเดียว' })[r.id] })),
+        summary: ({ admin: 'เข้าถึงและจัดการได้ทุกส่วนของระบบ รวมถึงการจัดการผู้ใช้และการตั้งค่า', supervisor: 'รับเข้า–เบิกจ่าย จัดการข้อมูลน้ำยา และรับทราบการแจ้งเตือน', technician: 'เบิกจ่ายแบบหมดอายุก่อน–เบิกก่อน ดูคลัง และรับทราบการแจ้งเตือน', viewer: 'ดูข้อมูลคลังน้ำยาและประวัติได้อย่างเดียว' })[r.id] })),
       permRoles: this.ROLES().map(r => ({ th: r.th, color: r.color, current: r.id === S.role, headBg: r.id === S.role ? 'var(--brand-50)' : 'transparent', headFg: r.id === S.role ? 'var(--text-primary)' : 'var(--text-secondary)' })),
       permRows: this.PERM_LABELS().map(p => ({ label: p.label, cells: this.ROLES().map(r => { const ok = !!this.state.perms[r.id][p.key]; const edit = S.role === 'admin'; return { mark: this.icon(ok ? 'Check' : 'X', 18, ok ? 'var(--green-700)' : 'var(--text-tertiary)'), cellBg: r.id === S.role ? 'rgba(43,166,198,.09)' : 'transparent', cursor: edit ? 'pointer' : 'default', onToggle: edit ? (() => this.togglePerm(r.id, p.key)) : (() => {}) }; }) })),
       myRole: (() => { const id = S.role || this.ROLES()[0].id; const r = this.ROLES().find(x => x.id === id); const m = this.state.perms[id] || {}; return { th: r.th, en: r.en, initials: r.initials, color: r.color, grantCount: this.PERM_LABELS().filter(p => m[p.key]).length }; })(),
