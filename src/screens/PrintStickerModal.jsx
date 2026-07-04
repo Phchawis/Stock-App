@@ -72,15 +72,34 @@ export function PrintStickerModal({ v }) {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, W, H);
 
-      // QR on the left
+      // QR on the left — drawn module-by-module from the raw QR matrix instead of
+      // scaling a pre-rendered PNG. Scaling a bitmap QR down/up onto the canvas
+      // resamples its finite black/white modules, which is what most often shows
+      // up as "fuzzy" or moiré detail once printed on a thermal label printer.
+      // Drawing each module as its own rect keeps every edge pixel-crisp at any
+      // final print resolution.
       const pad = 26;
       const qrSize = H - pad * 2;
-      await new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => { ctx.imageSmoothingEnabled = false; ctx.drawImage(img, pad, pad, qrSize, qrSize); resolve(); };
-        img.onerror = resolve;
-        img.src = qrUrl;
-      });
+      const qrMatrix = QRCode.create(lot.qr, { errorCorrectionLevel: 'H' }).modules;
+      const moduleCount = qrMatrix.size;
+      const marginModules = 3; // matches the on-screen QR's quiet-zone margin
+      const totalModules = moduleCount + marginModules * 2;
+      const cellSize = qrSize / totalModules;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(pad, pad, qrSize, qrSize);
+      ctx.fillStyle = '#000000';
+      for (let row = 0; row < moduleCount; row++) {
+        for (let col = 0; col < moduleCount; col++) {
+          if (!qrMatrix.get(row, col)) continue;
+          // Round each cell's edges (not its width) so adjacent modules never
+          // leave a hairline gap or overlap regardless of final pixel scale.
+          const x0 = Math.round(pad + (marginModules + col) * cellSize);
+          const x1 = Math.round(pad + (marginModules + col + 1) * cellSize);
+          const y0 = Math.round(pad + (marginModules + row) * cellSize);
+          const y1 = Math.round(pad + (marginModules + row + 1) * cellSize);
+          ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+        }
+      }
 
       // Text on the right
       const tx = pad + qrSize + 22;
@@ -94,21 +113,24 @@ export function PrintStickerModal({ v }) {
         while (t.length > 1 && ctx.measureText(t + '…').width > tw) t = t.slice(0, -1);
         return t + '…';
       };
-      const nameFont = "bold 36px 'Sarabun', sans-serif";
-      const dataFont = "600 30px 'IBM Plex Mono', monospace";
-      const recvFont = "600 28px 'Sarabun', sans-serif";
-      const expFont = "bold 30px 'IBM Plex Mono', monospace";
-      const locFont = "24px 'Sarabun', sans-serif";
+      // Bolder/larger than before — thermal printheads lose thin anti-aliased
+      // edges, so extra weight and size buys back legibility (there was ~65px
+      // of unused vertical space below the last line at the old sizes).
+      const nameFont = "bold 38px 'Sarabun', sans-serif";
+      const dataFont = "700 32px 'IBM Plex Mono', monospace";
+      const recvFont = "700 30px 'Sarabun', sans-serif";
+      const expFont = "bold 32px 'IBM Plex Mono', monospace";
+      const locFont = "600 26px 'Sarabun', sans-serif";
       ctx.font = nameFont;
-      ctx.fillText(clip(reagent.th, nameFont), tx, 82);
+      ctx.fillText(clip(reagent.th, nameFont), tx, 84);
       ctx.font = dataFont;
-      ctx.fillText('Lot: ' + lot.lot, tx, 136);
+      ctx.fillText('Lot: ' + lot.lot, tx, 140);
       ctx.font = recvFont;
-      ctx.fillText(clip('รับเข้า: ' + recvLabel, recvFont), tx, 190);
+      ctx.fillText(clip('รับเข้า: ' + recvLabel, recvFont), tx, 196);
       ctx.font = expFont;
-      ctx.fillText(clip('EXP: ' + expLabel, expFont), tx, 244);
+      ctx.fillText(clip('EXP: ' + expLabel, expFont), tx, 252);
       ctx.font = locFont;
-      ctx.fillText(clip('สภาวะจัดเก็บ: ' + storageLabel, locFont), tx, 292);
+      ctx.fillText(clip('สภาวะจัดเก็บ: ' + storageLabel, locFont), tx, 302);
 
       const url = canvas.toDataURL('image/png');
       const safe = (reagent.en || reagent.th).replace(/[^a-zA-Z0-9ก-๙]/g, '_');
