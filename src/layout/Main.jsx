@@ -94,14 +94,14 @@ export function Main({ v }) {
         bottom: 0;
         left: 0;
         right: 0;
-        background: rgba(8, 17, 25, 0.85);
+        background: var(--content-glass-bottom);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
         border-top: 1px solid var(--border-default);
         padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 8px));
         gap: 12px;
         z-index: 40;
-        box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
+        box-shadow: var(--content-bar-shadow);
       }
       .mobile-action-btn {
         flex: 1;
@@ -155,7 +155,23 @@ export function Main({ v }) {
           <div className="subtitle-text" style={css(`font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary);`)}>{subtitle}</div>
         </div>
         <div style={css(`flex:1;`)}></div>
-        
+
+        {/* Theme picker — three selectable looks for the content area */}
+        <div style={css(`display:flex; align-items:center; gap:7px; padding:5px 8px; border-radius:var(--radius-pill, 999px); border:1px solid var(--border-subtle); background:var(--brand-50);`)}>
+          {themeChoices.map((t) => {
+            const active = t.id === activeTheme.id;
+            return (
+              <button
+                key={t.id}
+                title={t.label}
+                aria-label={t.label}
+                onClick={() => setContentTheme(t.id)}
+                style={css(`width:20px; height:20px; border-radius:50%; padding:0; cursor:pointer; background:${t.swatch}; border:2px solid ${active ? 'var(--text-link)' : 'var(--border-default)'}; box-shadow:${active ? '0 0 0 3px var(--brand-100)' : 'none'}; transform:${active ? 'scale(1.12)' : 'none'}; transition:all var(--dur-fast);`)}
+              />
+            );
+          })}
+        </div>
+
         <button onClick={openReceive} className="header-btn-receive">
           <span style={css(`width:16px; height:16px; display:grid; place-items:center;`)}>{ic.receive}</span>
           รับเข้า
@@ -179,7 +195,7 @@ export function Main({ v }) {
         </button>
       </div>
 
-      <main className="main-content" style={css(`flex:1; padding:var(--page-gutter,28px); overflow-y:auto; background:radial-gradient(1100px 520px at 85% -10%, rgba(158,215,230,.10), transparent 60%), radial-gradient(900px 480px at -10% 30%, rgba(175,218,224,.06), transparent 55%), radial-gradient(760px 420px at 55% 115%, rgba(141,187,204,.08), transparent 60%), var(--surface-page);`)}>
+      <main className="main-content" style={css(`flex:1; padding:var(--page-gutter,28px); overflow-y:auto; background:var(--content-ambient); transition:background .3s ease;`)}>
         <Dashboard v={v} />
         <Inventory v={v} />
         <ReagentLists v={v} />
