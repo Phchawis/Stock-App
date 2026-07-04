@@ -1,6 +1,6 @@
 import React from 'react';
 import { css } from '../css.js';
-import { contentThemes, themeChoices } from '../theme.js';
+import { contentTheme } from '../theme.js';
 import { Dashboard } from '../screens/Dashboard.jsx';
 import { Inventory } from '../screens/Inventory.jsx';
 import { Alerts } from '../screens/Alerts.jsx';
@@ -12,10 +12,7 @@ import { Help } from '../screens/Help.jsx';
 export function Main({ v }) {
   const {
     ic, title, subtitle, openReceive, openIssue, toggleSidebar,
-    contentThemeId, setContentTheme,
   } = v;
-
-  const activeTheme = contentThemes[contentThemeId] || contentThemes.indigo;
 
   const localStyle = `
     /* Matches the sidebar's "การทำงาน" receive/withdraw buttons — same green/amber
@@ -140,7 +137,7 @@ export function Main({ v }) {
   `;
 
   return (
-    <div style={css(`flex:1; min-width:0; display:flex; flex-direction:column; background:var(--surface-page); ${activeTheme.vars}`)}>
+    <div style={css(`flex:1; min-width:0; display:flex; flex-direction:column; background:var(--surface-page); ${contentTheme}`)}>
       <style>{localStyle}</style>
       <header className="main-header" style={css(`height:var(--topbar-height,60px); flex-shrink:0; background:var(--content-glass-top); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--border-default); display:flex; align-items:center; gap:16px; padding:0 var(--page-gutter,28px); position:sticky; top:0; z-index:5;`)}>
         <button 
@@ -155,22 +152,6 @@ export function Main({ v }) {
           <div className="subtitle-text" style={css(`font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary);`)}>{subtitle}</div>
         </div>
         <div style={css(`flex:1;`)}></div>
-
-        {/* Theme picker — three selectable looks for the content area */}
-        <div style={css(`display:flex; align-items:center; gap:7px; padding:5px 8px; border-radius:var(--radius-pill, 999px); border:1px solid var(--border-subtle); background:var(--brand-50);`)}>
-          {themeChoices.map((t) => {
-            const active = t.id === activeTheme.id;
-            return (
-              <button
-                key={t.id}
-                title={t.label}
-                aria-label={t.label}
-                onClick={() => setContentTheme(t.id)}
-                style={css(`width:20px; height:20px; border-radius:50%; padding:0; cursor:pointer; background:${t.swatch}; border:2px solid ${active ? 'var(--text-link)' : 'var(--border-default)'}; box-shadow:${active ? '0 0 0 3px var(--brand-100)' : 'none'}; transform:${active ? 'scale(1.12)' : 'none'}; transition:all var(--dur-fast);`)}
-              />
-            );
-          })}
-        </div>
 
         <button onClick={openReceive} className="header-btn-receive">
           <span style={css(`width:16px; height:16px; display:grid; place-items:center;`)}>{ic.receive}</span>
