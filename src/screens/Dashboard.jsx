@@ -167,7 +167,7 @@ export function Dashboard({ v }) {
         display: block !important;
         width: 100% !important;
         box-sizing: border-box;
-        padding: 0 !important;
+        padding: 10mm 10mm !important;
         margin: 0 !important;
       }
       .report-table {
