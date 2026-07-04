@@ -79,14 +79,18 @@ export function PrintStickerModal({ v }) {
       // Drawing each module as its own rect keeps every edge pixel-crisp at any
       // final print resolution.
       const pad = 26;
-      const qrSize = H - pad * 2;
+      // Slightly smaller than the full label height — still generous for reliable
+      // scanning (~15mm), and frees extra width for the larger text alongside it.
+      // Centered vertically since it no longer fills the full column height.
+      const qrSize = H - pad * 2 - 48;
+      const qrY = pad + (H - pad * 2 - qrSize) / 2;
       const qrMatrix = QRCode.create(lot.qr, { errorCorrectionLevel: 'H' }).modules;
       const moduleCount = qrMatrix.size;
       const marginModules = 3; // matches the on-screen QR's quiet-zone margin
       const totalModules = moduleCount + marginModules * 2;
       const cellSize = qrSize / totalModules;
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(pad, pad, qrSize, qrSize);
+      ctx.fillRect(pad, qrY, qrSize, qrSize);
       ctx.fillStyle = '#000000';
       for (let row = 0; row < moduleCount; row++) {
         for (let col = 0; col < moduleCount; col++) {
@@ -95,8 +99,8 @@ export function PrintStickerModal({ v }) {
           // leave a hairline gap or overlap regardless of final pixel scale.
           const x0 = Math.round(pad + (marginModules + col) * cellSize);
           const x1 = Math.round(pad + (marginModules + col + 1) * cellSize);
-          const y0 = Math.round(pad + (marginModules + row) * cellSize);
-          const y1 = Math.round(pad + (marginModules + row + 1) * cellSize);
+          const y0 = Math.round(qrY + (marginModules + row) * cellSize);
+          const y1 = Math.round(qrY + (marginModules + row + 1) * cellSize);
           ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
         }
       }
@@ -113,23 +117,22 @@ export function PrintStickerModal({ v }) {
         while (t.length > 1 && ctx.measureText(t + '…').width > tw) t = t.slice(0, -1);
         return t + '…';
       };
-      // Larger still — every line now uses the full ~348px of vertical room
-      // between the top and bottom padding (previously ~65px of that was unused).
-      const nameFont = "bold 44px 'Sarabun', sans-serif";
-      const dataFont = "700 36px 'IBM Plex Mono', monospace";
-      const recvFont = "700 34px 'Sarabun', sans-serif";
-      const expFont = "bold 38px 'IBM Plex Mono', monospace";
-      const locFont = "600 28px 'Sarabun', sans-serif";
+      // Larger again, using the extra width freed up by the smaller QR above.
+      const nameFont = "bold 48px 'Sarabun', sans-serif";
+      const dataFont = "700 40px 'IBM Plex Mono', monospace";
+      const recvFont = "700 38px 'Sarabun', sans-serif";
+      const expFont = "bold 42px 'IBM Plex Mono', monospace";
+      const locFont = "600 32px 'Sarabun', sans-serif";
       ctx.font = nameFont;
-      ctx.fillText(clip(reagent.th, nameFont), tx, 80);
+      ctx.fillText(clip(reagent.th, nameFont), tx, 66);
       ctx.font = dataFont;
-      ctx.fillText(clip('Lot: ' + lot.lot, dataFont), tx, 152);
+      ctx.fillText(clip('Lot: ' + lot.lot, dataFont), tx, 144);
       ctx.font = recvFont;
-      ctx.fillText(clip('รับเข้า: ' + recvLabel, recvFont), tx, 224);
+      ctx.fillText(clip('รับเข้า: ' + recvLabel, recvFont), tx, 220);
       ctx.font = expFont;
       ctx.fillText(clip('EXP: ' + expLabel, expFont), tx, 296);
       ctx.font = locFont;
-      ctx.fillText(clip('สภาวะจัดเก็บ: ' + storageLabel, locFont), tx, 362);
+      ctx.fillText(clip('สภาวะจัดเก็บ: ' + storageLabel, locFont), tx, 366);
 
       // Force every pixel to pure black or pure white — canvas text (even with a
       // solid black fillStyle) is anti-aliased, leaving grey pixels along every
@@ -137,13 +140,14 @@ export function PrintStickerModal({ v }) {
       // greyscale content, which turns those soft anti-aliased edges into the
       // speckled halftone pattern that shows up on the printed label. Thresholding
       // here removes all grey from the source, so there's nothing left to dither —
-      // biased slightly toward black so thin Thai tone marks and QR modules don't
-      // get eaten away by the cutoff.
+      // biased toward black so thin Thai tone marks and QR modules don't get eaten
+      // away by the cutoff — thermal printheads under-render thin strokes, so
+      // erring toward bolder source text holds up better once actually printed.
       const imageData = ctx.getImageData(0, 0, W, H);
       const data = imageData.data;
       for (let i = 0; i < data.length; i += 4) {
         const luminance = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-        const v = luminance < 190 ? 0 : 255;
+        const v = luminance < 210 ? 0 : 255;
         data[i] = data[i + 1] = data[i + 2] = v;
       }
       ctx.putImageData(imageData, 0, 0);
