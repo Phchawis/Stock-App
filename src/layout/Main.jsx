@@ -135,133 +135,10 @@ export function Main({ v }) {
     }
   `;
 
-  const themeStyles = {
-    option1: `
-      --surface-page: #060b13;
-      --surface-card: rgba(15, 24, 42, 0.75);
-      --surface-sunken: rgba(7, 13, 25, 0.6);
-      --white: rgba(15, 24, 42, 0.85);
-      --surface-inverse: #f0f7f8;
-      --text-primary: #f0f7f8;
-      --text-secondary: #afdae0;
-      --text-tertiary: #8DBBCC;
-      --text-link: #9ED7E6;
-      --text-disabled: #4f6170;
-      --border-subtle: rgba(175, 218, 224, 0.16);
-      --border-default: rgba(175, 218, 224, 0.28);
-      --border-strong: rgba(141, 187, 204, 0.45);
-      --border-brand: #9ED7E6;
-      --brand-900: #8DBBCC;
-      --brand-800: #9ED7E6;
-      --brand-700: #8DBBCC;
-      --brand-600: #9ED7E6;
-      --brand-500: #afdae0;
-      --brand-400: #8DBBCC;
-      --brand-300: #9ED7E6;
-      --brand-100: rgba(158, 215, 230, 0.18);
-      --brand-50: rgba(158, 215, 230, 0.1);
-      --glow-brand: 0 0 20px rgba(158, 215, 230, 0.25);
-      --glow-brand-soft: 0 4px 12px rgba(158, 215, 230, 0.15);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    `,
-    option2: `
-      --surface-page: #f0f7f8;
-      --surface-card: #ffffff;
-      --surface-sunken: #e2eff1;
-      --white: #ffffff;
-      --surface-inverse: #101c24;
-      --text-primary: #101c24;
-      --text-secondary: #354e5b;
-      --text-tertiary: #5d7c8d;
-      --text-link: #8DBBCC;
-      --text-disabled: #94a8b5;
-      --border-subtle: #e2eff1;
-      --border-default: #cfdfE2;
-      --border-strong: #8DBBCC;
-      --border-brand: #8DBBCC;
-      --brand-900: #354e5b;
-      --brand-800: #5d7c8d;
-      --brand-700: #8DBBCC;
-      --brand-600: #8DBBCC;
-      --brand-500: #9ED7E6;
-      --brand-400: #afdae0;
-      --brand-300: #cfdfE2;
-      --brand-100: rgba(141, 187, 204, 0.18);
-      --brand-50: rgba(141, 187, 204, 0.1);
-      --glow-brand: 0 8px 24px rgba(141, 187, 204, 0.15);
-      --glow-brand-soft: 0 4px 12px rgba(141, 187, 204, 0.1);
-    `,
-    option3: `
-      --surface-page: #19222c;
-      --surface-card: #222d3a;
-      --surface-sunken: #141b23;
-      --white: #222d3a;
-      --surface-inverse: #e8ecef;
-      --text-primary: #e8ecef;
-      --text-secondary: #a3b8cc;
-      --text-tertiary: #7d96ae;
-      --text-link: #9ED7E6;
-      --text-disabled: #4f6173;
-      --border-subtle: #2d3b4b;
-      --border-default: #394d61;
-      --border-strong: #8DBBCC;
-      --border-brand: #9ED7E6;
-      --brand-900: #8DBBCC;
-      --brand-800: #9ED7E6;
-      --brand-700: #8DBBCC;
-      --brand-600: #9ED7E6;
-      --brand-500: #afdae0;
-      --brand-400: #8DBBCC;
-      --brand-300: #9ED7E6;
-      --brand-100: rgba(158, 215, 230, 0.18);
-      --brand-50: rgba(158, 215, 230, 0.1);
-      --glow-brand: 0 8px 24px rgba(158, 215, 230, 0.2);
-      --glow-brand-soft: 0 4px 12px rgba(158, 215, 230, 0.1);
-    `
-  };
-
-  const selectedThemeStyle = themeStyles[v.themeOption || 'option1'];
-
-  const switcherStyles = {
-    option1: {
-      bg: '#0f182a',
-      border: '1.5px solid #9ED7E6',
-      titleColor: '#ffffff',
-      btnActiveBg: '#9ED7E6',
-      btnActiveText: '#060b13',
-      btnInactiveBg: 'rgba(255, 255, 255, 0.05)',
-      btnInactiveBorder: '1px solid rgba(255, 255, 255, 0.15)',
-      btnInactiveText: '#afdae0'
-    },
-    option2: {
-      bg: '#ffffff',
-      border: '2px solid #8DBBCC',
-      titleColor: '#101c24',
-      btnActiveBg: '#8DBBCC',
-      btnActiveText: '#ffffff',
-      btnInactiveBg: '#f0f7f8',
-      btnInactiveBorder: '1px solid #cfdfE2',
-      btnInactiveText: '#354e5b'
-    },
-    option3: {
-      bg: '#222d3a',
-      border: '1.5px solid #8DBBCC',
-      titleColor: '#e8ecef',
-      btnActiveBg: '#8DBBCC',
-      btnActiveText: '#19222c',
-      btnInactiveBg: 'rgba(255, 255, 255, 0.04)',
-      btnInactiveBorder: '1px solid rgba(255, 255, 255, 0.1)',
-      btnInactiveText: '#a3b8cc'
-    }
-  };
-
-  const currentSwitcher = switcherStyles[v.themeOption || 'option1'];
-
   return (
-    <div style={css(`flex:1; min-width:0; display:flex; flex-direction:column; background:var(--surface-page); transition:all 0.35s cubic-bezier(0.4, 0, 0.2, 1); ${selectedThemeStyle}`)}>
+    <div style={css(`flex:1; min-width:0; display:flex; flex-direction:column;`)}>
       <style>{localStyle}</style>
-      <header className="main-header" style={css(`height:var(--topbar-height,60px); flex-shrink:0; background:var(--white); border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; gap:16px; padding:0 var(--page-gutter,28px); position:sticky; top:0; z-index:5; transition:background 0.35s ease, border-color 0.35s ease;`)}>
+      <header className="main-header" style={css(`height:var(--topbar-height,60px); flex-shrink:0; background:var(--white); border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; gap:16px; padding:0 var(--page-gutter,28px); position:sticky; top:0; z-index:5;`)}>
         <button 
           onClick={toggleSidebar} 
           className="hamburger-btn"
@@ -274,31 +151,6 @@ export function Main({ v }) {
           <div className="subtitle-text" style={css(`font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary);`)}>{subtitle}</div>
         </div>
         <div style={css(`flex:1;`)}></div>
-
-        {/* Live Theme Switcher Option Selector */}
-        <div className="no-print" style={css(`display:flex; align-items:center; gap:6px; background:${currentSwitcher.btnInactiveBg}; padding:4px; border-radius:var(--radius-pill); border:1px solid ${v.themeOption === 'option2' ? '#cfdfE2' : 'rgba(255,255,255,0.15)'}; transition:all 0.3s ease;`)}>
-          <button
-            onClick={() => v.changeThemeOption('option1')}
-            title="แบบที่ 1: Ice-Cool Glassmorphic Dark"
-            style={css(`border:none; cursor:pointer; padding:5px 12px; border-radius:var(--radius-pill); font:var(--fw-bold) var(--text-3xs)/1 var(--font-body); transition:all 0.2s ease; ${v.themeOption === 'option1' ? `background:${currentSwitcher.btnActiveBg}; color:${currentSwitcher.btnActiveText}; box-shadow:var(--shadow-sm);` : `background:transparent; color:${currentSwitcher.btnInactiveText};`}`)}
-          >
-            แบบที่ 1 (Glass Dark)
-          </button>
-          <button
-            onClick={() => v.changeThemeOption('option2')}
-            title="แบบที่ 2: Soft Arctic Light"
-            style={css(`border:none; cursor:pointer; padding:5px 12px; border-radius:var(--radius-pill); font:var(--fw-bold) var(--text-3xs)/1 var(--font-body); transition:all 0.2s ease; ${v.themeOption === 'option2' ? `background:${currentSwitcher.btnActiveBg}; color:${currentSwitcher.btnActiveText}; box-shadow:var(--shadow-sm);` : `background:transparent; color:${currentSwitcher.btnInactiveText};`}`)}
-          >
-            แบบที่ 2 (Arctic Light)
-          </button>
-          <button
-            onClick={() => v.changeThemeOption('option3')}
-            title="แบบที่ 3: Nord Slate Matte"
-            style={css(`border:none; cursor:pointer; padding:5px 12px; border-radius:var(--radius-pill); font:var(--fw-bold) var(--text-3xs)/1 var(--font-body); transition:all 0.2s ease; ${v.themeOption === 'option3' ? `background:${currentSwitcher.btnActiveBg}; color:${currentSwitcher.btnActiveText}; box-shadow:var(--shadow-sm);` : `background:transparent; color:${currentSwitcher.btnInactiveText};`}`)}
-          >
-            แบบที่ 3 (Nord Slate)
-          </button>
-        </div>
         
         <button onClick={openReceive} className="header-btn-receive">
           <span style={css(`width:16px; height:16px; display:grid; place-items:center;`)}>{ic.receive}</span>
@@ -332,33 +184,6 @@ export function Main({ v }) {
         <Perms v={v} />
         <Help v={v} />
       </main>
-
-      {/* Floating Theme Switcher Widget */}
-      <div className="no-print" style={css(`position:fixed; bottom:24px; right:24px; z-index:100; display:flex; flex-direction:column; gap:8px; background:${currentSwitcher.bg}; padding:10px 12px; border-radius:var(--radius-lg); border:${currentSwitcher.border}; box-shadow:var(--shadow-lg); transition:all 0.3s ease;`)}>
-        <div style={css(`font:var(--fw-bold) var(--text-3xs)/1 var(--font-body); color:${currentSwitcher.titleColor}; margin-bottom:4px; display:flex; align-items:center; gap:4px;`)}>
-          🎨 ปรับธีมอินเตอร์เฟสหลัก:
-        </div>
-        <div style={css(`display:flex; flex-direction:column; gap:6px;`)}>
-          <button
-            onClick={() => v.changeThemeOption('option1')}
-            style={css(`cursor:pointer; padding:7px 12px; border-radius:var(--radius-md); text-align:left; font:var(--fw-bold) var(--text-2xs)/1 var(--font-body); transition:all 0.2s ease; ${v.themeOption === 'option1' ? `background:${currentSwitcher.btnActiveBg}; color:${currentSwitcher.btnActiveText}; border:none; box-shadow:var(--shadow-sm);` : `background:${currentSwitcher.btnInactiveBg}; border:${currentSwitcher.btnInactiveBorder}; color:${currentSwitcher.btnInactiveText};`}`)}
-          >
-            {v.themeOption === 'option1' ? '✓ ' : ''}แบบที่ 1 (Glass Dark)
-          </button>
-          <button
-            onClick={() => v.changeThemeOption('option2')}
-            style={css(`cursor:pointer; padding:7px 12px; border-radius:var(--radius-md); text-align:left; font:var(--fw-bold) var(--text-2xs)/1 var(--font-body); transition:all 0.2s ease; ${v.themeOption === 'option2' ? `background:${currentSwitcher.btnActiveBg}; color:${currentSwitcher.btnActiveText}; border:none; box-shadow:var(--shadow-sm);` : `background:${currentSwitcher.btnInactiveBg}; border:${currentSwitcher.btnInactiveBorder}; color:${currentSwitcher.btnInactiveText};`}`)}
-          >
-            {v.themeOption === 'option2' ? '✓ ' : ''}แบบที่ 2 (Arctic Light)
-          </button>
-          <button
-            onClick={() => v.changeThemeOption('option3')}
-            style={css(`cursor:pointer; padding:7px 12px; border-radius:var(--radius-md); text-align:left; font:var(--fw-bold) var(--text-2xs)/1 var(--font-body); transition:all 0.2s ease; ${v.themeOption === 'option3' ? `background:${currentSwitcher.btnActiveBg}; color:${currentSwitcher.btnActiveText}; border:none; box-shadow:var(--shadow-sm);` : `background:${currentSwitcher.btnInactiveBg}; border:${currentSwitcher.btnInactiveBorder}; color:${currentSwitcher.btnInactiveText};`}`)}
-          >
-            {v.themeOption === 'option3' ? '✓ ' : ''}แบบที่ 3 (Nord Slate)
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
