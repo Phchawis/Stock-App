@@ -118,17 +118,22 @@ export function PrintStickerModal({ v }) {
         return t + '…';
       };
       // Larger again, using the extra width freed up by the smaller QR above.
+      // Baselines start lower than a Latin-metrics estimate would suggest — Thai
+      // stacked tone marks/vowels on a bold face render noticeably taller above
+      // the baseline than the nominal font size implies, confirmed by checking
+      // actual rendered pixel bounds (a naive ascent estimate left only 6px of
+      // margin above the label's physical top edge).
       const nameFont = "bold 48px 'Sarabun', sans-serif";
       const dataFont = "700 40px 'IBM Plex Mono', monospace";
       const recvFont = "700 38px 'Sarabun', sans-serif";
       const expFont = "bold 42px 'IBM Plex Mono', monospace";
       const locFont = "600 32px 'Sarabun', sans-serif";
       ctx.font = nameFont;
-      ctx.fillText(clip(reagent.th, nameFont), tx, 66);
+      ctx.fillText(clip(reagent.th, nameFont), tx, 86);
       ctx.font = dataFont;
-      ctx.fillText(clip('Lot: ' + lot.lot, dataFont), tx, 144);
+      ctx.fillText(clip('Lot: ' + lot.lot, dataFont), tx, 156);
       ctx.font = recvFont;
-      ctx.fillText(clip('รับเข้า: ' + recvLabel, recvFont), tx, 220);
+      ctx.fillText(clip('รับเข้า: ' + recvLabel, recvFont), tx, 226);
       ctx.font = expFont;
       ctx.fillText(clip('EXP: ' + expLabel, expFont), tx, 296);
       ctx.font = locFont;
