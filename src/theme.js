@@ -62,37 +62,38 @@ export const contentTheme = `
 `;
 
 // Header strip for the light-scoped modals (Receive / Issue / Register).
-// Solid tone requested by the user (#7AA2C4), lifted into a subtle gradient
-// with white text so it reads as an intentional banner, not a flat block.
+// Base tone requested by the user (#a4b0be), lifted into a subtle gradient
+// with a faint teal cast at the end so it ties back to the main content
+// theme. Title text is dark (#1b2b33) for clear contrast on the light band.
 export const modalHeaderStyle = `
   padding:18px 22px;
   display:flex;
   align-items:center;
   gap:11px;
-  background:linear-gradient(135deg, #7AA2C4 0%, #93B9E1 100%);
+  background:linear-gradient(135deg, #a4b0be 0%, #9db3bc 100%);
   border-radius:10px 10px 0 0;
-  border-bottom:1px solid rgba(255,255,255,.28);
-  box-shadow:0 2px 10px -4px rgba(58,90,120,.45);
+  border-bottom:1px solid rgba(255,255,255,.35);
+  box-shadow:0 2px 10px -4px rgba(46,66,78,.4);
 `;
 export const modalHeaderBadgeStyle = `
   width:34px; height:34px;
   border-radius:var(--radius-md);
-  background:rgba(255,255,255,.22);
-  border:1px solid rgba(255,255,255,.38);
-  color:#ffffff;
+  background:rgba(255,255,255,.4);
+  border:1px solid rgba(255,255,255,.55);
+  color:#1b2b33;
   display:grid;
   place-items:center;
   flex-shrink:0;
 `;
-export const modalHeaderTitleStyle = `font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:#ffffff;`;
-export const modalHeaderSubtitleStyle = `font:var(--text-2xs)/1.3 var(--font-body); color:rgba(255,255,255,.85);`;
+export const modalHeaderTitleStyle = `font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:#16242c;`;
+export const modalHeaderSubtitleStyle = `font:var(--text-2xs)/1.3 var(--font-body); color:#38505b;`;
 export const modalHeaderCloseStyle = `
   border:none;
-  background:rgba(255,255,255,.2);
+  background:rgba(255,255,255,.32);
   cursor:pointer;
   padding:6px;
   border-radius:var(--radius-sm);
-  color:#ffffff;
+  color:#1b2b33;
   display:grid;
   place-items:center;
   transition:background var(--dur-fast);
