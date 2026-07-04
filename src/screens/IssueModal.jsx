@@ -2,6 +2,7 @@ import React from 'react';
 import { css } from '../css.js';
 import { Input } from '../components/Input.jsx';
 import { Html5Qrcode } from 'html5-qrcode';
+import { modalHeaderStyle, modalHeaderBadgeStyle, modalHeaderTitleStyle, modalHeaderSubtitleStyle, modalHeaderCloseStyle } from '../theme.js';
 
 export function IssueModal({ v }) {
   const {
@@ -161,15 +162,20 @@ export function IssueModal({ v }) {
         <div className="tt-in theme-light-scope" onClick={stop} style={css(`width:min(720px,96vw); max-height:92vh; overflow-y:auto; background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:2px solid #7AA2C4; --surface-card:#e4effb; --text-primary:#192e4d; --text-secondary:#2c476f; --text-tertiary:#4c6b99; --border-subtle:#7AA2C4; --border-default:#93b9e1; --border-strong:#7AA2C4; --slate-50:#cbdffa; --slate-100:#b6d2f3; --slate-200:#93b9e1;`)}>
           
           {/* Header */}
-          <div style={css(`padding:18px 22px; border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; gap:11px;`)}>
-            <span style={css(`width:34px; height:34px; border-radius:var(--radius-md); background:var(--accent-50); color:var(--accent-600); display:grid; place-items:center;`)}>
+          <div style={css(modalHeaderStyle)}>
+            <span style={css(modalHeaderBadgeStyle)}>
               {ic.issue}
             </span>
             <div style={css(`flex:1;`)}>
-              <div style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary);`)}>เบิกจ่ายน้ำยาห้องปฏิบัติการ</div>
-              <div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>ทำรายการเบิกจ่ายสารเคมีและน้ำยาโดยอิงเกณฑ์หมดอายุก่อน–เบิกก่อน</div>
+              <div style={css(modalHeaderTitleStyle)}>เบิกจ่ายน้ำยาห้องปฏิบัติการ</div>
+              <div style={css(modalHeaderSubtitleStyle)}>ทำรายการเบิกจ่ายสารเคมีและน้ำยาโดยอิงเกณฑ์หมดอายุก่อน–เบิกก่อน</div>
             </div>
-            <button onClick={closeModal} style={css(`border:none; background:var(--slate-100); cursor:pointer; padding:6px; border-radius:var(--radius-sm); color:var(--text-secondary); display:grid; place-items:center;`)}>
+            <button
+              onClick={closeModal}
+              style={css(modalHeaderCloseStyle)}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,.34)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,.2)'; }}
+            >
               {ic.close}
             </button>
           </div>
