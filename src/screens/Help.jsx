@@ -250,7 +250,7 @@ export function Help({ v }) {
                   </div>
                   <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
                     <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--accent-600); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>3</span>
-                    <div>กรอกปริมาณที่เบิก ระบบจะแสดง **แผนเบิกคิวล็อต (FEFO Allocation Queue)** ให้ดูด้านล่างทันที</div>
+                    <div>กรอกปริมาณที่เบิก ระบบจะแสดง **แผนเบิกคิวล็อต (หมดอายุก่อน–เบิกก่อน)** ให้ดูด้านล่างทันที</div>
                   </div>
                   <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
                     <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--accent-600); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>4</span>
@@ -262,7 +262,7 @@ export function Help({ v }) {
               {/* Visual Queue Simulator */}
               <div style={css(`flex:1; min-width:320px; background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
                 <div style={css(`font:var(--fw-bold) var(--text-xs)/1.2 var(--font-display); color:var(--accent-700); margin-bottom:12px; display:flex; align-items:center; gap:6px;`)}>
-                  <span>📊</span> แบบจำลองระบบเรียงลำดับคิวเบิกจ่าย (FEFO Queue Demo)
+                  <span>📊</span> แบบจำลองระบบเรียงลำดับคิวเบิกจ่าย (หมดอายุก่อน–เบิกก่อน)
                 </div>
 
                 <div style={css(`display:flex; flex-direction:column; gap:10px;`)}>
