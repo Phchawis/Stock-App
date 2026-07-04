@@ -34,7 +34,7 @@ export function Alerts({ v }) {
     @media print {
       @page {
         size: A4 portrait;
-        margin: 10mm;
+        margin: 16mm 14mm;
       }
       *, *::before, *::after {
         background-color: transparent !important;
@@ -68,7 +68,7 @@ export function Alerts({ v }) {
         width: 100% !important;
         margin: 0 !important;
         box-sizing: border-box;
-        padding: 16mm 18mm !important;
+        padding: 0 !important;
       }
       .report-table {
         width: 100% !important;
