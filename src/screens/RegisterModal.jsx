@@ -116,7 +116,7 @@ export function RegisterModal({ v }) {
     <>
       <style>{localStyle}</style>
 
-      <div className="ov-in" onClick={closeModal} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.46); z-index:50; display:grid; place-items:center; padding:24px;`)}>
+      <div className="ov-in" onClick={closeModal} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.46); z-index:50; display:grid; place-items:center; padding:24px; --brand-700:#7AA2C4; --brand-800:#93b9e1; --brand-600:#7AA2C4; --brand-500:#93b9e1; --brand-400:#a9c7ee; --brand-100:rgba(122,162,196,0.22); --brand-50:rgba(122,162,196,0.12); --glow-brand-soft:0 6px 18px -8px rgba(122,162,196,0.5);`)}>
         <div className="tt-in theme-light-scope" onClick={stop} style={css(`width:min(600px,96vw); max-height:92vh; overflow-y:auto; background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg);`)}>
           <div style={css(`padding:18px 22px; border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; gap:11px;`)}>
             <span style={css(`width:34px; height:34px; border-radius:var(--radius-md); background:var(--brand-50); color:var(--brand-700); display:grid; place-items:center;`)}>{ic.boxes || ic.shield}</span>
