@@ -94,7 +94,7 @@ export function Main({ v }) {
       .mobile-action-btn.receive {
         border: 1.5px solid var(--brand-300);
         background: var(--white);
-        color: var(--brand-700) !important;
+        color: var(--brand-600) !important;
       }
       .mobile-action-btn.withdraw {
         border: none;
