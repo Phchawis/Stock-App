@@ -96,5 +96,20 @@ export const modalHeaderCloseStyle = `
   color:#1b2b33;
   display:grid;
   place-items:center;
+  flex-shrink:0;
   transition:background var(--dur-fast);
+`;
+
+// Rendered once per modal (via a <style> tag) so the shared header keeps the
+// same tidy single-row layout on phones as on desktop: on narrow screens the
+// title font + padding shrink so the long Thai heading stops wrapping into the
+// icon/close button. Classes are added alongside the inline styles above; the
+// !important rules win over the inline font-size only inside the media query.
+export const modalHeaderResponsiveCSS = `
+  @media (max-width: 640px) {
+    .tuh-mhead { padding: 14px 16px !important; gap: 10px !important; }
+    .tuh-mhead-title { font-size: var(--text-base) !important; line-height: 1.25 !important; }
+    .tuh-mhead-sub { font-size: 11px !important; }
+    .tuh-mhead-badge { width: 30px !important; height: 30px !important; }
+  }
 `;
