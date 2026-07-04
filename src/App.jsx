@@ -856,6 +856,20 @@ class App extends React.Component {
     const ns = { dash: this.navStyle('dashboard'), inv: this.navStyle('inventory'), rlist: this.navStyle('reagent_lists'), al: this.navStyle('alerts'), au: this.navStyle('audit'), pm: this.navStyle('perms'), help: this.navStyle('help') };
     const alerts = this.buildAlerts(crit);
 
+    // Reorder report rows — every reagent currently at/under its reorder point,
+    // for the printable PDF on the Alerts page. Independent of `acked` state:
+    // acknowledging an alert dismisses it from the feed, but the reagent is
+    // still genuinely low, so a purchasing document must still include it.
+    const reorderReportRows = S.reagents
+      .filter(r => this.onHand(r.id) <= r.min)
+      .map(r => ({
+        id: r.id, code: r.code, th: r.th, en: r.en,
+        catLabel: this.CAT_LABEL(r.cat), unit: r.unit,
+        onHand: this.onHand(r.id), min: r.min, reorder: r.reorder,
+        supplier: r.supplier,
+      }))
+      .sort((a, b) => a.onHand - b.onHand);
+
     // reagent view-models
     const rvm = (r) => {
       const oh = this.onHand(r.id); const earl = this.earliest(r.id);
@@ -1065,7 +1079,7 @@ class App extends React.Component {
       search: S.search, onSearch: (e) => this.setState({ search: e.target.value }),
       hasInvRows: invRows.length > 0,
       detailOpen: detail != null, detail, closeDetail: () => this.closeDetail(),
-      alertRows, hasAlerts: alertRows.length > 0, txnRows,
+      alertRows, hasAlerts: alertRows.length > 0, txnRows, reorderReportRows,
       modalReceive: S.modal === 'receive', modalIssue: S.modal === 'issue', closeModal: () => this.closeModal(),
       rf: S.rf, rfRid: this.bindRf('rid'), rfLot: this.bindRf('lot'), rfExpiry: this.bindRf('expiry'), rfQty: this.bindRf('qty'), rfSupplier: this.bindRf('supplier'), rfLoc: this.bindRf('loc'),
       reagentOpts, locOpts, supplierOpts, scanOpts, submitReceive: () => this.submitReceive(),
