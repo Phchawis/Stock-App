@@ -101,7 +101,7 @@ export function DetailDrawer({ v }) {
                         <button
                           type="button"
                           onClick={() => openPrintSticker(l, detail)}
-                          style={css(`background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; gap:3px;`)}
+                          style={css(`background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; gap:3px; white-space:nowrap; flex-shrink:0;`)}
                         >
                           🏷️ สติกเกอร์
                         </button>
