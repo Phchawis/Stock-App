@@ -315,7 +315,7 @@ export function IssueModal({ v }) {
                   <button
                     type="button"
                     onClick={unlinkLot}
-                    style={css(`background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:4px 8px; font:var(--fw-medium) var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer;`)}
+                    style={css(`background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:4px 8px; font:var(--fw-medium) var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; white-space:nowrap; flex-shrink:0;`)}
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--red-700)'; e.currentTarget.style.color = 'var(--red-700)'; }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
                   >
@@ -349,7 +349,7 @@ export function IssueModal({ v }) {
                 <button
                   type="button"
                   onClick={() => { if (manualCode.trim()) { scanQRCode(manualCode); setManualCode(''); } }}
-                  style={css(`background:var(--brand-700); color:#fff; border:none; border-radius:var(--radius-md); padding:0 14px; height:40px; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); cursor:pointer; display:flex; align-items:center;`)}
+                  style={css(`background:var(--brand-700); color:#fff; border:none; border-radius:var(--radius-md); padding:0 14px; height:40px; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); cursor:pointer; display:flex; align-items:center; white-space:nowrap; flex-shrink:0;`)}
                 >
                   เชื่อมโยง
                 </button>
