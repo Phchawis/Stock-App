@@ -167,6 +167,36 @@ export function Inventory({ v }) {
     .inv-btn-primary:active {
       transform: translateY(1px);
     }
+
+    /* Mobile card layout — the desktop 5-column grid is unusable at phone widths
+       (columns squeeze until text wraps mid-word / overlaps), so below 768px each
+       reagent renders as a stacked card instead. Desktop stays the grid above. */
+    .inv-thead-desktop { }
+    .inv-row-mobile { display: none; }
+    @media (max-width: 768px) {
+      .inv-thead-desktop { display: none !important; }
+      .inv-row { display: none !important; }
+      .inv-row-mobile {
+        display: flex !important;
+        flex-direction: column;
+        gap: 10px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border-subtle);
+        background: var(--white);
+        cursor: pointer;
+      }
+      .inv-row-mobile:active { background: var(--slate-50); }
+      .inv-row-mobile-top { display: flex; align-items: flex-start; gap: 12px; }
+      .inv-row-mobile-info { flex: 1; min-width: 0; }
+      .inv-row-mobile-badges { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+      .inv-row-mobile-stats {
+        display: flex; flex-direction: column; gap: 6px;
+        padding-top: 10px; border-top: 1px dashed var(--border-subtle);
+      }
+      .inv-row-mobile-stat-line { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+      .inv-row-mobile-stat-label { font: var(--text-2xs)/1.3 var(--font-body); color: var(--text-tertiary); flex-shrink: 0; }
+      .inv-row-mobile-stat-value { font: var(--text-xs)/1.3 var(--font-body); color: var(--text-secondary); text-align: right; }
+    }
   `;
 
   return (
@@ -203,7 +233,7 @@ export function Inventory({ v }) {
         <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); overflow:hidden;`)}>
           
           {/* Header row */}
-          <div style={css(`display:grid; grid-template-columns:1.7fr 0.8fr 1fr 1.1fr 0.7fr; gap:12px; padding:11px 18px; background:var(--slate-50); border-bottom:1px solid var(--border-subtle);`)}>
+          <div className="inv-thead-desktop" style={css(`display:grid; grid-template-columns:1.7fr 0.8fr 1fr 1.1fr 0.7fr; gap:12px; padding:11px 18px; background:var(--slate-50); border-bottom:1px solid var(--border-subtle);`)}>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em;`)}>น้ำยา</div>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em;`)}>หมวด</div>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em; text-align:right;`)}>คงเหลือ / จุดสั่งซื้อ</div>
@@ -265,6 +295,59 @@ export function Inventory({ v }) {
                     หมดอายุ
                   </span>
                 ) : null}
+              </div>
+            </div>
+
+            /* Mobile card — same data as the desktop row above, stacked for narrow screens */
+          ))}
+          {invRows.map((r, rI) => (
+            <div key={'m' + rI} onClick={r.onOpen} className="inv-row-mobile">
+              <div className="inv-row-mobile-top">
+                <img src={r.img || '/reagent_placeholder.png'} alt="" className="inv-thumb" />
+                <div className="inv-row-mobile-info">
+                  <div style={css(`font:var(--fw-semibold) var(--text-sm)/1.35 var(--font-body); color:var(--text-primary);`)}>
+                    {r.th}
+                  </div>
+                  <div style={css(`font:var(--fw-medium) var(--text-2xs)/1.3 var(--font-body); color:var(--text-secondary); margin-top:2px;`)}>
+                    {r.catLabel}
+                  </div>
+                </div>
+                {(r.low || r.expiring) && (
+                  <div className="inv-row-mobile-badges">
+                    {r.low ? (
+                      <span className="inv-badge-red">
+                        <span className="inv-dot-red" />
+                        สั่งซื้อ
+                      </span>
+                    ) : null}
+                    {r.expiring ? (
+                      <span className="inv-badge-amber">
+                        <span className="inv-dot-amber" />
+                        หมดอายุ
+                      </span>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+              <div className="inv-row-mobile-stats">
+                <div className="inv-row-mobile-stat-line">
+                  <span className="inv-row-mobile-stat-label">คงเหลือ / จุดสั่งซื้อ</span>
+                  <span className="inv-row-mobile-stat-value" style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: r.onHandColor }}>
+                    {r.subUnit && r.subUnitQty
+                      ? `${(r.onHand * r.subUnitQty).toLocaleString()} ${r.subUnit} (${r.onHand} / ${r.min} ${r.unit})`
+                      : `${r.onHand} / ${r.min} ${r.unit}`}
+                  </span>
+                </div>
+                <div className="inv-row-mobile-stat-line">
+                  <span className="inv-row-mobile-stat-label">หมดอายุใกล้สุด</span>
+                  <span className="inv-row-mobile-stat-value" style={{ fontFamily: 'var(--font-mono)', color: r.expColor, fontWeight: 600 }}>
+                    {r.expLabel}
+                  </span>
+                </div>
+                <div className="inv-row-mobile-stat-line">
+                  <span className="inv-row-mobile-stat-label">จำนวน Lot · จัดเก็บ</span>
+                  <span className="inv-row-mobile-stat-value">{r.lotCount} Lot · {r.storageLabel}</span>
+                </div>
               </div>
             </div>
           ))}
