@@ -141,7 +141,7 @@ export function Dashboard({ v }) {
     @media print {
       @page {
         size: A4 portrait;
-        margin: 20mm 15mm 20mm 15mm;
+        margin: 25mm 20mm 25mm 20mm;
       }
       *, *::before, *::after {
         background-color: transparent !important;
@@ -172,10 +172,10 @@ export function Dashboard({ v }) {
       }
       .print-report-container {
         display: block !important;
-        width: 100% !important;
+        width: 92% !important;
+        margin: 0 auto !important;
         box-sizing: border-box;
         padding: 0 !important;
-        margin: 0 !important;
       }
       .report-table {
         width: 100% !important;
