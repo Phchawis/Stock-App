@@ -173,8 +173,8 @@ export function IssueModal({ v }) {
             <button
               onClick={closeModal}
               style={css(modalHeaderCloseStyle)}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,.1)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,.05)'; }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,.55)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,.32)'; }}
             >
               {ic.close}
             </button>
