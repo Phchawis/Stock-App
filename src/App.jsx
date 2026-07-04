@@ -30,13 +30,8 @@ class App extends React.Component {
       sidebarOpen: false,
       editingLotId: null, elForm: this.blankElf(),
       editingTxnId: null, etForm: this.blankEtf(),
-      themeOption: localStorage.getItem('themeOption') || 'option1',
     };
     this.user = { name: 'ทนพ. สมชาย ใจดี', role: 'นักเทคนิคการแพทย์', initials: 'สช' };
-  }
-  changeThemeOption(opt) {
-    localStorage.setItem('themeOption', opt);
-    this.setState({ themeOption: opt });
   }
   blankRf() { return { rid: '', lot: '', expiry: '', qty: '', supplier: '', loc: 'ตู้เย็น A1' }; }
   blankIf() { return { rid: '', qty: '', scan: 'MANUAL', ref: '', lotId: '', qrInput: '', searchInput: '' }; }
@@ -1166,8 +1161,6 @@ class App extends React.Component {
       sidebarOpen: S.sidebarOpen,
       toggleSidebar: () => this.setState(s => ({ sidebarOpen: !s.sidebarOpen })),
       closeSidebar: () => this.setState({ sidebarOpen: false }),
-      themeOption: S.themeOption || 'option1',
-      changeThemeOption: (opt) => this.changeThemeOption(opt),
     };
   }
 
