@@ -7,7 +7,7 @@ export function DetailDrawer({ v }) {
     stop, ic, detailOpen, detail, closeDetail, openPrintSticker,
     role, openEditReagent, canManage, contentThemeId,
   } = v;
-  const activeTheme = contentThemes[contentThemeId] || contentThemes.ocean;
+  const activeTheme = contentThemes[contentThemeId] || contentThemes.indigo;
   const localStyle = `
     /* Matches the sidebar/header receive-withdraw color language (green/amber
        with a lift + gradient-fill hover) so this drawer's actions read the same
