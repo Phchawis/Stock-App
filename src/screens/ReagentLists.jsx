@@ -398,7 +398,7 @@ export function ReagentLists({ v }) {
                                   <button
                                     type="button"
                                     onClick={() => openPrintSticker(l, r)}
-                                    style={css(`background:var(--slate-50); border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-3xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; display:inline-flex; align-items:center; gap:3px; transition:all var(--dur-fast);`)}
+                                    style={css(`background:var(--slate-50); border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-3xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; display:inline-flex; align-items:center; gap:3px; transition:all var(--dur-fast); white-space:nowrap; flex-shrink:0;`)}
                                     onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--slate-100)'; e.currentTarget.style.borderColor = 'var(--border-strong)'; }}
                                     onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--slate-50)'; e.currentTarget.style.borderColor = 'var(--border-default)'; }}
                                   >
