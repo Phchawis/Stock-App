@@ -15,7 +15,7 @@ export function Main({ v }) {
     contentThemeId, setContentTheme,
   } = v;
 
-  const activeTheme = contentThemes[contentThemeId] || contentThemes.ocean;
+  const activeTheme = contentThemes[contentThemeId] || contentThemes.indigo;
 
   const localStyle = `
     /* Matches the sidebar's "การทำงาน" receive/withdraw buttons — same green/amber
