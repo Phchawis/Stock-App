@@ -28,7 +28,7 @@ class App extends React.Component {
       users: [], uform: { name: '', username: '', role: 'technician', password: '' },
       printLotData: null,
       sidebarOpen: false,
-      contentTheme: localStorage.getItem('contentTheme') || 'ocean',
+      contentTheme: localStorage.getItem('contentTheme') || 'indigo',
       editingLotId: null, elForm: this.blankElf(),
       editingTxnId: null, etForm: this.blankEtf(),
     };
