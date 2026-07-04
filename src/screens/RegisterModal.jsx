@@ -2,7 +2,7 @@ import React from 'react';
 import { css } from '../css.js';
 import { Input } from '../components/Input.jsx';
 import { Select } from '../components/Select.jsx';
-import { modalHeaderStyle, modalHeaderBadgeStyle, modalHeaderTitleStyle, modalHeaderSubtitleStyle, modalHeaderCloseStyle } from '../theme.js';
+import { modalHeaderStyle, modalHeaderBadgeStyle, modalHeaderTitleStyle, modalHeaderSubtitleStyle, modalHeaderCloseStyle, modalHeaderResponsiveCSS } from '../theme.js';
 
 export function RegisterModal({ v }) {
   const {
@@ -119,11 +119,12 @@ export function RegisterModal({ v }) {
 
       <div className="ov-in" onClick={closeModal} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.46); z-index:50; display:grid; place-items:center; padding:24px; --brand-700:#7AA2C4; --brand-800:#93b9e1; --brand-600:#7AA2C4; --brand-500:#93b9e1; --brand-400:#a9c7ee; --brand-100:rgba(122,162,196,0.22); --brand-50:rgba(122,162,196,0.12); --glow-brand-soft:0 6px 18px -8px rgba(122,162,196,0.5);`)}>
         <div className="tt-in theme-light-scope" onClick={stop} style={css(`width:min(600px,96vw); max-height:92vh; overflow-y:auto; background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:2px solid #b2d1da; --surface-card:#e0ecf0; --text-primary:#10222a; --text-secondary:#2d444e; --text-tertiary:#526d79; --border-subtle:#b2d1da; --border-default:#b2d1da; --border-strong:#b2d1da; --slate-50:#d1e2e6; --slate-100:#b2d1da; --slate-200:#9abdc6;`)}>
-          <div style={css(modalHeaderStyle)}>
-            <span style={css(modalHeaderBadgeStyle)}>{ic.boxes || ic.shield}</span>
-            <div style={css(`flex:1;`)}>
-              <div style={css(modalHeaderTitleStyle)}>{editReagentId ? 'แก้ไขข้อมูลน้ำยาห้องปฏิบัติการ' : 'ลงทะเบียนทะเบียนน้ำยาห้องปฏิบัติการ'}</div>
-              <div style={css(modalHeaderSubtitleStyle)}>{editReagentId ? 'แก้ไขข้อมูลหลัก (Master Catalog) ของน้ำยาในระบบ' : 'เพิ่มรายการข้อมูลหลัก (Master Catalog) ของน้ำยาตัวใหม่ในระบบ'}</div>
+          <style>{modalHeaderResponsiveCSS}</style>
+          <div className="tuh-mhead" style={css(modalHeaderStyle)}>
+            <span className="tuh-mhead-badge" style={css(modalHeaderBadgeStyle)}>{ic.boxes || ic.shield}</span>
+            <div style={css(`flex:1; min-width:0;`)}>
+              <div className="tuh-mhead-title" style={css(modalHeaderTitleStyle)}>{editReagentId ? 'แก้ไขข้อมูลน้ำยาห้องปฏิบัติการ' : 'ลงทะเบียนทะเบียนน้ำยาห้องปฏิบัติการ'}</div>
+              <div className="tuh-mhead-sub" style={css(modalHeaderSubtitleStyle)}>{editReagentId ? 'แก้ไขข้อมูลหลัก (Master Catalog) ของน้ำยาในระบบ' : 'เพิ่มรายการข้อมูลหลัก (Master Catalog) ของน้ำยาตัวใหม่ในระบบ'}</div>
             </div>
             <button
               onClick={closeModal}
