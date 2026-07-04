@@ -113,24 +113,23 @@ export function PrintStickerModal({ v }) {
         while (t.length > 1 && ctx.measureText(t + '…').width > tw) t = t.slice(0, -1);
         return t + '…';
       };
-      // Bolder/larger than before — thermal printheads lose thin anti-aliased
-      // edges, so extra weight and size buys back legibility (there was ~65px
-      // of unused vertical space below the last line at the old sizes).
-      const nameFont = "bold 38px 'Sarabun', sans-serif";
-      const dataFont = "700 32px 'IBM Plex Mono', monospace";
-      const recvFont = "700 30px 'Sarabun', sans-serif";
-      const expFont = "bold 32px 'IBM Plex Mono', monospace";
-      const locFont = "600 26px 'Sarabun', sans-serif";
+      // Larger still — every line now uses the full ~348px of vertical room
+      // between the top and bottom padding (previously ~65px of that was unused).
+      const nameFont = "bold 44px 'Sarabun', sans-serif";
+      const dataFont = "700 36px 'IBM Plex Mono', monospace";
+      const recvFont = "700 34px 'Sarabun', sans-serif";
+      const expFont = "bold 38px 'IBM Plex Mono', monospace";
+      const locFont = "600 28px 'Sarabun', sans-serif";
       ctx.font = nameFont;
-      ctx.fillText(clip(reagent.th, nameFont), tx, 84);
+      ctx.fillText(clip(reagent.th, nameFont), tx, 80);
       ctx.font = dataFont;
-      ctx.fillText('Lot: ' + lot.lot, tx, 140);
+      ctx.fillText(clip('Lot: ' + lot.lot, dataFont), tx, 152);
       ctx.font = recvFont;
-      ctx.fillText(clip('รับเข้า: ' + recvLabel, recvFont), tx, 196);
+      ctx.fillText(clip('รับเข้า: ' + recvLabel, recvFont), tx, 224);
       ctx.font = expFont;
-      ctx.fillText(clip('EXP: ' + expLabel, expFont), tx, 252);
+      ctx.fillText(clip('EXP: ' + expLabel, expFont), tx, 296);
       ctx.font = locFont;
-      ctx.fillText(clip('สภาวะจัดเก็บ: ' + storageLabel, locFont), tx, 302);
+      ctx.fillText(clip('สภาวะจัดเก็บ: ' + storageLabel, locFont), tx, 362);
 
       // Force every pixel to pure black or pure white — canvas text (even with a
       // solid black fillStyle) is anti-aliased, leaving grey pixels along every
