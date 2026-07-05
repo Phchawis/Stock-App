@@ -30,6 +30,42 @@ export function Alerts({ v }) {
     return true;
   });
 
+  const handleExportCSV = () => {
+    if (filteredReportRows.length === 0) return;
+    const headerLine = "\uFEFFชื่อน้ำยา,หมวดงาน,คงเหลือ,จุดสั่งซื้อ (Min),แนะนำสั่ง,ผู้จัดจำหน่าย";
+    const bodyLines = filteredReportRows.map(r => {
+      const name = r.th + (r.en && r.en.toLowerCase() !== r.th.toLowerCase() ? " · " + r.en : "");
+      const cleanName = `"${name.replace(/"/g, '""')}"`;
+      const cleanCat = `"${getCategoryLabel(r.cat).replace(/"/g, '""')}"`;
+      const cleanSupplier = `"${(r.supplier || '—').replace(/"/g, '""')}"`;
+      return `${cleanName},${cleanCat},${r.onHand} ${r.unit},${r.min} ${r.unit},${r.reorder} ${r.unit},${cleanSupplier}`;
+    });
+    const csvContent = [headerLine, ...bodyLines].join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Reorder_Report_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleCopyToClipboard = () => {
+    if (filteredReportRows.length === 0) return;
+    const headerLine = "ชื่อน้ำยา\tหมวดงาน\tคงเหลือ\tจุดสั่งซื้อ (Min)\tแนะนำสั่ง\tผู้จัดจำหน่าย";
+    const bodyLines = filteredReportRows.map(r => {
+      const name = r.th + (r.en && r.en.toLowerCase() !== r.th.toLowerCase() ? " · " + r.en : "");
+      return `${name}\t${getCategoryLabel(r.cat)}\t${r.onHand} ${r.unit}\t${r.min} ${r.unit}\t${r.reorder} ${r.unit}\t${r.supplier || '—'}`;
+    });
+    const text = [headerLine, ...bodyLines].join("\n");
+    navigator.clipboard.writeText(text).then(() => {
+      alert("คัดลอกข้อมูลตารางจัดซื้อด่วนลงใน Clipboard เรียบร้อยแล้ว! สามารถเปิดโปรแกรม Excel แล้วกด Ctrl+V (หรือ Cmd+V) เพื่อวางได้เลยครับ");
+    }).catch(err => {
+      console.error("Failed to copy:", err);
+    });
+  };
+
   const printStyle = `
     @media print {
       @page {
@@ -140,6 +176,27 @@ export function Alerts({ v }) {
       from { left: -130%; }
       to { left: 140%; }
     }
+    .alert-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+      background: var(--surface-card);
+      color: var(--text-primary);
+      cursor: pointer;
+      font: var(--fw-semibold) var(--text-xs)/1 var(--font-body);
+      transition: all var(--dur-fast) ease-in-out;
+    }
+    .alert-action-btn:hover {
+      background: var(--surface-sunken);
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+    .alert-action-btn:active {
+      transform: translateY(0);
+    }
     @media (max-width: 768px) {
       .alert-row {
         flex-direction: column !important;
@@ -158,8 +215,9 @@ export function Alerts({ v }) {
       .alerts-header-row {
         flex-direction: column !important;
         align-items: stretch !important;
+        gap: 8px !important;
       }
-      .alert-print-btn {
+      .alert-print-btn, .alert-action-btn {
         width: 100%;
         justify-content: center;
       }
@@ -173,15 +231,24 @@ export function Alerts({ v }) {
 
       <div className="qms-rise no-print" style={css(`max-width:920px; display:flex; flex-direction:column; gap:16px;`)}>
 
-        {/* Header row with print action */}
-        <div className="alerts-header-row" style={css(`display:flex; align-items:center; justify-content:space-between; gap:12px;`)}>
+        <div className="alerts-header-row" style={css(`display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;`)}>
           <div style={css(`font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>
             พบน้ำยาที่ต้องสั่งซื้อ <strong style={css(`color:var(--text-primary);`)}>{filteredReportRows.length}</strong> รายการ
           </div>
-          <button className="alert-print-btn" onClick={() => window.print()}>
-            <span style={css(`display:grid; place-items:center;`)}>{ic.list}</span>
-            พิมพ์รายงาน PDF (น้ำยาที่ต้องสั่งซื้อ)
-          </button>
+          <div className="no-print" style={css(`display:flex; align-items:center; gap:8px; flex-wrap:wrap;`)}>
+            <button className="alert-action-btn" onClick={handleExportCSV} title="ส่งออกข้อมูลเป็นไฟล์ Excel (.csv) รองรับภาษาไทย">
+              <span style={css(`display:grid; place-items:center;`)}>{ic.receive}</span>
+              ส่งออก Excel (CSV)
+            </button>
+            <button className="alert-action-btn" onClick={handleCopyToClipboard} title="คัดลอกตารางข้อมูลสำหรับนำไปวางในโปรแกรม Excel">
+              <span style={css(`display:grid; place-items:center;`)}>{ic.list}</span>
+              คัดลอกด่วน (Copy)
+            </button>
+            <button className="alert-print-btn" onClick={() => window.print()}>
+              <span style={css(`display:grid; place-items:center;`)}>{ic.list}</span>
+              พิมพ์รายงาน PDF (น้ำยาที่ต้องสั่งซื้อ)
+            </button>
+          </div>
         </div>
 
         {/* Filters Row */}
