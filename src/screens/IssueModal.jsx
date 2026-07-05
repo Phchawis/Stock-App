@@ -147,6 +147,21 @@ export function IssueModal({ v }) {
       gap: 10px;
       background: var(--slate-50);
     }
+    .lot-code-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: flex-end;
+    }
+    @media (max-width: 640px) {
+      .lot-code-row {
+        grid-template-columns: 1fr !important;
+      }
+      .lot-code-row .lot-code-confirm {
+        width: 100% !important;
+        height: 40px !important;
+      }
+    }
     @media (max-width: 768px) {
       .modal-footer-responsive {
         flex-direction: column !important;
@@ -340,7 +355,7 @@ export function IssueModal({ v }) {
               {/* Type the lot / QR code by hand — or tap the QR icon inside the
                   field to open the camera scanner (compact, camera pops up only
                   when tapped). */}
-              <div style={css(`display:grid; grid-template-columns:1fr auto; gap:8px; align-items:flex-end;`)}>
+              <div className="lot-code-row">
                 <Input
                   label="รหัส Lot / QR Code"
                   placeholder="เช่น G2407A หรือ QR-G2407A"
@@ -364,8 +379,9 @@ export function IssueModal({ v }) {
                 />
                 <button
                   type="button"
+                  className="lot-code-confirm"
                   onClick={() => { if (manualCode.trim()) { scanQRCode(manualCode); setManualCode(''); } }}
-                  style={css(`background:var(--brand-700); color:#fff; border:none; border-radius:var(--radius-md); padding:0 14px; height:40px; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); cursor:pointer; display:flex; align-items:center; white-space:nowrap; flex-shrink:0;`)}
+                  style={css(`background:var(--brand-700); color:#fff; border:none; border-radius:var(--radius-md); padding:0 14px; height:40px; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); cursor:pointer; display:flex; align-items:center; justify-content:center; white-space:nowrap; flex-shrink:0;`)}
                 >
                   ยืนยัน
                 </button>
