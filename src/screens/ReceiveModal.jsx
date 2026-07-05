@@ -48,7 +48,7 @@ export function ReceiveModal({ v }) {
   return (
     <>
       <style>{localStyle}</style>
-      <div className="ov-in" onClick={closeModal} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.46); z-index:50; display:grid; place-items:center; padding:24px; --brand-700:#7AA2C4; --brand-800:#93b9e1; --brand-600:#7AA2C4; --brand-500:#93b9e1; --brand-400:#a9c7ee; --brand-100:rgba(122,162,196,0.22); --brand-50:rgba(122,162,196,0.12); --glow-brand-soft:0 6px 18px -8px rgba(122,162,196,0.5);`)}>
+      <div className="ov-in" onClick={closeModal} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.46); z-index:50; display:grid; place-items:center; padding:24px; --brand-700:#006884; --brand-800:#008276; --brand-600:#004F4B; --brand-500:#33A593; --brand-400:#70C4B4; --brand-100:rgba(0,104,132,0.18); --brand-50:rgba(0,104,132,0.10); --glow-brand-soft:0 6px 18px -8px rgba(0,104,132,0.30);`)}>
         <div className="tt-in theme-light-scope" onClick={stop} style={css(`width:min(720px,96vw); max-height:92vh; overflow-y:auto; background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:2px solid #b2d1da; --surface-card:#e0ecf0; --text-primary:#10222a; --text-secondary:#2d444e; --text-tertiary:#526d79; --border-subtle:#b2d1da; --border-default:#b2d1da; --border-strong:#b2d1da; --slate-50:#d1e2e6; --slate-100:#b2d1da; --slate-200:#9abdc6;`)}>
           
           {/* Header */}
