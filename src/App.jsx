@@ -30,6 +30,7 @@ class App extends React.Component {
       sidebarOpen: false,
       editingLotId: null, elForm: this.blankElf(),
       editingTxnId: null, etForm: this.blankEtf(),
+      confirmData: null,
     };
     this.user = { name: 'ทนพ. สมชาย ใจดี', role: 'นักเทคนิคการแพทย์', initials: 'สช' };
   }
@@ -161,16 +162,35 @@ class App extends React.Component {
       this.showToast('เฉพาะผู้ดูแลระบบเท่านั้นที่มีสิทธิ์ล้างประวัติการเคลื่อนไหว', 'warn');
       return;
     }
-    if (window.confirm('คุณต้องการล้างประวัติการเคลื่อนไหวทั้งหมดในระบบใช่หรือไม่? (ประวัติการคุมคลังและ Audit Trail จะเป็นศูนย์และไม่สามารถเรียกคืนได้)')) {
-      try {
-        const res = await this.api('/api/transactions', { method: 'DELETE' });
-        if (!res.ok) throw new Error('ล้างประวัติล้มเหลว');
-        this.fetchData();
-        this.showToast('ล้างประวัติการเคลื่อนไหวเรียบร้อยแล้ว');
-      } catch (err) {
-        this.showToast(err.message, 'warn');
+    this.askConfirm(
+      'ล้างประวัติคลังสินค้า',
+      'คุณต้องการล้างประวัติการเคลื่อนไหวทั้งหมดในระบบใช่หรือไม่? (ประวัติการคุมคลังและ Audit Trail จะเป็นศูนย์และไม่สามารถเรียกคืนได้)',
+      async () => {
+        try {
+          const res = await this.api('/api/transactions', { method: 'DELETE' });
+          if (!res.ok) throw new Error('ล้างประวัติล้มเหลว');
+          this.fetchData();
+          this.showToast('ล้างประวัติการเคลื่อนไหวเรียบร้อยแล้ว');
+        } catch (err) {
+          this.showToast(err.message, 'warn');
+        }
       }
-    }
+    );
+  }
+  askConfirm(title, message, onConfirm) {
+    this.setState({
+      confirmData: {
+        title,
+        message,
+        onConfirm: () => {
+          onConfirm();
+          this.setState({ confirmData: null });
+        },
+        onCancel: () => {
+          this.setState({ confirmData: null });
+        }
+      }
+    });
   }
   openPrintSticker(lot, reagent) {
     this.setState({ printLotData: { lot, reagent }, modal: 'printSticker' });
@@ -571,21 +591,26 @@ class App extends React.Component {
     const t = this.state.txns.find(x => x.id === txnId);
     if (!t) return;
     const kindLabel = t.type === 'RECEIVE' ? 'รายการรับเข้า (และ Lot ที่สร้างขึ้น)' : t.type === 'ISSUE' ? 'รายการเบิกจ่าย' : 'รายการปรับปรุง';
-    if (!window.confirm(`ยืนยันลบ${kindLabel}นี้ใช่หรือไม่? การลบนี้ไม่สามารถเรียกคืนได้`)) return;
-    try {
-      const res = await this.api(`/api/transactions?id=${txnId}`, { method: 'DELETE' });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'ลบรายการล้มเหลว');
-      this.setState(s => ({
-        txns: s.txns.filter(x => x.id !== txnId),
-        lots: data.deletedLotId
-          ? s.lots.filter(l => l.id !== data.deletedLotId)
-          : s.lots.map(l => (data.lot && l.id === data.lot.id) ? { ...l, ...data.lot } : l)
-      }));
-      this.showToast(`ลบ${kindLabel}เรียบร้อยแล้ว`);
-    } catch (err) {
-      this.showToast(err.message, 'warn');
-    }
+    this.askConfirm(
+      'ยืนยันการลบรายการ',
+      `ยืนยันลบ${kindLabel}นี้ใช่หรือไม่? การลบนี้ไม่สามารถเรียกคืนได้`,
+      async () => {
+        try {
+          const res = await this.api(`/api/transactions?id=${txnId}`, { method: 'DELETE' });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'ลบรายการล้มเหลว');
+          this.setState(s => ({
+            txns: s.txns.filter(x => x.id !== txnId),
+            lots: data.deletedLotId
+              ? s.lots.filter(l => l.id !== data.deletedLotId)
+              : s.lots.map(l => (data.lot && l.id === data.lot.id) ? { ...l, ...data.lot } : l)
+          }));
+          this.showToast(`ลบ${kindLabel}เรียบร้อยแล้ว`);
+        } catch (err) {
+          this.showToast(err.message, 'warn');
+        }
+      }
+    );
   }
   deleteLotReceive(lotId) {
     const receiveTxn = this.state.txns.find(t => t.lotId === lotId && t.type === 'RECEIVE');
@@ -1043,6 +1068,7 @@ class App extends React.Component {
 
     return {
       setRoot: (el) => { this.rootRef = el; }, stop: (e) => e.stopPropagation(), ic, user: this.user,
+      confirmData: S.confirmData, askConfirm: (t, m, c) => this.askConfirm(t, m, c),
       notAuthed: !S.role, onLogout: () => this.logout(), currentRoleLabel: this.user.role, canEditPerms: S.role === 'admin',
       loginForm: S.loginForm, lfUser: this.bindLF('username'), lfPass: this.bindLF('password'), loginError: S.loginForm.error, hasLoginError: !!S.loginForm.error, submitLogin: () => this.submitLogin(),
       // No demo/quick-login on a real system — credentials must be entered.
@@ -1189,6 +1215,45 @@ class App extends React.Component {
       <EditTransactionModal v={v} />
       <Toast v={v} />
       <Login v={v} />
+
+      {/* Custom Confirm Dialog Overlay */}
+      {v.confirmData && (
+        <div className="ov-in" onClick={v.confirmData.onCancel} style={css(`position:fixed; inset:0; background:rgba(14,24,34,.72); z-index:250; display:grid; place-items:center; padding:24px; backdrop-filter:blur(3px);`)}>
+          <div className="tt-in theme-light-scope" onClick={(e) => e.stopPropagation()} style={css(`width:min(420px,94vw); background:#e0ecf0; border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:2px solid #b2d1da; padding:20px; display:flex; flex-direction:column; gap:16px; color:#10222a; --surface-card:#e0ecf0; --text-primary:#10222a; --text-secondary:#2d444e; --slate-100:#b2d1da;`)}>
+            <div style={css(`display:flex; align-items:flex-start; gap:14px;`)}>
+              <span style={css(`width:40px; height:40px; border-radius:50%; background:rgba(194,66,42,0.12); color:#C2422A; display:grid; place-items:center; flex-shrink:0; font-size:20px;`)}>
+                ⚠️
+              </span>
+              <div style={css(`flex:1; min-width:0;`)}>
+                <h3 style={css(`font:var(--fw-bold) var(--text-base)/1.3 var(--font-body); color:var(--text-primary); margin:0;`)}>
+                  {v.confirmData.title}
+                </h3>
+                <p style={css(`font:var(--text-xs)/1.5 var(--font-body); color:var(--text-secondary); margin:8px 0 0;`)}>
+                  {v.confirmData.message}
+                </p>
+              </div>
+            </div>
+            <div style={css(`display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #b2d1da; padding-top:14px;`)}>
+              <button 
+                onClick={v.confirmData.onCancel}
+                style={css(`padding:8px 16px; border-radius:var(--radius-md); border:1px solid #b2d1da; background:#fff; color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#e0ecf0'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; }}
+              >
+                ยกเลิก
+              </button>
+              <button 
+                onClick={v.confirmData.onConfirm}
+                style={css(`padding:8px 16px; border-radius:var(--radius-md); border:none; background:#C2422A; color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); box-shadow:0 4px 12px rgba(194,66,42,0.3); transition:all var(--dur-fast);`)}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(194,66,42,0.45)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(194,66,42,0.3)'; }}
+              >
+                ยืนยันทำรายการ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     );
   }
