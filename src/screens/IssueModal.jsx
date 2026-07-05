@@ -48,7 +48,15 @@ export function IssueModal({ v }) {
     const timer = setTimeout(() => {
       if (!active) return;
       try {
-        const html5QrCode = new Html5Qrcode("qr-reader");
+        // Constructor options only pick the DECODER — they never touch
+        // getUserMedia, so they cannot re-trigger the "เปิดกล้องไม่ได้" failure.
+        // useBarCodeDetectorIfSupported switches to the browser's native,
+        // hardware-accelerated BarcodeDetector where available (big speedup on
+        // Android Chrome); browsers without it silently keep the JS decoder.
+        const html5QrCode = new Html5Qrcode("qr-reader", {
+          verbose: false,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+        });
         html5QrCodeRef.current = html5QrCode;
         // DO NOT add ANY extra getUserMedia constraints here. This user's iOS
         // Safari rejects the camera ("เปิดกล้องไม่ได้") the moment anything beyond
@@ -59,11 +67,15 @@ export function IssueModal({ v }) {
         html5QrCode.start(
           { facingMode: "environment" },
           {
-            fps: 15,
+            // Decode-loop tuning (not camera constraints — safe on iOS):
+            // more attempts/second, no wasted mirrored-image pass (our stickers
+            // are never mirrored), and a bigger scan window so the QR doesn't
+            // need to be aimed dead-center to register.
+            fps: 24,
             aspectRatio: 1.0,
-            disableFlip: false,
+            disableFlip: true,
             qrbox: (w, h) => {
-              const s = Math.floor(Math.min(w, h) * 0.7);
+              const s = Math.floor(Math.min(w, h) * 0.85);
               return { width: s, height: s };
             }
           },
