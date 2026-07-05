@@ -693,7 +693,7 @@ class App extends React.Component {
           qrInput: foundLot.qr
         }
       }));
-      this.showToast(`สแกนพบ Lot ${foundLot.lot} ของ ${r ? r.th : ''} และทำการเชื่อมโยงข้อมูลแล้ว`, 'success');
+      this.showToast(`เชื่อมโยง Lot ${foundLot.lot}${r ? ' · ' + r.th : ''} สำเร็จ`, 'success');
       return true;
     }
     const foundReagent = this.state.reagents.find(r => r.code.toLowerCase() === cleanCode);
@@ -708,7 +708,7 @@ class App extends React.Component {
           qrInput: cleanCode
         }
       }));
-      this.showToast(`สแกนพบน้ำยา ${foundReagent.th} แล้ว (จะจ่ายโดยใช้ระบบหมดอายุก่อน–เบิกก่อน)`, 'success');
+      this.showToast(`พบน้ำยา ${foundReagent.th} · จ่ายแบบหมดอายุก่อน–เบิกก่อน`, 'success');
       return true;
     }
     this.showToast(`ไม่พบข้อมูล QR Code "${cleanCode}" หรือน้ำยาใน Lot นี้หมดคลังแล้ว`, 'warn');
