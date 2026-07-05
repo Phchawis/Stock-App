@@ -32,8 +32,48 @@ export function SearchableSelect({ label, required = false, options = [], placeh
     o.label.toLowerCase().includes(search.toLowerCase())
   );
 
+  const [highlightedIndex, setHighlightedIndex] = React.useState(0);
+
+  // Reset highlightedIndex when search query or openness changes
+  React.useEffect(() => {
+    setHighlightedIndex(0);
+  }, [search, isOpen]);
+
+  const handleKeyDown = (e) => {
+    if (!isOpen) {
+      if (e.key === 'ArrowDown' || e.key === 'Enter') {
+        setIsOpen(true);
+        e.preventDefault();
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      setHighlightedIndex((prev) => (prev + 1) % Math.max(1, filteredOpts.length));
+      e.preventDefault();
+    } else if (e.key === 'ArrowUp') {
+      setHighlightedIndex((prev) => (prev - 1 + filteredOpts.length) % Math.max(1, filteredOpts.length));
+      e.preventDefault();
+    } else if (e.key === 'Enter') {
+      if (filteredOpts.length > 0 && highlightedIndex >= 0 && highlightedIndex < filteredOpts.length) {
+        onChange(filteredOpts[highlightedIndex].value);
+        setIsOpen(false);
+      }
+      e.preventDefault();
+    } else if (e.key === 'Escape') {
+      setIsOpen(false);
+      e.preventDefault();
+    }
+  };
+
   return (
-    <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', gap: 6, position: 'relative', ...style }}>
+    <div 
+      ref={containerRef} 
+      role="combobox"
+      aria-expanded={isOpen}
+      aria-haspopup="listbox"
+      style={{ display: 'flex', flexDirection: 'column', gap: 6, position: 'relative', ...style }}
+    >
       {label && (
         <label style={{ font: 'var(--type-ui)', color: 'var(--text-secondary)' }}>
           {label}{required && <span style={{ color: 'var(--red-600)', marginLeft: 2 }}>*</span>}
@@ -50,6 +90,9 @@ export function SearchableSelect({ label, required = false, options = [], placeh
             setSearch(''); // clear search on focus so user can type cleanly
           }}
           onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={handleKeyDown}
+          aria-autocomplete="list"
+          aria-controls="select-options-list"
           style={css(`
             width:100%;
             height:40px;
@@ -75,49 +118,54 @@ export function SearchableSelect({ label, required = false, options = [], placeh
 
       {/* Options Dropdown Popover */}
       {isOpen && (
-        <div style={css(`
-          position:absolute;
-          top:calc(100% + 4px);
-          left:0;
-          right:0;
-          max-height:220px;
-          overflow-y:auto;
-          background:var(--white);
-          border:1px solid var(--border-subtle);
-          border-radius:var(--radius-md);
-          box-shadow:var(--shadow-lg);
-          z-index:90;
-          display:flex;
-          flex-direction:column;
-          padding:4px 0;
-        `)}>
+        <div 
+          id="select-options-list"
+          role="listbox"
+          style={css(`
+            position:absolute;
+            top:calc(100% + 4px);
+            left:0;
+            right:0;
+            max-height:220px;
+            overflow-y:auto;
+            background:var(--white);
+            border:1px solid var(--border-subtle);
+            border-radius:var(--radius-md);
+            box-shadow:var(--shadow-lg);
+            z-index:90;
+            display:flex;
+            flex-direction:column;
+            padding:4px 0;
+          `)}
+        >
           {filteredOpts.length > 0 ? (
-            filteredOpts.map((o) => (
-              <div
-                key={o.value}
-                onClick={() => {
-                  onChange(o.value);
-                  setIsOpen(false);
-                }}
-                style={css(`
-                  padding:10px 14px;
-                  cursor:pointer;
-                  font:var(--text-sm)/1.3 var(--font-body);
-                  color:var(--text-primary);
-                  transition:background var(--dur-fast);
-                  background:${String(o.value) === String(value) ? 'var(--brand-50)' : 'transparent'};
-                  font-weight:${String(o.value) === String(value) ? '600' : '400'};
-                `)}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = String(o.value) === String(value) ? 'var(--brand-100)' : 'var(--slate-50)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = String(o.value) === String(value) ? 'var(--brand-50)' : 'transparent';
-                }}
-              >
-                {o.label}
-              </div>
-            ))
+            filteredOpts.map((o, idx) => {
+              const isSelected = String(o.value) === String(value);
+              const isHighlighted = idx === highlightedIndex;
+              return (
+                <div
+                  key={o.value}
+                  role="option"
+                  aria-selected={isSelected}
+                  onClick={() => {
+                    onChange(o.value);
+                    setIsOpen(false);
+                  }}
+                  onMouseEnter={() => setHighlightedIndex(idx)}
+                  style={css(`
+                    padding:10px 14px;
+                    cursor:pointer;
+                    font:var(--text-sm)/1.3 var(--font-body);
+                    color:var(--text-primary);
+                    transition:background var(--dur-fast);
+                    background:${isHighlighted ? 'var(--slate-50)' : (isSelected ? 'var(--brand-50)' : 'transparent')};
+                    font-weight:${isSelected || isHighlighted ? '600' : '400'};
+                  `)}
+                >
+                  {o.label}
+                </div>
+              );
+            })
           ) : (
             <div style={css(`padding:12px 14px; text-align:center; font:var(--text-xs)/1.2 var(--font-body); color:var(--text-tertiary);`)}>
               ไม่พบข้อมูลน้ำยาเคมีที่ค้นหา
