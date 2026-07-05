@@ -554,7 +554,7 @@ export function Dashboard({ v }) {
                 </table>
               ) : (
                 <div style={css(`display:flex; flex-direction:column; align-items:center; justify-content:center; padding:36px 16px; text-align:center; color:var(--text-secondary); gap:8px;`)}>
-                  <span style={css(`font-size:24px;`)}>🎉</span>
+                  <span style={css(`font-size:24px;`)}>✅</span>
                   <div style={css(`font-weight:600; font-size:var(--text-xs); color:var(--green-700);`)}>คลังสินค้าปลอดภัยทั้งหมด</div>
                   <div style={css(`font-size:var(--text-3xs); color:var(--text-tertiary);`)}>ไม่มีรายการน้ำยาตัวใดต่ำกว่าจุดแจ้งเตือนในขณะนี้</div>
                 </div>
