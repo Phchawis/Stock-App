@@ -50,13 +50,19 @@ export function IssueModal({ v }) {
       try {
         const html5QrCode = new Html5Qrcode("qr-reader");
         html5QrCodeRef.current = html5QrCode;
-        // IMPORTANT: keep the camera selector as the plain { facingMode } form and
-        // the constructor bare. iOS Safari rejects getUserMedia when passed
-        // unsupported advanced constraints (e.g. focusMode) or a rigid resolution,
-        // which surfaced as "เปิดกล้องไม่ได้". iOS already autofocuses continuously
-        // by default; disableFlip:false + a slightly higher fps keep scans quick.
+        // Camera selector stays the plain { facingMode } form — iOS Safari rejects
+        // getUserMedia when passed unsupported *advanced* constraints (e.g.
+        // focusMode) or an *exact* resolution, which surfaced as "เปิดกล้องไม่ได้".
+        // width/height as { ideal } is best-effort and safe on iOS: it asks for a
+        // high-res stream so a QR held ~15–20cm away (inside the phone's focus
+        // range, so it's sharp) still has enough pixels to decode — this is the
+        // fix for "blurry / hard to scan when held close".
         html5QrCode.start(
-          { facingMode: "environment" },
+          {
+            facingMode: "environment",
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+          },
           {
             fps: 15,
             aspectRatio: 1.0,
@@ -545,7 +551,7 @@ export function IssueModal({ v }) {
                 )}
               </div>
               <div style={css(`margin-top:14px; text-align:center; font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-tertiary);`)}>
-                เล็ง QR Code บนสติกเกอร์ให้อยู่ในกรอบ · หากสแกนไม่ติดให้ปิดแล้วพิมพ์รหัส Lot เอง
+ถือมือถือห่างจาก QR ~15–20 ซม. ให้ภาพคมชัด (อย่าจ่อใกล้เกินไป จะเบลอโฟกัสไม่ติด) · หากยังสแกนไม่ได้ให้ปิดแล้วพิมพ์รหัส Lot เอง
               </div>
             </div>
           </div>
