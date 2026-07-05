@@ -4,7 +4,7 @@ import { css } from '../css.js';
 export function Perms({ v }) {
   const {
     canEditPerms, permRoles, permRows, myRole, isPerms,
-    canAddUser, usersList, openAddUser, deleteUser, user,
+    canAddUser, usersList, openAddUser, deleteUser, user, askConfirm,
   } = v;
 
   if (!isPerms) return null;
@@ -118,9 +118,11 @@ export function Perms({ v }) {
                   isAdmin ? (
                     <button
                       onClick={() => {
-                        if (window.confirm(`คุณต้องการลบผู้ใช้งาน "${u.name}" ใช่หรือไม่?`)) {
-                          deleteUser(u.username);
-                        }
+                        askConfirm(
+                          'ยืนยันการลบผู้ใช้',
+                          `คุณต้องการลบผู้ใช้งาน "${u.name}" ใช่หรือไม่?`,
+                          () => deleteUser(u.username)
+                        );
                       }}
                       style={css(`border:none; background:transparent; color:var(--red-600); cursor:pointer; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); padding:4px 8px; border-radius:var(--radius-sm);`)}
                       onMouseEnter={(e) => { e.currentTarget.style.textDecoration = 'underline'; }}
@@ -160,9 +162,11 @@ export function Perms({ v }) {
                 {canDelete ? (
                   <button
                     onClick={() => {
-                      if (window.confirm(`คุณต้องการลบผู้ใช้งาน "${u.name}" ใช่หรือไม่?`)) {
-                        deleteUser(u.username);
-                      }
+                      askConfirm(
+                        'ยืนยันการลบผู้ใช้',
+                        `คุณต้องการลบผู้ใช้งาน "${u.name}" ใช่หรือไม่?`,
+                        () => deleteUser(u.username)
+                      );
                     }}
                     style={css(`border:1px solid var(--red-600); background:transparent; color:var(--red-600); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); padding:6px 12px; border-radius:var(--radius-sm);`)}
                   >
