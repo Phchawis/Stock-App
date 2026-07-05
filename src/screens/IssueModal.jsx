@@ -4,31 +4,6 @@ import { Input } from '../components/Input.jsx';
 import { Html5Qrcode } from 'html5-qrcode';
 import { modalHeaderStyle, modalHeaderBadgeStyle, modalHeaderTitleStyle, modalHeaderSubtitleStyle, modalHeaderCloseStyle, modalHeaderResponsiveCSS } from '../theme.js';
 
-const playBeep = () => {
-  try {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) return;
-    const audioCtx = new AudioCtx();
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    oscillator.type = 'sine';
-    oscillator.frequency.value = 1000;
-
-    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.25);
-
-    oscillator.start(audioCtx.currentTime);
-    oscillator.stop(audioCtx.currentTime + 0.25);
-  } catch (e) {
-    console.error('AudioContext beep failed:', e);
-  }
-};
-
 export function IssueModal({ v }) {
   const {
     stop, ic, modalIssue, closeModal,
@@ -92,15 +67,10 @@ export function IssueModal({ v }) {
         html5QrCode.start(
           { facingMode: "environment" },
           {
-            // Decode-loop tuning (not camera constraints — safe on iOS):
-            // more attempts/second, no wasted mirrored-image pass (our stickers
-            // are never mirrored), and a bigger scan window so the QR doesn't
-            // need to be aimed dead-center to register.
-            fps: 24,
+            fps: 20,
             aspectRatio: 1.0,
-            disableFlip: true,
             qrbox: (w, h) => {
-              const s = Math.floor(Math.min(w, h) * 0.85);
+              const s = Math.floor(Math.min(w, h) * 0.7);
               return { width: s, height: s };
             }
           },
@@ -108,8 +78,7 @@ export function IssueModal({ v }) {
             if (lotIdRef.current) return;
             const linked = scanRef.current(msg);
             if (linked) {
-              playBeep();
-              if (navigator.vibrate) navigator.vibrate(100);
+              if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
               setJustScanned(true); // brief green success flash before the popup closes
               setTimeout(() => { if (active) setShowCamera(false); }, 550);
             }
