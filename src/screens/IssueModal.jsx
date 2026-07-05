@@ -7,28 +7,17 @@ import { modalHeaderStyle, modalHeaderBadgeStyle, modalHeaderTitleStyle, modalHe
 export function IssueModal({ v }) {
   const {
     stop, ic, modalIssue, closeModal,
-    iform, ifQty, ifRef, submitIssue,
+    iform, ifQty, submitIssue,
     issuePlanRows, issueShort, issueHasPlan, issueUnit,
-    scanQRCode, unlinkLot, selectReagentForIssue,
+    scanQRCode, unlinkLot,
     activeLotsList, reagentsList, issueOnHand,
-    ifSearchInput,
   } = v;
 
-  const [showDropdown, setShowDropdown] = React.useState(false);
-
-  React.useEffect(() => {
-    const handleOutsideClick = () => setShowDropdown(false);
-    window.addEventListener('click', handleOutsideClick);
-    return () => window.removeEventListener('click', handleOutsideClick);
-  }, []);
-
   const [currentStep, setCurrentStep] = React.useState(1);
-  const [showSearchReagent, setShowSearchReagent] = React.useState(false);
 
   React.useEffect(() => {
     if (!modalIssue) {
       setCurrentStep(1);
-      setShowSearchReagent(false);
     }
   }, [modalIssue]);
 
@@ -129,13 +118,6 @@ export function IssueModal({ v }) {
   }, [modalIssue, showCamera]);
 
   if (!modalIssue) return null;
-
-  const query = (iform.searchInput || '').trim().toLowerCase();
-  const filteredReagents = reagentsList.filter(r => 
-    r.code.toLowerCase().includes(query) || 
-    r.th.toLowerCase().includes(query) || 
-    r.en.toLowerCase().includes(query)
-  );
 
   const selectedReagentObj = reagentsList.find(r => r.id === +iform.rid);
   const linkedLotObj = activeLotsList.find(l => l.id === +iform.lotId);
@@ -328,69 +310,6 @@ export function IssueModal({ v }) {
                   </div>
                 </div>
 
-                {/* Optional fallback selection */}
-                <div style={css(`text-align:center; margin-top:4px;`)}>
-                  <button
-                    type="button"
-                    onClick={() => setShowSearchReagent(!showSearchReagent)}
-                    style={css(`background:transparent; border:none; color:var(--brand-700); cursor:pointer; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); text-decoration:underline;`)}
-                  >
-                    {showSearchReagent ? '▲ ซ่อนการค้นหาตามชื่อน้ำยา' : '▼ หรือค้นหาตามชื่อน้ำยาเคมีด้วยตนเอง'}
-                  </button>
-                </div>
-
-                {showSearchReagent && (
-                  <div style={{ position: 'relative' }} onClick={(e) => e.stopPropagation()}>
-                    <Input 
-                      label="ค้นหาชื่อน้ำยาเคมี" 
-                      placeholder="พิมพ์เพื่อค้นหา เช่น Glucose, CBC..." 
-                      value={iform.searchInput || ''}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        ifSearchInput(val);
-                        setShowDropdown(true);
-                        if (!val) {
-                          selectReagentForIssue('');
-                        }
-                      }}
-                      onFocus={() => setShowDropdown(true)}
-                      suffix={
-                        <span style={css(`color:var(--text-tertiary); display:grid; place-items:center; margin-right:8px;`)}>
-                          {ic.search}
-                        </span>
-                      }
-                    />
-                    
-                    {showDropdown && query && filteredReagents.length > 0 && (
-                      <div style={css(`position:absolute; top:70px; left:0; right:0; background:var(--surface-card); border:1px solid var(--border-strong); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:100; max-height:160px; overflow-y:auto;`)}>
-                        {filteredReagents.map(r => {
-                          const totalStock = activeLotsList.filter(l => l.rid === r.id).reduce((sum, l) => sum + l.qty, 0);
-                          return (
-                            <div 
-                              key={r.id} 
-                              onClick={() => {
-                                selectReagentForIssue(r.id);
-                                setShowDropdown(false);
-                                setCurrentStep(2); // Auto proceed to step 2 for ultra smooth UX!
-                              }}
-                              style={css(`padding:10px 14px; cursor:pointer; font:var(--text-sm)/1.3 var(--font-body); color:var(--text-primary); border-bottom:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center; transition:background var(--dur-fast);`)}
-                              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--slate-50)'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                            >
-                              <div>
-                                <div style={css(`font-weight:600; color:var(--text-primary);`)}>{r.th}</div>
-                                <div style={css(`font:var(--text-2xs)/1 var(--font-mono); color:var(--text-tertiary); margin-top:2px;`)}>{r.en}</div>
-                              </div>
-                              <div style={css(`font:var(--fw-semibold) var(--text-xs)/1 var(--font-mono); color:var(--brand-800);`)}>
-                                คงเหลือ {totalStock} {r.unit}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
             )}
 
@@ -521,23 +440,15 @@ export function IssueModal({ v }) {
                   </div>
                 </div>
 
-                <div style={css(`display:grid; grid-template-columns:1.2fr 1fr; gap:12px;`)}>
-                  <Input 
-                    label="จำนวนที่เบิกจ่าย" 
-                    type="number" 
-                    required={true} 
-                    placeholder="ระบุจำนวน เช่น 1" 
-                    value={iform.qty} 
-                    onChange={ifQty} 
-                    suffix={<span style={css(`color:var(--text-tertiary); font:var(--fw-medium) var(--text-2xs)/1 var(--font-body); margin-right:8px;`)}>{selectedReagentObj.unit}</span>}
-                  />
-                  <Input 
-                    label="เลขที่ใบเบิก / อ้างอิง" 
-                    placeholder="เช่น PO-xxxxx" 
-                    value={iform.ref} 
-                    onChange={ifRef} 
-                  />
-                </div>
+                <Input
+                  label="จำนวนที่เบิกจ่าย"
+                  type="number"
+                  required={true}
+                  placeholder="ระบุจำนวน เช่น 1"
+                  value={iform.qty}
+                  onChange={ifQty}
+                  suffix={<span style={css(`color:var(--text-tertiary); font:var(--fw-medium) var(--text-2xs)/1 var(--font-body); margin-right:8px;`)}>{selectedReagentObj.unit}</span>}
+                />
 
                 {/* FEFO Plan details */}
                 {issueHasPlan ? (
