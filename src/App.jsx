@@ -693,7 +693,9 @@ class App extends React.Component {
           qrInput: foundLot.qr
         }
       }));
-      this.showToast(`เชื่อมโยง Lot ${foundLot.lot}${r ? ' · ' + r.th : ''} สำเร็จ`, 'success');
+      // No toast here on purpose: the modal already shows the linked lot inline
+      // (the green "สำเร็จ!" box), and the scan popup flashes a green check. A toast
+      // on top was redundant and, on some phones, overflowed as a dark bar.
       return true;
     }
     const foundReagent = this.state.reagents.find(r => r.code.toLowerCase() === cleanCode);
