@@ -383,16 +383,16 @@ export function ReagentLists({ v }) {
                           const dayLabel = d < 0 ? 'หมดอายุแล้ว' : (d === 0 ? 'หมดอายุวันนี้' : `เหลือ ${d} วัน`);
 
                           return (
-                            <div 
-                              key={l.id} 
-                              style={css(`border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:10px 12px; display:flex; align-items:center; justify-content:space-between; background:var(--white);`)}
+                            <div
+                              key={l.id}
+                              style={css(`border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:10px 12px; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; background:var(--white);`)}
                             >
-                              <div style={css(`min-width:0;`)}>
-                                <div style={css(`display:flex; align-items:center; gap:8px;`)}>
+                              <div style={css(`flex:1; min-width:0;`)}>
+                                <div style={css(`display:flex; align-items:center; gap:8px; flex-wrap:wrap;`)}>
                                   <span style={css(`font:var(--fw-bold) var(--text-2xs)/1 var(--font-mono); color:var(--text-primary);`)}>Lot {l.lot}</span>
                                   <span style={css(`font-family:var(--font-mono); font-size:var(--text-3xs); color:var(--text-tertiary);`)}>( {l.loc} )</span>
                                 </div>
-                                <div style={css(`font:var(--text-3xs)/1.3 var(--font-body); color:var(--text-tertiary); margin-top:4px; display:flex; align-items:center; gap:8px;`)}>
+                                <div style={css(`font:var(--text-3xs)/1.3 var(--font-body); color:var(--text-tertiary); margin-top:6px; display:flex; align-items:center; gap:6px 8px; flex-wrap:wrap;`)}>
                                   <span>หมดอายุ: <span style={css(`font-family:var(--font-mono); font-weight:600; color:var(--text-secondary);`)}>{l.expiry}</span></span>
                                   <span style={{ color: 'var(--border-strong)' }}>|</span>
                                   <button
@@ -430,9 +430,9 @@ export function ReagentLists({ v }) {
                                 </div>
                               </div>
 
-                              <div style={css(`display:flex; align-items:center; gap:12px;`)}>
+                              <div style={css(`display:flex; align-items:center; gap:12px; flex-shrink:0;`)}>
                                 <div style={css(`text-align:right;`)}>
-                                  <div style={css(`font:var(--fw-bold) var(--text-2xs)/1 var(--font-mono); color:var(--text-primary);`)}>{l.qty} / {l.recv} {r.unit}</div>
+                                  <div style={css(`font:var(--fw-bold) var(--text-2xs)/1.3 var(--font-mono); color:var(--text-primary); white-space:nowrap;`)}>{l.qty} / {l.recv} {r.unit}</div>
                                   <span style={css(`padding:1px 6px; border-radius:var(--radius-pill); background:${c.bg}; color:${c.fg}; font:var(--fw-semibold) var(--text-3xs)/1.2 var(--font-body); display:inline-block; margin-top:4px;`)}>
                                     {dayLabel}
                                   </span>
