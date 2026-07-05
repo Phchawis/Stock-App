@@ -336,27 +336,30 @@ export function IssueModal({ v }) {
                 </div>
               ) : null}
 
-              {/* Open-camera button (compact — camera pops up only when tapped) */}
-              <button
-                type="button"
-                onClick={() => setShowCamera(true)}
-                style={css(`display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px; border-radius:var(--radius-md); border:1px dashed var(--border-strong); background:var(--white); color:var(--brand-700); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body); transition:all var(--dur-fast);`)}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--border-brand)'; e.currentTarget.style.background = 'var(--brand-50)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.background = 'var(--white)'; }}
-              >
-                <span style={css(`display:grid; place-items:center;`)}>{ic.qr}</span>
-                สแกน QR Code ด้วยกล้อง
-              </button>
-
-              {/* Manual code fallback — type the lot number or QR code by hand */}
+              {/* Type the lot / QR code by hand — or tap the QR icon inside the
+                  field to open the camera scanner (compact, camera pops up only
+                  when tapped). */}
               <div style={css(`display:grid; grid-template-columns:1fr auto; gap:8px; align-items:flex-end;`)}>
                 <Input
-                  label="หรือพิมพ์รหัส Lot / QR Code เอง"
+                  label="พิมพ์รหัส Lot / QR Code หรือแตะไอคอนเพื่อสแกน"
                   placeholder="เช่น G2407A หรือ QR-G2407A"
                   value={manualCode}
                   onChange={(e) => setManualCode(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && manualCode.trim()) { scanQRCode(manualCode); setManualCode(''); } }}
                   style={{ flex: 1 }}
+                  suffix={
+                    <button
+                      type="button"
+                      onClick={() => setShowCamera(true)}
+                      title="สแกน QR Code ด้วยกล้อง"
+                      aria-label="สแกน QR Code ด้วยกล้อง"
+                      style={css(`display:grid; place-items:center; width:30px; height:30px; border:none; border-radius:var(--radius-sm); background:transparent; cursor:pointer; color:var(--brand-700); margin-right:-4px; transition:background var(--dur-fast);`)}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--brand-50)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      {ic.qr}
+                    </button>
+                  }
                 />
                 <button
                   type="button"
