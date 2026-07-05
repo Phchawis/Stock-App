@@ -50,19 +50,14 @@ export function IssueModal({ v }) {
       try {
         const html5QrCode = new Html5Qrcode("qr-reader");
         html5QrCodeRef.current = html5QrCode;
-        // Camera selector stays the plain { facingMode } form — iOS Safari rejects
-        // getUserMedia when passed unsupported *advanced* constraints (e.g.
-        // focusMode) or an *exact* resolution, which surfaced as "เปิดกล้องไม่ได้".
-        // width/height as { ideal } is best-effort and safe on iOS: it asks for a
-        // high-res stream so a QR held ~15–20cm away (inside the phone's focus
-        // range, so it's sharp) still has enough pixels to decode — this is the
-        // fix for "blurry / hard to scan when held close".
+        // DO NOT add ANY extra getUserMedia constraints here. This user's iOS
+        // Safari rejects the camera ("เปิดกล้องไม่ได้") the moment anything beyond
+        // the bare { facingMode: "environment" } is passed — even a best-effort
+        // { ideal } width/height, and even advanced focusMode. This plain form is
+        // the one confirmed working on-device; keep it. Sharpness is handled by
+        // guidance (hold ~15–20cm away) and the qrbox size below, not constraints.
         html5QrCode.start(
-          {
-            facingMode: "environment",
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
-          },
+          { facingMode: "environment" },
           {
             fps: 15,
             aspectRatio: 1.0,
