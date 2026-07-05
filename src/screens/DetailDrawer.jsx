@@ -12,18 +12,18 @@ export function DetailDrawer({ v }) {
        with a lift + gradient-fill hover) so this drawer's actions read the same
        as everywhere else in the app instead of a plain brand-indigo pair. */
     .detail-btn-receive {
-      border: 1.5px solid rgba(16, 185, 129, 0.35);
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
-      color: #10B981 !important;
+      border: 1.5px solid rgba(52, 211, 153, 0.35);
+      background: linear-gradient(135deg, rgba(52, 211, 153, 0.08) 0%, rgba(52, 211, 153, 0.02) 100%);
+      color: #34D399 !important;
       transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
-      box-shadow: 0 2px 4px rgba(16, 185, 129, 0.05);
+      box-shadow: 0 2px 4px rgba(52, 211, 153, 0.05);
     }
     .detail-btn-receive:hover {
       transform: translateY(-2px);
-      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-      border-color: #10B981;
-      color: #ffffff !important;
-      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+      background: linear-gradient(135deg, #34D399 0%, #059669 100%);
+      border-color: #34D399;
+      color: #002934 !important;
+      box-shadow: 0 6px 16px rgba(52, 211, 153, 0.35);
     }
     .detail-btn-receive:active {
       transform: translateY(-1px);
