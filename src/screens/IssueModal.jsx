@@ -48,16 +48,30 @@ export function IssueModal({ v }) {
     const timer = setTimeout(() => {
       if (!active) return;
       try {
-        const html5QrCode = new Html5Qrcode("qr-reader");
+        // useBarCodeDetectorIfSupported switches to the browser's native, hardware
+        // -accelerated BarcodeDetector on modern phones (iOS 15+/Android Chrome) —
+        // far faster and more forgiving than the JS decoder, which is the biggest
+        // win for "hard to scan". verbose:false keeps the console clean.
+        const html5QrCode = new Html5Qrcode("qr-reader", {
+          verbose: false,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+        });
         html5QrCodeRef.current = html5QrCode;
         html5QrCode.start(
-          { facingMode: "environment" },
+          // Rear camera + continuous autofocus + a higher resolution so small QR
+          // codes on stickers resolve sharply enough to lock focus quickly.
           {
-            fps: 10,
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            advanced: [{ focusMode: 'continuous' }, { focusMode: 'auto' }],
+          },
+          {
+            fps: 20,
             aspectRatio: 1.0,
-            disableFlip: true,
+            disableFlip: false,
             qrbox: (w, h) => {
-              const s = Math.floor(Math.min(w, h) * 0.8);
+              const s = Math.floor(Math.min(w, h) * 0.7);
               return { width: s, height: s };
             }
           },
