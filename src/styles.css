@@ -1694,6 +1694,11 @@ body { font-variant-numeric: tabular-nums; }
 /* Kill the grey mobile tap flash — press feedback below replaces it */
 html { -webkit-tap-highlight-color: transparent; }
 
+/* Guard against a stray overflowing fixed element (e.g. a long toast) widening
+   the layout viewport, which would inflate vw units and push modals past the
+   screen edge on phones. */
+html, body { overflow-x: hidden; }
+
 /* Buttons: one consistent motion vocabulary (fast, ease-out) */
 button {
   transition:
