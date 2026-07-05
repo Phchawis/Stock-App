@@ -1,13 +1,13 @@
 ---
 name: TUH Laboratory Stock Design System
-description: Clinical precision design system for laboratory reagent management at TUH.
+description: Clinical precision design system for laboratory reagent management at TUH, using the Glass Dark theme.
 colors:
-  primary: "#343E9B"
+  primary: "#0E9587"
   accent: "#EC6647"
-  neutral-bg: "#F6F7FB"
-  neutral-surface: "#FFFFFF"
-  neutral-sunken: "#EEEFF5"
-  neutral-ink: "#181B2A"
+  neutral-bg: "#002934"
+  neutral-surface: "rgba(0, 72, 92, 0.45)"
+  neutral-sunken: "rgba(0, 30, 39, 0.6)"
+  neutral-ink: "#ECF7F4"
 typography:
   display:
     fontFamily: "Anuphan, Sarabun, system-ui, sans-serif"
@@ -33,7 +33,7 @@ components:
     rounded: "{rounded.md}"
     padding: "10px 16px"
   button-primary-hover:
-    backgroundColor: "#262E73"
+    backgroundColor: "#1FA090"
 ---
 
 # Design System: TUH Laboratory Stock Design System
@@ -42,28 +42,28 @@ components:
 
 **Creative North Star: "The Clinical Lab Ledger"**
 
-A high-density, high-readability user interface designed specifically for medical laboratory professionals operating under variable lighting conditions. The layout avoids decorative elements in favor of a clean, structured workspace resembling an official lab record book. It rejects the generic warm-neutral SaaS aesthetic in favor of a cool blue-slate palette representing security and scientific precision.
+A high-density, high-readability user interface designed specifically for medical laboratory professionals operating under variable lighting conditions. The layout avoids decorative elements in favor of a clean, structured workspace resembling an official lab record book. It utilizes the "Glass Dark" theme — a cool, translucent dark-teal palette representing security, clinical cleanliness, and scientific precision.
 
 **Key Characteristics:**
 - Strict alignment to a grid system for multiple side-by-side data columns.
-- Tonal layering instead of heavy borders or floating shadows.
+- Tonal layering and translucent glass variables instead of heavy shadows.
 - Visual prioritisation of safety status indicators (expiration levels, low stock alerts).
 
 ## 2. Colors
 
-A cool, high-contrast palette anchored by laboratory indigo with coral warning accents.
+A cool, translucent high-contrast palette anchored by laboratory teal-green with coral warning accents.
 
 ### Primary
-- **Laboratory Indigo** (#343E9B): Used for brand elements, primary navigation triggers, and primary actions.
+- **Laboratory Teal** (#0E9587 / --brand-700): Used for brand elements, primary navigation highlights, and primary actions.
 
 ### Secondary
 - **Warning Coral** (#EC6647): Used strictly for expired lot numbers, critical alerts, and urgent attention markers.
 
 ### Neutral
-- **Slate Ink** (#181B2A): The standard color for body copy and headings, ensuring high contrast.
-- **Cool Grey Background** (#F6F7FB): Page background.
-- **Pure White Surface** (#FFFFFF): Container and card backgrounds.
-- **Sunken Slate** (#EEEFF5): Background for tables, lists, and inactive selectors.
+- **Mint Ink** (#ECF7F4 / --text-primary): The standard color for body copy and headings, ensuring high contrast on dark backgrounds.
+- **Glass Ocean Background** (#002934 / --surface-page): Full-page deep teal background.
+- **Translucent Teal Surface** (rgba(0, 72, 92, 0.45) / --surface-card): Card backgrounds with blur filters.
+- **Sunken Dark Teal** (rgba(0, 30, 39, 0.6) / --surface-sunken): Background for tables, lists, and inactive panels.
 
 **The Contrast Rule.** Body text must have a minimum contrast ratio of 4.5:1 against the background. Do not use light grey text on a white background for typography.
 
@@ -92,17 +92,17 @@ The system is flat by default to maintain official document aesthetics. Depth is
 
 ### Buttons
 - **Shape:** Rounded-md (8px radius)
-- **Primary:** Laboratory Indigo background, white text, bold font, padding (10px 16px).
-- **Hover:** Darkens background to #262E73 with a subtle glow transition.
+- **Primary:** Laboratory Teal background, white text, bold font, padding (10px 16px).
+- **Hover:** Darkens background to #1FA090 with a subtle glow transition.
 
 ### Cards / Containers
 - **Corner Style:** Rounded-md (8px radius)
-- **Background:** White surface (#FFFFFF) with a 1px border (#EEEFF5).
+- **Background:** Translucent teal surface (rgba(0, 72, 92, 0.45)) with a 1px border.
 - **Padding:** Spacing-md (16px).
 
 ### Inputs / Fields
-- **Style:** Background white, 1px border default (#C4C8D6), radius-md (8px).
-- **Focus:** Shows focus ring border in #5E6CD6.
+- **Style:** Background dark, 1px border default, radius-md (8px).
+- **Focus:** Shows focus ring border in #33A593.
 
 ### Navigation
 - **Style:** Left Sidebar rail using deep slate background. Menu items use IBM Plex Mono for badges. Hover triggers background color shift.
