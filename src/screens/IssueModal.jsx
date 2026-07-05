@@ -23,10 +23,12 @@ export function IssueModal({ v }) {
   }, []);
 
   const [currentStep, setCurrentStep] = React.useState(1);
+  const [showSearchReagent, setShowSearchReagent] = React.useState(false);
 
   React.useEffect(() => {
     if (!modalIssue) {
       setCurrentStep(1);
+      setShowSearchReagent(false);
     }
   }, [modalIssue]);
 
@@ -88,7 +90,12 @@ export function IssueModal({ v }) {
             if (linked) {
               if (navigator.vibrate) navigator.vibrate([800, 100, 800]);
               setJustScanned(true); // brief green success flash before the popup closes
-              setTimeout(() => { if (active) setShowCamera(false); }, 550);
+              setTimeout(() => { 
+                if (active) {
+                  setShowCamera(false);
+                  setCurrentStep(2);
+                }
+              }, 550);
             }
           },
           () => {}
@@ -221,86 +228,167 @@ export function IssueModal({ v }) {
           <div style={css(`padding:14px 22px 4px; display:flex; justify-content:space-between; align-items:center;`)}>
             <div style={css(`display:flex; align-items:center; gap:8px;`)}>
               <span style={css(`width:22px; height:22px; border-radius:50%; background:${currentStep >= 1 ? 'var(--brand-700)' : 'var(--slate-200)'}; color:${currentStep >= 1 ? '#fff' : 'var(--text-secondary)'}; display:grid; place-items:center; font:var(--fw-bold) 11px/1 var(--font-mono);`)}>1</span>
-              <span style={css(`font:var(--fw-bold) var(--text-3xs)/1 var(--font-body); color:${currentStep === 1 ? 'var(--text-primary)' : 'var(--text-secondary)'};`)}>เลือกน้ำยา</span>
+              <span style={css(`font:var(--fw-bold) var(--text-3xs)/1 var(--font-body); color:${currentStep === 1 ? 'var(--text-primary)' : 'var(--text-secondary)'};`)}>สแกน / ระบุ Lot</span>
             </div>
-            <div style={css(`height:1px; flex:1; background:var(--border-subtle); margin:0 12px;`)} />
+            <div style={css(`height:1px; flex:1; background:var(--border-subtle); margin:0 16px;`)} />
             <div style={css(`display:flex; align-items:center; gap:8px;`)}>
               <span style={css(`width:22px; height:22px; border-radius:50%; background:${currentStep >= 2 ? 'var(--brand-700)' : 'var(--slate-200)'}; color:${currentStep >= 2 ? '#fff' : 'var(--text-secondary)'}; display:grid; place-items:center; font:var(--fw-bold) 11px/1 var(--font-mono);`)}>2</span>
-              <span style={css(`font:var(--fw-bold) var(--text-3xs)/1 var(--font-body); color:${currentStep === 2 ? 'var(--text-primary)' : 'var(--text-secondary)'};`)}>สแกน/เลือก Lot</span>
-            </div>
-            <div style={css(`height:1px; flex:1; background:var(--border-subtle); margin:0 12px;`)} />
-            <div style={css(`display:flex; align-items:center; gap:8px;`)}>
-              <span style={css(`width:22px; height:22px; border-radius:50%; background:${currentStep >= 3 ? 'var(--brand-700)' : 'var(--slate-200)'}; color:${currentStep >= 3 ? '#fff' : 'var(--text-secondary)'}; display:grid; place-items:center; font:var(--fw-bold) 11px/1 var(--font-mono);`)}>3</span>
-              <span style={css(`font:var(--fw-bold) var(--text-3xs)/1 var(--font-body); color:${currentStep === 3 ? 'var(--text-primary)' : 'var(--text-secondary)'};`)}>ระบุจำนวนเบิก</span>
+              <span style={css(`font:var(--fw-bold) var(--text-3xs)/1 var(--font-body); color:${currentStep === 2 ? 'var(--text-primary)' : 'var(--text-secondary)'};`)}>ระบุจำนวนเบิก</span>
             </div>
           </div>
 
           {/* Form Body */}
           <div style={css(`padding:14px 22px 20px; display:flex; flex-direction:column; gap:16px; min-height:280px; justify-content:flex-start;`)}>
             
-            {/* STEP 1: SELECT REAGENT */}
+            {/* STEP 1: SCAN LOT OR SEARCH BY REAGENT NAME */}
             {currentStep === 1 && (
               <div style={css(`display:flex; flex-direction:column; gap:14px;`)}>
-                <div style={{ position: 'relative' }} onClick={(e) => e.stopPropagation()}>
-                  <Input 
-                    label="ค้นหาน้ำยาที่ต้องการเบิก (พิมพ์ชื่อหรือรหัส)" 
-                    required={true}
-                    placeholder="พิมพ์เพื่อค้นหา เช่น Glucose, CBC, Anti-HIV..." 
-                    value={iform.searchInput || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      ifSearchInput(val);
-                      setShowDropdown(true);
-                      if (!val) {
-                        selectReagentForIssue('');
-                      }
-                    }}
-                    onFocus={() => setShowDropdown(true)}
-                    suffix={
-                      <span style={css(`color:var(--text-tertiary); display:grid; place-items:center; margin-right:8px;`)}>
-                        {ic.search}
-                      </span>
-                    }
-                  />
-                  
-                  {showDropdown && query && filteredReagents.length > 0 && (
-                    <div style={css(`position:absolute; top:70px; left:0; right:0; background:var(--surface-card); border:1px solid var(--border-strong); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:100; max-height:200px; overflow-y:auto;`)}>
-                      {filteredReagents.map(r => {
-                        const totalStock = activeLotsList.filter(l => l.rid === r.id).reduce((sum, l) => sum + l.qty, 0);
-                        return (
-                          <div 
-                            key={r.id} 
-                            onClick={() => {
-                              selectReagentForIssue(r.id);
-                              setShowDropdown(false);
-                              setCurrentStep(2); // Auto proceed to step 2 for ultra smooth UX!
-                            }}
-                            style={css(`padding:10px 14px; cursor:pointer; font:var(--text-sm)/1.3 var(--font-body); color:var(--text-primary); border-bottom:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center; transition:background var(--dur-fast);`)}
-                            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--slate-50)'}
-                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                          >
-                            <div>
-                              <div style={css(`font-weight:600; color:var(--text-primary);`)}>{r.th}</div>
-                              <div style={css(`font:var(--text-2xs)/1 var(--font-mono); color:var(--text-tertiary); margin-top:2px;`)}>{r.en}</div>
-                            </div>
-                            <div style={css(`font:var(--fw-semibold) var(--text-xs)/1 var(--font-mono); color:var(--brand-800);`)}>
-                              คงเหลือ {totalStock} {r.unit}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                <div style={css(`font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary); text-align:center; padding:0 8px;`)}>
+                  กรุณาสแกน QR Code หรือระบุรหัส Lot ของน้ำยาเคมีเพื่อทำรายการเบิกจ่าย
                 </div>
 
-                {selectedReagentObj ? (
-                  <div style={css(`background:rgba(0,104,132,0.06); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:12px 14px; display:flex; align-items:center; justify-content:space-between; font:var(--text-sm)/1.3 var(--font-body);`)}>
-                    <div>น้ำยาที่เลือก: <strong style={css(`color:var(--text-primary);`)}>{selectedReagentObj.th}</strong></div>
-                    <div style={css(`font-family:var(--font-mono); font-weight:600; color:var(--brand-700);`)}>คงเหลือรวม: {issueOnHand} {selectedReagentObj.unit}</div>
+                {/* Scan box container */}
+                <div style={css(`display:flex; flex-direction:column; gap:12px; border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:14px; background:var(--surface-sunken);`)}>
+                  {iform.lotId ? (
+                    <div style={{
+                      background: 'rgba(56,182,115,.12)',
+                      border: '1px solid var(--green-700)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '10px 12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ display: 'grid', placeItems: 'center', color: 'var(--green-700)' }}>
+                          {ic.shield || ic.check}
+                        </span>
+                        <div style={{ font: 'var(--text-xs)/1.3 var(--font-body)' }}>
+                          <div style={{ fontWeight: 'bold', color: 'var(--green-700)' }}>เชื่อมโยง Lot สำเร็จ!</div>
+                          <div style={{ font: 'var(--text-3xs)/1 var(--font-mono)', color: 'var(--text-secondary)', marginTop: 2 }}>
+                            น้ำยา: <strong style={{ color: 'var(--text-primary)' }}>{selectedReagentObj ? selectedReagentObj.th : ''}</strong> · Lot: <strong style={{ color: 'var(--text-primary)' }}>{linkedLotObj ? linkedLotObj.lot : ''}</strong> (คงเหลือ {linkedLotObj ? linkedLotObj.qty : 0} {selectedReagentObj ? selectedReagentObj.unit : ''})
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={unlinkLot}
+                        style={css(`background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:4px 8px; font:var(--fw-medium) var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; white-space:nowrap; flex-shrink:0;`)}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--red-700)'; e.currentTarget.style.color = 'var(--red-700)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                      >
+                        ยกเลิก
+                      </button>
+                    </div>
+                  ) : null}
+
+                  <div className="lot-code-row">
+                    <Input
+                      label="รหัส Lot หรือสแกน QR Code"
+                      placeholder="ป้อนรหัส เช่น G2407A หรือสแกนบาร์โค้ด..."
+                      value={manualCode}
+                      onChange={(e) => setManualCode(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && manualCode.trim()) {
+                          const linked = scanQRCode(manualCode);
+                          if (linked) {
+                            setManualCode('');
+                            setCurrentStep(2);
+                          }
+                        }
+                      }}
+                      style={{ flex: 1 }}
+                      suffix={
+                        <button
+                          type="button"
+                          onClick={() => setShowCamera(true)}
+                          title="สแกน QR Code ด้วยกล้อง"
+                          style={css(`display:grid; place-items:center; width:30px; height:30px; border:none; border-radius:var(--radius-sm); background:transparent; cursor:pointer; color:var(--brand-700); margin-right:-4px;`)}
+                        >
+                          {ic.qr}
+                        </button>
+                      }
+                    />
+                    <button
+                      type="button"
+                      className="lot-code-confirm"
+                      onClick={() => {
+                        if (manualCode.trim()) {
+                          const linked = scanQRCode(manualCode);
+                          if (linked) {
+                            setManualCode('');
+                            setCurrentStep(2);
+                          }
+                        }
+                      }}
+                      style={css(`background:var(--brand-700); color:#fff; border:none; border-radius:var(--radius-md); padding:0 14px; height:40px; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); cursor:pointer; display:flex; align-items:center; justify-content:center; white-space:nowrap; flex-shrink:0;`)}
+                    >
+                      ยืนยัน
+                    </button>
                   </div>
-                ) : (
-                  <div style={css(`display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px; text-align:center; border:1px dashed var(--border-default); border-radius:var(--radius-md); background:rgba(0,0,0,0.01); color:var(--text-tertiary); font:var(--text-xs)/1.4 var(--font-body); gap:6px;`)}>
-                    <span>🔎 โปรดพิมพ์ค้นหาหรือเลือกน้ำยาด้านบนเพื่อดำเนินการเบิกจ่าย</span>
+                </div>
+
+                {/* Optional fallback selection */}
+                <div style={css(`text-align:center; margin-top:4px;`)}>
+                  <button
+                    type="button"
+                    onClick={() => setShowSearchReagent(!showSearchReagent)}
+                    style={css(`background:transparent; border:none; color:var(--brand-700); cursor:pointer; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); text-decoration:underline;`)}
+                  >
+                    {showSearchReagent ? '▲ ซ่อนการค้นหาตามชื่อน้ำยา' : '▼ หรือค้นหาตามชื่อน้ำยาเคมีด้วยตนเอง'}
+                  </button>
+                </div>
+
+                {showSearchReagent && (
+                  <div style={{ position: 'relative' }} onClick={(e) => e.stopPropagation()}>
+                    <Input 
+                      label="ค้นหาชื่อน้ำยาเคมี" 
+                      placeholder="พิมพ์เพื่อค้นหา เช่น Glucose, CBC..." 
+                      value={iform.searchInput || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        ifSearchInput(val);
+                        setShowDropdown(true);
+                        if (!val) {
+                          selectReagentForIssue('');
+                        }
+                      }}
+                      onFocus={() => setShowDropdown(true)}
+                      suffix={
+                        <span style={css(`color:var(--text-tertiary); display:grid; place-items:center; margin-right:8px;`)}>
+                          {ic.search}
+                        </span>
+                      }
+                    />
+                    
+                    {showDropdown && query && filteredReagents.length > 0 && (
+                      <div style={css(`position:absolute; top:70px; left:0; right:0; background:var(--surface-card); border:1px solid var(--border-strong); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:100; max-height:160px; overflow-y:auto;`)}>
+                        {filteredReagents.map(r => {
+                          const totalStock = activeLotsList.filter(l => l.rid === r.id).reduce((sum, l) => sum + l.qty, 0);
+                          return (
+                            <div 
+                              key={r.id} 
+                              onClick={() => {
+                                selectReagentForIssue(r.id);
+                                setShowDropdown(false);
+                                setCurrentStep(2); // Auto proceed to step 2 for ultra smooth UX!
+                              }}
+                              style={css(`padding:10px 14px; cursor:pointer; font:var(--text-sm)/1.3 var(--font-body); color:var(--text-primary); border-bottom:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center; transition:background var(--dur-fast);`)}
+                              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--slate-50)'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
+                              <div>
+                                <div style={css(`font-weight:600; color:var(--text-primary);`)}>{r.th}</div>
+                                <div style={css(`font:var(--text-2xs)/1 var(--font-mono); color:var(--text-tertiary); margin-top:2px;`)}>{r.en}</div>
+                              </div>
+                              <div style={css(`font:var(--fw-semibold) var(--text-xs)/1 var(--font-mono); color:var(--brand-800);`)}>
+                                คงเหลือ {totalStock} {r.unit}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
