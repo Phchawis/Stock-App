@@ -710,7 +710,7 @@ class App extends React.Component {
           qrInput: cleanCode
         }
       }));
-      this.showToast(`พบน้ำยา ${foundReagent.th} · จ่ายแบบหมดอายุก่อน–เบิกก่อน`, 'success');
+      // No toast: the modal reflects the scanned reagent + FEFO plan inline.
       return true;
     }
     this.showToast(`ไม่พบข้อมูล QR Code "${cleanCode}" หรือน้ำยาใน Lot นี้หมดคลังแล้ว`, 'warn');
