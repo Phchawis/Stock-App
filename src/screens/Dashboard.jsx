@@ -312,11 +312,11 @@ export function Dashboard({ v }) {
         </div>
 
         {/* Dashboard Filters Row */}
-        <div style={css(`display:flex; gap:14px; flex-wrap:wrap; background:var(--surface-sunken); padding:14px 18px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); align-items:center;`)}>
+        <div className="dash-filter-row" style={css(`display:flex; gap:14px; flex-wrap:wrap; background:var(--surface-sunken); padding:14px 18px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); align-items:center;`)}>
           <div style={css(`font:var(--fw-semibold) var(--text-3xs)/1 var(--font-body); color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.04em;`)}>ตัวกรองข้อมูล:</div>
-          
+
           {/* Category filter */}
-          <div style={css(`display:flex; flex-direction:column; gap:4px; min-width:140px;`)}>
+          <div className="dash-filter-item" style={css(`display:flex; flex-direction:column; gap:4px; min-width:140px;`)}>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -330,7 +330,7 @@ export function Dashboard({ v }) {
           </div>
 
           {/* Supplier filter */}
-          <div style={css(`display:flex; flex-direction:column; gap:4px; min-width:180px;`)}>
+          <div className="dash-filter-item" style={css(`display:flex; flex-direction:column; gap:4px; min-width:180px;`)}>
             <select
               value={selectedSupplier}
               onChange={(e) => setSelectedSupplier(e.target.value)}
@@ -344,7 +344,7 @@ export function Dashboard({ v }) {
           </div>
 
           {/* Reagent Type searchable filter */}
-          <div style={css(`display:flex; flex-direction:column; gap:4px; min-width:240px; flex:1.2; max-width:340px;`)}>
+          <div className="dash-filter-item" style={css(`display:flex; flex-direction:column; gap:4px; min-width:240px; flex:1.2; max-width:340px;`)}>
             <SearchableSelect
               placeholder="ค้นหาชนิดน้ำยา..."
               options={[{ value: 'all', label: 'ทุกชนิดน้ำยาเคมี' }, ...reagents.map(r => ({ value: String(r.id), label: r.th }))]}
