@@ -1567,13 +1567,17 @@ code, kbd, samp { font-family: var(--font-mono); }
 
 /* Mobile and Tablet Responsiveness */
 @media (max-width: 768px) {
-  /* Keep sidebar always visible as a collapsed 72px icons-only sidebar on mobile */
+  /* Keep sidebar always visible as a collapsed 72px icons-only sidebar on mobile.
+     z-index must stay BELOW every full-screen overlay in the app (DetailDrawer
+     40, Receive/Issue/Register modals 50, toast/scan popup 60, Login 80) —
+     otherwise this rail renders on top of them, visually blocking the login
+     screen and cutting off the left edge of every modal on mobile. */
   aside.main-sidebar {
     position: sticky !important;
     top: 0 !important;
     left: 0 !important;
     height: 100vh !important;
-    z-index: 90 !important;
+    z-index: 20 !important;
     width: 72px !important;
     transform: none !important;
     box-shadow: none !important;
