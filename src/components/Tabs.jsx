@@ -3,7 +3,7 @@ import React from 'react';
 /** Tabs — underline-style navigation for switching register views / doc-detail panels. */
 export function Tabs({ tabs = [], value, onChange, style }) {
   return (
-    <div role="tablist" style={{
+    <div role="tablist" className="qms-tablist" style={{
       display: 'flex', gap: 4, borderBottom: '1px solid var(--border-subtle)', ...style,
     }}>
       {tabs.map((t) => {
@@ -13,10 +13,11 @@ export function Tabs({ tabs = [], value, onChange, style }) {
         const active = key === value;
         return (
           <button key={key} role="tab" aria-selected={active} onClick={() => onChange && onChange(key)}
+            className="qms-tab"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 7,
               background: 'transparent', border: 'none', cursor: 'pointer',
-              padding: '10px 14px', marginBottom: -1,
+              padding: '10px 14px', marginBottom: -1, whiteSpace: 'nowrap', flexShrink: 0,
               borderBottom: '2px solid ' + (active ? 'var(--teal-700)' : 'transparent'),
               color: active ? 'var(--teal-700)' : 'var(--text-secondary)',
               font: (active ? 'var(--fw-semibold) ' : 'var(--fw-medium) ') + 'var(--text-base)/1 var(--font-body)',
