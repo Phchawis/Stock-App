@@ -600,7 +600,7 @@ class App extends React.Component {
   activeLots(rid) { return this.state.lots.filter(l => l.rid === rid && l.qty > 0 && l.status === 'ACTIVE'); }
   onHand(rid) { return this.activeLots(rid).reduce((s, l) => s + l.qty, 0); }
   earliest(rid) { const a = this.activeLots(rid).map(l => l.expiry).sort(); return a[0] || null; }
-  sev(days, crit) { const c = crit || 30; if (days <= c) return 'critical'; if (days <= c * 2) return 'warning'; if (days <= c * 3) return 'watch'; return 'ok'; }
+  sev(days, crit) { if (days <= 15) return 'critical'; if (days <= 60) return 'warning'; return 'ok'; }
   sevCol(s) { return ({
     critical: { fg: 'var(--red-700)', bg: 'var(--red-100)', dot: 'var(--red-600)', th: 'วิกฤต' },
     warning: { fg: 'var(--amber-700)', bg: 'var(--amber-100)', dot: 'var(--amber-600)', th: 'เฝ้าระวัง' },
@@ -620,7 +620,7 @@ class App extends React.Component {
     this.state.reagents.forEach(r => {
       this.activeLots(r.id).forEach(l => {
         const d = this.days(l.expiry);
-        if (d <= crit * 3) {
+        if (d <= 60) {
           const s = this.sev(d, crit); const c = this.sevCol(s);
           const key = 'E' + l.id;
           out.push({ key, kind: 'EXPIRY', rid: r.id, sev: s, order: s === 'critical' ? 0 : s === 'warning' ? 1 : 2,
@@ -898,13 +898,13 @@ class App extends React.Component {
       return { id: r.id, code: r.code, th: r.th, en: showEn ? r.en : '', cat: r.cat, catLabel: this.CAT_LABEL(r.cat),
         unit: r.unit, subUnit: subUnitName, subUnitQty, testsPerSubUnit, onHand: oh, min: r.min, low, lotCount, storageLabel: this.STORAGE_LABEL(r.storage), onHandColor: low ? 'var(--red-700)' : 'var(--text-primary)',
         expDays: d, expLabel: d != null ? this.dayLabel(d) : '—', expColor: d != null ? sc.fg : 'var(--text-tertiary)',
-        expiring: d != null && d <= crit * 3, sev: s, img: r.img || '/reagent_placeholder.png', onOpen: () => this.openDetail(r.id),
+        expiring: d != null && d <= 60, sev: s, img: r.img || '/reagent_placeholder.png', onOpen: () => this.openDetail(r.id),
         testsPerUnit: r.testsPerUnit, testsTotal: r.testsPerUnit ? oh * r.testsPerUnit : null };
     };
 
     // KPIs
     const lotsActive = S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE').length;
-    const expiringSoon = S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE' && this.days(l.expiry) <= crit * 3).length;
+    const expiringSoon = S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE' && this.days(l.expiry) <= 60).length;
     const lowCount = S.reagents.filter(r => this.onHand(r.id) <= r.min).length;
     const kpis = [
       { value: S.reagents.length, label: 'ชนิดน้ำยาทั้งหมด', color: 'var(--brand-700)', bg: 'var(--brand-50)', icon: I('Boxes', 'var(--brand-700)', 21) },
@@ -931,7 +931,7 @@ class App extends React.Component {
     const invTabs = [
       { value: 'all', label: 'ทั้งหมด', count: S.reagents.length },
       { value: 'low', label: 'ต่ำกว่าจุดสั่งซื้อ', count: lowCount },
-      { value: 'expiring', label: 'ใกล้หมดอายุ', count: S.reagents.filter(r => { const e = this.earliest(r.id); return e != null && this.days(e) <= crit * 3; }).length },
+      { value: 'expiring', label: 'ใกล้หมดอายุ', count: S.reagents.filter(r => { const e = this.earliest(r.id); return e != null && this.days(e) <= 60; }).length },
     ];
 
     // detail
