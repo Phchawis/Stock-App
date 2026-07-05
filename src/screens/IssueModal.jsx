@@ -342,7 +342,7 @@ export function IssueModal({ v }) {
                   when tapped). */}
               <div style={css(`display:grid; grid-template-columns:1fr auto; gap:8px; align-items:flex-end;`)}>
                 <Input
-                  label="พิมพ์รหัส Lot / QR Code หรือแตะไอคอนเพื่อสแกน"
+                  label="รหัส Lot / QR Code"
                   placeholder="เช่น G2407A หรือ QR-G2407A"
                   value={manualCode}
                   onChange={(e) => setManualCode(e.target.value)}
