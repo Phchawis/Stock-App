@@ -78,7 +78,7 @@ export function IssueModal({ v }) {
             if (lotIdRef.current) return;
             const linked = scanRef.current(msg);
             if (linked) {
-              if (navigator.vibrate) navigator.vibrate([400, 150, 400]);
+              if (navigator.vibrate) navigator.vibrate([800, 100, 800]);
               setJustScanned(true); // brief green success flash before the popup closes
               setTimeout(() => { if (active) setShowCamera(false); }, 550);
             }
