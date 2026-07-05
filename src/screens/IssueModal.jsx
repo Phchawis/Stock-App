@@ -48,26 +48,17 @@ export function IssueModal({ v }) {
     const timer = setTimeout(() => {
       if (!active) return;
       try {
-        // useBarCodeDetectorIfSupported switches to the browser's native, hardware
-        // -accelerated BarcodeDetector on modern phones (iOS 15+/Android Chrome) —
-        // far faster and more forgiving than the JS decoder, which is the biggest
-        // win for "hard to scan". verbose:false keeps the console clean.
-        const html5QrCode = new Html5Qrcode("qr-reader", {
-          verbose: false,
-          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-        });
+        const html5QrCode = new Html5Qrcode("qr-reader");
         html5QrCodeRef.current = html5QrCode;
+        // IMPORTANT: keep the camera selector as the plain { facingMode } form and
+        // the constructor bare. iOS Safari rejects getUserMedia when passed
+        // unsupported advanced constraints (e.g. focusMode) or a rigid resolution,
+        // which surfaced as "เปิดกล้องไม่ได้". iOS already autofocuses continuously
+        // by default; disableFlip:false + a slightly higher fps keep scans quick.
         html5QrCode.start(
-          // Rear camera + continuous autofocus + a higher resolution so small QR
-          // codes on stickers resolve sharply enough to lock focus quickly.
+          { facingMode: "environment" },
           {
-            facingMode: { ideal: 'environment' },
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            advanced: [{ focusMode: 'continuous' }, { focusMode: 'auto' }],
-          },
-          {
-            fps: 20,
+            fps: 15,
             aspectRatio: 1.0,
             disableFlip: false,
             qrbox: (w, h) => {
