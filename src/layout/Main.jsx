@@ -113,13 +113,13 @@ export function Main({ v }) {
         transition: all var(--dur-fast);
       }
       .mobile-action-btn.receive {
-        border: 1.5px solid rgba(16, 185, 129, 0.35);
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
-        color: #10B981 !important;
+        border: 1.5px solid rgba(52, 211, 153, 0.35);
+        background: linear-gradient(135deg, rgba(52, 211, 153, 0.08) 0%, rgba(52, 211, 153, 0.02) 100%);
+        color: #34D399 !important;
       }
       .mobile-action-btn.receive:active {
-        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-        color: #ffffff !important;
+        background: linear-gradient(135deg, #34D399 0%, #059669 100%);
+        color: #002934 !important;
       }
       .mobile-action-btn.withdraw {
         border: none;
