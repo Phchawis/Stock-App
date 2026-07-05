@@ -49,7 +49,7 @@ export function Dashboard({ v }) {
   // KPIs
   const lowCount = filteredReagents.filter(r => getOnHand(r.id) <= r.min).length;
   const getDaysLeft = (expiryDate) => Math.round((new Date(expiryDate + 'T00:00:00') - new Date('2026-06-29T00:00:00')) / 86400000);
-  const expiringSoonCount = activeLots.filter(l => filteredReagentIds.includes(l.rid) && getDaysLeft(l.expiry) <= 90).length;
+  const expiringSoonCount = activeLots.filter(l => filteredReagentIds.includes(l.rid) && getDaysLeft(l.expiry) <= 60).length;
   
   const kpis = [
     { value: filteredReagents.length, label: 'ชนิดน้ำยาทั้งหมด', color: 'var(--brand-700)', bg: 'var(--brand-50)', icon: ic.boxes },
@@ -128,13 +128,21 @@ export function Dashboard({ v }) {
   const sortedCats = [...catStats].sort((a, b) => b.issue - a.issue);
   const topCatLabel = sortedCats.length > 0 && sortedCats[0].issue > 0 ? getCategoryLabel(sortedCats[0].cat) : '—';
 
+  const expiredLots = activeLots.filter(l => filteredReagentIds.includes(l.rid) && getDaysLeft(l.expiry) <= 0);
+  const expiredQty = expiredLots.reduce((sum, l) => sum + l.qty, 0);
+  const totalStockQty = activeLots.filter(l => filteredReagentIds.includes(l.rid)).reduce((sum, l) => sum + l.qty, 0);
+  const wasteRate = totalStockQty > 0 ? ((expiredQty / totalStockQty) * 100).toFixed(1) : '0.0';
+
   const insights = {
     topCatLabel,
-    totalStock: activeLots.filter(l => filteredReagentIds.includes(l.rid)).reduce((sum, l) => sum + l.qty, 0),
+    totalStock: totalStockQty,
     lowStockCount: lowCount,
     totalReagents: filteredReagents.length,
     totalRecInRange,
-    totalIssueInRange
+    totalIssueInRange,
+    expiredQty,
+    expiredLotsCount: expiredLots.length,
+    wasteRate
   };
 
   const printStyle = `
@@ -503,6 +511,10 @@ export function Dashboard({ v }) {
                 <span style={{ color: 'var(--brand-700)', fontWeight: 'bold', marginTop: '2px' }}>•</span>
                 <span>ปัจจุบันตรวจพบรายการน้ำยาต่ำกว่าจุดสั่งซื้อซ้ำสะสม <strong>{insights.lowStockCount} รายการ</strong> ควรออกเอกสารสั่งจัดหาตามเกณฑ์จัดจัดซื้อด่วน</span>
               </div>
+              <div style={css(`display:flex; align-items:flex-start; gap:8px; padding-top:6px; border-top:1px dashed var(--border-subtle);`)}>
+                <span style={{ color: 'var(--red-700)', fontWeight: 'bold', marginTop: '2px' }}>⚠️</span>
+                <span>พบน้ำยาเคมีหมดอายุคาคลังสะสม <strong>{insights.expiredQty} กล่อง/ชิ้น</strong> (จาก {insights.expiredLotsCount} Lot) คิดเป็น <strong>อัตราความสูญเสียคลัง (Waste Rate) {insights.wasteRate}%</strong> ควรปรับปริมาณสั่งซื้อขั้นต่ำเพื่อลดของเสีย</span>
+              </div>
             </div>
           </div>
 
@@ -714,6 +726,7 @@ export function Dashboard({ v }) {
           <p style={{ margin: '2px 0' }}>• หมวดหมู่ที่มีอัตราจ่ายใช้งานสะสมสูงสุดในช่วงเวลาวิเคราะห์ คือ <strong>กลุ่ม{insights.topCatLabel}</strong></p>
           <p style={{ margin: '2px 0' }}>• ยอดรับเข้ารวมสะสมในช่วงเวลาวิเคราะห์ <strong>{insights.totalRecInRange.toLocaleString()} ชิ้น</strong> ยอดเบิกจ่ายออกสะสม <strong>{insights.totalIssueInRange.toLocaleString()} ชิ้น</strong></p>
           <p style={{ margin: '2px 0' }}>• ตรวจพบรายการน้ำยาต่ำกว่าระดับต่ำสุดแนะนำ (Min) <strong>{insights.lowStockCount} รายการ</strong></p>
+          <p style={{ margin: '2px 0' }}>• ตรวจพบน้ำยาหมดอายุสะสม <strong>{insights.expiredQty} ชิ้น/กล่อง</strong> (คิดเป็นอัตราส่วนความเสียหายคลัง <strong>{insights.wasteRate}%</strong>)</p>
         </div>
 
         {/* Sign-off signatures */}
