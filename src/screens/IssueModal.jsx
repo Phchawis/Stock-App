@@ -91,6 +91,25 @@ export function IssueModal({ v }) {
           () => {}
         ).then(() => {
           if (active) setCameraReady(true);
+          // Best-effort quality upgrade on the LIVE track. Unlike start()-time
+          // constraints (which killed the camera on this user's iOS twice),
+          // applyConstraints on a running track can never stop the stream — if
+          // the phone doesn't support a request it just rejects the promise and
+          // the default feed keeps playing. A 720p feed gives the decoder ~2x
+          // the pixel detail of the iOS default, which is the main lever for
+          // small sticker QRs registering quickly; continuous autofocus is
+          // requested for phones that expose it (iOS ignores it silently).
+          try {
+            const videoEl = document.querySelector('#qr-reader video');
+            const track = videoEl && videoEl.srcObject && videoEl.srcObject.getVideoTracks()[0];
+            if (track) {
+              track.applyConstraints({
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                advanced: [{ focusMode: 'continuous' }],
+              }).catch(() => { /* unsupported — keep default stream */ });
+            }
+          } catch (e) { /* keep default stream */ }
         }).catch((err) => {
           if (active) {
             console.error('Camera start error:', err);
