@@ -1567,30 +1567,56 @@ code, kbd, samp { font-family: var(--font-mono); }
 
 /* Mobile and Tablet Responsiveness */
 @media (max-width: 768px) {
-  /* Collapse sidebar on mobile, slide in when .open is present */
+  /* Keep sidebar always visible as a collapsed 72px icons-only sidebar on mobile */
   aside.main-sidebar {
-    position: fixed !important;
-    left: 0 !important;
+    position: sticky !important;
     top: 0 !important;
+    left: 0 !important;
     height: 100vh !important;
     z-index: 90 !important;
-    width: 264px !important;
-    transform: translateX(-100%);
-    transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1) !important;
-    box-shadow: var(--shadow-lg) !important;
+    width: 72px !important;
+    transform: none !important;
+    box-shadow: none !important;
+    flex-shrink: 0 !important;
   }
-  aside.main-sidebar.open {
-    transform: translateX(0) !important;
+  aside.main-sidebar .sidebar-logo-container > div:last-child,
+  aside.main-sidebar .sidebar-section-title,
+  aside.main-sidebar .sidebar-btn-item > span:last-child,
+  aside.main-sidebar .sidebar-btn-item > span:nth-child(2),
+  aside.main-sidebar .sidebar-op-receive > span:last-child,
+  aside.main-sidebar .sidebar-op-withdraw > span:last-child,
+  aside.main-sidebar > div:last-child > div {
+    display: none !important;
+  }
+  aside.main-sidebar .sidebar-logo-container {
+    padding: 16px 0 !important;
+    justify-content: center !important;
+  }
+  aside.main-sidebar .sidebar-btn-item {
+    padding: 12px 0 !important;
+    justify-content: center !important;
+    border-radius: var(--radius-md) !important;
+  }
+  aside.main-sidebar .sidebar-op-receive,
+  aside.main-sidebar .sidebar-op-withdraw {
+    padding: 12px 0 !important;
+    justify-content: center !important;
+    border-radius: var(--radius-md) !important;
+  }
+  aside.main-sidebar > div:last-child {
+    padding: 14px 0 !important;
+    justify-content: center !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .hamburger-btn {
+    display: none !important;
   }
 
   /* Backdrop wrapper when sidebar is open */
   .sidebar-backdrop {
-    display: block !important;
-    position: fixed;
-    inset: 0;
-    background: rgba(14, 24, 34, 0.6);
-    backdrop-filter: blur(2px);
-    z-index: 85;
+    display: none !important;
   }
 
   /* Padding adjustments on header and page content */
