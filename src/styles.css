@@ -1699,6 +1699,21 @@ html { -webkit-tap-highlight-color: transparent; }
    screen edge on phones. */
 html, body { overflow-x: hidden; }
 
+/* Tabs: keep each tab on a single line; scroll horizontally instead of wrapping
+   labels mid-word or overlapping on narrow phones. Scrollbar hidden for looks. */
+.qms-tablist { overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.qms-tablist::-webkit-scrollbar { display: none; }
+@media (max-width: 640px) {
+  .qms-tab { padding: 9px 7px !important; font-size: var(--text-xs) !important; gap: 5px !important; }
+}
+
+/* Dashboard filters: stack each dropdown full-width and uniform on phones,
+   instead of uneven wrapped widths. */
+@media (max-width: 640px) {
+  .dash-filter-row { flex-direction: column; align-items: stretch; }
+  .dash-filter-item { min-width: 0 !important; max-width: none !important; width: 100%; flex: none !important; }
+}
+
 /* Buttons: one consistent motion vocabulary (fast, ease-out) */
 button {
   transition:
