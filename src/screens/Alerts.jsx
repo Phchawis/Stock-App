@@ -11,7 +11,7 @@ export function Alerts({ v }) {
   const [selectedCategory, setSelectedCategory] = React.useState('all');
   const [selectedSupplier, setSelectedSupplier] = React.useState('all');
 
-  const cats = ['HMS', 'ADV'];
+  const cats = Array.from(new Set(reorderReportRows.map(r => r.cat).filter(Boolean)));
   const getCategoryLabel = (c) => ({
     CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
     HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
