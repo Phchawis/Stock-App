@@ -19,7 +19,6 @@ class App extends React.Component {
     super(props);
     const t = new Date(); t.setHours(0, 0, 0, 0);
     this.today = t;
-    this.token = sessionStorage.getItem('authToken') || null;
     this.state = {
       view: 'dashboard', role: null, invTab: 'all', search: '', detailId: null, modal: null, toast: null, acked: {},
       reagents: [], lots: [], txns: [],
@@ -50,6 +49,7 @@ class App extends React.Component {
     try {
       const res = await fetch('/api/login', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password: f.password })
       });
@@ -58,9 +58,10 @@ class App extends React.Component {
         this.setState(s => ({ loginForm: { ...s.loginForm, error: data.error || 'เข้าสู่ระบบล้มเหลว' } }));
         return;
       }
-      // Persist session, set the authenticated user, then load data.
-      this.token = data.token;
-      sessionStorage.setItem('authToken', data.token);
+      // The session itself lives in an httpOnly cookie the server just set —
+      // nothing to store here. authUser is just a display cache so the UI
+      // can show "who's logged in" immediately on next page load, before
+      // fetchData()'s requests (which prove the cookie is still valid) resolve.
       sessionStorage.setItem('authUser', JSON.stringify(data.user));
       this.login(data.user.role, data.user.name, data.user.initials);
       this.fetchData();
@@ -240,19 +241,29 @@ class App extends React.Component {
   login(id, name, initials) { const r = this.ROLES().find(x => x.id === id); if (!r) return; this.user = { name: name || r.name, role: r.th, initials: initials || r.initials, roleId: r.id }; this.setState({ role: id, view: 'dashboard', detailId: null, modal: null }); }
   async logout() {
     try { await this.api('/api/logout', { method: 'POST' }); } catch (e) { /* best effort */ }
-    this.token = null;
-    sessionStorage.removeItem('authToken');
     sessionStorage.removeItem('authUser');
     this.user = { name: 'ทนพ. สมชาย ใจดี', role: 'นักเทคนิคการแพทย์', initials: 'สช' };
     this.setState({ role: null, detailId: null, modal: null, reagents: [], lots: [], txns: [], users: [], loginForm: { username: '', password: '', error: '' } });
   }
   can(p) { const m = this.state.perms[this.state.role]; return m ? !!m[p] : false; }
 
-  // Authenticated fetch — attaches the session token and auto-signs-out on 401.
+  // Reads the JS-readable CSRF cookie the server set alongside the httpOnly
+  // session cookie — see functions/api/_lib.js for why auth needs both.
+  csrfToken() {
+    for (const part of document.cookie.split(';')) {
+      const i = part.indexOf('=');
+      if (i === -1) continue;
+      if (part.slice(0, i).trim() === 'tuh_csrf') return decodeURIComponent(part.slice(i + 1).trim());
+    }
+    return '';
+  }
+  // Authenticated fetch — the session cookie rides along automatically;
+  // mutating requests also need the CSRF header, and any 401 auto-signs-out.
   async api(path, opts = {}) {
     const headers = { ...(opts.headers || {}) };
-    if (this.token) headers['Authorization'] = 'Bearer ' + this.token;
-    const res = await fetch(path, { ...opts, headers });
+    const method = (opts.method || 'GET').toUpperCase();
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) headers['X-CSRF-Token'] = this.csrfToken();
+    const res = await fetch(path, { ...opts, method, headers, credentials: 'same-origin' });
     if (res.status === 401) {
       this.handleAuthExpired();
       throw new Error('หมดเวลาการเข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่');
@@ -260,8 +271,6 @@ class App extends React.Component {
     return res;
   }
   handleAuthExpired() {
-    this.token = null;
-    sessionStorage.removeItem('authToken');
     sessionStorage.removeItem('authUser');
     this.user = { name: 'ทนพ. สมชาย ใจดี', role: 'นักเทคนิคการแพทย์', initials: 'สช' };
     this.setState({ role: null, detailId: null, modal: null, reagents: [], lots: [], txns: [], users: [], loginForm: { username: '', password: '', error: '' } });
@@ -291,18 +300,19 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    // Restore a prior session (token + cached user) if present.
-    if (this.token) {
-      try {
-        const cached = JSON.parse(sessionStorage.getItem('authUser') || 'null');
-        if (cached) {
-          const r = this.ROLES().find(x => x.id === cached.role);
-          this.user = { name: cached.name, role: r ? r.th : cached.role, initials: cached.initials, roleId: cached.role };
-          this.setState({ role: cached.role });
-        }
-      } catch (e) { /* ignore corrupt cache */ }
-      this.fetchData();
-    }
+    // The session itself lives in an httpOnly cookie we can't read from JS —
+    // authUser is just a cached display hint. If it's present, optimistically
+    // show that user and call fetchData(); if the cookie has actually expired,
+    // those requests 401 and handleAuthExpired() drops back to the login screen.
+    try {
+      const cached = JSON.parse(sessionStorage.getItem('authUser') || 'null');
+      if (cached) {
+        const r = this.ROLES().find(x => x.id === cached.role);
+        this.user = { name: cached.name, role: r ? r.th : cached.role, initials: cached.initials, roleId: cached.role };
+        this.setState({ role: cached.role });
+        this.fetchData();
+      }
+    } catch (e) { /* ignore corrupt cache */ }
     if (!(window.lucide && window.lucide.icons)) {
       this._t = setInterval(() => { if (window.lucide && window.lucide.icons) { clearInterval(this._t); this.forceUpdate(); } }, 120);
     }
