@@ -515,6 +515,17 @@ export function Dashboard({ v }) {
                 <span style={{ color: 'var(--red-700)', fontWeight: 'bold', marginTop: '2px' }}>⚠️</span>
                 <span>พบน้ำยาเคมีหมดอายุคาคลังสะสม <strong>{insights.expiredQty} กล่อง/ชิ้น</strong> (จาก {insights.expiredLotsCount} Lot) คิดเป็น <strong>อัตราความสูญเสียคลัง (Waste Rate) {insights.wasteRate}%</strong> ควรปรับปริมาณสั่งซื้อขั้นต่ำเพื่อลดของเสีย</span>
               </div>
+              
+              {/* KPI Glossary */}
+              <div style={css(`background:rgba(43,166,198,0.05); border:1px dashed var(--border-subtle); border-radius:var(--radius-md); padding:10px 12px; font-size:11px; color:var(--text-secondary); margin-top:6px; display:flex; flex-direction:column; gap:4px;`)}>
+                <div style={css(`font-weight:bold; color:var(--brand-700); display:flex; align-items:center; gap:4px;`)}>
+                  💡 คำอธิบายดัชนีชี้วัดทางห้องปฏิบัติการ (KPI Glossary)
+                </div>
+                <div style={css(`line-height:1.45; color:var(--text-tertiary);`)}>
+                  • <strong>Turnover % (อัตราหมุนเวียนกลุ่มงาน):</strong> ดัชนีวัดความเร็วในการใช้สินค้าเทียบสต็อกสะสม คำนวณจาก: [ยอดเบิกจ่าย / (ยอดคงคลัง + ยอดเบิกจ่าย) × 100]<br />
+                  • <strong>Waste Rate (อัตราส่วนความสูญเสีย):</strong> ดัชนีแสดงความสูญเสียของของเสื่อมสภาพคาคลัง คำนวณจาก: [ยอดน้ำยาหมดอายุสะสม / ยอดคงคลังสะสมทั้งหมด × 100]
+                </div>
+              </div>
             </div>
           </div>
 
