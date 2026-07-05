@@ -718,7 +718,10 @@ class App extends React.Component {
   }
   unlinkLot() {
     this.setState(s => ({ iform: { ...s.iform, lotId: '' } }));
-    this.showToast('ยกเลิกการเชื่อมโยงล็อตนี้แล้ว ระบบจะใช้ระบบหมดอายุก่อน–เบิกก่อนตามปกติ');
+    // No toast here on purpose (same reasoning as scanQRCode above): the modal's
+    // green "linked" box disappears and the lot list reverts to the FEFO-plan
+    // view immediately, so the state change is already visible inline. A toast
+    // on top overflowed as a dark bar on some phones.
   }
   selectReagentForIssue(rid) {
     const r = this.state.reagents.find(x => x.id === +rid);
