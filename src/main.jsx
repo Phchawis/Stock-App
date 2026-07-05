@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { icons } from 'lucide';
+import { icons } from './icons.js';
 import App from './App.jsx';
 import './styles.css';
 
