@@ -1587,8 +1587,8 @@ code, kbd, samp { font-family: var(--font-mono); }
   aside.main-sidebar .sidebar-section-title,
   aside.main-sidebar .sidebar-btn-item > span:last-child,
   aside.main-sidebar .sidebar-btn-item > span:nth-child(2),
-  aside.main-sidebar .sidebar-op-receive > span:last-child,
-  aside.main-sidebar .sidebar-op-withdraw > span:last-child,
+  aside.main-sidebar .sidebar-op-receive,
+  aside.main-sidebar .sidebar-op-withdraw,
   aside.main-sidebar > div:last-child > div {
     display: none !important;
   }
