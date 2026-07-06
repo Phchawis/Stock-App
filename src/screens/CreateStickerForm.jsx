@@ -98,27 +98,27 @@ export function CreateStickerForm({ v }) {
       // Row 1: ชื่อน้ำยา
       drawLabel("ชื่อน้ำยา", 40, 150);
       drawDottedLine(360, 1160, 160);
-      fillTextAutoFit(aliquotReagent || '', 370, 145, 780, valSize);
+      fillTextAutoFit(aliquotReagent || '', 420, 145, 730, valSize);
 
       // Row 2: Lot.
       drawLabel("Lot.", 40, 285);
       drawDottedLine(210, 1160, 295);
-      fillTextAutoFit(aliquotLot || '', 220, 280, 930, valSize);
+      fillTextAutoFit(aliquotLot || '', 320, 280, 830, valSize);
 
       // Row 3: วันที่เตรียม
       drawLabel("วันที่เตรียม", 40, 420);
       drawDottedLine(450, 1160, 430);
-      fillTextAutoFit(formatDate(aliquotPrepDate), 460, 415, 690, valSize);
+      fillTextAutoFit(formatDate(aliquotPrepDate), 510, 415, 640, valSize);
 
       // Row 4: วัน: Exp.
       drawLabel("วัน: Exp.", 40, 555);
       drawDottedLine(390, 1160, 565);
-      fillTextAutoFit(formatDate(aliquotExpDate), 400, 550, 750, valSize);
+      fillTextAutoFit(formatDate(aliquotExpDate), 460, 550, 690, valSize);
 
       // Row 5: ชื่อผู้เตรียม
       drawLabel("ชื่อผู้เตรียม", 40, 690);
       drawDottedLine(450, 1160, 700);
-      fillTextAutoFit(aliquotPrepBy || '', 460, 685, 690, valSize);
+      fillTextAutoFit(aliquotPrepBy || '', 510, 685, 640, valSize);
 
     } else {
       // Dimension 4.5x2 cm -> High resolution W:1800px, H:800px (scale = 40)
