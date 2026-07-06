@@ -44,6 +44,16 @@ export function DetailDrawer({ v }) {
       transform: translateY(-1px);
       box-shadow: 0 3px 10px rgba(245, 158, 11, 0.2);
     }
+    .detail-kpi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 768px) {
+      .detail-kpi-grid {
+        grid-template-columns: 1fr !important;
+      }
+    }
   `;
   return detailOpen ? (<>
     <style>{localStyle}</style>
@@ -67,7 +77,7 @@ export function DetailDrawer({ v }) {
             <div style={css(`position:absolute; inset:0; background:linear-gradient(to top, rgba(14,24,34,0.92) 0%, rgba(14,24,34,0.3) 60%, rgba(14,24,34,0) 100%);`)} />
           </div>
 
-          <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:10px;`)}>
+          <div className="detail-kpi-grid">
             <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:11px 13px;`)}>
               <div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>คงเหลือรวม</div>
               <div style={css(`font:var(--fw-bold) var(--text-sm)/1.1 var(--font-mono); color:${detail.onHandColor}; margin-top:2px;`)}>
