@@ -230,21 +230,43 @@ export function CreateStickerForm({ v }) {
             <span>🏷️</span> สร้างสติกเกอร์ (Sticker Generator)
           </h2>
           <p style={css(`font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-tertiary); margin:4px 0 0 0;`)}>
-            สร้างสติกเกอร์สำหรับขวดทดสอบน้ำยาแบ่งส่วน (Aliquot) และขวดเปิดใช้งาน (Opened) พร้อมดาวน์โหลดไฟล์ PNG หรือสั่งพิมพ์ออกเครื่องพิมพ์สติกเกอร์ความร้อน
+            สร้างสติกเกอร์สำหรับขวดทดสอบน้ำยาแบ่งส่วน (Aliquot) และขวดเปิดใช้งาน (Opened) พร้อมดาวน์โหลดไฟล์ PNG
           </p>
         </div>
-
-        {/* Tab Buttons */}
         <div style={css(`display:flex; background:var(--surface-sunken); padding:4px; border-radius:var(--radius-md); border:1px solid var(--border-subtle);`)}>
           <button 
             onClick={() => setActiveTab('aliquot')}
             style={css(`padding:8px 16px; border-radius:var(--radius-sm); border:none; background:${activeTab === 'aliquot' ? 'var(--brand-700)' : 'transparent'}; color:${activeTab === 'aliquot' ? '#fff' : 'var(--text-secondary)'}; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
+            onMouseEnter={(e) => {
+              if (activeTab !== 'aliquot') {
+                e.currentTarget.style.background = 'var(--brand-50)';
+                e.currentTarget.style.color = 'var(--brand-700)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== 'aliquot') {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = 'var(--text-secondary)';
+              }
+            }}
           >
             Aliquot Sticker Form (3x2 cm)
           </button>
           <button 
             onClick={() => setActiveTab('opened')}
             style={css(`padding:8px 16px; border-radius:var(--radius-sm); border:none; background:${activeTab === 'opened' ? 'var(--brand-700)' : 'transparent'}; color:${activeTab === 'opened' ? '#fff' : 'var(--text-secondary)'}; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
+            onMouseEnter={(e) => {
+              if (activeTab !== 'opened') {
+                e.currentTarget.style.background = 'var(--brand-50)';
+                e.currentTarget.style.color = 'var(--brand-700)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== 'opened') {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = 'var(--text-secondary)';
+              }
+            }}
           >
             Opened Sticker Form (4.5x2 cm)
           </button>
@@ -260,7 +282,7 @@ export function CreateStickerForm({ v }) {
           </h3>
 
           {activeTab === 'aliquot' ? (
-            <>
+            <div className="tab-fade-in">
               {/* Aliquot Reagent Select */}
               <div style={css(`display:flex; flex-direction:column; gap:6px; position:relative;`)}>
                 <label style={css(`font-size:var(--text-2xs); font-weight:600; color:var(--text-secondary);`)}>ชื่อน้ำยาเคมี</label>
@@ -274,6 +296,7 @@ export function CreateStickerForm({ v }) {
                     setAliquotReagent(e.target.value);
                     setAliquotOpen(true);
                   }}
+                  className="sticker-form-input"
                   style={css(`box-sizing:border-box; width:100%; padding:10px 14px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none;`)}
                 />
                 {aliquotOpen && (
@@ -318,6 +341,7 @@ export function CreateStickerForm({ v }) {
                   placeholder="เช่น LOT2026-A"
                   value={aliquotLot}
                   onChange={(e) => setAliquotLot(e.target.value)}
+                  className="sticker-form-input"
                   style={css(`box-sizing:border-box; width:100%; padding:10px 14px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none;`)}
                 />
               </div>
@@ -329,6 +353,7 @@ export function CreateStickerForm({ v }) {
                   type="date" 
                   value={aliquotPrepDate}
                   onChange={(e) => setAliquotPrepDate(e.target.value)}
+                  className="sticker-form-input"
                   style={css(`box-sizing:border-box; width:100%; padding:10px 14px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none; cursor:pointer;`)}
                 />
               </div>
@@ -340,6 +365,7 @@ export function CreateStickerForm({ v }) {
                   type="date" 
                   value={aliquotExpDate}
                   onChange={(e) => setAliquotExpDate(e.target.value)}
+                  className="sticker-form-input"
                   style={css(`box-sizing:border-box; width:100%; padding:10px 14px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none; cursor:pointer;`)}
                 />
               </div>
@@ -352,12 +378,13 @@ export function CreateStickerForm({ v }) {
                   placeholder="ชื่อผู้เตรียม..."
                   value={aliquotPrepBy}
                   onChange={(e) => setAliquotPrepBy(e.target.value)}
+                  className="sticker-form-input"
                   style={css(`box-sizing:border-box; width:100%; padding:10px 14px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none;`)}
                 />
               </div>
-            </>
+            </div>
           ) : (
-            <>
+            <div className="tab-fade-in">
               {/* Opened Reagent Select */}
               <div style={css(`display:flex; flex-direction:column; gap:6px; position:relative;`)}>
                 <label style={css(`font-size:var(--text-2xs); font-weight:600; color:var(--text-secondary);`)}>ชื่อน้ำยาเคมี</label>
@@ -371,6 +398,7 @@ export function CreateStickerForm({ v }) {
                     setOpenedReagent(e.target.value);
                     setOpenedOpen(true);
                   }}
+                  className="sticker-form-input"
                   style={css(`box-sizing:border-box; width:100%; padding:10px 14px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none;`)}
                 />
                 {openedOpen && (
@@ -407,8 +435,6 @@ export function CreateStickerForm({ v }) {
                 )}
               </div>
 
-
-
               {/* Opened Date */}
               <div style={css(`display:flex; flex-direction:column; gap:6px;`)}>
                 <label style={css(`font-size:var(--text-2xs); font-weight:600; color:var(--text-secondary);`)}>วันที่เปิดขวดใช้งาน (Opened Date)</label>
@@ -416,6 +442,7 @@ export function CreateStickerForm({ v }) {
                   type="date" 
                   value={openedDate}
                   onChange={(e) => setOpenedDate(e.target.value)}
+                  className="sticker-form-input"
                   style={css(`box-sizing:border-box; width:100%; padding:10px 14px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none; cursor:pointer;`)}
                 />
               </div>
@@ -428,6 +455,7 @@ export function CreateStickerForm({ v }) {
                   placeholder="ชื่อผู้เปิดขวด..."
                   value={openedBy}
                   onChange={(e) => setOpenedBy(e.target.value)}
+                  className="sticker-form-input"
                   style={css(`box-sizing:border-box; width:100%; padding:10px 14px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none;`)}
                 />
               </div>
@@ -438,6 +466,7 @@ export function CreateStickerForm({ v }) {
                 <select 
                   value={openStorageDuration}
                   onChange={(e) => setOpenStorageDuration(e.target.value)}
+                  className="sticker-form-input"
                   style={css(`box-sizing:border-box; width:100%; padding:10px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none; height:42px; cursor:pointer;`)}
                 >
                   <option value="7 days">7 days</option>
@@ -446,7 +475,7 @@ export function CreateStickerForm({ v }) {
                   <option value="Until exp.">Until exp.</option>
                 </select>
               </div>
-            </>
+            </div>
           )}
         </div>
 
