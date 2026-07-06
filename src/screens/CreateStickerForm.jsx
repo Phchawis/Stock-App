@@ -11,6 +11,8 @@ export function CreateStickerForm({ v }) {
 
   // Form 1: Aliquot Form State
   const [aliquotReagent, setAliquotReagent] = React.useState('');
+  const [aliquotSearch, setAliquotSearch] = React.useState('');
+  const [aliquotOpen, setAliquotOpen] = React.useState(false);
   const [aliquotLot, setAliquotLot] = React.useState('');
   const [aliquotPrepDate, setAliquotPrepDate] = React.useState(new Date().toISOString().slice(0, 10));
   const [aliquotExpDate, setAliquotExpDate] = React.useState('');
@@ -18,10 +20,32 @@ export function CreateStickerForm({ v }) {
 
   // Form 2: Opened Form State
   const [openedReagent, setOpenedReagent] = React.useState('');
+  const [openedSearch, setOpenedSearch] = React.useState('');
+  const [openedOpen, setOpenedOpen] = React.useState(false);
   const [openedType, setOpenedType] = React.useState('Control'); // 'Control' or 'Calibrator'
   const [openedDate, setOpenedDate] = React.useState(new Date().toISOString().slice(0, 10));
   const [openedBy, setOpenedBy] = React.useState(user ? user.name.split(' ')[0] : '');
   const [openStorageDuration, setOpenStorageDuration] = React.useState('Until exp.');
+
+  const filteredAliquotOptions = React.useMemo(() => {
+    if (!aliquotSearch) return reagentsList;
+    const q = aliquotSearch.toLowerCase();
+    return reagentsList.filter(r => 
+      r.th.toLowerCase().includes(q) || 
+      (r.en && r.en.toLowerCase().includes(q)) ||
+      (r.code && r.code.toLowerCase().includes(q))
+    );
+  }, [aliquotSearch, reagentsList]);
+
+  const filteredOpenedOptions = React.useMemo(() => {
+    if (!openedSearch) return reagentsList;
+    const q = openedSearch.toLowerCase();
+    return reagentsList.filter(r => 
+      r.th.toLowerCase().includes(q) || 
+      (r.en && r.en.toLowerCase().includes(q)) ||
+      (r.code && r.code.toLowerCase().includes(q))
+    );
+  }, [openedSearch, reagentsList]);
 
   // Render preview canvas in real time
   React.useEffect(() => {
@@ -228,25 +252,52 @@ export function CreateStickerForm({ v }) {
           {activeTab === 'aliquot' ? (
             <>
               {/* Aliquot Reagent Select */}
-              <div style={css(`display:flex; flex-direction:column; gap:6px;`)}>
+              <div style={css(`display:flex; flex-direction:column; gap:6px; position:relative;`)}>
                 <label style={css(`font-size:var(--text-2xs); font-weight:600; color:var(--text-secondary);`)}>ชื่อน้ำยาเคมี</label>
-                <select 
-                  value={aliquotReagent}
-                  onChange={(e) => setAliquotReagent(e.target.value)}
-                  style={css(`box-sizing:border-box; width:100%; padding:10px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none; height:42px; cursor:pointer;`)}
-                >
-                  <option value="">-- เลือกน้ำยาจากฐานข้อมูล หรือพิมพ์ด้านล่าง --</option>
-                  {reagentsList.map(r => (
-                    <option key={r.id} value={r.th}>{r.th} ({r.en})</option>
-                  ))}
-                </select>
                 <input 
                   type="text" 
-                  placeholder="หรือพิมพ์ชื่อน้ำยาอื่นๆ..."
-                  value={aliquotReagent}
-                  onChange={(e) => setAliquotReagent(e.target.value)}
+                  placeholder="พิมพ์ค้นหาชื่อน้ำยา หรือพิมพ์ชื่อใหม่เอง..."
+                  value={aliquotSearch}
+                  onFocus={() => setAliquotOpen(true)}
+                  onChange={(e) => {
+                    setAliquotSearch(e.target.value);
+                    setAliquotReagent(e.target.value);
+                    setAliquotOpen(true);
+                  }}
                   style={css(`box-sizing:border-box; width:100%; padding:10px 14px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none;`)}
                 />
+                {aliquotOpen && (
+                  <>
+                    <div 
+                      onClick={() => setAliquotOpen(false)}
+                      style={css(`position:fixed; inset:0; z-index:10;`)}
+                    />
+                    <div style={css(`position:absolute; top:calc(100% + 4px); left:0; right:0; max-height:240px; overflow-y:auto; background:var(--surface-card); border:1px solid var(--border-strong); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:20;`)}>
+                      {filteredAliquotOptions.length > 0 ? (
+                        filteredAliquotOptions.map(r => (
+                          <div 
+                            key={r.id}
+                            onClick={() => {
+                              setAliquotReagent(r.th);
+                              setAliquotSearch(r.th);
+                              setAliquotOpen(false);
+                            }}
+                            style={css(`padding:10px 14px; font-size:var(--text-xs); color:var(--text-primary); cursor:pointer; border-bottom:1px solid var(--border-subtle); transition:background var(--dur-fast);`)}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--brand-50)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                          >
+                            <div style={css(`font-weight:600;`)}>{r.th}</div>
+                            <div style={css(`font-size:10px; color:var(--text-tertiary); margin-top:2px;`)}>{r.en} | {r.code}</div>
+                          </div>
+                        ))
+                      ) : (
+                        <div style={css(`padding:12px; font-size:var(--text-xs); color:var(--text-tertiary); text-align:center;`)}>
+                          ไม่พบน้ำยาที่ตรงกัน (พิมพ์เพื่อบันทึกใช้นามสมมตินี้)
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Lot Number */}
@@ -298,25 +349,52 @@ export function CreateStickerForm({ v }) {
           ) : (
             <>
               {/* Opened Reagent Select */}
-              <div style={css(`display:flex; flex-direction:column; gap:6px;`)}>
+              <div style={css(`display:flex; flex-direction:column; gap:6px; position:relative;`)}>
                 <label style={css(`font-size:var(--text-2xs); font-weight:600; color:var(--text-secondary);`)}>ชื่อน้ำยาเคมี</label>
-                <select 
-                  value={openedReagent}
-                  onChange={(e) => setOpenedReagent(e.target.value)}
-                  style={css(`box-sizing:border-box; width:100%; padding:10px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none; height:42px; cursor:pointer;`)}
-                >
-                  <option value="">-- เลือกน้ำยาจากฐานข้อมูล หรือพิมพ์ด้านล่าง --</option>
-                  {reagentsList.map(r => (
-                    <option key={r.id} value={r.th}>{r.th} ({r.en})</option>
-                  ))}
-                </select>
                 <input 
                   type="text" 
-                  placeholder="หรือพิมพ์ชื่อน้ำยาอื่นๆ..."
-                  value={openedReagent}
-                  onChange={(e) => setOpenedReagent(e.target.value)}
+                  placeholder="พิมพ์ค้นหาชื่อน้ำยา หรือพิมพ์ชื่อใหม่เอง..."
+                  value={openedSearch}
+                  onFocus={() => setOpenedOpen(true)}
+                  onChange={(e) => {
+                    setOpenedSearch(e.target.value);
+                    setOpenedReagent(e.target.value);
+                    setOpenedOpen(true);
+                  }}
                   style={css(`box-sizing:border-box; width:100%; padding:10px 14px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none;`)}
                 />
+                {openedOpen && (
+                  <>
+                    <div 
+                      onClick={() => setOpenedOpen(false)}
+                      style={css(`position:fixed; inset:0; z-index:10;`)}
+                    />
+                    <div style={css(`position:absolute; top:calc(100% + 4px); left:0; right:0; max-height:240px; overflow-y:auto; background:var(--surface-card); border:1px solid var(--border-strong); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:20;`)}>
+                      {filteredOpenedOptions.length > 0 ? (
+                        filteredOpenedOptions.map(r => (
+                          <div 
+                            key={r.id}
+                            onClick={() => {
+                              setOpenedReagent(r.th);
+                              setOpenedSearch(r.th);
+                              setOpenedOpen(false);
+                            }}
+                            style={css(`padding:10px 14px; font-size:var(--text-xs); color:var(--text-primary); cursor:pointer; border-bottom:1px solid var(--border-subtle); transition:background var(--dur-fast);`)}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--brand-50)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                          >
+                            <div style={css(`font-weight:600;`)}>{r.th}</div>
+                            <div style={css(`font-size:10px; color:var(--text-tertiary); margin-top:2px;`)}>{r.en} | {r.code}</div>
+                          </div>
+                        ))
+                      ) : (
+                        <div style={css(`padding:12px; font-size:var(--text-xs); color:var(--text-tertiary); text-align:center;`)}>
+                          ไม่พบน้ำยาที่ตรงกัน (พิมพ์เพื่อบันทึกใช้นามสมมตินี้)
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Type Dropdown (Control / Calibrator) */}
