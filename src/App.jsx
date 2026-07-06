@@ -37,7 +37,7 @@ class App extends React.Component {
   blankIf() { return { rid: '', qty: '', scan: 'MANUAL', ref: '', lotId: '', qrInput: '', searchInput: '' }; }
   blankElf() { return { expiry: '', qty: '', loc: '' }; }
   blankEtf() { return { qty: '', ref: '' }; }
-  blankMf() { return { code: '', th: '', en: '', cat: 'CHE', unit: 'vial', subUnit: '', subUnitQty: '', testsPerSubUnit: '', testsPerUnit: '', storage: 'REFRIGERATED_2_8', min: '', reorder: '', supplier: 'i-med', img: '/reagent_placeholder.png' }; }
+  blankMf() { return { code: '', th: '', en: '', cat: 'HMS', unit: 'vial', subUnit: '', subUnitQty: '', testsPerSubUnit: '', testsPerUnit: '', storage: 'REFRIGERATED_2_8', min: '', reorder: '', supplier: 'i-med', img: '/reagent_placeholder.png' }; }
   defaultPerms() { const o = {}; this.ROLES().forEach(r => { o[r.id] = { ...r.perms }; }); return o; }
   USERNAMES() { return { admin: 'admin', supervisor: 'supervisor', technician: 'technician', viewer: 'viewer' }; }
   bindLF(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ loginForm: { ...s.loginForm, [k]: v, error: '' } })); }; }
@@ -1017,7 +1017,7 @@ class App extends React.Component {
     }).sort((a, b) => b.used - a.used);
 
     // dashboard kpi calculations
-    const cats = ['CHE', 'HEM', 'IMM', 'MIP', 'MDC', 'HMS', 'ADV'];
+    const cats = ['HMS', 'ADV'];
     const catStats = cats.map(c => {
       const cReagents = S.reagents.filter(r => r.cat === c);
       const rIds = cReagents.map(r => r.id);
