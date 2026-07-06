@@ -117,41 +117,39 @@ export function CreateStickerForm({ v }) {
         ctx.strokeText(txt, x, y);
       };
 
-      // Helper to draw dotted line
-      const drawDottedLine = (xStart, xEnd, y) => {
+      // Helper to draw thin solid line
+      const drawSolidLine = (xStart, xEnd, y) => {
         ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 6;
-        ctx.setLineDash([4, 12]);
+        ctx.lineWidth = 4;
         ctx.beginPath();
         ctx.moveTo(xStart, y);
         ctx.lineTo(xEnd, y);
         ctx.stroke();
-        ctx.setLineDash([]); // clear dash pattern
       };
 
       // Row 1: ชื่อน้ำยา
       drawLabel("ชื่อน้ำยา", 40, 150);
-      drawDottedLine(360, 1160, 160);
+      drawSolidLine(360, 1160, 160);
       fillTextAutoFit(aliquotReagent || '', 420, 145, 730, valSize);
 
       // Row 2: Lot.
       drawLabel("Lot.", 40, 285);
-      drawDottedLine(210, 1160, 295);
+      drawSolidLine(210, 1160, 295);
       fillTextAutoFit(aliquotLot || '', 320, 280, 830, valSize);
 
       // Row 3: วันที่เตรียม
       drawLabel("วันที่เตรียม", 40, 420);
-      drawDottedLine(450, 1160, 430);
+      drawSolidLine(450, 1160, 430);
       fillTextAutoFit(formatDate(aliquotPrepDate), 510, 415, 640, valSize);
 
       // Row 4: วัน: Exp.
       drawLabel("วัน: Exp.", 40, 555);
-      drawDottedLine(390, 1160, 565);
+      drawSolidLine(390, 1160, 565);
       fillTextAutoFit(formatDate(aliquotExpDate), 460, 550, 690, valSize);
 
       // Row 5: ชื่อผู้เตรียม
       drawLabel("ชื่อผู้เตรียม", 40, 690);
-      drawDottedLine(450, 1160, 700);
+      drawSolidLine(450, 1160, 700);
       fillTextAutoFit(aliquotPrepBy || '', 510, 685, 640, valSize);
 
     } else {
