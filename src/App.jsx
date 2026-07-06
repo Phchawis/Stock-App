@@ -329,8 +329,54 @@ class App extends React.Component {
     if (!(window.lucide && window.lucide.icons)) {
       this._t = setInterval(() => { if (window.lucide && window.lucide.icons) { clearInterval(this._t); this.forceUpdate(); } }, 120);
     }
+
+    // Global keyboard shortcut listener
+    this._handleKeyDown = (e) => {
+      // Check if user is logged in
+      const hasAuth = !!sessionStorage.getItem('authUser');
+      if (!hasAuth) return;
+
+      const modifier = e.altKey;
+
+      if (modifier) {
+        // Alt + R -> Receive Reagent modal
+        if (e.key.toLowerCase() === 'r' && this.can('receive')) {
+          e.preventDefault();
+          this.openReceive();
+        }
+        // Alt + I -> Issue Reagent modal
+        if (e.key.toLowerCase() === 'i' && this.can('issue')) {
+          e.preventDefault();
+          this.openIssue();
+        }
+        // Alt + S -> Switch to Stock Count screen
+        if (e.key.toLowerCase() === 's' && this.can('receive')) {
+          e.preventDefault();
+          this.setState({ view: 'stockCount' });
+        }
+      }
+
+      // Esc -> Close modals / drawers
+      if (e.key === 'Escape') {
+        if (this.state.modal) {
+          e.preventDefault();
+          this.setState({ modal: null });
+        } else if (this.state.detailId) {
+          e.preventDefault();
+          this.setState({ detailId: null });
+        }
+      }
+    };
+    window.addEventListener('keydown', this._handleKeyDown);
   }
-  componentWillUnmount() { clearInterval(this._t); if (this._toastT) clearTimeout(this._toastT); }
+
+  componentWillUnmount() {
+    if (this._t) clearInterval(this._t);
+    if (this._toastT) clearTimeout(this._toastT);
+    if (this._handleKeyDown) {
+      window.removeEventListener('keydown', this._handleKeyDown);
+    }
+  }
 
   icon(name, size, color, sw) {
     const lib = (window.lucide && window.lucide.icons) || {};
@@ -848,7 +894,15 @@ class App extends React.Component {
 
   // ── derivations ──
   STORAGE_LABEL(s) { return ({ REFRIGERATED_2_8: '2–8°C', FROZEN_40: '−40°C', ROOM_TEMP: 'อุณหภูมิห้อง' })[s] || s; }
-  CAT_LABEL(c) { return ({ HMS: 'บริการศูนย์การแพทย์', ADV: 'ตรวจวินิจฉัยขั้นสูง' })[c] || c; }
+  CAT_LABEL(c) {
+    return ({
+      CHE: 'เคมีคลินิก (Clinical Chemistry)',
+      HEM: 'โลหิตวิทยา (Hematology)',
+      IMM: 'ภูมิคุ้มกันวิทยา (Immunology)',
+      MIP: 'จุลชีววิทยาคลินิก (Microbiology)',
+      MDC: 'วัสดุการแพทย์ (Medical Supplies)'
+    })[c] || c;
+  }
   days(d) { return Math.round((new Date(d + 'T00:00:00') - this.today) / 86400000); }
   activeLots(rid) { return this.state.lots.filter(l => l.rid === rid && l.qty > 0 && l.status === 'ACTIVE'); }
   onHand(rid) { return this.activeLots(rid).reduce((s, l) => s + l.qty, 0); }
@@ -866,6 +920,7 @@ class App extends React.Component {
     ISSUE: { label: 'เบิกจ่าย', fg: 'var(--accent-700)', bg: 'var(--accent-50)' },
     ADJUST: { label: 'ปรับปรุง', fg: 'var(--blue-700)', bg: 'var(--blue-100)' },
     DISPOSE: { label: 'ทำลาย', fg: 'var(--red-700)', bg: 'var(--red-100)' },
+    DELETE: { label: 'ลบน้ำยา', fg: 'var(--red-700)', bg: 'var(--red-100)' },
   })[type] || { label: type, fg: 'var(--slate-700)', bg: 'var(--slate-100)' }; }
 
   buildAlerts(crit) {
@@ -1231,12 +1286,21 @@ class App extends React.Component {
 
     // audit rows
     const txnRows = S.txns.slice().sort((a, b) => b.at.localeCompare(a.at)).map(t => {
+      const isDelete = t.type === 'DELETE';
       const r = S.reagents.find(x => x.id === t.rid); const l = S.lots.find(x => x.id === t.lotId); const m = this.txnMeta(t.type);
       const scanLabel = ({ MANUAL: 'พิมพ์ชื่อ', QR: 'QR code', BARCODE: 'บาร์โค้ด' })[t.scan] || t.scan;
-      return { id: t.id, rid: t.rid, name: r ? r.th : '—', code: r ? r.code : '', lot: l ? l.lot : '—', typeLabel: m.label, fg: m.fg, bg: m.bg,
-        qtyLabel: (t.qty > 0 ? '+' : '') + t.qty + ' ' + (r ? r.unit : ''), qtyColor: t.qty > 0 ? 'var(--green-700)' : 'var(--accent-700)',
-        scanLabel, ref: t.ref, by: t.by, at: t.at, qty: t.qty, type: t.type, unit: r ? r.unit : '',
-        onEdit: () => this.openEditTxn(t.id), onDelete: () => this.deleteTxn(t.id),
+      
+      const name = isDelete ? (t.ref.split(' - ')[1] || '—') : (r ? r.th : '—');
+      const code = isDelete ? (t.ref.split(' - ')[0] || '') : (r ? r.code : '');
+      const lot = isDelete ? '—' : (l ? l.lot : '—');
+      const qtyLabel = isDelete ? '—' : ((t.qty > 0 ? '+' : '') + t.qty + ' ' + (r ? r.unit : ''));
+      const qtyColor = isDelete ? 'var(--text-secondary)' : (t.qty > 0 ? 'var(--green-700)' : 'var(--accent-700)');
+      const ref = isDelete ? 'ลบข้อมูลและประวัติล็อต' : t.ref;
+
+      return { id: t.id, rid: t.rid, name, code, lot, typeLabel: m.label, fg: m.fg, bg: m.bg,
+        qtyLabel, qtyColor,
+        scanLabel: isDelete ? '—' : scanLabel, ref, by: t.by, at: t.at, qty: t.qty, type: t.type, unit: r ? r.unit : '',
+        onEdit: isDelete ? null : () => this.openEditTxn(t.id), onDelete: isDelete ? null : () => this.deleteTxn(t.id),
         onPrintSticker: (l && r) ? () => this.openPrintSticker({ ...l, recvDate: recvDateOf(l.id) }, r) : null };
     });
 
@@ -1252,7 +1316,7 @@ class App extends React.Component {
     }).sort((a, b) => b.used - a.used);
 
     // dashboard kpi calculations
-    const cats = ['HMS', 'ADV'];
+    const cats = ['CHE', 'HEM', 'IMM', 'MIP', 'MDC'];
     const catStats = cats.map(c => {
       const cReagents = S.reagents.filter(r => r.cat === c);
       const rIds = cReagents.map(r => r.id);
@@ -1480,7 +1544,7 @@ class App extends React.Component {
     const v = this.renderVals();
     const { setRoot } = v;
     return (
-<div ref={setRoot} style={css(`--surface-page:#0E1822; --surface-card:#17242E; --surface-sunken:#0B141C; --white:#17242E; --surface-inverse:#E8F0F4; --text-primary:#E8F0F4; --text-secondary:#AAC3CF; --text-tertiary:#7C96A3; --text-link:#5BC0D9; --text-on-brand:#FFFFFF; --text-disabled:#5A6E7A; --border-subtle:#22333E; --border-default:#2F4452; --border-strong:#3D5462; --border-brand:#1A93B3; --brand-900:#5FC8E0; --brand-800:#7FD3E8; --brand-700:#1A93B3; --brand-600:#2BA6C6; --brand-500:#5BC0D9; --brand-400:#8DBBCC; --brand-300:#A9C7EE; --brand-100:rgba(43,166,198,.18); --brand-50:rgba(43,166,198,.12); --accent-700:#A9C7EE; --accent-600:#4E7CB0; --accent-500:#7AA2C4; --accent-400:#93B9E1; --accent-100:rgba(122,162,196,.20); --accent-50:rgba(122,162,196,.12); --green-700:#5FD49A; --green-600:#38B673; --green-100:rgba(56,182,115,.16); --amber-700:#F0C674; --amber-600:#D69A2E; --amber-100:rgba(214,154,46,.16); --red-700:#F18C8C; --red-600:#E2685E; --red-100:rgba(226,104,94,.16); --blue-700:#8DBBCC; --blue-600:#5BC0D9; --blue-100:rgba(91,192,217,.16); --violet-700:#B9A9E8; --violet-600:#9B86D8; --violet-100:rgba(155,134,216,.18); --slate-900:#0B1922; --slate-700:#9DB1BC; --slate-600:#8DBBCC; --slate-500:#7C96A3; --slate-400:#5A6E7A; --slate-300:#3D5462; --slate-200:#2F4452; --slate-100:#1F2E39; --slate-50:#1B2933; --shadow-xs:0 1px 2px rgba(0,0,0,.4); --shadow-sm:0 1px 3px rgba(0,0,0,.5),0 1px 2px rgba(0,0,0,.4); --shadow-md:0 4px 12px -2px rgba(0,0,0,.55); --shadow-lg:0 16px 32px -8px rgba(0,0,0,.6); --glow-brand:0 10px 30px -10px rgba(0,0,0,.6); --glow-brand-soft:0 6px 18px -8px rgba(0,0,0,.5); --glow-accent:0 10px 30px -10px rgba(0,0,0,.55); --text-2xs:0.8125rem; --text-xs:0.875rem; --text-sm:0.9375rem; --text-base:1.0625rem; --text-md:1.1875rem; --text-lg:1.375rem; --text-xl:1.625rem; --text-2xl:2rem; --text-3xl:2.5rem; --text-4xl:3.25rem; display:flex; height:100vh; overflow:hidden; background:var(--surface-page); font-family:var(--font-body); color:var(--text-primary);`)}>
+<div ref={setRoot} className="dark-theme" style={css(`display:flex; height:100vh; overflow:hidden; background:var(--surface-page); font-family:var(--font-body); color:var(--text-primary);`)}>
       {v.sidebarOpen && (
         <div className="sidebar-backdrop" onClick={v.closeSidebar} />
       )}
