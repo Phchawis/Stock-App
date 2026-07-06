@@ -354,7 +354,7 @@ export function Help({ v }) {
                 การสั่งพิมพ์รายงานประจำเดือน A4 ขาวสะอาด (Clean PDF Printing Guide)
               </h2>
               <p style={css(`font:var(--text-sm)/1.6 var(--font-body); color:var(--text-secondary); margin:0;`)}>
-                แอปพลิเคชันรองรับการพิมพ์ใบรายงานยอดใช้จ่ายคลังน้ำยาในลักษณะเอกสารราชการสีขาวสะอาด ปราศจากปุ่มและรหัสน้ำยารกกระดาษ เพื่อใช้แนบเสนอประเมิน QMS โดยระบบได้ล็อกระยะขอบกระดาษทุกด้านไว้ที่ **2 cm (20mm)** เป็นมาตรฐานเรียบร้อยแล้ว
+                แอปพลิเคชันรองรับการพิมพ์ใบรายงานยอดใช้จ่ายคลังน้ำยาในลักษณะเอกสารราชการสีขาวสะอาด ปราศจากปุ่มและรหัสน้ำยารกกระดาษ เพื่อใช้แนบเสนอประเมิน QMS โดยระบบได้ล็อกระยะขอบกระดาษทุกด้านไว้ที่ **2.5 cm (25mm)** เป็นมาตรฐานเรียบร้อยแล้ว
               </p>
             </div>
 
@@ -372,7 +372,7 @@ export function Help({ v }) {
                       <li>**ปลายทาง (Destination):** บันทึกเป็น PDF (Save as PDF) หรือเลือกเครื่องพิมพ์</li>
                       <li>**การจัดวาง (Layout):** แนวตั้ง (Portrait)</li>
                       <li>**ขนาดกระดาษ (Paper size):** A4</li>
-                      <li>**ระยะขอบ (Margins):** เลือกค่าเริ่มต้น (Default) *ระบบจัดระยะขอบ 2 cm ทุกด้านให้อัตโนมัติในสไตล์ชีทแล้ว*</li>
+                      <li>**ระยะขอบ (Margins):** เลือกค่าเริ่มต้น (Default) *ระบบจัดระยะขอบ 2.5 cm ทุกด้านให้อัตโนมัติในสไตล์ชีทแล้ว*</li>
                       <li>**ส่วนหัวและส่วนท้าย (Headers & Footers):** *ไม่เช็คถูก (Uncheck)* เพื่อลบ URL และวันที่ขอบกระดาษออก</li>
                     </ul>
                   </div>
@@ -399,7 +399,7 @@ export function Help({ v }) {
                   </div>
                   <div style={css(`display:flex; justify-content:space-between; align-items:center;`)}>
                     <span style={css(`color:var(--text-secondary);`)}>Margins (ระยะขอบ)</span>
-                    <span style={css(`font-weight:600; color:var(--text-primary);`)}>เริ่มต้น (2 cm อัตโนมัติ) ✔️</span>
+                    <span style={css(`font-weight:600; color:var(--text-primary);`)}>เริ่มต้น (2.5 cm อัตโนมัติ) ✔️</span>
                   </div>
                   <div style={css(`display:flex; justify-content:space-between; align-items:center;`)}>
                     <span style={css(`color:var(--text-secondary);`)}>Headers and footers</span>
