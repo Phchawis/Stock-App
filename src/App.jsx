@@ -627,6 +627,68 @@ class App extends React.Component {
     }
   }
 
+  updateStockCountRow(lotId, qty, reason) {
+    this.setState(s => {
+      const row = s.stockCountForm[lotId] || { qty: '', reason: '' };
+      return {
+        stockCountForm: {
+          ...s.stockCountForm,
+          [lotId]: {
+            qty: qty !== undefined ? qty : row.qty,
+            reason: reason !== undefined ? reason : row.reason
+          }
+        }
+      };
+    });
+  }
+  async submitStockCount() {
+    if (!this.can('manage')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์ปรับปรุงสต็อก', 'warn'); return; }
+    const f = this.state.stockCountForm;
+    const items = [];
+    for (const lotId of Object.keys(f)) {
+      const row = f[lotId];
+      const lot = this.state.lots.find(x => x.id === +lotId);
+      if (!lot) continue;
+      const numQty = row.qty === '' ? lot.qty : +row.qty;
+      if (isNaN(numQty) || numQty < 0) {
+        this.showToast('กรุณากรอกตัวเลขจำนวนที่ตรวจนับได้จริงให้ถูกต้อง', 'warn');
+        return;
+      }
+      const delta = numQty - lot.qty;
+      if (delta !== 0) {
+        items.push({ lotId: +lotId, qty: numQty, reason: row.reason || 'ตรวจนับยอดคลังคลาดเคลื่อนประจำสัปดาห์/เดือน' });
+      }
+    }
+
+    if (items.length === 0) {
+      this.showToast('ไม่พบความคลาดเคลื่อนจากการนับคลังเพื่อดำเนินการบันทึก', 'info');
+      return;
+    }
+
+    this.askConfirm(
+      'บันทึกผลการตรวจนับคลัง',
+      `คุณต้องการบันทึกปรับยอดสต็อกที่คลาดเคลื่อนจำนวน ${items.length} รายการ ใช่หรือไม่?`,
+      async () => {
+        try {
+          const res = await this.api('/api/lots/reconcile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'บันทึกการตรวจนับล้มเหลว');
+
+          // Update local state with the adjusted lots and pull new transactions list
+          this.fetchData();
+          this.setState({ view: 'inventory' }); // Go back to inventory view
+          this.showToast('ปรับปรุงยอดสต็อกคลาดเคลื่อนเรียบร้อยแล้ว');
+        } catch (err) {
+          this.showToast(err.message, 'warn');
+        }
+      }
+    );
+  }
+
   bindEtf(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ etForm: { ...s.etForm, [k]: v } })); }; }
   openEditTxn(txnId) {
     if (!this.can('manage')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์แก้ไขรายการนี้', 'warn'); return; }
@@ -741,7 +803,17 @@ class App extends React.Component {
   }
 
   // ── handlers ──
-  nav(v) { this.setState({ view: v, detailId: null, sidebarOpen: false }); }
+  nav(v) {
+    const nextState = { view: v, detailId: null, sidebarOpen: false };
+    if (v === 'stock_count') {
+      const activeLots = this.state.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE');
+      nextState.stockCountForm = activeLots.reduce((acc, item) => {
+        acc[item.id] = { qty: String(item.qty), reason: '' };
+        return acc;
+      }, {});
+    }
+    this.setState(nextState);
+  }
   showToast(msg, kind) { if (this._toastT) clearTimeout(this._toastT); this.setState({ toast: { msg, kind: kind || 'ok' } }); this._toastT = setTimeout(() => this.setState({ toast: null }), 2800); }
   openDetail(id) { this.setState({ detailId: id }); }
   closeDetail() { this.setState({ detailId: null }); }
@@ -1196,6 +1268,21 @@ class App extends React.Component {
       iform: S.iform, ifRid: this.bindIf('rid'), ifQty: this.bindIf('qty'), ifScan: this.bindIf('scan'), ifRef: this.bindIf('ref'), ifSearchInput: this.bindIf('searchInput'), ifQrInput: this.bindIf('qrInput'), submitIssue: () => this.submitIssue(),
       scanQRCode: (code) => this.scanQRCode(code), unlinkLot: () => this.unlinkLot(), selectReagentForIssue: (rid) => this.selectReagentForIssue(rid),
       activeLotsList: S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE').map(l => ({ ...l, recvDate: recvDateOf(l.id) })),
+      stockCountList: S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE').map(l => {
+        const r = S.reagents.find(x => x.id === l.rid);
+        return {
+          lotId: l.id,
+          lot: l.lot,
+          expiry: l.expiry,
+          systemQty: l.qty,
+          reagentName: r ? r.th : '—',
+          unit: r ? r.unit : '',
+          category: r ? r.cat : ''
+        };
+      }),
+      stockCountForm: S.stockCountForm || {},
+      updateStockCountRow: (lotId, qty, reason) => this.updateStockCountRow(lotId, qty, reason),
+      submitStockCount: () => this.submitStockCount(),
       reagentsList: S.reagents.map(r => {
         let subUnitName = '';
         let subUnitQty = null;
