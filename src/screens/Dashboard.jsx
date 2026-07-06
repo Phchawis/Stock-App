@@ -143,7 +143,7 @@ export function Dashboard({ v }) {
   const printStyle = `
     @page {
       size: A4 portrait;
-      margin: 2.5cm;
+      margin: 2cm;
     }
     @media print {
       *, *::before, *::after {
@@ -175,8 +175,8 @@ export function Dashboard({ v }) {
       }
       .print-report-container {
         display: block !important;
-        width: 16cm !important;
-        max-width: 16cm !important;
+        width: 17cm !important;
+        max-width: 17cm !important;
         margin: 0 auto !important;
         box-sizing: border-box;
         padding: 0 !important;
