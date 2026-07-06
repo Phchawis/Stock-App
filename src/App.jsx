@@ -14,6 +14,7 @@ import { PrintStickerModal } from './screens/PrintStickerModal.jsx';
 import { EditLotModal } from './screens/EditLotModal.jsx';
 import { EditTransactionModal } from './screens/EditTransactionModal.jsx';
 import { DisposeLotModal } from './screens/DisposeLotModal.jsx';
+import { SignatureModal } from './screens/SignatureModal.jsx';
 
 class App extends React.Component {
   constructor(props) {
@@ -66,7 +67,7 @@ class App extends React.Component {
       // can show "who's logged in" immediately on next page load, before
       // fetchData()'s requests (which prove the cookie is still valid) resolve.
       sessionStorage.setItem('authUser', JSON.stringify(data.user));
-      this.login(data.user.role, data.user.name, data.user.initials);
+      this.login(data.user.role, data.user.name, data.user.initials, data.user.signature);
       this.fetchData();
     } catch (err) {
       this.setState(s => ({ loginForm: { ...s.loginForm, error: 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้: ' + err.message } }));
@@ -234,7 +235,7 @@ class App extends React.Component {
   ROLES() {
     return [
       { id: 'admin', th: 'ผู้ดูแลระบบ', en: 'Administrator', name: 'ทนพ. ธนวัฒน์ ผู้ดูแลระบบ', initials: 'ธว', color: '#1387A6', perms: { view: 1, receive: 1, issue: 1, manage: 1, ack: 1, users: 1, settings: 1 } },
-      { id: 'supervisor', th: 'หัวหน้าคลังน้ำยา', en: 'Store Supervisor', name: 'ภญ. สมหญิง รักษ์ดี', initials: 'สญ', color: '#4E7CB0', perms: { view: 1, receive: 1, issue: 1, manage: 1, ack: 1, users: 0, settings: 0 } },
+      { id: 'supervisor', th: 'หัวหน้าคลังน้ำยา', en: 'Store Supervisor', name: 'ทนพญ.เบญจวรรณ รุ่งเรือง', initials: 'บว', color: '#4E7CB0', perms: { view: 1, receive: 1, issue: 1, manage: 1, ack: 1, users: 0, settings: 0 } },
       { id: 'technician', th: 'นักเทคนิคการแพทย์', en: 'Medical Technologist', name: 'ทนพ. สมชาย ใจดี', initials: 'สช', color: '#2E9E63', perms: { view: 1, receive: 0, issue: 1, manage: 0, ack: 1, users: 0, settings: 0 } },
       { id: 'viewer', th: 'ผู้ดูข้อมูล', en: 'Viewer', name: 'คุณวิภา (ผู้สังเกตการณ์)', initials: 'วภ', color: '#6E8694', perms: { view: 1, receive: 0, issue: 0, manage: 0, ack: 0, users: 0, settings: 0 } },
     ];
@@ -250,7 +251,7 @@ class App extends React.Component {
       { key: 'settings', label: 'ตั้งค่าเกณฑ์ของระบบ' },
     ];
   }
-  login(id, name, initials) { const r = this.ROLES().find(x => x.id === id); if (!r) return; this.user = { name: name || r.name, role: r.th, initials: initials || r.initials, roleId: r.id }; this.setState({ role: id, view: 'dashboard', detailId: null, modal: null }); }
+  login(id, name, initials, signature) { const r = this.ROLES().find(x => x.id === id); if (!r) return; this.user = { name: name || r.name, role: r.th, initials: initials || r.initials, roleId: r.id, signature: signature || null }; this.setState({ role: id, view: 'dashboard', detailId: null, modal: null }); }
   async logout() {
     try { await this.api('/api/logout', { method: 'POST' }); } catch (e) { /* best effort */ }
     sessionStorage.removeItem('authUser');
@@ -320,7 +321,7 @@ class App extends React.Component {
       const cached = JSON.parse(sessionStorage.getItem('authUser') || 'null');
       if (cached) {
         const r = this.ROLES().find(x => x.id === cached.role);
-        this.user = { name: cached.name, role: r ? r.th : cached.role, initials: cached.initials, roleId: cached.role };
+        this.user = { name: cached.name, role: r ? r.th : cached.role, initials: cached.initials, roleId: cached.role, signature: cached.signature || null };
         this.setState({ role: cached.role });
         this.fetchData();
       }
@@ -689,6 +690,39 @@ class App extends React.Component {
     );
   }
 
+  openSignature() {
+    if (!this.state.role) return;
+    this.setState({ modal: 'signature' });
+  }
+  async onSaveSignature(signature) {
+    try {
+      const res = await this.api('/api/users/signature', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ signature })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'บันทึกลายเซ็นล้มเหลว');
+
+      // Update active user state and cached user
+      const updatedUser = { ...this.user, signature };
+      this.user = updatedUser;
+      
+      // Update authUser session storage
+      const cached = JSON.parse(sessionStorage.getItem('authUser') || 'null');
+      if (cached) {
+        cached.signature = signature;
+        sessionStorage.setItem('authUser', JSON.stringify(cached));
+      }
+
+      this.setState({ modal: null });
+      this.showToast('บันทึกลายเซ็นเรียบร้อยแล้ว');
+      this.fetchData(); // reload users list
+    } catch (err) {
+      this.showToast(err.message, 'warn');
+    }
+  }
+
   bindEtf(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ etForm: { ...s.etForm, [k]: v } })); }; }
   openEditTxn(txnId) {
     if (!this.can('manage')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์แก้ไขรายการนี้', 'warn'); return; }
@@ -783,7 +817,12 @@ class App extends React.Component {
     this.state.reagents.forEach(r => {
       this.activeLots(r.id).forEach(l => {
         const d = this.days(l.expiry);
-        if (d <= 60) {
+        if (d <= 0) {
+          const key = 'E' + l.id;
+          out.push({ key, kind: 'EXPIRY', rid: r.id, sev: 'critical', order: -1,
+            title: '⚠️ หมดอายุคาคลัง · ' + r.th + ' · Lot ' + l.lot, sub: 'หมดอายุไปแล้วเมื่อ ' + l.expiry + ' · คงเหลือ ' + l.qty + ' ' + r.unit + ' (โปรดดำเนินการตัดจำหน่าย)',
+            tag: 'หมดอายุแล้ว', fg: '#fff', bg: 'var(--red-600)' });
+        } else if (d <= 60) {
           const s = this.sev(d, crit); const c = this.sevCol(s);
           const key = 'E' + l.id;
           out.push({ key, kind: 'EXPIRY', rid: r.id, sev: s, order: s === 'critical' ? 0 : s === 'warning' ? 1 : 2,
@@ -1256,6 +1295,9 @@ class App extends React.Component {
       isDash: dn === 'dashboard', isInv: dn === 'inventory', isReagentLists: dn === 'reagent_lists', isAlerts: dn === 'alerts', isAudit: dn === 'audit', isPerms: dn === 'perms', isHelp: dn === 'help', isStockCount: dn === 'stock_count',
       title: titles[dn][0], subtitle: titles[dn][1],
       openReceive: (rid) => this.openReceive(rid), openIssue: (rid) => this.openIssue(rid),
+      openSignature: () => this.openSignature(),
+      modalSignature: S.modal === 'signature',
+      onSaveSignature: (sig) => this.onSaveSignature(sig),
       kpi: { total: S.reagents.length }, kpis, dashAlerts, dashLow, recent, usageList, catStats, monthlyData, weeklyPattern, insights,
       invRows, invTabs, invTab: S.invTab, setInvTab: (v) => this.setState({ invTab: v }),
       search: S.search, onSearch: (e) => this.setState({ search: e.target.value }),
@@ -1393,6 +1435,7 @@ class App extends React.Component {
       <EditLotModal v={v} />
       <EditTransactionModal v={v} />
       <DisposeLotModal v={v} />
+      <SignatureModal v={v} />
       <Toast v={v} />
       <Login v={v} />
 
