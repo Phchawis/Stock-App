@@ -1613,6 +1613,13 @@ code, kbd, samp { font-family: var(--font-mono); }
     flex-direction: column !important;
     gap: 12px !important;
   }
+  /* The user avatar + logout footer is the sidebar's last flex child, flush
+     with the 100vh-tall <aside>'s bottom edge — which is exactly where the
+     fixed .mobile-action-bar (higher z-index) also sits, so without this the
+     bar covers the footer entirely. Push the footer up by the bar's height. */
+  aside.main-sidebar .sidebar-footer {
+    margin-bottom: var(--mobile-bar-height, 74px) !important;
+  }
 
   .hamburger-btn {
     display: none !important;
