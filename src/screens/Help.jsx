@@ -229,7 +229,7 @@ export function Help({ v }) {
                 การเบิกจ่ายระบบจ่ายตามเกณฑ์หมดอายุก่อน–เบิกก่อน (Withdraw Process)
               </h2>
               <p style={css(`font:var(--text-sm)/1.6 var(--font-body); color:var(--text-secondary); margin:0;`)}>
-                ระบบบังคับระบบคิวจ่าย **หมดอายุก่อน–เบิกก่อน (First-Expired, First-Out)** โดยเรียงลำดับวันหมดอายุเป็นหลักอัตโนมัติ เพื่อป้องกันแล็บใช้น้ำยาข้ามล็อตจนเหลือล็อตเก่าหมดอายุคาตู้
+                ระบบจ่ายคิวอัตโนมัติแบบ **หมดอายุก่อน–เบิกก่อน (First-Expired, First-Out)** โดยยุบขั้นตอนเหลือเพียง 2 ขั้นตอนสั้นๆ เพื่อความรวดเร็วในการเบิกจ่ายที่หน้างานจริง
               </p>
             </div>
 
@@ -237,24 +237,16 @@ export function Help({ v }) {
               {/* Process Steps */}
               <div style={css(`flex:1; min-width:280px; display:flex; flex-direction:column; gap:14px;`)}>
                 <h3 style={css(`font:var(--fw-semibold) var(--text-sm)/1.3 var(--font-display); color:var(--text-primary); margin:0;`)}>
-                  หลักการและขั้นตอนเบิกจ่าย:
+                  ขั้นตอนการเบิกจ่าย (2 ขั้นตอน):
                 </h3>
                 <div style={css(`display:flex; flex-direction:column; gap:12px;`)}>
                   <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
                     <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--accent-600); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>1</span>
-                    <div>กดปุ่ม **"เบิกจ่าย (Withdraw)"** บนหน้าจอหลัก</div>
+                    <div>**สแกนบาร์โค้ด หรือ ระบุ Lot:** กดเบิกจ่ายแล้วสแกนคิวอาร์โค้ดฉลากขวด หรือพิมพ์เลข Lot ทันที ระบบจะผูกข้อมูลล็อตและชื่อน้ำยาให้อัตโนมัติ (สามารถกดเลือกชื่อน้ำยาด้วยตนเองเป็นทางเลือกสำรองได้) แล้วกด **"ถัดไป"**</div>
                   </div>
                   <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
                     <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--accent-600); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>2</span>
-                    <div>ค้นหาและคลิกเลือกชนิดน้ำยาที่ต้องการเบิกออกจากคลัง</div>
-                  </div>
-                  <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
-                    <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--accent-600); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>3</span>
-                    <div>กรอกปริมาณที่เบิก ระบบจะแสดง **แผนเบิกคิวล็อต (หมดอายุก่อน–เบิกก่อน)** ให้ดูด้านล่างทันที</div>
-                  </div>
-                  <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
-                    <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--accent-600); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>4</span>
-                    <div>กดปุ่มยืนยันเบิกจ่าย ระบบจะตัดสัดส่วนจากล็อตที่หมดอายุก่อนให้อัตโนมัติ</div>
+                    <div>**ระบุจำนวนเบิกจ่าย:** ระบุจำนวนที่ต้องการเบิก (โดยไม่ต้องกรอกเลขที่ใบเบิก/เลขเอกสารอ้างอิงให้เสียเวลา) ตรวจสอบแผนการจัดสรรคิวล็อต FEFO ด้านล่าง แล้วกด **"ยืนยันเบิกจ่าย"** เพื่อตัดยอดคงคลังทันที</div>
                   </div>
                 </div>
               </div>
@@ -362,7 +354,7 @@ export function Help({ v }) {
                 การสั่งพิมพ์รายงานประจำเดือน A4 ขาวสะอาด (Clean PDF Printing Guide)
               </h2>
               <p style={css(`font:var(--text-sm)/1.6 var(--font-body); color:var(--text-secondary); margin:0;`)}>
-                แอปพลิเคชันรองรับการพิมพ์ใบรายงานยอดใช้จ่ายคลังน้ำยาในลักษณะเอกสารราชการสีขาวสะอาด ปราศจากปุ่มและรหัสน้ำยารกกระดาษ เพื่อใช้แนบเสนอประเมิน QMS
+                แอปพลิเคชันรองรับการพิมพ์ใบรายงานยอดใช้จ่ายคลังน้ำยาในลักษณะเอกสารราชการสีขาวสะอาด ปราศจากปุ่มและรหัสน้ำยารกกระดาษ เพื่อใช้แนบเสนอประเมิน QMS โดยระบบได้ล็อกระยะขอบกระดาษทุกด้านไว้ที่ **2 cm (20mm)** เป็นมาตรฐานเรียบร้อยแล้ว
               </p>
             </div>
 
@@ -380,6 +372,7 @@ export function Help({ v }) {
                       <li>**ปลายทาง (Destination):** บันทึกเป็น PDF (Save as PDF) หรือเลือกเครื่องพิมพ์</li>
                       <li>**การจัดวาง (Layout):** แนวตั้ง (Portrait)</li>
                       <li>**ขนาดกระดาษ (Paper size):** A4</li>
+                      <li>**ระยะขอบ (Margins):** เลือกค่าเริ่มต้น (Default) *ระบบจัดระยะขอบ 2 cm ทุกด้านให้อัตโนมัติในสไตล์ชีทแล้ว*</li>
                       <li>**ส่วนหัวและส่วนท้าย (Headers & Footers):** *ไม่เช็คถูก (Uncheck)* เพื่อลบ URL และวันที่ขอบกระดาษออก</li>
                     </ul>
                   </div>
@@ -403,6 +396,10 @@ export function Help({ v }) {
                   <div style={css(`display:flex; justify-content:space-between; align-items:center;`)}>
                     <span style={css(`color:var(--text-secondary);`)}>Paper size</span>
                     <span style={css(`font-weight:600; color:var(--text-primary);`)}>A4 ✔️</span>
+                  </div>
+                  <div style={css(`display:flex; justify-content:space-between; align-items:center;`)}>
+                    <span style={css(`color:var(--text-secondary);`)}>Margins (ระยะขอบ)</span>
+                    <span style={css(`font-weight:600; color:var(--text-primary);`)}>เริ่มต้น (2 cm อัตโนมัติ) ✔️</span>
                   </div>
                   <div style={css(`display:flex; justify-content:space-between; align-items:center;`)}>
                     <span style={css(`color:var(--text-secondary);`)}>Headers and footers</span>
