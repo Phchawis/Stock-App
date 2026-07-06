@@ -110,20 +110,15 @@ export function CreateStickerForm({ v }) {
       fillTextAutoFit(aliquotPrepBy || '', 450, 685, 690, 82);
 
     } else {
-      // Dimension 4x2 cm -> High resolution W:1600px, H:800px (scale = 40)
-      canvas.width = 1600;
+      // Dimension 4.5x2 cm -> High resolution W:1800px, H:800px (scale = 40)
+      canvas.width = 1800;
       canvas.height = 800;
 
       // Draw background
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, 1600, 800);
+      ctx.fillRect(0, 0, 1800, 800);
 
-      // Draw rounded border
-      ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 14;
-      ctx.beginPath();
-      ctx.roundRect(30, 30, 1540, 740, 45);
-      ctx.stroke();
+      // (Border is completely removed as requested)
 
       ctx.fillStyle = '#000000';
 
@@ -131,7 +126,7 @@ export function CreateStickerForm({ v }) {
 
       // Row 1: Reagent Name + Type (Control / Calibrator)
       const titleText = `${openedReagent || ''} ${openedType}`;
-      fillTextAutoFit(titleText, 60, 195, 1480, 115);
+      fillTextAutoFit(titleText, 60, 195, 1680, 115);
 
       // Row 2: Opened: __ / __ / __ by ___
       ctx.font = labelFont;
@@ -142,25 +137,25 @@ export function CreateStickerForm({ v }) {
       ctx.lineWidth = 5;
       ctx.beginPath();
       ctx.moveTo(430, 440);
-      ctx.lineTo(920, 440);
+      ctx.lineTo(1020, 440);
       ctx.stroke();
 
-      fillTextAutoFit(formatDate(openedDate), 450, 425, 450, 88);
+      fillTextAutoFit(formatDate(openedDate), 450, 425, 550, 88);
 
       ctx.font = labelFont;
-      ctx.fillText("by", 960, 430);
+      ctx.fillText("by", 1060, 430);
       
       // Draw name line
       ctx.beginPath();
-      ctx.moveTo(1070, 440);
-      ctx.lineTo(1530, 440);
+      ctx.moveTo(1170, 440);
+      ctx.lineTo(1720, 440);
       ctx.stroke();
 
-      fillTextAutoFit(openedBy || '', 1090, 425, 420, 88);
+      fillTextAutoFit(openedBy || '', 1190, 425, 510, 88);
 
       // Row 3: After open storage 2-8 °C = Until exp.
       const storageText = `After open storage 2-8 °C = ${openStorageDuration}`;
-      fillTextAutoFit(storageText, 60, 660, 1480, 95);
+      fillTextAutoFit(storageText, 60, 660, 1680, 95);
     }
   }, [
     activeTab,
@@ -188,7 +183,7 @@ export function CreateStickerForm({ v }) {
     if (!printWindow) return;
     
     // Set width and height based on chosen size in cm
-    const wCm = activeTab === 'aliquot' ? 3 : 4;
+    const wCm = activeTab === 'aliquot' ? 3 : 4.5;
     const hCm = 2;
 
     printWindow.document.write(`
@@ -249,7 +244,7 @@ export function CreateStickerForm({ v }) {
             onClick={() => setActiveTab('opened')}
             style={css(`padding:8px 16px; border-radius:var(--radius-sm); border:none; background:${activeTab === 'opened' ? 'var(--brand-700)' : 'transparent'}; color:${activeTab === 'opened' ? '#fff' : 'var(--text-secondary)'}; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
           >
-            Opened Sticker Form (4x2 cm)
+            Opened Sticker Form (4.5x2 cm)
           </button>
         </div>
       </div>
@@ -420,7 +415,7 @@ export function CreateStickerForm({ v }) {
           <div style={css(`padding:10px; background:#e2ecf0; border-radius:var(--radius-md); border:1px solid var(--border-default); display:flex; align-items:center; justify-content:center; max-width:100%; overflow:auto;`)}>
             <canvas 
               ref={canvasRef} 
-              style={css(`background:#ffffff; border:1px solid #999; box-shadow:0 4px 8px rgba(0,0,0,0.1); width:${activeTab === 'aliquot' ? '300px' : '400px'}; height:200px; display:block;`)}
+              style={css(`background:#ffffff; border:1px solid #999; box-shadow:0 4px 8px rgba(0,0,0,0.1); width:${activeTab === 'aliquot' ? '300px' : '450px'}; height:200px; display:block;`)}
             />
           </div>
 
