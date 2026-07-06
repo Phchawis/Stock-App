@@ -22,7 +22,7 @@ export function ReagentLists({ v }) {
     (r.en || '').toLowerCase().includes(query)
   );
 
-  const getCategoryLabel = (c) => ({ CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', IMM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', MIP: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์', HMS: 'บริการศูนย์การแพทย์', ADV: 'ตรวจวินิจฉัยขั้นสูง' })[c] || c;
+  const getCategoryLabel = (c) => ({ HMS: 'บริการศูนย์การแพทย์', ADV: 'ตรวจวินิจฉัยขั้นสูง' })[c] || c;
   const getStorageLabel = (s) => ({ REFRIGERATED_2_8: '2–8°C', FROZEN_40: '−40°C', ROOM_TEMP: 'อุณหภูมิห้อง' })[s] || s;
 
   const formatStock = (qty, reagent) => {
