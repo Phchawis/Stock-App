@@ -314,120 +314,8 @@ export function IssueModal({ v }) {
             )}
 
             {/* STEP 2: SELECT LOT / SCAN */}
+            {/* STEP 2: QUANTITY & CONFIRMATION */}
             {currentStep === 2 && selectedReagentObj && (
-              <div style={css(`display:flex; flex-direction:column; gap:14px;`)}>
-                <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:10px 14px; display:flex; align-items:center; justify-content:space-between; font:var(--text-xs)/1.3 var(--font-body);`)}>
-                  <div>น้ำยา: <strong style={css(`color:var(--text-primary);`)}>{selectedReagentObj.th}</strong></div>
-                  <div style={css(`font-family:var(--font-mono); font-weight:600; color:var(--brand-700);`)}>คงเหลือรวม: {issueOnHand} {selectedReagentObj.unit}</div>
-                </div>
-
-                {/* Scan box container */}
-                <div style={css(`display:flex; flex-direction:column; gap:12px; border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:14px; background:var(--surface-sunken);`)}>
-                  {iform.lotId ? (
-                    <div style={{
-                      background: 'rgba(56,182,115,.12)',
-                      border: '1px solid var(--green-700)',
-                      borderRadius: 'var(--radius-md)',
-                      padding: '10px 12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <span style={{ display: 'grid', placeItems: 'center', color: 'var(--green-700)' }}>
-                          {ic.shield || ic.check}
-                        </span>
-                        <div style={{ font: 'var(--text-xs)/1.3 var(--font-body)' }}>
-                          <div style={{ fontWeight: 'bold', color: 'var(--green-700)' }}>เชื่อมโยง Lot สำเร็จ!</div>
-                          <div style={{ font: 'var(--text-3xs)/1 var(--font-mono)', color: 'var(--text-secondary)', marginTop: 2 }}>
-                            Lot: <strong style={{ color: 'var(--text-primary)' }}>{linkedLotObj ? linkedLotObj.lot : ''}</strong> (คงเหลือ {linkedLotObj ? linkedLotObj.qty : 0} {selectedReagentObj.unit})
-                          </div>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={unlinkLot}
-                        style={css(`background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:4px 8px; font:var(--fw-medium) var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; white-space:nowrap; flex-shrink:0;`)}
-                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--red-700)'; e.currentTarget.style.color = 'var(--red-700)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
-                      >
-                        ยกเลิก
-                      </button>
-                    </div>
-                  ) : null}
-
-                  <div className="lot-code-row">
-                    <Input
-                      label="สแกนคิวอาร์โค้ด หรือระบุ Lot ด้วยตนเอง"
-                      placeholder="เช่น G2407A หรือสแกนฉลาก..."
-                      value={manualCode}
-                      onChange={(e) => setManualCode(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter' && manualCode.trim()) { scanQRCode(manualCode); setManualCode(''); } }}
-                      style={{ flex: 1 }}
-                      suffix={
-                        <button
-                          type="button"
-                          onClick={() => setShowCamera(true)}
-                          title="สแกน QR Code ด้วยกล้อง"
-                          style={css(`display:grid; place-items:center; width:30px; height:30px; border:none; border-radius:var(--radius-sm); background:transparent; cursor:pointer; color:var(--brand-700); margin-right:-4px;`)}
-                        >
-                          {ic.qr}
-                        </button>
-                      }
-                    />
-                    <button
-                      type="button"
-                      className="lot-code-confirm"
-                      onClick={() => { if (manualCode.trim()) { scanQRCode(manualCode); setManualCode(''); } }}
-                      style={css(`background:var(--brand-700); color:#fff; border:none; border-radius:var(--radius-md); padding:0 14px; height:40px; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); cursor:pointer; display:flex; align-items:center; justify-content:center; white-space:nowrap; flex-shrink:0;`)}
-                    >
-                      ยืนยัน
-                    </button>
-                  </div>
-                </div>
-
-                {/* Direct lot picker list */}
-                {(() => {
-                  const lots = activeLotsList
-                    .filter(l => l.rid === selectedReagentObj.id)
-                    .slice()
-                    .sort((a, b) => a.expiry.localeCompare(b.expiry));
-                  if (lots.length === 0) return null;
-                  return (
-                    <div style={css(`display:flex; flex-direction:column; gap:8px;`)}>
-                      <div style={css(`font:var(--fw-medium) var(--text-2xs)/1.3 var(--font-body); color:var(--text-secondary);`)}>
-                        หรือคลิกเลือกล็อตน้ำยาจากรายการคงเหลือ (FEFO Order):
-                      </div>
-                      <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:8px;`)}>
-                        {lots.map((l, i) => {
-                          const linked = String(l.id) === String(iform.lotId);
-                          return (
-                            <button
-                              key={l.id}
-                              type="button"
-                              onClick={() => scanQRCode(l.qr)}
-                              style={css(`display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:8px 12px; border-radius:var(--radius-md); cursor:pointer; text-align:left; border:1.5px solid ${linked ? 'var(--green-600)' : 'var(--border-default)'}; background:${linked ? 'rgba(56,182,115,.08)' : 'var(--white)'}; transition:all var(--dur-fast);`)}
-                              onMouseEnter={(e) => { if (!linked) e.currentTarget.style.borderColor = 'var(--border-brand)'; }}
-                              onMouseLeave={(e) => { if (!linked) e.currentTarget.style.borderColor = 'var(--border-default)'; }}
-                            >
-                              <span style={css(`font:var(--fw-bold) var(--text-xs)/1 var(--font-mono); color:var(--text-primary); display:flex; align-items:center; gap:4px;`)}>
-                                Lot {l.lot}{i === 0 && <span style={css(`font-size:10px; background:var(--brand-50); color:var(--brand-700); padding:1px 4px; border-radius:var(--radius-sm);`)}>แนะนำ</span>}
-                              </span>
-                              <span style={css(`font:var(--text-3xs)/1.2 var(--font-body); color:var(--text-tertiary);`)}>
-                                คงเหลือ {l.qty} {selectedReagentObj.unit} · หมดอายุ {l.expiry}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-
-            {/* STEP 3: QUANTITY & CONFIRMATION */}
-            {currentStep === 3 && selectedReagentObj && (
               <div style={css(`display:flex; flex-direction:column; gap:14px;`)}>
                 <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:12px 14px; display:flex; flex-direction:column; gap:6px; font:var(--text-xs)/1.3 var(--font-body);`)}>
                   <div style={css(`display:flex; justify-content:space-between;`)}>
@@ -440,15 +328,17 @@ export function IssueModal({ v }) {
                   </div>
                 </div>
 
-                <Input
-                  label="จำนวนที่เบิกจ่าย"
-                  type="number"
-                  required={true}
-                  placeholder="ระบุจำนวน เช่น 1"
-                  value={iform.qty}
-                  onChange={ifQty}
-                  suffix={<span style={css(`color:var(--text-tertiary); font:var(--fw-medium) var(--text-2xs)/1 var(--font-body); margin-right:8px;`)}>{selectedReagentObj.unit}</span>}
-                />
+                <div>
+                  <Input 
+                    label="จำนวนที่เบิกจ่าย" 
+                    type="number" 
+                    required={true} 
+                    placeholder="ระบุจำนวน เช่น 1" 
+                    value={iform.qty} 
+                    onChange={ifQty} 
+                    suffix={<span style={css(`color:var(--text-tertiary); font:var(--fw-medium) var(--text-2xs)/1 var(--font-body); margin-right:8px;`)}>{selectedReagentObj.unit}</span>}
+                  />
+                </div>
 
                 {/* FEFO Plan details */}
                 {issueHasPlan ? (
@@ -459,10 +349,10 @@ export function IssueModal({ v }) {
                     <div style={css(`display:flex; flex-direction:column; gap:4px;`)}>
                       {issuePlanRows.map((p, pI) => (
                         <div key={pI} style={css(`display:flex; align-items:center; gap:8px; font:var(--text-2xs)/1.3 var(--font-body); border-bottom: 1px dashed rgba(0,0,0,0.04); padding-bottom:3px;`)}>
-                          <span style={css(`font:var(--fw-bold) var(--text-xs)/1 var(--font-mono); color:var(--text-primary);`)}>Lot {p.lot}</span>
+                          <span style={css(`font-weight:600; color:var(--text-primary); font-family:var(--font-mono);`)}>Lot {p.lot}</span>
                           <span style={css(`font-size:10px; color:${p.col}; font-weight:600;`)}>หมดอายุ {p.expiry} ({p.dayLabel})</span>
                           <span style={css(`flex:1;`)} />
-                          <span style={css(`font:var(--fw-bold) var(--text-xs)/1 var(--font-mono); color:var(--accent-700);`)}>−{p.take} {selectedReagentObj.unit}</span>
+                          <span style={css(`font:var(--fw-bold) var(--text-xs)/1 var(--font-mono); color:var(--accent-700);`)}>-{p.take} {selectedReagentObj.unit}</span>
                         </div>
                       ))}
                     </div>
@@ -495,7 +385,7 @@ export function IssueModal({ v }) {
                   onClick={() => setCurrentStep(2)}
                   style={css(`padding:8px 16px; border-radius:var(--radius-md); border:none; background:${selectedReagentObj ? 'var(--brand-700)' : 'var(--slate-200)'}; color:${selectedReagentObj ? '#fff' : 'var(--text-disabled)'}; cursor:${selectedReagentObj ? 'pointer' : 'not-allowed'}; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
                 >
-                  ถัดไป (ระบุล็อต) &rarr;
+                  ถัดไป (ระบุจำนวน) &rarr;
                 </button>
               </>
             )}
@@ -504,23 +394,6 @@ export function IssueModal({ v }) {
               <>
                 <button 
                   onClick={() => setCurrentStep(1)} 
-                  style={css(`padding:8px 16px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
-                >
-                  &larr; ย้อนกลับ
-                </button>
-                <button 
-                  onClick={() => setCurrentStep(3)}
-                  style={css(`padding:8px 16px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
-                >
-                  ถัดไป (ระบุจำนวน) &rarr;
-                </button>
-              </>
-            )}
-
-            {currentStep === 3 && (
-              <>
-                <button 
-                  onClick={() => setCurrentStep(2)} 
                   style={css(`padding:8px 16px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
                 >
                   &larr; ย้อนกลับ
