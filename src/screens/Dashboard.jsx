@@ -14,6 +14,7 @@ export function Dashboard({ v }) {
   const [selectedCategory, setSelectedCategory] = React.useState('all');
   const [startDate, setStartDate] = React.useState('');
   const [endDate, setEndDate] = React.useState('');
+  const [activeReportTab, setActiveReportTab] = React.useState('charts');
 
   if (!isDash) return null;
 
@@ -398,132 +399,175 @@ export function Dashboard({ v }) {
           ))}
         </div>
 
-        {/* Row 2: Category Stats Table (Left) & Double Bar Chart (Right) — stacks to
-            one column on mobile via .dash-two-col-grid above */}
-        <div className="dash-two-col-grid" style={css(`display:grid; grid-template-columns:1.2fr 1fr; gap:20px; flex-wrap:wrap;`)}>
-          
-          {/* Panel A: Category Overview Table */}
-          <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); overflow:hidden; display:flex; flex-direction:column;`)}>
-            <div style={css(`padding:12px 16px; border-bottom:1px solid var(--border-subtle); font:var(--type-card-title); color:var(--text-primary); background:var(--surface-sunken);`)}>
-              สรุปสถานะคลังแยกรายหมวดหมู่
-            </div>
-            <div style={css(`flex:1; overflow-x:auto;`)}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--text-2xs)', fontFamily: 'var(--font-body)' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid var(--border-default)', background: 'rgba(0,0,0,0.02)' }}>
-                    <th style={{ padding: '10px 12px', textAlign: 'left', color: 'var(--text-tertiary)', fontWeight: '600' }}>หมวดหมู่</th>
-                    <th style={{ padding: '10px 12px', textAlign: 'center', color: 'var(--text-tertiary)', fontWeight: '600' }}>ชนิดน้ำยา</th>
-                    <th style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: '600' }}>คงคลัง</th>
-                    <th style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: '600' }}>เบิกสะสม</th>
-                    <th style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: '600' }}>หมุนเวียน %</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {catStats.map((s, idx) => (
-                    <tr key={idx} className="qrow" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                      <td style={{ padding: '10px 12px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{getCategoryLabel(s.cat)} <span style={{ fontWeight: 500, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', fontSize: '0.9em' }}>({s.cat})</span></td>
-                      <td style={{ padding: '10px 12px', textAlign: 'center', color: 'var(--text-secondary)' }}>{s.types} ชนิด</td>
-                      <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: '600', color: 'var(--text-primary)' }}>{s.stock}</td>
-                      <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-secondary)' }}>{s.issue}</td>
-                      <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 'bold', color: 'var(--brand-700)' }}>{s.turnover}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+        {/* Report Tabs Switcher */}
+        <div style={css(`display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-subtle); padding-bottom:10px; margin-top:10px;`)}>
+          <div style={css(`display:flex; gap:8px; background:var(--surface-sunken); padding:4px; border-radius:var(--radius-md); border:1px solid var(--border-subtle);`)}>
+            <button
+              onClick={() => setActiveReportTab('charts')}
+              style={css(`padding:6px 16px; border-radius:var(--radius-sm); border:none; background:${activeReportTab === 'charts' ? 'var(--brand-700)' : 'transparent'}; color:${activeReportTab === 'charts' ? '#fff' : 'var(--text-secondary)'}; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
+              onMouseEnter={(e) => {
+                if (activeReportTab !== 'charts') {
+                  e.currentTarget.style.background = 'var(--brand-50)';
+                  e.currentTarget.style.color = 'var(--brand-700)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeReportTab !== 'charts') {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                }
+              }}
+            >
+              📊 กราฟวิเคราะห์และคำแนะนำ (Charts & Insights)
+            </button>
+            <button
+              onClick={() => setActiveReportTab('category')}
+              style={css(`padding:6px 16px; border-radius:var(--radius-sm); border:none; background:${activeReportTab === 'category' ? 'var(--brand-700)' : 'transparent'}; color:${activeReportTab === 'category' ? '#fff' : 'var(--text-secondary)'}; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
+              onMouseEnter={(e) => {
+                if (activeReportTab !== 'category') {
+                  e.currentTarget.style.background = 'var(--brand-50)';
+                  e.currentTarget.style.color = 'var(--brand-700)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeReportTab !== 'category') {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                }
+              }}
+            >
+              🗂️ สถานะแยกรายหมวดหมู่ (Category Overview)
+            </button>
           </div>
-
-          {/* Panel B: Monthly Comparison Bar Chart */}
-          <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); padding:16px; display:flex; flex-direction:column;`)}>
-            <div style={css(`font:var(--type-card-title); color:var(--text-primary); margin-bottom:14px; display:flex; align-items:center; justify-content:space-between;`)}>
-              <span>ยอดรับเข้า (Receive) vs เบิกจ่ายสะสม (Issue)</span>
-              <div style={css(`display:flex; align-items:center; gap:12px; font-size:var(--text-3xs);`)}>
-                <div style={css(`display:flex; align-items:center; gap:4px;`)}>
-                  <div style={css(`width:10px; height:10px; background:#2E9E63; border-radius:2px;`)}></div>
-                  <span style={css(`color:var(--text-secondary);`)}>รับเข้า</span>
-                </div>
-                <div style={css(`display:flex; align-items:center; gap:4px;`)}>
-                  <div style={css(`width:10px; height:10px; background:#1387A6; border-radius:2px;`)}></div>
-                  <span style={css(`color:var(--text-secondary);`)}>เบิกจ่าย</span>
-                </div>
-              </div>
-            </div>
-            
-            <div style={css(`flex:1; display:grid; place-items:center; min-height:160px;`)}>
-              <svg width="450" height="120" style={{ overflow: 'visible' }}>
-                <line x1="20" y1="10" x2="430" y2="10" stroke="var(--border-subtle)" strokeDasharray="3,3" />
-                <line x1="20" y1="50" x2="430" y2="50" stroke="var(--border-subtle)" strokeDasharray="3,3" />
-                <line x1="20" y1="90" x2="430" y2="90" stroke="var(--border-subtle)" />
-                
-                <text x="0" y="14" fontSize="8" fill="var(--text-tertiary)" fontFamily="var(--font-mono)">{maxBarVal}</text>
-                <text x="0" y="54" fontSize="8" fill="var(--text-tertiary)" fontFamily="var(--font-mono)">{Math.round(maxBarVal / 2)}</text>
-                <text x="0" y="94" fontSize="8" fill="var(--text-tertiary)" fontFamily="var(--font-mono)">0</text>
-
-                {monthlyData.map((m, idx) => {
-                  const x = 30 + idx * colWidth;
-                  const recH = getBarHeight(m.rec);
-                  const issH = getBarHeight(m.issue);
-                  return (
-                    <g key={idx}>
-                      {/* Receive bar */}
-                      <rect x={x} y={90 - recH} width={barW} height={recH} fill="#2E9E63" rx="2" style={{ transition: 'all 0.3s' }} />
-                      <text x={x + barW / 2} y={85 - recH} fontSize="7" fill="var(--text-secondary)" textAnchor="middle" fontFamily="var(--font-mono)">{m.rec}</text>
-                      
-                      {/* Issue bar */}
-                      <rect x={x + barW + 3} y={90 - issH} width={barW} height={issH} fill="#1387A6" rx="2" style={{ transition: 'all 0.3s' }} />
-                      <text x={x + barW + 3 + barW / 2} y={85 - issH} fontSize="7" fill="var(--text-secondary)" textAnchor="middle" fontFamily="var(--font-mono)">{m.issue}</text>
-
-                      {/* Month label */}
-                      <text x={x + barW + 1.5} y="105" fontSize="8" fill="var(--text-tertiary)" textAnchor="middle" fontFamily="var(--font-body)">
-                        {m.label}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
-            </div>
-          </div>
-
         </div>
 
-        {/* Row 3: Executive Insights (Left) & Critical Reorders (Right) */}
-        <div className="dash-two-col-grid" style={css(`display:grid; grid-template-columns:1fr 1.2fr; gap:20px; flex-wrap:wrap;`)}>
-          
-          {/* Panel C: Monthly Executive Insights */}
-          <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); padding:16px; display:flex; flex-direction:column;`)}>
-            <div style={css(`font:var(--type-card-title); color:var(--text-primary); margin-bottom:14px;`)}>
-              สรุปผลวิเคราะห์ & ข้อเสนอแนะเชิงบริหารคลังน้ำยา (Executive Insights)
-            </div>
-            <div style={css(`display:flex; flex-direction:column; gap:12px; font:var(--text-xs)/1.5 var(--font-body); color:var(--text-secondary); justify-content:center; flex:1;`)}>
-              <div style={css(`display:flex; align-items:flex-start; gap:8px;`)}>
-                <span style={{ color: 'var(--brand-700)', fontWeight: 'bold', marginTop: '2px' }}>•</span>
-                <span>หมวดหมู่ที่มีอัตราจ่ายใช้งานสะสมสูงสุดในขณะนี้ คือ <strong>กลุ่ม{insights.topCatLabel}</strong></span>
-              </div>
-              <div style={css(`display:flex; align-items:flex-start; gap:8px;`)}>
-                <span style={{ color: 'var(--brand-700)', fontWeight: 'bold', marginTop: '2px' }}>•</span>
-                <span>ในช่วงเวลาที่วิเคราะห์นี้ มีจำนวนยอดรับเข้ารวม <strong>{insights.totalRecInRange.toLocaleString()} ชิ้น</strong> และมียอดเบิกจ่ายใช้งานสะสม <strong>{insights.totalIssueInRange.toLocaleString()} ชิ้น</strong></span>
-              </div>
-              <div style={css(`display:flex; align-items:flex-start; gap:8px;`)}>
-                <span style={{ color: 'var(--brand-700)', fontWeight: 'bold', marginTop: '2px' }}>•</span>
-                <span>ปัจจุบันตรวจพบรายการน้ำยาต่ำกว่าจุดสั่งซื้อซ้ำสะสม <strong>{insights.lowStockCount} รายการ</strong> ควรออกเอกสารสั่งจัดหาตามเกณฑ์จัดจัดซื้อด่วน</span>
-              </div>
-              <div style={css(`display:flex; align-items:flex-start; gap:8px; padding-top:6px; border-top:1px dashed var(--border-subtle);`)}>
-                <span style={{ color: 'var(--red-700)', fontWeight: 'bold', marginTop: '2px' }}>⚠️</span>
-                <span>พบน้ำยาเคมีหมดอายุคาคลังสะสม <strong>{insights.expiredQty} กล่อง/ชิ้น</strong> (จาก {insights.expiredLotsCount} Lot) คิดเป็น <strong>อัตราความสูญเสียคลัง (Waste Rate) {insights.wasteRate}%</strong> ควรปรับปริมาณสั่งซื้อขั้นต่ำเพื่อลดของเสีย</span>
+        {/* Tab 1: Charts & Insights */}
+        {activeReportTab === 'charts' && (
+          <div className="dash-two-col-grid tab-fade-in" style={css(`display:grid; grid-template-columns:1.2fr 1fr; gap:20px; flex-wrap:wrap; width:100%;`)}>
+            {/* Panel B: Monthly Comparison Bar Chart */}
+            <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); padding:16px; display:flex; flex-direction:column;`)}>
+              <div style={css(`font:var(--type-card-title); color:var(--text-primary); margin-bottom:14px; display:flex; align-items:center; justify-content:space-between;`)}>
+                <span>ยอดรับเข้า (Receive) vs เบิกจ่ายสะสม (Issue)</span>
+                <div style={css(`display:flex; align-items:center; gap:12px; font-size:var(--text-3xs);`)}>
+                  <div style={css(`display:flex; align-items:center; gap:4px;`)}>
+                    <div style={css(`width:10px; height:10px; background:var(--green-600); border-radius:var(--radius-sm);`)}></div>
+                    <span style={css(`color:var(--text-secondary);`)}>รับเข้า</span>
+                  </div>
+                  <div style={css(`display:flex; align-items:center; gap:4px;`)}>
+                    <div style={css(`width:10px; height:10px; background:var(--blue-600); border-radius:var(--radius-sm);`)}></div>
+                    <span style={css(`color:var(--text-secondary);`)}>เบิกจ่าย</span>
+                  </div>
+                </div>
               </div>
               
-              {/* KPI Glossary */}
-              <div style={css(`background:rgba(43,166,198,0.05); border:1px dashed var(--border-subtle); border-radius:var(--radius-md); padding:10px 12px; font-size:11px; color:var(--text-secondary); margin-top:6px; display:flex; flex-direction:column; gap:4px;`)}>
-                <div style={css(`font-weight:bold; color:var(--brand-700); display:flex; align-items:center; gap:4px;`)}>
-                  💡 คำอธิบายดัชนีชี้วัดทางห้องปฏิบัติการ (KPI Glossary)
+              <div style={css(`flex:1; display:grid; place-items:center; min-height:160px;`)}>
+                <svg width="450" height="120" style={{ overflow: 'visible' }}>
+                  <line x1="20" y1="10" x2="430" y2="10" stroke="var(--border-subtle)" strokeDasharray="3,3" />
+                  <line x1="20" y1="50" x2="430" y2="50" stroke="var(--border-subtle)" strokeDasharray="3,3" />
+                  <line x1="20" y1="90" x2="430" y2="90" stroke="var(--border-subtle)" />
+                  
+                  <text x="0" y="14" fontSize="8" fill="var(--text-tertiary)" fontFamily="var(--font-mono)">{maxBarVal}</text>
+                  <text x="0" y="54" fontSize="8" fill="var(--text-tertiary)" fontFamily="var(--font-mono)">{Math.round(maxBarVal / 2)}</text>
+                  <text x="0" y="94" fontSize="8" fill="var(--text-tertiary)" fontFamily="var(--font-mono)">0</text>
+
+                  {monthlyData.map((m, idx) => {
+                    const x = 30 + idx * colWidth;
+                    const recH = getBarHeight(m.rec);
+                    const issH = getBarHeight(m.issue);
+                    return (
+                      <g key={idx}>
+                        {/* Receive bar */}
+                        <rect x={x} y={90 - recH} width={barW} height={recH} fill="var(--green-600)" rx="2" style={{ transition: 'all 0.3s' }} />
+                        <text x={x + barW / 2} y={85 - recH} fontSize="7" fill="var(--text-secondary)" textAnchor="middle" fontFamily="var(--font-mono)">{m.rec}</text>
+                        
+                        {/* Issue bar */}
+                        <rect x={x + barW + 3} y={90 - issH} width={barW} height={issH} fill="var(--blue-600)" rx="2" style={{ transition: 'all 0.3s' }} />
+                        <text x={x + barW + 3 + barW / 2} y={85 - issH} fontSize="7" fill="var(--text-secondary)" textAnchor="middle" fontFamily="var(--font-mono)">{m.issue}</text>
+
+                        {/* Month label */}
+                        <text x={x + barW + 1.5} y="105" fontSize="8" fill="var(--text-tertiary)" textAnchor="middle" fontFamily="var(--font-body)">
+                          {m.label}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
+              </div>
+            </div>
+
+            {/* Panel C: Monthly Executive Insights */}
+            <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); padding:16px; display:flex; flex-direction:column;`)}>
+              <div style={css(`font:var(--type-card-title); color:var(--text-primary); margin-bottom:14px;`)}>
+                สรุปผลวิเคราะห์ & ข้อเสนอแนะเชิงบริหารคลังน้ำยา (Executive Insights)
+              </div>
+              <div style={css(`display:flex; flex-direction:column; gap:12px; font:var(--text-xs)/1.5 var(--font-body); color:var(--text-secondary); justify-content:center; flex:1;`)}>
+                <div style={css(`display:flex; align-items:flex-start; gap:8px;`)}>
+                  <span style={{ color: 'var(--brand-700)', fontWeight: 'bold', marginTop: '2px' }}>•</span>
+                  <span>หมวดหมู่ที่มีอัตราจ่ายใช้งานสะสมสูงสุดในขณะนี้ คือ <strong>กลุ่ม{insights.topCatLabel}</strong></span>
                 </div>
-                <div style={css(`line-height:1.45; color:var(--text-tertiary);`)}>
-                  • <strong>Turnover % (อัตราหมุนเวียนกลุ่มงาน):</strong> ดัชนีวัดความเร็วในการใช้สินค้าเทียบสต็อกสะสม คำนวณจาก: [ยอดเบิกจ่าย / (ยอดคงคลัง + ยอดเบิกจ่าย) × 100]<br />
-                  • <strong>Waste Rate (อัตราส่วนความสูญเสีย):</strong> ดัชนีแสดงความสูญเสียของของเสื่อมสภาพคาคลัง คำนวณจาก: [ยอดน้ำยาหมดอายุสะสม / ยอดคงคลังสะสมทั้งหมด × 100]
+                <div style={css(`display:flex; align-items:flex-start; gap:8px;`)}>
+                  <span style={{ color: 'var(--brand-700)', fontWeight: 'bold', marginTop: '2px' }}>•</span>
+                  <span>ในช่วงเวลาที่วิเคราะห์นี้ มีจำนวนยอดรับเข้ารวม <strong>{insights.totalRecInRange.toLocaleString()} ชิ้น</strong> และมียอดเบิกจ่ายใช้งานสะสม <strong>{insights.totalIssueInRange.toLocaleString()} ชิ้น</strong></span>
+                </div>
+                <div style={css(`display:flex; align-items:flex-start; gap:8px;`)}>
+                  <span style={{ color: 'var(--brand-700)', fontWeight: 'bold', marginTop: '2px' }}>•</span>
+                  <span>ปัจจุบันตรวจพบรายการน้ำยาต่ำกว่าจุดสั่งซื้อซ้ำสะสม <strong>{insights.lowStockCount} รายการ</strong> ควรออกเอกสารสั่งจัดหาตามเกณฑ์จัดจัดซื้อด่วน</span>
+                </div>
+                <div style={css(`display:flex; align-items:flex-start; gap:8px; padding-top:6px; border-top:1px dashed var(--border-subtle);`)}>
+                  <span style={{ color: 'var(--red-700)', fontWeight: 'bold', marginTop: '2px' }}>⚠️</span>
+                  <span>พบน้ำยาเคมีหมดอายุคาคลังสะสม <strong>{insights.expiredQty} กล่อง/ชิ้น</strong> (จาก {insights.expiredLotsCount} Lot) คิดเป็น <strong>อัตราความสูญเสียคลัง (Waste Rate) {insights.wasteRate}%</strong> ควรปรับปริมาณสั่งซื้อขั้นต่ำเพื่อลดของเสีย</span>
+                </div>
+                
+                {/* KPI Glossary */}
+                <div style={css(`background:rgba(43,166,198,0.05); border:1px dashed var(--border-subtle); border-radius:var(--radius-md); padding:10px 12px; font-size:11px; color:var(--text-secondary); margin-top:6px; display:flex; flex-direction:column; gap:4px;`)}>
+                  <div style={css(`font-weight:bold; color:var(--brand-700); display:flex; align-items:center; gap:4px;`)}>
+                    💡 คำอธิบายดัชนีชี้วัดทางห้องปฏิบัติการ (KPI Glossary)
+                  </div>
+                  <div style={css(`line-height:1.45; color:var(--text-tertiary);`)}>
+                    • <strong>Turnover % (อัตราหมุนเวียนกลุ่มงาน):</strong> ดัชนีวัดความเร็วในการใช้สินค้าเทียบสต็อกสะสม คำนวณจาก: [ยอดเบิกจ่าย / (ยอดคงคลัง + ยอดเบิกจ่าย) × 100]<br />
+                    • <strong>Waste Rate (อัตราส่วนความสูญเสีย):</strong> ดัชนีแสดงความสูญเสียของของเสื่อมสภาพคาคลัง คำนวณจาก: [ยอดน้ำยาหมดอายุสะสม / ยอดคงคลังสะสมทั้งหมด × 100]
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+        )}
+
+        {/* Tab 2: Category Stats Table */}
+        {activeReportTab === 'category' && (
+          <div className="tab-fade-in" style={css(`width:100%;`)}>
+            {/* Panel A: Category Overview Table */}
+            <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); overflow:hidden; display:flex; flex-direction:column;`)}>
+              <div style={css(`padding:12px 16px; border-bottom:1px solid var(--border-subtle); font:var(--type-card-title); color:var(--text-primary); background:var(--surface-sunken);`)}>
+                สรุปสถานะคลังแยกรายหมวดหมู่
+              </div>
+              <div style={css(`flex:1; overflow-x:auto;`)}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--text-2xs)', fontFamily: 'var(--font-body)' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--border-default)', background: 'var(--surface-sunken)' }}>
+                      <th style={{ padding: '10px 12px', textAlign: 'left', color: 'var(--text-tertiary)', fontWeight: '600' }}>หมวดหมู่</th>
+                      <th style={{ padding: '10px 12px', textAlign: 'center', color: 'var(--text-tertiary)', fontWeight: '600' }}>ชนิดน้ำยา</th>
+                      <th style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: '600' }}>คงคลัง</th>
+                      <th style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: '600' }}>เบิกสะสม</th>
+                      <th style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: '600' }}>หมุนเวียน %</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {catStats.map((s, idx) => (
+                      <tr key={idx} className="qrow" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <td style={{ padding: '10px 12px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{getCategoryLabel(s.cat)} <span style={{ fontWeight: 500, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', fontSize: '0.9em' }}>({s.cat})</span></td>
+                        <td style={{ padding: '10px 12px', textAlign: 'center', color: 'var(--text-secondary)' }}>{s.types} ชนิด</td>
+                        <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: '600', color: 'var(--text-primary)' }}>{s.stock}</td>
+                        <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-secondary)' }}>{s.issue}</td>
+                        <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 'bold', color: 'var(--brand-700)' }}>{s.turnover}%</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
 
           {/* Panel D: Critical Reorder List */}
           <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); overflow:hidden; display:flex; flex-direction:column;`)}>
@@ -570,8 +614,6 @@ export function Dashboard({ v }) {
           </div>
 
         </div>
-
-      </div>
 
       {/* Printable PDF Report Template */}
       <div className="print-report-container" style={{ display: 'none' }}>
