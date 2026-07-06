@@ -203,7 +203,6 @@ class App extends React.Component {
     if (this.state.role !== 'admin') { this.showToast('เฉพาะผู้ดูแลระบบเท่านั้นที่แก้ไขสิทธิ์ได้', 'warn'); return; }
     const cur = this.state.perms[roleId][key];
     const next = cur ? 0 : 1;
-    const rname = (this.ROLES().find(r => r.id === roleId) || {}).th;
     // Optimistic update, then persist; revert on failure.
     this.setState(s => ({ perms: { ...s.perms, [roleId]: { ...s.perms[roleId], [key]: next } } }));
     try {
@@ -213,7 +212,6 @@ class App extends React.Component {
         body: JSON.stringify({ role: roleId, perm: key, allowed: next })
       });
       if (!res.ok) throw new Error('บันทึกสิทธิ์ล้มเหลว');
-      this.showToast((cur ? 'ยกเลิก' : 'เพิ่ม') + 'สิทธิ์ของ' + rname + 'แล้ว');
     } catch (err) {
       this.setState(s => ({ perms: { ...s.perms, [roleId]: { ...s.perms[roleId], [key]: cur } } }));
       this.showToast(err.message, 'warn');
