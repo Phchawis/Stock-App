@@ -7,7 +7,63 @@ export function StockCount({ v }) {
     submitStockCount, go, ic
   } = v;
 
+  const [scannerInput, setScannerInput] = React.useState('');
+  const [highlightedLotId, setHighlightedLotId] = React.useState(null);
+  const inputRefs = React.useRef({});
+
   if (!isStockCount) return null;
+
+  const handleScannerChange = (e) => {
+    const val = e.target.value;
+    setScannerInput(val);
+    
+    // Instant match on QR code or Lot number
+    const matched = stockCountList.find(l => l.qr === val.trim() || l.lot === val.trim());
+    if (matched) {
+      setHighlightedLotId(matched.lotId);
+      setScannerInput(''); // Reset field
+      setTimeout(() => {
+        const inputEl = inputRefs.current[matched.lotId];
+        if (inputEl) {
+          inputEl.focus();
+          inputEl.select();
+        }
+      }, 50);
+      
+      // Flash highlight
+      setTimeout(() => {
+        setHighlightedLotId(prev => prev === matched.lotId ? null : prev);
+      }, 3000);
+    }
+  };
+
+  const handleScannerKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const val = scannerInput.trim();
+      if (!val) return;
+
+      const matched = stockCountList.find(l => 
+        l.qr.toLowerCase().includes(val.toLowerCase()) || 
+        l.lot.toLowerCase().includes(val.toLowerCase())
+      );
+
+      if (matched) {
+        setHighlightedLotId(matched.lotId);
+        setScannerInput('');
+        setTimeout(() => {
+          const inputEl = inputRefs.current[matched.lotId];
+          if (inputEl) {
+            inputEl.focus();
+            inputEl.select();
+          }
+        }, 50);
+        setTimeout(() => {
+          setHighlightedLotId(prev => prev === matched.lotId ? null : prev);
+        }, 3000);
+      }
+    }
+  };
 
   return (
     <div className="qms-rise" style={css(`max-width:1180px; display:flex; flex-direction:column; gap:20px;`)}>
@@ -41,6 +97,23 @@ export function StockCount({ v }) {
         </div>
       </div>
 
+      {/* Barcode/QR Code Scanner Input Utility Bar */}
+      <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:16px 20px; display:flex; align-items:center; gap:14px; box-shadow:var(--shadow-sm);`)}>
+        <span style={css(`font-size:20px;`)}>🔍</span>
+        <div style={css(`flex:1;`)}>
+          <input 
+            type="text" 
+            placeholder="สแกน QR Code / บาร์โค้ดสติกเกอร์ที่ขวด หรือพิมพ์รหัสคีย์ย่อเพื่อค้นหาแถวตรวจนับและโฟกัสทันที..." 
+            value={scannerInput}
+            onChange={handleScannerChange}
+            onKeyDown={handleScannerKeyDown}
+            style={css(`width:100%; padding:10px 14px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none; transition:all var(--dur-fast);`)}
+            onFocus={(e) => e.currentTarget.style.borderColor = 'var(--brand-700)'}
+            onBlur={(e) => e.currentTarget.style.borderColor = 'var(--border-default)'}
+          />
+        </div>
+      </div>
+
       {/* Main Table Card */}
       <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); box-shadow:var(--shadow-md); overflow:hidden;`)}>
         <div className="perm-matrix-scroll" style={css(`overflow-x:auto;`)}>
@@ -61,6 +134,7 @@ export function StockCount({ v }) {
                 const row = stockCountForm[item.lotId] || { qty: String(item.systemQty), reason: '' };
                 const numVal = row.qty === '' ? item.systemQty : +row.qty;
                 const diff = isNaN(numVal) ? 0 : numVal - item.systemQty;
+                const isHighlighted = highlightedLotId === item.lotId;
 
                 let diffBadge = <span style={css(`color:var(--text-disabled); font:var(--font-mono) var(--text-2xs);`)}>—</span>;
                 if (diff > 0) {
@@ -70,7 +144,10 @@ export function StockCount({ v }) {
                 }
 
                 return (
-                  <tr key={idx} style={css(`border-bottom:1px solid var(--border-subtle); background:${diff !== 0 ? 'rgba(91,192,217,0.03)' : 'transparent'}; transition:background var(--dur-fast);`)}>
+                  <tr 
+                    key={idx} 
+                    style={css(`border-bottom:1px solid var(--border-subtle); background:${isHighlighted ? 'rgba(43,166,198,0.15)' : diff !== 0 ? 'rgba(91,192,217,0.03)' : 'transparent'}; transition:all 0.3s ease;`)}
+                  >
                     <td style={css(`padding:12px 18px; font:var(--fw-semibold) var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>
                       {item.reagentName}
                     </td>
@@ -88,8 +165,9 @@ export function StockCount({ v }) {
                         type="number"
                         min="0"
                         value={row.qty}
+                        ref={el => { inputRefs.current[item.lotId] = el; }}
                         onChange={(e) => updateStockCountRow(item.lotId, e.target.value, undefined)}
-                        style={css(`width:80px; padding:6px 8px; border:1px solid ${diff !== 0 ? 'var(--brand-700)' : 'var(--border-default)'}; border-radius:var(--radius-sm); background:var(--white); color:var(--text-primary); font:var(--fw-bold) var(--text-xs) var(--font-mono); text-align:center; outline:none;`)}
+                        style={css(`width:80px; padding:6px 8px; border:1px solid ${isHighlighted ? 'var(--brand-700)' : diff !== 0 ? 'var(--brand-700)' : 'var(--border-default)'}; border-radius:var(--radius-sm); background:var(--white); color:var(--text-primary); font:var(--fw-bold) var(--text-xs) var(--font-mono); text-align:center; outline:none; transition:all 0.2s;`)}
                       />
                     </td>
                     <td style={css(`padding:12px 18px; text-align:center;`)}>
