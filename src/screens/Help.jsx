@@ -14,6 +14,7 @@ export function Help({ v }) {
     { id: 'issue', label: 'การเบิกจ่าย (หมดอายุก่อน–เบิกก่อน)', icon: ic.issue || '📤' },
     { id: 'register', label: 'การลงทะเบียนหลัก (Catalog)', icon: ic.boxes || '📦' },
     { id: 'reports', label: 'รายงานประจำเดือน (PDF)', icon: ic.list || '📄' },
+    { id: 'reconciliation', label: 'การปรับปรุงสต็อก & ตัดจ่าย', icon: '⚖️' },
   ];
 
   return (
@@ -408,6 +409,60 @@ export function Help({ v }) {
                   <div style={css(`display:flex; justify-content:space-between; align-items:center;`)}>
                     <span style={css(`color:var(--text-secondary);`)}>Background graphics</span>
                     <span style={css(`font-weight:600; color:var(--green-700);`)}>แสดง (Check) ✔️</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 6: Reconciliation */}
+        {activeTab === 'reconciliation' && (
+          <div style={css(`display:flex; flex-direction:column; gap:24px;`)}>
+            <div>
+              <h2 style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary); margin:0 0 8px 0;`)}>
+                การจัดการข้อยกเว้น: การปรับปรุงยอดสต็อกคลาดเคลื่อนและการตัดจำหน่ายน้ำยาชำรุด/หมดอายุ
+              </h2>
+              <p style={css(`font:var(--text-sm)/1.6 var(--font-body); color:var(--text-secondary); margin:0;`)}>
+                เมื่อเกิดความไม่สอดคล้องกันระหว่างขวดจริงในคลังกับระบบคอมพิวเตอร์ หรือพบน้ำยาหมดอายุ/เสื่อมสภาพคาคลังก่อนเบิกใช้งาน ให้ทำตามคู่มือแนะนำดังนี้
+              </p>
+            </div>
+
+            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; align-items:flex-start;`)}>
+              {/* Section 1: Disposal */}
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span style={css(`color:var(--red-600);`)}>🗑️</span> 1. การตัดจำหน่ายน้ำยาหมดอายุ/ชำรุด (DISPOSE)
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
+                  <div>**กรณีใช้งาน:** เมื่อน้ำยาหมดอายุคาคลัง หรือเกิดการแตกร้าว ปนเปื้อน หรือเสื่อมสภาพก่อนเบิกใช้งานปกติ</div>
+                  <div>**ขั้นตอนดำเนินการ:**
+                    <ol style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
+                      <li>ไปที่หน้า **คลังน้ำยา (Inventory)** คลิกรายการน้ำยาที่ต้องการ</li>
+                      <li>ดูที่ตารางรายการ Lot ค้นหา Lot ที่หมดอายุหรือชำรุด</li>
+                      <li>คลิกปุ่ม **"🗑️ ตัดจำหน่าย"** (เฉพาะ Admin/Supervisor)</li>
+                      <li>ระบุจำนวนกล่อง/ขวดที่ต้องการคัดทิ้ง และเลือกสาเหตุ (เช่น หมดอายุ, เสื่อมสภาพ/ชำรุด)</li>
+                      <li>กด **"ยืนยันตัดจำหน่าย"** ระบบจะตัดสต็อกและสร้างประวัติประเภท `DISPOSE`</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Reconciliation */}
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span style={css(`color:var(--brand-700);`)}>📋</span> 2. การตรวจนับสต็อกและปรับยอดคลาดเคลื่อน (ADJUST)
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
+                  <div>**กรณีใช้งาน:** หลังการนับสต็อกประจำสัปดาห์หรือประจำเดือน (Physical Count) แล้วพบยอดน้ำยาจริงไม่ตรงกับระบบคอมพิวเตอร์</div>
+                  <div>**ขั้นตอนดำเนินการ:**
+                    <ol style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
+                      <li>คลิกเมนูหลัก **"ตรวจนับคลัง"** ที่แถบเมนูด้านซ้าย (เฉพาะ Admin/Supervisor)</li>
+                      <li>ตารางจะรวบรวม Lot ที่เปิดใช้งานอยู่ทั้งหมดมาแสดงผล</li>
+                      <li>กรอกจำนวนที่นับได้จริงลงในช่อง **"นับได้จริง"** ระบบจะคำนวณส่วนต่างคลาดเคลื่อนให้อัตโนมัติ</li>
+                      <li>กรอกเหตุผลที่ยอดไม่ตรงลงในช่องหมายเหตุ (เช่น ลืมคีย์เบิกจ่าย, นับผิดพลาด)</li>
+                      <li>คลิก **"บันทึกผลการตรวจนับทั้งหมด"** และกดยืนยันในป๊อปอัปเพื่อลงบันทึกธุรกรรมปรับยอดประเภท `ADJUST`</li>
+                    </ol>
                   </div>
                 </div>
               </div>
