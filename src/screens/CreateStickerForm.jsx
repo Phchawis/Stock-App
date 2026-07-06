@@ -186,49 +186,6 @@ export function CreateStickerForm({ v }) {
     a.remove();
   };
 
-  const handlePrint = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const dataUrl = canvas.toDataURL('image/png');
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-    
-    // Set width and height based on chosen size in cm
-    const wCm = activeTab === 'aliquot' ? 3 : 4.5;
-    const hCm = 2;
-
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Print Sticker</title>
-          <style>
-            @page {
-              size: ${wCm}cm ${hCm}cm;
-              margin: 0;
-            }
-            body {
-              margin: 0;
-              padding: 0;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              height: 100vh;
-              background-color: #fff;
-            }
-            img {
-              width: ${wCm}cm;
-              height: ${hCm}cm;
-              display: block;
-            }
-          </style>
-        </head>
-        <body onload="window.print(); window.close();">
-          <img src="${dataUrl}" />
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-  };
 
   return (
     <div className="qms-rise" style={css(`max-width:1100px; display:flex; flex-direction:column; gap:20px;`)}>
@@ -431,26 +388,18 @@ export function CreateStickerForm({ v }) {
           </div>
 
           <div style={css(`font:var(--text-3xs)/1.4 var(--font-body); color:var(--text-tertiary); max-width:320px; text-align:center;`)}>
-            สติกเกอร์จะถูกแสดงผลด้วยอัตราส่วนที่ถูกต้อง คุณสามารถดาวน์โหลดเป็นไฟล์รูปภาพ PNG หรือสั่งพิมพ์ออกทางเครื่องพิมพ์สติกเกอร์ความร้อนโดยตรง
+            สติกเกอร์จะถูกแสดงผลด้วยอัตราส่วนที่ถูกต้อง คุณสามารถดาวน์โหลดเป็นไฟล์รูปภาพ PNG เพื่อนำไปพิมพ์ด้วยโปรแกรมพิมพ์สติกเกอร์ได้ทันที
           </div>
 
           {/* Buttons */}
           <div style={css(`display:flex; gap:12px; width:100%; justify-content:center; flex-wrap:wrap;`)}>
             <button 
               onClick={handleDownload}
-              style={css(`display:inline-flex; align-items:center; gap:8px; padding:12px 20px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body); transition:all var(--dur-fast);`)}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--border-strong)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)'; }}
-            >
-              📥 ดาวน์โหลดไฟล์ PNG
-            </button>
-            <button 
-              onClick={handlePrint}
               style={css(`display:inline-flex; align-items:center; gap:8px; padding:12px 24px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-bold) var(--text-sm)/1 var(--font-body); box-shadow:var(--glow-brand-soft); transition:all var(--dur-fast);`)}
               onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.background = 'var(--brand-800)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'var(--brand-700)'; }}
             >
-              🖨️ สั่งพิมพ์สติกเกอร์
+              📥 ดาวน์โหลดไฟล์ PNG
             </button>
           </div>
         </div>
