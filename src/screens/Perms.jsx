@@ -16,6 +16,12 @@ export function Perms({ v }) {
     <div className="qms-rise" style={css(`max-width:1080px; display:flex; flex-direction:column; gap:20px;`)}>
       <style>{`
         .perm-user-row-mobile { display: none; }
+        .perm-user-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-top: 14px;
+        }
         @media (max-width: 768px) {
           .perm-matrix-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
           .perm-matrix-grid { min-width: 560px; }
@@ -30,6 +36,11 @@ export function Perms({ v }) {
           .active-role-badge {
             align-self: flex-start !important;
             margin-left: 64px !important;
+          }
+          .perm-user-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
           }
         }
       `}</style>
@@ -78,7 +89,7 @@ export function Perms({ v }) {
       </div>
 
       {/* User List Section */}
-      <div style={css(`display:flex; align-items:center; justify-content:space-between; margin-top:14px;`)}>
+      <div className="perm-user-header">
         <div>
           <div style={css(`font:var(--fw-bold) var(--text-base)/1.2 var(--font-display); color:var(--text-primary);`)}>รายชื่อผู้ใช้งานในระบบคลังน้ำยา ({usersList.length} คน)</div>
           <div style={css(`font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); margin-top:2px;`)}>ผู้ใช้งานที่ลงทะเบียนและสิทธิ์ในการเข้าใช้เครื่องระบบปฏิบัติการ</div>
