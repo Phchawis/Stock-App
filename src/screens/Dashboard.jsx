@@ -61,11 +61,6 @@ export function Dashboard({ v }) {
   // Category Overview Table — labels match App.jsx's CAT_LABEL() so the same
   // code always reads the same way across screens (Inventory, Reagent Lists, here).
   const getCategoryLabel = (c) => ({
-    CHE: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-    HEM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-    IMM: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-    MIP: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
-    MDC: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์',
     HMS: 'บริการศูนย์การแพทย์',
     ADV: 'ตรวจวินิจฉัยขั้นสูง',
   })[c] || c;
