@@ -38,6 +38,17 @@ export function CreateStickerForm({ v }) {
       return `${d}/${m}/${y}`;
     };
 
+    // Auto-fit text scale helper to make text as large as possible without clipping
+    const fillTextAutoFit = (textVal, x, y, maxWidth, baseSize, isBold = true) => {
+      let size = baseSize;
+      ctx.font = `${isBold ? 'bold ' : ''}${size}px 'Sarabun', sans-serif`;
+      while (ctx.measureText(textVal).width > maxWidth && size > 30) {
+        size -= 2;
+        ctx.font = `${isBold ? 'bold ' : ''}${size}px 'Sarabun', sans-serif`;
+      }
+      ctx.fillText(textVal, x, y);
+    };
+
     if (activeTab === 'aliquot') {
       // Dimension 3x2 cm -> High resolution W:1200px, H:800px (scale = 40)
       canvas.width = 1200;
@@ -49,18 +60,17 @@ export function CreateStickerForm({ v }) {
 
       // Draw border (solid thick black line)
       ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 10;
+      ctx.lineWidth = 14;
       ctx.strokeRect(20, 20, 1160, 760);
 
       ctx.fillStyle = '#000000';
 
-      const labelFont = "bold 64px 'Sarabun', sans-serif";
-      const valFont = "bold 60px 'Sarabun', sans-serif";
+      const labelFont = "bold 88px 'Sarabun', sans-serif";
 
       // Helper to draw dotted line
       const drawDottedLine = (xStart, xEnd, y) => {
         ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 5;
         ctx.setLineDash([4, 12]);
         ctx.beginPath();
         ctx.moveTo(xStart, y);
@@ -71,38 +81,33 @@ export function CreateStickerForm({ v }) {
 
       // Row 1: ชื่อน้ำยา
       ctx.font = labelFont;
-      ctx.fillText("ชื่อน้ำยา", 50, 160);
-      drawDottedLine(290, 1150, 170);
-      ctx.font = valFont;
-      ctx.fillText(aliquotReagent || '', 310, 155);
+      ctx.fillText("ชื่อน้ำยา", 50, 150);
+      drawDottedLine(360, 1150, 160);
+      fillTextAutoFit(aliquotReagent || '', 370, 145, 770, 82);
 
       // Row 2: Lot.
       ctx.font = labelFont;
-      ctx.fillText("Lot.", 50, 290);
-      drawDottedLine(190, 1150, 300);
-      ctx.font = valFont;
-      ctx.fillText(aliquotLot || '', 210, 285);
+      ctx.fillText("Lot.", 50, 285);
+      drawDottedLine(210, 1150, 295);
+      fillTextAutoFit(aliquotLot || '', 220, 280, 920, 82);
 
       // Row 3: วันที่เตรียม
       ctx.font = labelFont;
       ctx.fillText("วันที่เตรียม", 50, 420);
-      drawDottedLine(350, 1150, 430);
-      ctx.font = valFont;
-      ctx.fillText(formatDate(aliquotPrepDate), 370, 415);
+      drawDottedLine(440, 1150, 430);
+      fillTextAutoFit(formatDate(aliquotPrepDate), 450, 415, 690, 82);
 
       // Row 4: วัน: Exp.
       ctx.font = labelFont;
-      ctx.fillText("วัน: Exp.", 50, 550);
-      drawDottedLine(310, 1150, 560);
-      ctx.font = valFont;
-      ctx.fillText(formatDate(aliquotExpDate), 330, 545);
+      ctx.fillText("วัน: Exp.", 50, 555);
+      drawDottedLine(380, 1150, 565);
+      fillTextAutoFit(formatDate(aliquotExpDate), 390, 550, 750, 82);
 
       // Row 5: ชื่อผู้เตรียม
       ctx.font = labelFont;
-      ctx.fillText("ชื่อผู้เตรียม", 50, 680);
-      drawDottedLine(350, 1150, 690);
-      ctx.font = valFont;
-      ctx.fillText(aliquotPrepBy || '', 370, 675);
+      ctx.fillText("ชื่อผู้เตรียม", 50, 690);
+      drawDottedLine(440, 1150, 700);
+      fillTextAutoFit(aliquotPrepBy || '', 450, 685, 690, 82);
 
     } else {
       // Dimension 4x2 cm -> High resolution W:1600px, H:800px (scale = 40)
@@ -115,52 +120,47 @@ export function CreateStickerForm({ v }) {
 
       // Draw rounded border
       ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 10;
+      ctx.lineWidth = 14;
       ctx.beginPath();
-      ctx.roundRect(30, 30, 1540, 740, 40);
+      ctx.roundRect(30, 30, 1540, 740, 45);
       ctx.stroke();
 
       ctx.fillStyle = '#000000';
 
-      const labelFont = "bold 76px 'Sarabun', sans-serif";
-      const valFont = "bold 68px 'Sarabun', sans-serif";
+      const labelFont = "bold 96px 'Sarabun', sans-serif";
 
-      // Row 1: HBsAg Qualitative Control (Reagent + Type)
+      // Row 1: Reagent Name + Type (Control / Calibrator)
       const titleText = `${openedReagent || ''} ${openedType}`;
-      ctx.font = labelFont;
-      ctx.fillText(titleText, 60, 190);
+      fillTextAutoFit(titleText, 60, 195, 1480, 115);
 
       // Row 2: Opened: __ / __ / __ by ___
       ctx.font = labelFont;
-      ctx.fillText("Opened: ", 60, 420);
+      ctx.fillText("Opened: ", 60, 430);
       
       // Draw Opened date line
       ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 5;
       ctx.beginPath();
-      ctx.moveTo(350, 430);
-      ctx.lineTo(920, 430);
+      ctx.moveTo(430, 440);
+      ctx.lineTo(920, 440);
       ctx.stroke();
 
-      ctx.font = valFont;
-      ctx.fillText(formatDate(openedDate), 370, 415);
+      fillTextAutoFit(formatDate(openedDate), 450, 425, 450, 88);
 
       ctx.font = labelFont;
-      ctx.fillText("by", 960, 420);
+      ctx.fillText("by", 960, 430);
       
       // Draw name line
       ctx.beginPath();
-      ctx.moveTo(1060, 430);
-      ctx.lineTo(1520, 430);
+      ctx.moveTo(1070, 440);
+      ctx.lineTo(1530, 440);
       ctx.stroke();
 
-      ctx.font = valFont;
-      ctx.fillText(openedBy || '', 1080, 415);
+      fillTextAutoFit(openedBy || '', 1090, 425, 420, 88);
 
       // Row 3: After open storage 2-8 °C = Until exp.
-      ctx.font = "bold 72px 'Sarabun', sans-serif";
       const storageText = `After open storage 2-8 °C = ${openStorageDuration}`;
-      ctx.fillText(storageText, 60, 640);
+      fillTextAutoFit(storageText, 60, 660, 1480, 95);
     }
   }, [
     activeTab,
