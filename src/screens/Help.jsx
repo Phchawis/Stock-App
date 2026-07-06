@@ -206,7 +206,7 @@ export function Help({ v }) {
                     </div>
                     <div>
                       <label style={css(`font-size:10px; font-weight:600; color:var(--text-tertiary); display:block; margin-bottom:4px;`)}>ผู้ทำธุรกรรม</label>
-                      <div style={css(`padding:8px 12px; border:1px solid var(--border-subtle); border-radius:var(--radius-sm); background:var(--slate-100); font-size:11px; color:var(--text-tertiary);`)}>ภาคย์ชวิศ พรประสิทธิ์แสง</div>
+                      <div style={css(`padding:8px 12px; border:1px solid var(--border-subtle); border-radius:var(--radius-sm); background:var(--slate-100); font-size:11px; color:var(--text-tertiary);`)}>ทนพ. ภาคย์ชวิศ พรประสิทธิ์แสง</div>
                     </div>
                   </div>
                   
