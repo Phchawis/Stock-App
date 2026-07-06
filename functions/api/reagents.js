@@ -1,4 +1,4 @@
-import { requirePerm, json } from './_lib.js';
+import { requirePerm, json, actorName, nowStr } from './_lib.js';
 
 export async function onRequestGet(context) {
   try {
@@ -76,10 +76,23 @@ export async function onRequestDelete(context) {
   try {
     const id = new URL(request.url).searchParams.get('id');
     if (!id) return json({ error: 'Missing reagent id' }, 400);
+
+    // Fetch reagent info before deletion to log it
+    const reagent = await env.DB.prepare('SELECT code, th FROM reagents WHERE id = ?').bind(id).first();
+    if (!reagent) return json({ error: 'Reagent not found' }, 404);
+
+    const actor = await actorName(context);
+    const timestamp = nowStr();
+    const refString = `${reagent.code} - ${reagent.th}`;
+
     await env.DB.batch([
       env.DB.prepare('DELETE FROM transactions WHERE rid = ?').bind(id),
       env.DB.prepare('DELETE FROM lots WHERE rid = ?').bind(id),
-      env.DB.prepare('DELETE FROM reagents WHERE id = ?').bind(id)
+      env.DB.prepare('DELETE FROM reagents WHERE id = ?').bind(id),
+      env.DB.prepare(
+        `INSERT INTO transactions (lot_id, rid, type, qty, bal, ref, scan, by, at)
+         VALUES (0, 0, 'DELETE', 0, 0, ?, 'MANUAL', ?, ?)`
+      ).bind(refString, actor, timestamp)
     ]);
     return json({ success: true, id: Number(id) });
   } catch (err) {
