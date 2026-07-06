@@ -275,7 +275,7 @@ export function Sidebar({ v }) {
           </button>
         </div>
 
-        <div style={css(`padding:14px 12px; border-top:1px solid var(--border-subtle); display:flex; align-items:center; gap:10px;`)}>
+        <div className="sidebar-footer" style={css(`padding:14px 12px; border-top:1px solid var(--border-subtle); display:flex; align-items:center; gap:10px;`)}>
           <span style={css(`width:38px; height:38px; border-radius:50%; background:var(--brand-700); color:#fff; display:grid; place-items:center; font:var(--fw-semibold) 15px/1 var(--font-body); flex-shrink:0;`)}>{user.initials}</span>
           <div style={css(`flex:1; line-height:1.3; min-width:0;`)}>
             <div style={css(`font:var(--fw-semibold) var(--text-sm)/1.2 var(--font-body); color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>{user.name}</div>
