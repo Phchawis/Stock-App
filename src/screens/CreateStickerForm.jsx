@@ -282,7 +282,7 @@ export function CreateStickerForm({ v }) {
                       onClick={() => setAliquotOpen(false)}
                       style={css(`position:fixed; inset:0; z-index:10;`)}
                     />
-                    <div style={css(`position:absolute; top:calc(100% + 4px); left:0; right:0; max-height:240px; overflow-y:auto; background:var(--surface-card); border:1px solid var(--border-strong); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:20;`)}>
+                    <div style={css(`position:absolute; top:calc(100% + 4px); left:0; right:0; max-height:240px; overflow-y:auto; background:var(--white); border:1px solid var(--border-strong); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:20;`)}>
                       {filteredAliquotOptions.length > 0 ? (
                         filteredAliquotOptions.map(r => (
                           <div 
@@ -297,7 +297,7 @@ export function CreateStickerForm({ v }) {
                             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                           >
                             <div style={css(`font-weight:600;`)}>{r.th}</div>
-                            <div style={css(`font-size:10px; color:var(--text-tertiary); margin-top:2px;`)}>{r.en} | {r.code}</div>
+                            <div style={css(`font-size:10px; color:var(--text-tertiary); margin-top:2px;`)}>{r.en}</div>
                           </div>
                         ))
                       ) : (
@@ -379,7 +379,7 @@ export function CreateStickerForm({ v }) {
                       onClick={() => setOpenedOpen(false)}
                       style={css(`position:fixed; inset:0; z-index:10;`)}
                     />
-                    <div style={css(`position:absolute; top:calc(100% + 4px); left:0; right:0; max-height:240px; overflow-y:auto; background:var(--surface-card); border:1px solid var(--border-strong); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:20;`)}>
+                    <div style={css(`position:absolute; top:calc(100% + 4px); left:0; right:0; max-height:240px; overflow-y:auto; background:var(--white); border:1px solid var(--border-strong); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:20;`)}>
                       {filteredOpenedOptions.length > 0 ? (
                         filteredOpenedOptions.map(r => (
                           <div 
@@ -394,7 +394,7 @@ export function CreateStickerForm({ v }) {
                             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                           >
                             <div style={css(`font-weight:600;`)}>{r.th}</div>
-                            <div style={css(`font-size:10px; color:var(--text-tertiary); margin-top:2px;`)}>{r.en} | {r.code}</div>
+                            <div style={css(`font-size:10px; color:var(--text-tertiary); margin-top:2px;`)}>{r.en}</div>
                           </div>
                         ))
                       ) : (
