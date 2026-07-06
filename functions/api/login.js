@@ -42,7 +42,7 @@ export async function onRequestPost(context) {
     // the httpOnly cookie carries it. The CSRF cookie is JS-readable on
     // purpose (the frontend must echo it back as a header on writes).
     const res = json({
-      user: { username: user.username, name: user.name, role: user.role, initials: user.initials, color: user.color }
+      user: { username: user.username, name: user.name, role: user.role, initials: user.initials, color: user.color, signature: user.signature }
     });
     return withSessionCookies(res, request, { token, csrf });
   } catch (err) {
