@@ -1909,3 +1909,27 @@ input:focus, select:focus, textarea:focus {
 .theme-light-scope .sticker-dropdown-menu {
   background-color: #ffffff !important; /* Solid light theme card background */
 }
+
+/* Tab transition animation for sticker page */
+@keyframes tabFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tab-fade-in {
+  animation: tabFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Interactive input states inside CreateStickerForm */
+.sticker-form-input {
+  transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease !important;
+}
+.sticker-form-input:hover {
+  border-color: var(--border-strong) !important;
+}
+.sticker-form-input:focus {
+  border-color: var(--brand-700) !important;
+  box-shadow: 0 0 0 2px var(--brand-100) !important;
+}
