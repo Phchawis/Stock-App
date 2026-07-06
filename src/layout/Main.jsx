@@ -8,6 +8,7 @@ import { Audit } from '../screens/Audit.jsx';
 import { Perms } from '../screens/Perms.jsx';
 import { ReagentLists } from '../screens/ReagentLists.jsx';
 import { Help } from '../screens/Help.jsx';
+import { StockCount } from '../screens/StockCount.jsx';
 
 export function Main({ v }) {
   const {
@@ -190,6 +191,7 @@ export function Main({ v }) {
         <Audit v={v} />
         <Perms v={v} />
         <Help v={v} />
+        <StockCount v={v} />
       </main>
     </div>
   );
