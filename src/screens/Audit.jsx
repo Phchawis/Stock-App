@@ -91,6 +91,9 @@ export function Audit({ v }) {
                   <option value="ALL">ทั้งหมด</option>
                   <option value="RECEIVE">รับเข้าคลัง (+)</option>
                   <option value="ISSUE">เบิกจ่ายน้ำยา (-)</option>
+                  <option value="ADJUST">ปรับปรุงยอด</option>
+                  <option value="DISPOSE">ทำลายน้ำยา</option>
+                  <option value="DELETE">ลบน้ำยา</option>
                 </select>
                 <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-tertiary)', display: 'flex', fontSize: '8px' }}>
                   ▼
