@@ -514,15 +514,48 @@ export function IssueModal({ v }) {
                 )}
 
                 {cameraError && (
-                  <div style={css(`position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; background:rgba(5,10,16,.92); z-index:10; padding:18px; text-align:center; gap:10px;`)}>
-                    <div style={css(`color:var(--red-700); font-weight:600; font:var(--text-xs)/1.5 var(--font-body);`)}>⚠️ {cameraError}</div>
-                    <button
-                      type="button"
-                      onClick={() => { setShowCamera(false); setTimeout(() => setShowCamera(true), 60); }}
-                      style={css(`padding:7px 14px; border-radius:var(--radius-sm); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body);`)}
-                    >
-                      ลองเปิดกล้องอีกครั้ง
-                    </button>
+                  <div style={css(`position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-start; align-items:center; background:var(--surface-sunken); z-index:10; padding:20px; box-sizing:border-box; overflow-y:auto; gap:14px;`)}>
+                    <div style={css(`color:var(--red-700); font-weight:bold; font:var(--text-xs)/1.5 var(--font-body);`)}>⚠️ {cameraError}</div>
+                    
+                    {/* Guidance Card */}
+                    <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:14px; text-align:left; width:100%; box-sizing:border-box; display:flex; flex-direction:column; gap:8px;`)}>
+                      <div style={css(`font-weight:bold; font-size:var(--text-2xs); color:var(--text-primary); border-bottom:1px solid var(--border-subtle); padding-bottom:4px;`)}>
+                        💡 วิธีตั้งค่าอนุญาตสิทธิ์ใช้งานกล้อง:
+                      </div>
+                      
+                      {/* Chrome Guide */}
+                      <div style={css(`font-size:11px; color:var(--text-secondary); line-height:1.4;`)}>
+                        🌐 **บน Google Chrome:**<br />
+                        1. สังเกตไอคอน **"แม่กุญแจ"** หรือ **"สไลเดอร์ตัวเลือก"** ด้านซ้ายสุดของแถบที่อยู่เว็บ (URL Bar)<br />
+                        2. คลิกเลือกและกดปุ่มเปิดสวิตช์ **"กล้อง (Camera)"** ให้เป็นสีเขียว (หรืออนุญาต)<br />
+                        3. ทำการรีเฟรชหน้าเว็บอีกครั้ง
+                      </div>
+                      
+                      {/* Safari iOS Guide */}
+                      <div style={css(`font-size:11px; color:var(--text-secondary); line-height:1.4;`)}>
+                        🧭 **บน iOS Safari:**<br />
+                        1. แตะไอคอน **"กค / aA"** ด้านซ้ายแถบ URL ด้านล่าง<br />
+                        2. เลือก **"การตั้งค่าเว็บไซต์" (Website Settings)**<br />
+                        3. ตรงหัวข้อ **"กล้อง" (Camera)** ให้เปลี่ยนจาก "ถาม" หรือ "ปฏิเสธ" เป็น **"อนุญาต" (Allow)**
+                      </div>
+                    </div>
+
+                    <div style={css(`display:flex; gap:10px; margin-top:4px;`)}>
+                      <button
+                        type="button"
+                        onClick={() => { setShowCamera(false); setTimeout(() => setShowCamera(true), 60); }}
+                        style={css(`padding:8px 16px; border-radius:var(--radius-sm); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
+                      >
+                        ลองเปิดกล้องอีกครั้ง
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowCamera(false)}
+                        style={css(`padding:8px 16px; border-radius:var(--radius-sm); border:none; background:transparent; border:1px solid var(--border-strong); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
+                      >
+                        พิมพ์รหัสเอง
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
