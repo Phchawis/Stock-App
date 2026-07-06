@@ -68,7 +68,7 @@ export function StockCount({ v }) {
   return (
     <div className="qms-rise" style={css(`max-width:1180px; display:flex; flex-direction:column; gap:20px;`)}>
       {/* Header Actions */}
-      <div style={css(`display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:18px 24px; box-shadow:var(--shadow-sm);`)}>
+      <div className="stock-count-header" style={css(`display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:18px 24px; box-shadow:var(--shadow-sm);`)}>
         <div style={css(`flex:1; min-width:240px;`)}>
           <h2 style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary); margin:0; display:flex; align-items:center; gap:8px;`)}>
             <span>📋</span> ตรวจนับคลังสินค้า (Stock Reconciliation)
@@ -77,7 +77,7 @@ export function StockCount({ v }) {
             บันทึกยอดนับจริงทางกายภาพประจำสัปดาห์หรือเดือน ระบบจะคำนวณส่วนต่างและสร้างรายการปรับปรุงยอด (ADJUST) ให้อัตโนมัติ
           </p>
         </div>
-        <div style={css(`display:flex; gap:10px; flex-shrink:0;`)}>
+        <div className="stock-count-header-buttons" style={css(`display:flex; gap:10px; flex-shrink:0;`)}>
           <button 
             onClick={() => go.inventory()}
             style={css(`padding:10px 18px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body); transition:all var(--dur-fast);`)}
@@ -98,7 +98,7 @@ export function StockCount({ v }) {
       </div>
 
       {/* Barcode/QR Code Scanner Input Utility Bar */}
-      <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:16px 20px; display:flex; align-items:center; gap:14px; box-shadow:var(--shadow-sm);`)}>
+      <div className="stock-count-scanner-bar" style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:16px 20px; display:flex; align-items:center; gap:14px; box-shadow:var(--shadow-sm);`)}>
         <span style={css(`font-size:20px;`)}>🔍</span>
         <div style={css(`flex:1;`)}>
           <input 
