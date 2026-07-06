@@ -269,6 +269,11 @@ export function Sidebar({ v }) {
             <span style={css(`flex:1;`)}>คู่มือการใช้งาน</span>
           </button>
 
+          <button onClick={go.createSticker} className="sidebar-btn-item" style={css(`background:${nav.csBg}; color:${nav.csFg};`)}>
+            <span style={css(`width:22px; height:22px; display:grid; place-items:center; color:${nav.csIc};`)}>🏷️</span>
+            <span style={css(`flex:1;`)}>สร้างสติกเกอร์</span>
+          </button>
+
           <div className="sidebar-section-title" style={css(`margin-top:10px;`)}>การทำงาน</div>
           
           <button onClick={openReceive} className="sidebar-op-receive">
