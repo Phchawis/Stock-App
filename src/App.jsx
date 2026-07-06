@@ -13,6 +13,7 @@ import { AddUserModal } from './screens/AddUserModal.jsx';
 import { PrintStickerModal } from './screens/PrintStickerModal.jsx';
 import { EditLotModal } from './screens/EditLotModal.jsx';
 import { EditTransactionModal } from './screens/EditTransactionModal.jsx';
+import { DisposeLotModal } from './screens/DisposeLotModal.jsx';
 
 class App extends React.Component {
   constructor(props) {
@@ -30,6 +31,7 @@ class App extends React.Component {
       editingLotId: null, elForm: this.blankElf(),
       editingTxnId: null, etForm: this.blankEtf(),
       confirmData: null,
+      disposalLotId: null, dispForm: this.blankDispForm(),
     };
     this.user = { name: 'ทนพ. สมชาย ใจดี', role: 'นักเทคนิคการแพทย์', initials: 'สช' };
   }
@@ -38,6 +40,7 @@ class App extends React.Component {
   blankElf() { return { expiry: '', qty: '', loc: '' }; }
   blankEtf() { return { qty: '', ref: '' }; }
   blankMf() { return { code: '', th: '', en: '', cat: 'HMS', unit: 'vial', subUnit: '', subUnitQty: '', testsPerSubUnit: '', testsPerUnit: '', storage: 'REFRIGERATED_2_8', min: '', reorder: '', supplier: 'i-med', img: '/reagent_placeholder.png' }; }
+  blankDispForm() { return { qty: '', reason: 'หมดอายุ', customReason: '' }; }
   defaultPerms() { const o = {}; this.ROLES().forEach(r => { o[r.id] = { ...r.perms }; }); return o; }
   USERNAMES() { return { admin: 'admin', supervisor: 'supervisor', technician: 'technician', viewer: 'viewer' }; }
   bindLF(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ loginForm: { ...s.loginForm, [k]: v, error: '' } })); }; }
@@ -570,6 +573,60 @@ class App extends React.Component {
     }
   }
 
+  openDisposeLot(reagentId, lotId) {
+    if (!this.can('manage')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์ตัดจำหน่ายน้ำยา', 'warn'); return; }
+    const l = this.state.lots.find(x => x.id === lotId);
+    if (!l) return;
+    this.setState({
+      modal: 'disposeLot',
+      disposalLotId: lotId,
+      dispForm: { qty: String(l.qty), reason: 'หมดอายุ', customReason: '' }
+    });
+  }
+  dispQty(qty) {
+    const val = typeof qty === 'object' && qty.target ? qty.target.value : qty;
+    this.setState(s => ({ dispForm: { ...s.dispForm, qty: val } }));
+  }
+  dispReason(reason, isCustom = false) {
+    if (isCustom) {
+      const val = typeof reason === 'object' && reason.target ? reason.target.value : reason;
+      this.setState(s => ({ dispForm: { ...s.dispForm, customReason: val } }));
+    } else {
+      this.setState(s => ({ dispForm: { ...s.dispForm, reason } }));
+    }
+  }
+  async submitDisposeLot() {
+    if (!this.can('manage')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์ตัดจำหน่ายน้ำยา', 'warn'); return; }
+    const id = this.state.disposalLotId;
+    const f = this.state.dispForm;
+    const qty = +f.qty;
+    const finalReason = f.reason === 'อื่นๆ' ? (f.customReason || '').trim() : f.reason;
+
+    if (isNaN(qty) || qty <= 0) { this.showToast('กรุณากรอกจำนวนให้ถูกต้อง', 'warn'); return; }
+    if (!finalReason) { this.showToast('กรุณากรอกสาเหตุให้ครบถ้วน', 'warn'); return; }
+
+    const l = this.state.lots.find(x => x.id === id);
+    if (l && l.qty < qty) { this.showToast(`จำนวนค้างคลังไม่พอให้ตัดจำหน่าย (คงเหลือ ${l.qty})`, 'warn'); return; }
+
+    try {
+      const res = await this.api('/api/lots/dispose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lotId: id, qty, reason: finalReason })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'บันทึกการตัดจำหน่ายล้มเหลว');
+      this.setState(s => ({
+        lots: s.lots.map(item => item.id === id ? { ...item, ...data.lot } : item),
+        txns: data.txn ? [...s.txns, data.txn] : s.txns,
+        modal: null, disposalLotId: null, dispForm: this.blankDispForm()
+      }));
+      this.showToast('บันทึกการตัดจำหน่ายเรียบร้อยแล้ว');
+    } catch (err) {
+      this.showToast(err.message, 'warn');
+    }
+  }
+
   bindEtf(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ etForm: { ...s.etForm, [k]: v } })); }; }
   openEditTxn(txnId) {
     if (!this.can('manage')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์แก้ไขรายการนี้', 'warn'); return; }
@@ -901,8 +958,9 @@ class App extends React.Component {
       audit: ['ประวัติการเคลื่อนไหว', 'บันทึกการรับเข้า–เบิกจ่ายทั้งหมด (Audit Trail)'],
       perms: ['สิทธิ์การใช้งาน', 'สิทธิ์การเข้าถึงระบบตามบทบาทผู้ใช้งาน'],
       help: ['คู่มือการใช้งาน', 'วิธีการใช้งานระบบจัดเก็บคลังน้ำยาและบริหารคลังอย่างเป็นขั้นตอน'],
+      stock_count: ['ตรวจนับคลัง (Stock Count)', 'บันทึกยอดการตรวจนับน้ำยาจริงประจำสัปดาห์หรือเดือน'],
     };
-    const ns = { dash: this.navStyle('dashboard'), inv: this.navStyle('inventory'), rlist: this.navStyle('reagent_lists'), al: this.navStyle('alerts'), au: this.navStyle('audit'), pm: this.navStyle('perms'), help: this.navStyle('help') };
+    const ns = { dash: this.navStyle('dashboard'), inv: this.navStyle('inventory'), rlist: this.navStyle('reagent_lists'), al: this.navStyle('alerts'), au: this.navStyle('audit'), pm: this.navStyle('perms'), help: this.navStyle('help'), sc: this.navStyle('stock_count') };
     const alerts = this.buildAlerts(crit);
 
     // Reorder report rows — every reagent currently at/under its reorder point,
@@ -991,7 +1049,7 @@ class App extends React.Component {
             dayLabel: dep ? 'หมดแล้ว' : this.dayLabel(d), dayColor: dep ? 'var(--text-tertiary)' : sc.fg,
             fefoBadge: (i === 0 && !dep) ? 'หมดอายุก่อน–เบิกก่อน ถัดไป' : '', statusLabel: dep ? 'หมด' : 'พร้อมใช้',
             statusFg: dep ? 'var(--slate-600)' : 'var(--green-700)', statusBg: dep ? 'var(--slate-100)' : 'var(--green-100)',
-            onEdit: () => this.openEditLot(l.id), onDelete: () => this.deleteLotReceive(l.id) };
+            onEdit: () => this.openEditLot(l.id), onDispose: () => this.openDisposeLot(r.id, l.id), onDelete: () => this.deleteLotReceive(l.id) };
         });
         detail = { ...vm, supplier: r.supplier, reorder: r.reorder, lots, img: r.img || '/reagent_placeholder.png',
           onReceive: () => this.openReceive(r.id), onIssue: () => this.openIssue(r.id) };
@@ -1118,10 +1176,12 @@ class App extends React.Component {
       nav: { dashBg: ns.dash.bg, dashFg: ns.dash.fg, dashIc: ns.dash.ic, invBg: ns.inv.bg, invFg: ns.inv.fg, invIc: ns.inv.ic,
         rlistBg: ns.rlist.bg, rlistFg: ns.rlist.fg, rlistIc: ns.rlist.ic,
         alBg: ns.al.bg, alFg: ns.al.fg, alIc: ns.al.ic, auBg: ns.au.bg, auFg: ns.au.fg, auIc: ns.au.ic, pmBg: ns.pm.bg, pmFg: ns.pm.fg, pmIc: ns.pm.ic,
-        helpBg: ns.help.bg, helpFg: ns.help.fg, helpIc: ns.help.ic, alertCount: alerts.length },
-      go: { dashboard: () => this.nav('dashboard'), inventory: () => this.nav('inventory'), reagentLists: () => this.nav('reagent_lists'), alerts: () => this.nav('alerts'), audit: () => this.nav('audit'), perms: () => this.nav('perms'), help: () => this.nav('help'),
+        helpBg: ns.help.bg, helpFg: ns.help.fg, helpIc: ns.help.ic,
+        scBg: ns.sc.bg, scFg: ns.sc.fg, scIc: ns.sc.ic,
+        alertCount: alerts.length },
+      go: { dashboard: () => this.nav('dashboard'), inventory: () => this.nav('inventory'), reagentLists: () => this.nav('reagent_lists'), alerts: () => this.nav('alerts'), audit: () => this.nav('audit'), perms: () => this.nav('perms'), help: () => this.nav('help'), stockCount: () => this.nav('stock_count'),
         alertsLink: (e) => { e.preventDefault(); this.nav('alerts'); }, auditLink: (e) => { e.preventDefault(); this.nav('audit'); } },
-      isDash: dn === 'dashboard', isInv: dn === 'inventory', isReagentLists: dn === 'reagent_lists', isAlerts: dn === 'alerts', isAudit: dn === 'audit', isPerms: dn === 'perms', isHelp: dn === 'help',
+      isDash: dn === 'dashboard', isInv: dn === 'inventory', isReagentLists: dn === 'reagent_lists', isAlerts: dn === 'alerts', isAudit: dn === 'audit', isPerms: dn === 'perms', isHelp: dn === 'help', isStockCount: dn === 'stock_count',
       title: titles[dn][0], subtitle: titles[dn][1],
       openReceive: (rid) => this.openReceive(rid), openIssue: (rid) => this.openIssue(rid),
       kpi: { total: S.reagents.length }, kpis, dashAlerts, dashLow, recent, usageList, catStats, monthlyData, weeklyPattern, insights,
@@ -1180,7 +1240,6 @@ class App extends React.Component {
       canManage: this.can('manage'),
       updateReagentCategory: (id, cat) => this.updateReagentCategory(id, cat),
 
-      // edit lot (correct qty/expiry/location of existing stock)
       openEditLot: (id) => this.openEditLot(id),
       deleteLotReceive: (id) => this.deleteLotReceive(id),
       modalEditLot: S.modal === 'editLot',
@@ -1191,6 +1250,20 @@ class App extends React.Component {
         if (!l) return null;
         const r = S.reagents.find(x => x.id === l.rid);
         return { lot: l.lot, reagentName: r ? r.th : '—', unit: r ? r.unit : '' };
+      })(),
+
+      // dispose lot
+      openDisposeLot: (rid, lid) => this.openDisposeLot(rid, lid),
+      modalDisposeLot: S.modal === 'disposeLot',
+      dispForm: S.dispForm,
+      dispQty: (qty) => this.dispQty(qty),
+      dispReason: (r, isCustom) => this.dispReason(r, isCustom),
+      submitDisposeLot: () => this.submitDisposeLot(),
+      disposalLotData: (() => {
+        const l = S.lots.find(x => x.id === S.disposalLotId);
+        if (!l) return null;
+        const r = S.reagents.find(x => x.id === l.rid);
+        return { lot: l.lot, qty: l.qty, reagentName: r ? r.th : '—', unit: r ? r.unit : '' };
       })(),
 
       // edit transaction (correct qty/reference of a past receive/issue/adjust record)
@@ -1232,6 +1305,7 @@ class App extends React.Component {
       <PrintStickerModal v={v} />
       <EditLotModal v={v} />
       <EditTransactionModal v={v} />
+      <DisposeLotModal v={v} />
       <Toast v={v} />
       <Login v={v} />
 
