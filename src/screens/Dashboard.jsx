@@ -144,7 +144,7 @@ export function Dashboard({ v }) {
     @media print {
       @page {
         size: A4 portrait;
-        margin: 16mm 14mm;
+        margin: 2cm;
       }
       *, *::before, *::after {
         background-color: transparent !important;
