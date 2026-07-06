@@ -1674,7 +1674,7 @@ code, kbd, samp { font-family: var(--font-mono); }
   }
 
   /* Drawer modals sizing on mobile */
-  .tt-in, .ov-in > div:not(.login-container) {
+  .tt-in:not(.confirm-card), .ov-in > div:not(.login-container):not(.confirm-card) {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
