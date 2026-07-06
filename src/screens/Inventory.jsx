@@ -107,14 +107,14 @@ export function Inventory({ v }) {
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: #dc2626;
+      background: var(--red-700);
       animation: inv-pulse-red 1.8s infinite ease-in-out;
     }
     .inv-dot-amber {
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: #d97706;
+      background: var(--amber-700);
       animation: inv-pulse-amber 1.8s infinite ease-in-out;
     }
 
@@ -124,11 +124,11 @@ export function Inventory({ v }) {
       gap: 6px;
       padding: 4px 10px;
       border-radius: var(--radius-pill);
-      background: #fef2f2;
-      color: #b91c1c;
+      background: var(--red-100);
+      color: var(--red-700);
       font: var(--fw-bold) var(--text-3xs)/1 var(--font-body);
-      border: 1px solid #fee2e2;
-      box-shadow: 0 1px 2px rgba(220, 38, 38, 0.04);
+      border: 1px solid rgba(226, 104, 94, 0.25);
+      box-shadow: 0 1px 2px rgba(226, 104, 94, 0.04);
       white-space: nowrap;
     }
 
@@ -138,11 +138,11 @@ export function Inventory({ v }) {
       gap: 6px;
       padding: 4px 10px;
       border-radius: var(--radius-pill);
-      background: #fffbeb;
-      color: #b45309;
+      background: var(--amber-100);
+      color: var(--amber-700);
       font: var(--fw-bold) var(--text-3xs)/1 var(--font-body);
-      border: 1px solid #fef3c7;
-      box-shadow: 0 1px 2px rgba(217, 119, 6, 0.04);
+      border: 1px solid rgba(214, 154, 46, 0.25);
+      box-shadow: 0 1px 2px rgba(214, 154, 46, 0.04);
       white-space: nowrap;
     }
 
@@ -154,10 +154,10 @@ export function Inventory({ v }) {
       border-radius: var(--radius-md);
       border: none;
       background: linear-gradient(135deg, var(--brand-700), var(--brand-800));
-      color: #ffffff;
+      color: var(--text-on-brand);
       cursor: pointer;
       font: var(--fw-semibold) var(--text-xs)/1 var(--font-body);
-      box-shadow: 0 4px 12px rgba(19, 135, 166, 0.2);
+      box-shadow: var(--glow-brand-soft);
       transition: all var(--dur-fast);
     }
     .inv-btn-primary:hover {
@@ -261,8 +261,8 @@ export function Inventory({ v }) {
                 </div>
               </div>
               
-              <div style={css(`font:var(--fw-medium) var(--text-xs)/1.3 var(--font-body); color:var(--text-secondary);`)}>
-                {r.catLabel}
+              <div title={r.catLabel} style={css(`font:var(--fw-medium) var(--text-xs)/1.3 var(--font-body); color:var(--text-secondary); cursor:help; text-decoration:underline; text-decoration-style:dotted; text-underline-offset:2px;`)}>
+                {r.cat}
               </div>
               
               <div style={css(`text-align:right;`)}>
@@ -308,8 +308,8 @@ export function Inventory({ v }) {
                   <div style={css(`font:var(--fw-semibold) var(--text-sm)/1.35 var(--font-body); color:var(--text-primary);`)}>
                     {r.th}
                   </div>
-                  <div style={css(`font:var(--fw-medium) var(--text-2xs)/1.3 var(--font-body); color:var(--text-secondary); margin-top:2px;`)}>
-                    {r.catLabel}
+                  <div title={r.catLabel} style={css(`font:var(--fw-medium) var(--text-2xs)/1.3 var(--font-body); color:var(--text-secondary); margin-top:2px; cursor:help; display:inline-block; border-bottom:1px dotted var(--border-strong);`)}>
+                    {r.cat}
                   </div>
                 </div>
                 {(r.low || r.expiring) && (
