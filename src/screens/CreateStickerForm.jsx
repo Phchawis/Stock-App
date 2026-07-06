@@ -11,12 +11,16 @@ export function CreateStickerForm({ v }) {
 
   const getFirstName = (fullName) => {
     if (!fullName) return '';
-    const parts = fullName.trim().split(/\s+/);
+    let name = fullName.trim();
     const prefixes = ['ทนพ.', 'ทนพญ.', 'ภญ.', 'นพ.', 'พญ.', 'นาย', 'นาง', 'นางสาว', 'คุณ'];
-    if (parts.length > 1 && prefixes.includes(parts[0])) {
-      return parts[1];
+    for (const p of prefixes) {
+      if (name.startsWith(p)) {
+        name = name.slice(p.length).trim();
+        break;
+      }
     }
-    return parts[0];
+    const parts = name.split(/\s+/);
+    return parts[0] || '';
   };
 
   // Form 1: Aliquot Form State
