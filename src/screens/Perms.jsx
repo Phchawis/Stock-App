@@ -203,6 +203,45 @@ export function Perms({ v }) {
         })}
       </div>
 
+      {isAdmin && (
+        <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:20px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:14px;`)}>
+          <div>
+            <div style={css(`font:var(--fw-bold) var(--text-base)/1.2 var(--font-display); color:var(--text-primary);`)}>สำรองและกู้คืนข้อมูลระบบ (Backup & Restore)</div>
+            <div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary); margin-top:2px;`)}>
+              สำรองข้อมูลฐานข้อมูลคลังทั้งหมดออกเป็นไฟล์ JSON หรืออัปโหลดไฟล์สำรองข้อมูลเพื่อกู้คืนฐานข้อมูล
+            </div>
+          </div>
+          <div style={css(`display:flex; gap:12px; flex-wrap:wrap;`)}>
+            <button 
+              onClick={v.onBackupDatabase}
+              style={css(`display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); box-shadow:var(--glow-brand-soft); transition:background var(--dur-fast);`)}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--brand-800)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--brand-700)'; }}
+            >
+              📥 ดาวน์โหลดไฟล์สำรองข้อมูล (Backup)
+            </button>
+            
+            <div style={css(`position:relative; display:inline-block;`)}>
+              <button 
+                onClick={() => document.getElementById('restore-file-input').click()}
+                style={css(`display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--border-strong)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)'; }}
+              >
+                📤 อัปโหลดไฟล์เพื่อกู้คืนคลัง (Restore)
+              </button>
+              <input 
+                id="restore-file-input"
+                type="file" 
+                accept=".json"
+                onChange={v.onRestoreDatabase}
+                style={css(`display:none;`)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
