@@ -4,7 +4,7 @@ import { requirePerm, hashPassword, json } from './_lib.js';
 export async function onRequestGet(context) {
   try {
     const { results } = await context.env.DB
-      .prepare('SELECT username, name, role, initials, color FROM users').all();
+      .prepare('SELECT username, name, role, initials, color, signature FROM users').all();
     return json(results);
   } catch (err) {
     return json({ error: err.message }, 500);
