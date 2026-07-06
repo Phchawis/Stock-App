@@ -201,6 +201,12 @@ export function Sidebar({ v }) {
       background-color: var(--red-50);
       transform: scale(1.1);
     }
+
+    .sidebar-op-receive:hover .sc-tag,
+    .sidebar-op-withdraw:hover .sc-tag {
+      color: #ffffff !important;
+      border-color: rgba(255,255,255,.6) !important;
+    }
   `;
 
   return (
@@ -261,6 +267,7 @@ export function Sidebar({ v }) {
             <button onClick={go.stockCount} className="sidebar-btn-item" style={css(`background:${nav.scBg}; color:${nav.scFg};`)}>
               <span style={css(`width:22px; height:22px; display:grid; place-items:center; color:${nav.scIc};`)}>📋</span>
               <span style={css(`flex:1;`)}>ตรวจนับคลัง</span>
+              <span style={css(`font-size:9px; color:var(--text-tertiary); border:1px solid var(--border-subtle); padding:1px 4px; border-radius:var(--radius-sm); font-family:var(--font-mono);`)}>Alt+S</span>
             </button>
           )}
           
@@ -279,11 +286,13 @@ export function Sidebar({ v }) {
           <button onClick={openReceive} className="sidebar-op-receive">
             <span style={css(`width:22px; height:22px; display:grid; place-items:center;`)}>{ic.receive}</span>
             <span style={css(`flex:1;`)}>รับเข้า (Receive)</span>
+            <span style={css(`font-size:9px; color:var(--text-disabled); border:1px solid rgba(16,185,129,.25); padding:1px 4px; border-radius:var(--radius-sm); font-family:var(--font-mono); transition:all 0.2s;`)} className="sc-tag">Alt+R</span>
           </button>
           
           <button onClick={openIssue} className="sidebar-op-withdraw">
             <span style={css(`width:22px; height:22px; display:grid; place-items:center;`)}>{ic.issue}</span>
             <span style={css(`flex:1;`)}>เบิกจ่าย (Withdraw)</span>
+            <span style={css(`font-size:9px; color:var(--text-disabled); border:1px solid rgba(245,158,11,.25); padding:1px 4px; border-radius:var(--radius-sm); font-family:var(--font-mono); transition:all 0.2s;`)} className="sc-tag">Alt+I</span>
           </button>
         </div>
 
