@@ -9,6 +9,16 @@ export function CreateStickerForm({ v }) {
   const [activeTab, setActiveTab] = React.useState('aliquot'); // 'aliquot' or 'opened'
   const canvasRef = React.useRef(null);
 
+  const getFirstName = (fullName) => {
+    if (!fullName) return '';
+    const parts = fullName.trim().split(/\s+/);
+    const prefixes = ['ทนพ.', 'ทนพญ.', 'ภญ.', 'นพ.', 'พญ.', 'นาย', 'นาง', 'นางสาว', 'คุณ'];
+    if (parts.length > 1 && prefixes.includes(parts[0])) {
+      return parts[1];
+    }
+    return parts[0];
+  };
+
   // Form 1: Aliquot Form State
   const [aliquotReagent, setAliquotReagent] = React.useState('');
   const [aliquotSearch, setAliquotSearch] = React.useState('');
@@ -16,7 +26,7 @@ export function CreateStickerForm({ v }) {
   const [aliquotLot, setAliquotLot] = React.useState('');
   const [aliquotPrepDate, setAliquotPrepDate] = React.useState(new Date().toISOString().slice(0, 10));
   const [aliquotExpDate, setAliquotExpDate] = React.useState('');
-  const [aliquotPrepBy, setAliquotPrepBy] = React.useState(user ? user.name.split(' ')[0] : '');
+  const [aliquotPrepBy, setAliquotPrepBy] = React.useState(user ? getFirstName(user.name) : '');
 
   // Form 2: Opened Form State
   const [openedReagent, setOpenedReagent] = React.useState('');
@@ -24,7 +34,7 @@ export function CreateStickerForm({ v }) {
   const [openedOpen, setOpenedOpen] = React.useState(false);
   const [openedType, setOpenedType] = React.useState('Control'); // 'Control' or 'Calibrator'
   const [openedDate, setOpenedDate] = React.useState(new Date().toISOString().slice(0, 10));
-  const [openedBy, setOpenedBy] = React.useState(user ? user.name.split(' ')[0] : '');
+  const [openedBy, setOpenedBy] = React.useState(user ? getFirstName(user.name) : '');
   const [openStorageDuration, setOpenStorageDuration] = React.useState('Until exp.');
 
   const filteredAliquotOptions = React.useMemo(() => {
