@@ -22,17 +22,28 @@ export function Perms({ v }) {
           .perm-user-thead-desktop { display: none !important; }
           .perm-user-row-desktop { display: none !important; }
           .perm-user-row-mobile { display: flex !important; }
+          .active-role-card {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 12px !important;
+          }
+          .active-role-badge {
+            align-self: flex-start !important;
+            margin-left: 64px !important;
+          }
         }
       `}</style>
 
       {/* Active Role card */}
-      <div style={css(`display:flex; align-items:center; gap:16px; padding:18px 20px; background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm);`)}>
-        <span style={css(`width:48px; height:48px; border-radius:50%; background:${myRole.color}; color:#fff; display:grid; place-items:center; font:600 16px/1 var(--font-body); flex-shrink:0;`)}>{myRole.initials}</span>
-        <div style={css(`flex:1; min-width:0;`)}>
-          <div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>บทบาทที่เข้าสู่ระบบขณะนี้</div>
-          <div style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary);`)}>{myRole.th} <span style={css(`font:500 12px/1 var(--font-mono); color:var(--text-tertiary);`)}>{myRole.en}</span></div>
+      <div className="active-role-card" style={css(`display:flex; align-items:center; gap:16px; padding:18px 20px; background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm);`)}>
+        <div style={css(`display:flex; align-items:center; gap:16px; flex:1; min-width:0;`)}>
+          <span style={css(`width:48px; height:48px; border-radius:50%; background:${myRole.color}; color:#fff; display:grid; place-items:center; font:600 16px/1 var(--font-body); flex-shrink:0;`)}>{myRole.initials}</span>
+          <div style={css(`flex:1; min-width:0;`)}>
+            <div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>บทบาทที่เข้าสู่ระบบขณะนี้</div>
+            <div style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary);`)}>{myRole.th} <span style={css(`font:500 12px/1 var(--font-mono); color:var(--text-tertiary);`)}>{myRole.en}</span></div>
+          </div>
         </div>
-        <span style={css(`padding:6px 13px; border-radius:var(--radius-pill); background:var(--green-100); color:var(--green-700); font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); white-space:nowrap;`)}>เข้าถึง {myRole.grantCount} / 7 สิทธิ์</span>
+        <span className="active-role-badge" style={css(`padding:6px 13px; border-radius:var(--radius-pill); background:var(--green-100); color:var(--green-700); font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); white-space:nowrap;`)}>เข้าถึง {myRole.grantCount} / 7 สิทธิ์</span>
       </div>
 
       {canEditPerms && (
