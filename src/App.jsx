@@ -203,19 +203,30 @@ class App extends React.Component {
     if (this.state.role !== 'admin') { this.showToast('เฉพาะผู้ดูแลระบบเท่านั้นที่แก้ไขสิทธิ์ได้', 'warn'); return; }
     const cur = this.state.perms[roleId][key];
     const next = cur ? 0 : 1;
-    // Optimistic update, then persist; revert on failure.
-    this.setState(s => ({ perms: { ...s.perms, [roleId]: { ...s.perms[roleId], [key]: next } } }));
-    try {
-      const res = await this.api('/api/permissions', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: roleId, perm: key, allowed: next })
-      });
-      if (!res.ok) throw new Error('บันทึกสิทธิ์ล้มเหลว');
-    } catch (err) {
-      this.setState(s => ({ perms: { ...s.perms, [roleId]: { ...s.perms[roleId], [key]: cur } } }));
-      this.showToast(err.message, 'warn');
-    }
+    const rname = (this.ROLES().find(r => r.id === roleId) || {}).th;
+    const pname = (this.PERM_LABELS().find(p => p.key === key) || {}).label;
+    const actionText = cur ? 'ยกเลิกสิทธิ์' : 'เพิ่มสิทธิ์';
+    const message = `คุณต้องการ${actionText} "${pname}" ของ "${rname}" ใช่หรือไม่?`;
+
+    this.askConfirm(
+      actionText,
+      message,
+      async () => {
+        // Optimistic update, then persist; revert on failure.
+        this.setState(s => ({ perms: { ...s.perms, [roleId]: { ...s.perms[roleId], [key]: next } } }));
+        try {
+          const res = await this.api('/api/permissions', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: roleId, perm: key, allowed: next })
+          });
+          if (!res.ok) throw new Error('บันทึกสิทธิ์ล้มเหลว');
+        } catch (err) {
+          this.setState(s => ({ perms: { ...s.perms, [roleId]: { ...s.perms[roleId], [key]: cur } } }));
+          this.showToast(err.message, 'warn');
+        }
+      }
+    );
   }
   ROLES() {
     return [
