@@ -151,7 +151,7 @@ export function DetailDrawer({ v }) {
                         <span style={css(`display:grid; place-items:center;`)}>{ic.qr}</span>
                         <span style={css(`font-family:var(--font-mono);`)}>{l.qr}</span>
                       </div>
-                      <div style={css(`display:flex; align-items:center; gap:6px;`)}>
+                      <div style={css(`display:flex; align-items:center; gap:6px; flex-wrap:wrap;`)}>
                         <button
                           type="button"
                           onClick={() => openPrintSticker(l, detail)}
@@ -167,6 +167,13 @@ export function DetailDrawer({ v }) {
                               style={css(`background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; gap:3px;`)}
                             >
                               ✏️ แก้ไข
+                            </button>
+                            <button
+                              type="button"
+                              onClick={l.onDispose}
+                              style={css(`background:transparent; border:1px solid var(--red-600); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--red-600); cursor:pointer; display:flex; align-items:center; gap:3px;`)}
+                            >
+                              🗑️ ตัดจำหน่าย
                             </button>
                             <button
                               type="button"
