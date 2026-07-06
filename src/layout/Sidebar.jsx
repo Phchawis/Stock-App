@@ -4,7 +4,7 @@ import { css } from '../css.js';
 export function Sidebar({ v }) {
   const {
     ic, user, onLogout, nav, go, title,
-    openReceive, openIssue, kpi, sidebarOpen,
+    openReceive, openIssue, kpi, sidebarOpen, canManage,
   } = v;
 
   const localStyle = `
@@ -256,6 +256,13 @@ export function Sidebar({ v }) {
             <span style={css(`width:22px; height:22px; display:grid; place-items:center; color:${nav.pmIc};`)}>{ic.shield}</span>
             <span style={css(`flex:1;`)}>สิทธิ์การใช้งาน</span>
           </button>
+          
+          {canManage && (
+            <button onClick={go.stockCount} className="sidebar-btn-item" style={css(`background:${nav.scBg}; color:${nav.scFg};`)}>
+              <span style={css(`width:22px; height:22px; display:grid; place-items:center; color:${nav.scIc};`)}>📋</span>
+              <span style={css(`flex:1;`)}>ตรวจนับคลัง</span>
+            </button>
+          )}
           
           <button onClick={go.help} className="sidebar-btn-item" style={css(`background:${nav.helpBg}; color:${nav.helpFg};`)}>
             <span style={css(`width:22px; height:22px; display:grid; place-items:center; color:${nav.helpIc};`)}>{ic.help || ic.list}</span>
