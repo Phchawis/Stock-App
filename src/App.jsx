@@ -1126,8 +1126,9 @@ class App extends React.Component {
       perms: ['สิทธิ์การใช้งาน', 'สิทธิ์การเข้าถึงระบบตามบทบาทผู้ใช้งาน'],
       help: ['คู่มือการใช้งาน', 'วิธีการใช้งานระบบจัดเก็บคลังน้ำยาและบริหารคลังอย่างเป็นขั้นตอน'],
       stock_count: ['ตรวจนับคลัง (Stock Count)', 'บันทึกยอดการตรวจนับน้ำยาจริงประจำสัปดาห์หรือเดือน'],
+      create_sticker: ['สร้างสติกเกอร์ (Sticker Generator)', 'แบบฟอร์มออกแบบและพิมพ์สติกเกอร์สำหรับขวดน้ำยาและสติกเกอร์แบ่งส่วน'],
     };
-    const ns = { dash: this.navStyle('dashboard'), inv: this.navStyle('inventory'), rlist: this.navStyle('reagent_lists'), al: this.navStyle('alerts'), au: this.navStyle('audit'), pm: this.navStyle('perms'), help: this.navStyle('help'), sc: this.navStyle('stock_count') };
+    const ns = { dash: this.navStyle('dashboard'), inv: this.navStyle('inventory'), rlist: this.navStyle('reagent_lists'), al: this.navStyle('alerts'), au: this.navStyle('audit'), pm: this.navStyle('perms'), help: this.navStyle('help'), sc: this.navStyle('stock_count'), cs: this.navStyle('create_sticker') };
     const alerts = this.buildAlerts(crit);
 
     // Reorder report rows — every reagent currently at/under its reorder point,
@@ -1347,10 +1348,11 @@ class App extends React.Component {
         alBg: ns.al.bg, alFg: ns.al.fg, alIc: ns.al.ic, auBg: ns.au.bg, auFg: ns.au.fg, auIc: ns.au.ic, pmBg: ns.pm.bg, pmFg: ns.pm.fg, pmIc: ns.pm.ic,
         helpBg: ns.help.bg, helpFg: ns.help.fg, helpIc: ns.help.ic,
         scBg: ns.sc.bg, scFg: ns.sc.fg, scIc: ns.sc.ic,
+        csBg: ns.cs.bg, csFg: ns.cs.fg, csIc: ns.cs.ic,
         alertCount: alerts.length },
-      go: { dashboard: () => this.nav('dashboard'), inventory: () => this.nav('inventory'), reagentLists: () => this.nav('reagent_lists'), alerts: () => this.nav('alerts'), audit: () => this.nav('audit'), perms: () => this.nav('perms'), help: () => this.nav('help'), stockCount: () => this.nav('stock_count'),
+      go: { dashboard: () => this.nav('dashboard'), inventory: () => this.nav('inventory'), reagentLists: () => this.nav('reagent_lists'), alerts: () => this.nav('alerts'), audit: () => this.nav('audit'), perms: () => this.nav('perms'), help: () => this.nav('help'), stockCount: () => this.nav('stock_count'), createSticker: () => this.nav('create_sticker'),
         alertsLink: (e) => { e.preventDefault(); this.nav('alerts'); }, auditLink: (e) => { e.preventDefault(); this.nav('audit'); } },
-      isDash: dn === 'dashboard', isInv: dn === 'inventory', isReagentLists: dn === 'reagent_lists', isAlerts: dn === 'alerts', isAudit: dn === 'audit', isPerms: dn === 'perms', isHelp: dn === 'help', isStockCount: dn === 'stock_count',
+      isDash: dn === 'dashboard', isInv: dn === 'inventory', isReagentLists: dn === 'reagent_lists', isAlerts: dn === 'alerts', isAudit: dn === 'audit', isPerms: dn === 'perms', isHelp: dn === 'help', isStockCount: dn === 'stock_count', isCreateSticker: dn === 'create_sticker',
       title: titles[dn][0], subtitle: titles[dn][1],
       openReceive: (rid) => this.openReceive(rid), openIssue: (rid) => this.openIssue(rid),
       openSignature: () => this.openSignature(),
