@@ -15,6 +15,7 @@ export function Help({ v }) {
     { id: 'register', label: 'การลงทะเบียนหลัก (Catalog)', icon: ic.boxes || '📦' },
     { id: 'reports', label: 'รายงานประจำเดือน (PDF)', icon: ic.list || '📄' },
     { id: 'reconciliation', label: 'การปรับปรุงสต็อก & ตัดจ่าย', icon: '⚖️' },
+    { id: 'sticker', label: 'การสร้างสติกเกอร์ (Sticker)', icon: '🏷️' },
   ];
 
   return (
@@ -465,6 +466,69 @@ export function Help({ v }) {
                     </ol>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 7: Sticker Generator */}
+        {activeTab === 'sticker' && (
+          <div style={css(`display:flex; flex-direction:column; gap:24px;`)}>
+            <div>
+              <h2 style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary); margin:0 0 8px 0;`)}>
+                การพิมพ์สติกเกอร์ติดขวดน้ำยา (Sticker Generator Utility)
+              </h2>
+              <p style={css(`font:var(--text-sm)/1.6 var(--font-body); color:var(--text-secondary); margin:0;`)}>
+                ระบบสร้างและส่งออกไฟล์ภาพสติกเกอร์สำหรับขวดทดสอบน้ำยาแบ่งส่วน (Aliquot) และขวดเปิดใช้งาน (Opened) ความละเอียดสูง เพื่อนำไปพิมพ์ออกทางเครื่องพิมพ์สติกเกอร์ความร้อนโดยตรง
+              </p>
+            </div>
+
+            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; align-items:flex-start;`)}>
+              {/* Aliquot Sticker Guide */}
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span>🏷️</span> 1. Aliquot Sticker Form (3x2 cm)
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
+                  <div>**จุดประสงค์:** ใช้ติดขวดแบ่งส่วนน้ำยา (Aliquot Tube) เพื่อบันทึกข้อมูลย้อนกลับ</div>
+                  <div>**รายละเอียดข้อมูลและองค์ประกอบ:**
+                    <ul style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
+                      <li>**ชื่อน้ำยาเคมี:** มีระบบค้นหาและเลือกจากฐานข้อมูลอัจฉริยะ (พิมพ์และเลือกได้ทันที)</li>
+                      <li>**เลข Lot:** ดึงข้อมูล Lot เพื่อเชื่อมโยงการสืบย้อน</li>
+                      <li>**วันที่เตรียม / วัน Exp.:** บันทึกช่วงเวลาการทำ Aliquot</li>
+                      <li>**ชื่อผู้เตรียม:** ดึงชื่อผู้ใช้ปัจจุบันที่ Login อัตโนมัติ (โดยตัดคำนำหน้าวิชาชีพ ทนพ./ทนพญ. ออกให้โดยอัตโนมัติ)</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Opened Sticker Guide */}
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span>🧴</span> 2. Opened Sticker Form (4.5x2 cm)
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
+                  <div>**จุดประสงค์:** ใช้ติดขวดหลักเมื่อเริ่มมีการเปิดจุกขวดน้ำยาใช้งานจริงครั้งแรก</div>
+                  <div>**รายละเอียดข้อมูลและองค์ประกอบ:**
+                    <ul style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
+                      <li>**ชื่อน้ำยาเคมี:** ค้นหาอัจฉริยะพร้อมกล่องพิมพ์แยกสีทึบแสง (Opaque) บังส่วนอื่นป้องกันการสับสน</li>
+                      <li>**วันที่เปิด (Opened Date) / ผู้เปิดใช้งาน:** ระบุวันที่เปิดขวดและผู้รับผิดชอบ</li>
+                      <li>**การเก็บรักษาระยะยาว:** แสดงอุณหภูมิเก็บรักษา (After open storage 2-8 °C) พร้อมระบุระยะเวลาที่น้ำยาอยู่ได้หลังเปิด (7 วัน, 14 วัน, 30 วัน หรือ จนกว่าจะหมดอายุ)</li>
+                      <li>**รูปแบบสติกเกอร์:** ดีไซน์แบบไม่มีขอบตัวการ์ดเพื่อขยายข้อความให้คมชัดที่สุด</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Printing Guidelines */}
+            <div style={css(`background:var(--brand-50); border:1px solid var(--brand-300); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+              <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--brand-700); margin-bottom:8px; display:flex; align-items:center; gap:8px;`)}>
+                <span>🖨️</span> คำแนะนำในการดาวน์โหลดและสั่งพิมพ์ให้คมชัดที่สุด
+              </div>
+              <div style={css(`font-size:var(--text-xs); color:var(--text-secondary); line-height:1.6; display:flex; flex-direction:column; gap:8px;`)}>
+                <div>1. เมื่อพิมพ์กรอกข้อมูลครบถ้วนแล้ว ให้คลิกปุ่ม **"📥 ดาวน์โหลดไฟล์ PNG"** เพื่อเซฟไฟล์ภาพสติกเกอร์ความละเอียดระดับ HD ลงในเครื่อง</div>
+                <div>2. เพื่อความคมชัดสูงสุด แนะนำให้นำไฟล์ภาพที่ได้ไปสั่งพิมพ์ผ่านโปรแกรมพิมพ์สลากโดยเฉพาะของตัวเครื่องพิมพ์ความร้อน (เช่น **BarTender** หรือ **GoLabel**) เพื่อให้ไดรเวอร์เครื่องพิมพ์ทำการจับคู่พิกเซล 1-to-1 แบบขาวดำคมกริบ</div>
               </div>
             </div>
           </div>
