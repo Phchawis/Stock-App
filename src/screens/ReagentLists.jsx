@@ -179,7 +179,7 @@ export function ReagentLists({ v }) {
                       <div style={css(`font:var(--fw-bold) var(--text-sm)/1.35 var(--font-body); color:var(--text-primary); min-height:38px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;`)}>
                         {r.th}
                       </div>
-                      <div style={css(`font:var(--text-2xs)/1.2 var(--font-mono); color:var(--text-tertiary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>
+                      <div style={css(`font:var(--fw-medium) var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>
                         {r.en || 'No English Name'}
                       </div>
                     </div>
