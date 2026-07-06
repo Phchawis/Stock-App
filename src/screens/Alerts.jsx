@@ -65,7 +65,7 @@ export function Alerts({ v }) {
     @media print {
       @page {
         size: A4 portrait;
-        margin: 2cm;
+        margin: 2.5cm;
       }
       *, *::before, *::after {
         background-color: transparent !important;
