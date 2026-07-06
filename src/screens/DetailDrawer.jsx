@@ -52,7 +52,7 @@ export function DetailDrawer({ v }) {
         <div style={css(`padding:18px 22px; border-bottom:1px solid var(--border-subtle); display:flex; align-items:flex-start; gap:12px;`)}>
           <div style={css(`flex:1; min-width:0;`)}>
             <div style={css(`font:var(--fw-bold) var(--text-lg)/1.25 var(--font-display); color:var(--text-primary);`)}>{detail.th}</div>
-            <div style={css(`font:var(--text-2xs)/1.4 var(--font-mono); color:var(--text-tertiary); margin-top:2px;`)}>{detail.en}</div>
+            <div style={css(`font:var(--fw-medium) var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary); margin-top:2px;`)}>{detail.en}</div>
           </div>
           <button onClick={closeDetail} style={css(`border:none; background:var(--slate-100); cursor:pointer; padding:6px; border-radius:var(--radius-sm); color:var(--text-secondary); display:grid; place-items:center;`)}>{ic.close}</button>
         </div>
