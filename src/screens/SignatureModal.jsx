@@ -57,7 +57,7 @@ export function SignatureModal({ v }) {
               <span style={css(`font-weight:600; color:var(--text-primary);`)}>{user ? user.role : '—'}</span>
             </div>
             <div style={css(`display:flex; justify-content:space-between;`)}>
-              <span style={css(`color:var(--text-secondary);`)}>หัวหน้าหน่วย:</span>
+              <span style={css(`color:var(--text-secondary);`)}>หัวหน้าคลังน้ำยา:</span>
               <span style={css(`font-weight:600; color:var(--text-primary);`)}>ทนพญ.เบญจวรรณ รุ่งเรือง</span>
             </div>
           </div>
