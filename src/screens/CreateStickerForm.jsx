@@ -169,8 +169,8 @@ export function CreateStickerForm({ v }) {
 
       const labelFont = "bold 96px 'Sarabun', sans-serif";
 
-      // Row 1: Reagent Name + Type (Control / Calibrator)
-      const titleText = `${openedReagent || ''} ${openedType}`;
+      // Row 1: Reagent Name only
+      const titleText = `${openedReagent || ''}`;
       fillTextAutoFit(titleText, 60, 195, 1680, 115);
 
       // Row 2: Opened: __ / __ / __ by ___
@@ -282,7 +282,7 @@ export function CreateStickerForm({ v }) {
                       onClick={() => setAliquotOpen(false)}
                       style={css(`position:fixed; inset:0; z-index:10;`)}
                     />
-                    <div style={css(`position:absolute; top:calc(100% + 4px); left:0; right:0; max-height:240px; overflow-y:auto; background:var(--white); border:1px solid var(--border-strong); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:20;`)}>
+                    <div className="sticker-dropdown-menu" style={css(`position:absolute; top:calc(100% + 4px); left:0; right:0; max-height:240px; overflow-y:auto; background:var(--white); border:1px solid var(--border-strong); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:20;`)}>
                       {filteredAliquotOptions.length > 0 ? (
                         filteredAliquotOptions.map(r => (
                           <div 
@@ -379,7 +379,7 @@ export function CreateStickerForm({ v }) {
                       onClick={() => setOpenedOpen(false)}
                       style={css(`position:fixed; inset:0; z-index:10;`)}
                     />
-                    <div style={css(`position:absolute; top:calc(100% + 4px); left:0; right:0; max-height:240px; overflow-y:auto; background:var(--white); border:1px solid var(--border-strong); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:20;`)}>
+                    <div className="sticker-dropdown-menu" style={css(`position:absolute; top:calc(100% + 4px); left:0; right:0; max-height:240px; overflow-y:auto; background:var(--white); border:1px solid var(--border-strong); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:20;`)}>
                       {filteredOpenedOptions.length > 0 ? (
                         filteredOpenedOptions.map(r => (
                           <div 
@@ -407,18 +407,7 @@ export function CreateStickerForm({ v }) {
                 )}
               </div>
 
-              {/* Type Dropdown (Control / Calibrator) */}
-              <div style={css(`display:flex; flex-direction:column; gap:6px;`)}>
-                <label style={css(`font-size:var(--text-2xs); font-weight:600; color:var(--text-secondary);`)}>ประเภทตัวควบคุม (Type)</label>
-                <select 
-                  value={openedType}
-                  onChange={(e) => setOpenedType(e.target.value)}
-                  style={css(`box-sizing:border-box; width:100%; padding:10px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none; height:42px; cursor:pointer;`)}
-                >
-                  <option value="Control">Control</option>
-                  <option value="Calibrator">Calibrator</option>
-                </select>
-              </div>
+
 
               {/* Opened Date */}
               <div style={css(`display:flex; flex-direction:column; gap:6px;`)}>
