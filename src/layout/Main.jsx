@@ -85,6 +85,12 @@ export function Main({ v }) {
     }
 
     @media (max-width: 768px) {
+      /* Shared height budget for the fixed bottom bar so the two places that
+         need to clear it (main-content's scroll padding, the icon-rail
+         sidebar's footer) stay in sync with the bar's own padding below. */
+      :root {
+        --mobile-bar-height: calc(54px + env(safe-area-inset-bottom, 0px));
+      }
       .mobile-action-bar {
         display: flex !important;
         position: fixed;
@@ -95,8 +101,8 @@ export function Main({ v }) {
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
         border-top: 1px solid var(--border-default);
-        padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 8px));
-        gap: 12px;
+        padding: 8px 14px calc(8px + env(safe-area-inset-bottom, 0px));
+        gap: 10px;
         z-index: 40;
         box-shadow: var(--content-bar-shadow);
       }
@@ -105,10 +111,10 @@ export function Main({ v }) {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        padding: 12px;
+        gap: 6px;
+        padding: 9px;
         border-radius: var(--radius-md);
-        font: var(--fw-bold) 15px/1 var(--font-body) !important;
+        font: var(--fw-bold) 13px/1 var(--font-body) !important;
         cursor: pointer;
         transition: all var(--dur-fast);
       }
@@ -131,7 +137,7 @@ export function Main({ v }) {
         display: none !important;
       }
       main.main-content {
-        padding-bottom: 90px !important;
+        padding-bottom: var(--mobile-bar-height) !important;
       }
     }
   `;
