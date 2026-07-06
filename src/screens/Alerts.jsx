@@ -3,7 +3,7 @@ import { css } from '../css.js';
 
 export function Alerts({ v }) {
   const {
-    isAlerts, alertRows, hasAlerts, ic, user, reorderReportRows,
+    isAlerts, alertRows, hasAlerts, ic, user, reorderReportRows, usersList,
   } = v;
 
   if (!isAlerts) return null;
@@ -344,14 +344,26 @@ export function Alerts({ v }) {
 
         {/* Sign-off signatures */}
         <div style={css(`margin-top:35px; display:flex; justify-content:space-between; page-break-inside:avoid;`)}>
-          <div style={css(`text-align:center; width:220px; font-size:10px; color:#333;`)}>
-            <p>ลงชื่อ.......................................................</p>
+          <div style={css(`text-align:center; width:220px; font-size:10px; color:#333; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;`)}>
+            {user.signature ? (
+              <img src={user.signature} alt="Reporter Signature" style={css(`max-height:36px; object-fit:contain; margin-bottom:4px; background:#fff; padding:2px; border:1px solid #eee;`)} />
+            ) : (
+              <p>ลงชื่อ.......................................................</p>
+            )}
             <p style={css(`margin-top:6px; font-weight:bold;`)}>( {user.name} )</p>
             <p style={css(`margin-top:2px; color:#666;`)}>ผู้จัดทำรายการสั่งซื้อ ( {user.role} )</p>
           </div>
-          <div style={css(`text-align:center; width:220px; font-size:10px; color:#333;`)}>
-            <p>ลงชื่อ.......................................................</p>
-            <p style={css(`margin-top:6px; font-weight:bold;`)}>( ทนพ. ธนวัฒน์ ผู้ดูแลระบบ )</p>
+          <div style={css(`text-align:center; width:220px; font-size:10px; color:#333; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;`)}>
+            {(() => {
+              const supervisorUser = (usersList || []).find(u => u.username === 'supervisor' || u.role === 'supervisor');
+              const supervisorSig = supervisorUser ? supervisorUser.signature : null;
+              return supervisorSig ? (
+                <img src={supervisorSig} alt="Supervisor Signature" style={css(`max-height:36px; object-fit:contain; margin-bottom:4px; background:#fff; padding:2px; border:1px solid #eee;`)} />
+              ) : (
+                <p>ลงชื่อ.......................................................</p>
+              );
+            })()}
+            <p style={css(`margin-top:6px; font-weight:bold;`)}>( ทนพญ.เบญจวรรณ รุ่งเรือง )</p>
             <p style={css(`margin-top:2px; color:#666;`)}>หัวหน้าห้องปฏิบัติการ</p>
           </div>
         </div>
