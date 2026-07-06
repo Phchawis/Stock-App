@@ -723,6 +723,62 @@ class App extends React.Component {
     }
   }
 
+  async onBackupDatabase() {
+    try {
+      const res = await this.api('/api/admin/backup');
+      if (!res.ok) throw new Error('ไม่สามารถสำรองข้อมูลได้');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tuh_inventory_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      this.showToast('สำรองข้อมูลเสร็จสิ้น');
+    } catch (err) {
+      this.showToast(err.message, 'warn');
+    }
+  }
+
+  async onRestoreDatabase(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = async (uploadEvent) => {
+      try {
+        const backupData = JSON.parse(uploadEvent.target.result);
+        
+        this.askConfirm(
+          'ยืนยันการกู้คืนฐานข้อมูล',
+          `คำเตือน: การกู้คืนข้อมูลจะเขียนทับและลบข้อมูลคลังน้ำยาในปัจจุบันทั้งหมด คุณต้องการดำเนินการต่อใช่หรือไม่?`,
+          async () => {
+            try {
+              const res = await this.api('/api/admin/restore', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(backupData)
+              });
+              const data = await res.json().catch(() => ({}));
+              if (!res.ok) throw new Error(data.error || 'กู้คืนข้อมูลล้มเหลว');
+              
+              this.showToast('กู้คืนฐานข้อมูลระบบสำเร็จแล้ว');
+              this.fetchData();
+            } catch (err) {
+              this.showToast(err.message, 'warn');
+            }
+          }
+        );
+      } catch (err) {
+        this.showToast('ไฟล์สำรองข้อมูลชำรุดหรือไม่ถูกต้อง: ' + err.message, 'warn');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // Reset uploader
+  }
+
   bindEtf(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ etForm: { ...s.etForm, [k]: v } })); }; }
   openEditTxn(txnId) {
     if (!this.can('manage')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์แก้ไขรายการนี้', 'warn'); return; }
@@ -1274,6 +1330,8 @@ class App extends React.Component {
       deleteUser: (username) => this.deleteUser(username),
       deleteReagent: (id) => this.deleteReagent(id),
       clearTxns: () => this.clearTxns(),
+      onBackupDatabase: () => this.onBackupDatabase(),
+      onRestoreDatabase: (e) => this.onRestoreDatabase(e),
       openPrintSticker: (lot, reagent) => this.openPrintSticker(lot, reagent),
       closePrintSticker: () => this.closePrintSticker(),
       modalPrintSticker: S.modal === 'printSticker',
