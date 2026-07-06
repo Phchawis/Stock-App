@@ -1,6 +1,6 @@
 import React from 'react';
 import { css } from '../css.js';
-import { contentTheme } from '../theme.js';
+
 import { Dashboard } from '../screens/Dashboard.jsx';
 import { Inventory } from '../screens/Inventory.jsx';
 import { Alerts } from '../screens/Alerts.jsx';
@@ -145,7 +145,7 @@ export function Main({ v }) {
   `;
 
   return (
-    <div style={css(`flex:1; min-width:0; display:flex; flex-direction:column; background:var(--surface-page); ${contentTheme}`)}>
+    <div className="theme-content-teal" style={css(`flex:1; min-width:0; display:flex; flex-direction:column; background:var(--surface-page);`)}>
       <style>{localStyle}</style>
       <header className="main-header" style={css(`height:var(--topbar-height,60px); flex-shrink:0; background:var(--content-glass-top); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--border-default); display:flex; align-items:center; gap:16px; padding:0 var(--page-gutter,28px); position:sticky; top:0; z-index:5;`)}>
         <button 
