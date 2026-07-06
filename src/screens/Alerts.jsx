@@ -62,11 +62,11 @@ export function Alerts({ v }) {
   };
 
   const printStyle = `
+    @page {
+      size: A4 portrait;
+      margin: 2.5cm;
+    }
     @media print {
-      @page {
-        size: A4 portrait;
-        margin: 2.5cm;
-      }
       *, *::before, *::after {
         background-color: transparent !important;
         color: #000000 !important;
@@ -96,8 +96,9 @@ export function Alerts({ v }) {
       }
       .print-report-container {
         display: block !important;
-        width: 100% !important;
-        margin: 0 !important;
+        width: 16cm !important;
+        max-width: 16cm !important;
+        margin: 0 auto !important;
         box-sizing: border-box;
         padding: 0 !important;
       }
