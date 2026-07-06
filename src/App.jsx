@@ -1238,7 +1238,7 @@ class App extends React.Component {
       {/* Custom Confirm Dialog Overlay */}
       {v.confirmData && (
         <div className="ov-in" onClick={v.confirmData.onCancel} style={css(`position:fixed; inset:0; background:rgba(14,24,34,.72); z-index:250; display:grid; place-items:center; padding:24px; backdrop-filter:blur(3px);`)}>
-          <div className="tt-in theme-light-scope" onClick={(e) => e.stopPropagation()} style={css(`width:min(420px,94vw); background:#e0ecf0; border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:2px solid #b2d1da; padding:20px; display:flex; flex-direction:column; gap:16px; color:#10222a; --surface-card:#e0ecf0; --text-primary:#10222a; --text-secondary:#2d444e; --slate-100:#b2d1da;`)}>
+          <div className="tt-in theme-light-scope confirm-card" onClick={(e) => e.stopPropagation()} style={css(`width:min(420px,94vw); background:#e0ecf0; border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:2px solid #b2d1da; padding:20px; display:flex; flex-direction:column; gap:16px; color:#10222a; --surface-card:#e0ecf0; --text-primary:#10222a; --text-secondary:#2d444e; --slate-100:#b2d1da;`)}>
             <div style={css(`display:flex; align-items:flex-start; gap:14px;`)}>
               <span style={css(`width:40px; height:40px; border-radius:50%; background:rgba(194,66,42,0.12); color:#C2422A; display:grid; place-items:center; flex-shrink:0; font-size:20px;`)}>
                 ⚠️
