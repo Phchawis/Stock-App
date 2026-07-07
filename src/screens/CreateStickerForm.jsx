@@ -61,6 +61,68 @@ export function CreateStickerForm({ v }) {
       (r.code && r.code.toLowerCase().includes(q))
     );
   }, [openedSearch, reagentsList]);
+  const selectOpenedReagent = (r) => {
+    setOpenedReagent(r.th);
+    setOpenedSearch(r.th);
+    setOpenedOpen(false);
+
+    // Auto-fill storage temperature and after-open duration
+    const thName = (r.th || '').toLowerCase();
+    const enName = (r.en || '').toLowerCase();
+    
+    // Check match helper
+    const matches = (pattern) => {
+      const p = pattern.toLowerCase();
+      return thName.includes(p) || enName.includes(p);
+    };
+
+    let defaultTemp = '2-8 °C';
+    let defaultDuration = 'Until exp.';
+
+    // Base storage conditions mapping as fallback
+    if (r.storage === 'FROZEN_40') {
+      defaultTemp = '-20 °C';
+    }
+
+    // User's specific calibrator rules:
+    if (matches('Consolidated Calibrator')) {
+      defaultTemp = '-20 °C';
+      defaultDuration = '28 days';
+    } else if (matches('Clinical Chemistry Calibrator')) {
+      defaultTemp = '-20 °C';
+      defaultDuration = '14 days';
+    } else if (matches('Lipase NG OC Calibrator') || matches('Lipase NG')) {
+      defaultTemp = '-20 °C';
+      defaultDuration = '14 days';
+    } else if (
+      matches('Multiconstituent Calibrator') || 
+      matches('Multicontituent Calibrator') || 
+      matches('Bilirubin Calibrator') || 
+      matches('Billirubin Calibrator') || 
+      matches('Lipid Multiconstituent Calibrator') || 
+      matches('Hemoglobin A1c Calibrator') || 
+      matches('ICT Serum Calibrator') || 
+      matches('ICT Urine Calibrator')
+    ) {
+      defaultTemp = '2-8 °C';
+      defaultDuration = '7 days';
+    } else if (matches('Carbon Dioxide Calibrator')) {
+      defaultTemp = '2-8 °C';
+      defaultDuration = '30 days';
+    } else if (matches('CRP Vario HS Calibrator') || matches('CRP Vario')) {
+      defaultTemp = '2-8 °C';
+      defaultDuration = '90 days';
+    } else if (matches('Microalbumin Calibrator')) {
+      defaultTemp = '2-8 °C';
+      defaultDuration = '90 days';
+    } else if (matches('UIBC Calibrator')) {
+      defaultTemp = '2-8 °C';
+      defaultDuration = '60 days';
+    }
+
+    setOpenedTemp(defaultTemp);
+    setOpenStorageDuration(defaultDuration);
+  };
 
   // Render preview canvas in real time
   React.useEffect(() => {
@@ -416,9 +478,7 @@ export function CreateStickerForm({ v }) {
                           <div 
                             key={r.id}
                             onClick={() => {
-                              setOpenedReagent(r.th);
-                              setOpenedSearch(r.th);
-                              setOpenedOpen(false);
+                              selectOpenedReagent(r);
                             }}
                             style={css(`padding:10px 14px; font-size:var(--text-xs); color:var(--text-primary); cursor:pointer; border-bottom:1px solid var(--border-subtle); transition:background var(--dur-fast);`)}
                             onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--brand-50)'; }}
@@ -491,6 +551,7 @@ export function CreateStickerForm({ v }) {
                   <option value="28 days">28 days</option>
                   <option value="30 days">30 days</option>
                   <option value="60 days">60 days</option>
+                  <option value="90 days">90 days</option>
                   <option value="120 days">120 days</option>
                   <option value="Until exp.">Until exp.</option>
                 </select>
