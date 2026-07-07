@@ -84,6 +84,48 @@ export function CreateStickerForm({ v }) {
       defaultTemp = '-20 °C';
     }
 
+    const untilExpList = [
+      'Urine/CSF Protein Calibrator',
+      'CEA Calibrator',
+      'Total PSA Calibrator',
+      'AFP Calibrator',
+      'Free PSA Calibrartor',
+      'Free PSA Calibrator',
+      'TSH Calibrator',
+      'Total T3 Calibrator',
+      'Total T4 Calibrator',
+      'Free T3 Calibrator',
+      'Free T4 Calibrator',
+      'HBsAg Qual Calibrator',
+      'Anti HBs Calibrator',
+      'Anti HBc Calibrator',
+      'Anti HCV Calibrator',
+      'HAVAb IgG Calibrator',
+      'HAVIgM Calibrator',
+      'HAVAb IgM Calibrator',
+      'Anti HBc IgM Calibrator',
+      'HBsAg Quantitative Calibrator',
+      'HBeAg Calibrator',
+      'Anti HBe Calibrator',
+      'Ferritin Calibrator',
+      'Syphilis Calibrator',
+      'Vitamin D Calibrator',
+      'Anti HIV Ag/Ab Combo Calibrator',
+      'HBsAg Qual Control',
+      'Anti HBs Control',
+      'Anti HBc Control',
+      'Anti HCV Control',
+      'HAVAb IgG Control',
+      'HAVAb IgM Control',
+      'Anti HBc IgM Control',
+      'HBsAg Quantitative Control',
+      'HBeAg Control',
+      'Anti HBe Control',
+      'Syphilis Control',
+      'Vitamin D Control',
+      'Anti HIV Ag/Ab Combo Control'
+    ];
+
     // User's specific calibrator rules:
     if (matches('Consolidated Calibrator')) {
       defaultTemp = '-20 °C';
@@ -118,6 +160,12 @@ export function CreateStickerForm({ v }) {
     } else if (matches('UIBC Calibrator')) {
       defaultTemp = '2-8 °C';
       defaultDuration = '60 days';
+    } else if (matches('Intact PTH Calibrator') || matches('Intact PTH Control')) {
+      defaultTemp = '2-8 °C';
+      defaultDuration = '30 days';
+    } else if (untilExpList.some(item => matches(item))) {
+      defaultTemp = '2-8 °C';
+      defaultDuration = 'Until exp.';
     }
 
     setOpenedTemp(defaultTemp);
