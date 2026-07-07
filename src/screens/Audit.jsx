@@ -200,7 +200,7 @@ export function Audit({ v }) {
                               onClick={t.onPrintSticker}
                               style={css(`background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:3px 8px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; white-space:nowrap;`)}
                             >
-                              🖨️ ปริ้น Sticker
+                              🏷️ Sticker
                             </button>
                           )}
                           <button
@@ -256,7 +256,7 @@ export function Audit({ v }) {
                               onClick={t.onPrintSticker}
                               style={css(`flex:1; background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-md); padding:9px; font:var(--fw-semibold) var(--text-xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; white-space:nowrap;`)}
                             >
-                              🖨️ ปริ้น Sticker
+                              🏷️ Sticker
                             </button>
                           )}
                           <button
