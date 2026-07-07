@@ -40,6 +40,7 @@ export function CreateStickerForm({ v }) {
   const [openedDate, setOpenedDate] = React.useState(new Date().toISOString().slice(0, 10));
   const [openedBy, setOpenedBy] = React.useState(user ? getFirstName(user.name) : '');
   const [openStorageDuration, setOpenStorageDuration] = React.useState('Until exp.');
+  const [openedTemp, setOpenedTemp] = React.useState('2-8 °C');
 
   const filteredAliquotOptions = React.useMemo(() => {
     if (!aliquotSearch) return reagentsList;
@@ -200,14 +201,14 @@ export function CreateStickerForm({ v }) {
 
       fillTextAutoFit(openedBy || '', 1190, 425, 510, 88);
 
-      // Row 3: After open storage 2-8 °C = Until exp.
-      const storageText = `After open storage 2-8 °C = ${openStorageDuration}`;
+      // Row 3: After open storage [Temp] = [Duration]
+      const storageText = `After open storage ${openedTemp} = ${openStorageDuration}`;
       fillTextAutoFit(storageText, 60, 660, 1680, 95);
     }
   }, [
     activeTab,
     aliquotReagent, aliquotLot, aliquotPrepDate, aliquotExpDate, aliquotPrepBy,
-    openedReagent, openedType, openedDate, openedBy, openStorageDuration
+    openedReagent, openedType, openedDate, openedBy, openStorageDuration, openedTemp
   ]);
 
   const handleDownload = () => {
@@ -462,9 +463,23 @@ export function CreateStickerForm({ v }) {
                 />
               </div>
 
+              {/* Storage Temperature Dropdown */}
+              <div style={css(`display:flex; flex-direction:column; gap:6px;`)}>
+                <label style={css(`font-size:var(--text-2xs); font-weight:600; color:var(--text-secondary);`)}>อุณหภูมิจัดเก็บ (Storage Temp)</label>
+                <select 
+                  value={openedTemp}
+                  onChange={(e) => setOpenedTemp(e.target.value)}
+                  className="sticker-form-input"
+                  style={css(`box-sizing:border-box; width:100%; padding:10px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none; height:42px; cursor:pointer;`)}
+                >
+                  <option value="2-8 °C">2-8 °C</option>
+                  <option value="-20 °C">-20 °C</option>
+                </select>
+              </div>
+
               {/* Storage Expiration Dropdown */}
               <div style={css(`display:flex; flex-direction:column; gap:6px;`)}>
-                <label style={css(`font-size:var(--text-2xs); font-weight:600; color:var(--text-secondary);`)}>วันหมดอายุหลังเปิด (After open storage 2-8 °C =)</label>
+                <label style={css(`font-size:var(--text-2xs); font-weight:600; color:var(--text-secondary);`)}>วันหมดอายุหลังเปิด (After open storage {openedTemp} =)</label>
                 <select 
                   value={openStorageDuration}
                   onChange={(e) => setOpenStorageDuration(e.target.value)}
@@ -473,7 +488,10 @@ export function CreateStickerForm({ v }) {
                 >
                   <option value="7 days">7 days</option>
                   <option value="14 days">14 days</option>
+                  <option value="28 days">28 days</option>
                   <option value="30 days">30 days</option>
+                  <option value="60 days">60 days</option>
+                  <option value="120 days">120 days</option>
                   <option value="Until exp.">Until exp.</option>
                 </select>
               </div>
