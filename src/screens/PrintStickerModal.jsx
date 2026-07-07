@@ -125,13 +125,17 @@ export function PrintStickerModal({ v }) {
       // against the actual available width once the QR went back to full label
       // height: 42px clipped a realistic "EXP: 20 Jul 2026" down to "20 Jul 20…",
       // which is not acceptable for the one safety-critical field on the label.
-      const nameFont = "bold 48px 'Sarabun', sans-serif";
+      let nameFontSize = 48;
+      ctx.font = `bold ${nameFontSize}px 'Sarabun', sans-serif`;
+      while (ctx.measureText(reagent.th).width > tw && nameFontSize > 22) {
+        nameFontSize -= 2;
+        ctx.font = `bold ${nameFontSize}px 'Sarabun', sans-serif`;
+      }
       const dataFont = "700 40px 'IBM Plex Mono', monospace";
       const recvFont = "700 38px 'Sarabun', sans-serif";
       const expFont = "bold 38px 'IBM Plex Mono', monospace";
       const locFont = "600 32px 'Sarabun', sans-serif";
-      ctx.font = nameFont;
-      ctx.fillText(clip(reagent.th, nameFont), tx, 86);
+      ctx.fillText(clip(reagent.th, ctx.font), tx, 86);
       ctx.font = dataFont;
       ctx.fillText(clip('Lot: ' + lot.lot, dataFont), tx, 156);
       ctx.font = recvFont;
@@ -222,6 +226,28 @@ export function PrintStickerModal({ v }) {
     }
   `;
 
+  const getNameStyle = () => {
+    const len = (reagent.th || '').length;
+    let fSize = '8.5px';
+    if (len > 28) {
+      fSize = '6px';
+    } else if (len > 18) {
+      fSize = '7px';
+    }
+    return {
+      fontSize: fSize,
+      fontWeight: 'bold',
+      color: '#000',
+      lineHeight: 1.2,
+      wordBreak: 'break-word',
+      display: '-webkit-box',
+      WebkitLineClamp: 2,
+      WebkitBoxOrient: 'vertical',
+      overflow: 'hidden',
+      margin: 0
+    };
+  };
+
   // Shared sticker content (QR + details) — used by BOTH the print area and the
   // on-screen preview so they can never drift apart. No fixed-height + overflow:hidden
   // on the text column (that was clipping the tops of Thai vowels/tone marks).
@@ -235,7 +261,7 @@ export function PrintStickerModal({ v }) {
         )}
       </div>
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.5mm', textAlign: 'left' }}>
-        <div style={{ fontSize: '8.5px', fontWeight: 'bold', color: '#000', lineHeight: 1.35, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div style={getNameStyle()}>
           {reagent.th}
         </div>
         <div style={{ fontSize: '7.5px', color: '#000', fontFamily: 'monospace', lineHeight: 1.3 }}>
