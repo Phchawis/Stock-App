@@ -14,6 +14,7 @@ export function Audit({ v }) {
   if (!isAudit) return null;
 
   const isAdmin = user && user.roleId === 'admin';
+  const isSupervisorOrAdmin = user && (user.roleId === 'supervisor' || user.roleId === 'admin');
 
   // Client-side filtering logic based on name, code, lot, type, and date range
   const filteredRows = txnRows.filter(t => {
@@ -149,14 +150,14 @@ export function Audit({ v }) {
         {/* Movement Table */}
         <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); overflow:hidden;`)}>
           
-          <div className="audit-thead" style={css(`display:grid; grid-template-columns:0.85fr 1.6fr 0.8fr 0.8fr 0.9fr 1.2fr${canManage ? ' 1fr' : ''}; gap:12px; padding:11px 18px; background:var(--slate-50); border-bottom:1px solid var(--border-subtle);`)}>
+          <div className="audit-thead" style={css(`display:grid; grid-template-columns:0.85fr 1.6fr 0.8fr 0.8fr 0.9fr 1.2fr${isSupervisorOrAdmin ? ' 1fr' : ''}; gap:12px; padding:11px 18px; background:var(--slate-50); border-bottom:1px solid var(--border-subtle);`)}>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em;`)}>ประเภท</div>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em;`)}>น้ำยา · Lot</div>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em; text-align:right;`)}>จำนวน</div>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em;`)}>วิธีระบุ</div>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em;`)}>ผู้ทำรายการ</div>
             <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em; text-align:right;`)}>เวลา · อ้างอิง</div>
-            {canManage && (
+            {isSupervisorOrAdmin && (
               <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em; text-align:right;`)}>ดำเนินการ</div>
             )}
           </div>
@@ -178,7 +179,7 @@ export function Audit({ v }) {
                   {groupedRows[dateStr].map((t, tI) => (
                     <React.Fragment key={tI}>
                     {/* Desktop table row */}
-                    <div className="audit-row-desktop" style={css(`display:grid; grid-template-columns:0.85fr 1.6fr 0.8fr 0.8fr 0.9fr 1.2fr${canManage ? ' 1fr' : ''}; gap:12px; align-items:center; padding:11px 18px; border-bottom:${tI === groupedRows[dateStr].length - 1 ? 'none' : '1px solid var(--border-subtle)'};`)}>
+                    <div className="audit-row-desktop" style={css(`display:grid; grid-template-columns:0.85fr 1.6fr 0.8fr 0.8fr 0.9fr 1.2fr${isSupervisorOrAdmin ? ' 1fr' : ''}; gap:12px; align-items:center; padding:11px 18px; border-bottom:${tI === groupedRows[dateStr].length - 1 ? 'none' : '1px solid var(--border-subtle)'};`)}>
                       <div><span style={css(`padding:3px 9px; border-radius:var(--radius-sm); background:${t.bg}; color:${t.fg}; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); white-space:nowrap;`)}>{t.typeLabel}</span></div>
                       <div style={css(`min-width:0;`)}>
                         <div style={css(`font:var(--fw-medium) var(--text-sm)/1.3 var(--font-body); color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>{t.name}</div>
@@ -191,7 +192,7 @@ export function Audit({ v }) {
                         <div style={css(`font:var(--text-2xs)/1.3 var(--font-mono); color:var(--text-secondary);`)}>{t.at.substring(11)}</div> {/* Show time part only as date is header */}
                         <div style={css(`font:var(--text-2xs)/1.3 var(--font-mono); color:var(--text-tertiary);`)}>{t.ref}</div>
                       </div>
-                      {canManage && (
+                      {isSupervisorOrAdmin && (
                         <div style={css(`display:flex; justify-content:flex-end; gap:6px;`)}>
                           {t.onPrintSticker && (
                             <button
@@ -199,7 +200,7 @@ export function Audit({ v }) {
                               onClick={t.onPrintSticker}
                               style={css(`background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:3px 8px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; white-space:nowrap;`)}
                             >
-                              🏷️ สติกเกอร์
+                              🖨️ ปริ้น Sticker
                             </button>
                           )}
                           <button
@@ -247,7 +248,7 @@ export function Audit({ v }) {
                         </div>
                       </div>
 
-                      {canManage && (
+                      {isSupervisorOrAdmin && (
                         <div style={css(`display:flex; justify-content:flex-end; gap:8px; padding-top:10px; border-top:1px dashed var(--border-subtle);`)}>
                           {t.onPrintSticker && (
                             <button
@@ -255,7 +256,7 @@ export function Audit({ v }) {
                               onClick={t.onPrintSticker}
                               style={css(`flex:1; background:transparent; border:1px solid var(--border-default); border-radius:var(--radius-md); padding:9px; font:var(--fw-semibold) var(--text-xs)/1.2 var(--font-body); color:var(--text-secondary); cursor:pointer; white-space:nowrap;`)}
                             >
-                              🏷️ สติกเกอร์
+                              🖨️ ปริ้น Sticker
                             </button>
                           )}
                           <button
