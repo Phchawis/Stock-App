@@ -618,7 +618,7 @@ export function Dashboard({ v }) {
       {/* Printable PDF Report Template */}
       <div className="print-report-container" style={{ display: 'none' }}>
         <div className="report-header" style={{ display: 'flex', alignItems: 'center', gap: '15px', borderBottom: '2px solid #000000', paddingBottom: '12px', marginBottom: '15px', textAlign: 'left' }}>
-          <img src="/assets/b082f9ab-2a3d-47e8-a44f-c9a7574496ec.png" alt="TUH Logo" style={css(`width:55px; height:55px; object-fit:contain; flex-shrink:0;`)} />
+          <img src="/assets/tuh_lab_logo.jpg" alt="TUH Logo" style={css(`width:55px; height:55px; object-fit:contain; flex-shrink:0;`)} />
           <div style={css(`flex:1; text-align:left;`)}>
             <h1 style={css(`margin:0; font-size:15px; font-weight:bold; color:#000; font-family:var(--font-display);`)}>โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ</h1>
             <h2 style={css(`margin:1px 0 0; font-size:10px; font-weight:normal; color:#444;`)}>Thammasat University Hospital Laboratory Center</h2>
