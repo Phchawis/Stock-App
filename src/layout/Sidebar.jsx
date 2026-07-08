@@ -25,21 +25,24 @@ export function Sidebar({ v }) {
     .sidebar-logo-img-wrapper {
       width: 44px;
       height: 44px;
-      border-radius: var(--radius-md);
+      border-radius: 50%;
+      overflow: hidden;
       background: var(--brand-50);
-      display: grid;
-      place-items: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
-      border: 1px solid var(--brand-600);
+      border: 1.5px solid var(--brand-600);
       box-shadow: 0 0 10px rgba(26,147,179,0.25);
       position: relative;
       transition: all var(--dur-medium) cubic-bezier(0.25, 1, 0.5, 1);
     }
 
     .sidebar-logo-img {
-      width: 34px;
-      height: 34px;
-      object-fit: contain;
+      width: 102%;
+      height: 102%;
+      object-fit: cover;
+      border-radius: 50%;
       transition: transform var(--dur-medium) cubic-bezier(0.25, 1, 0.5, 1);
     }
 
