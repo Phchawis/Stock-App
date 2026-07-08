@@ -217,7 +217,7 @@ export function Sidebar({ v }) {
         <div onClick={go.dashboard} className="sidebar-logo-container">
           <div className="sidebar-logo-img-wrapper">
             <img 
-              src="/assets/b082f9ab-2a3d-47e8-a44f-c9a7574496ec.png" 
+              src="/assets/tuh_lab_logo.jpg" 
               alt="ตรา รพธ." 
               className="sidebar-logo-img"
             />
