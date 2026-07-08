@@ -1,5 +1,6 @@
 import React from 'react';
 import { css } from '../css.js';
+import { Html5Qrcode } from 'html5-qrcode';
 
 export function StockCount({ v }) {
   const {
@@ -10,6 +11,139 @@ export function StockCount({ v }) {
   const [scannerInput, setScannerInput] = React.useState('');
   const [highlightedLotId, setHighlightedLotId] = React.useState(null);
   const inputRefs = React.useRef({});
+  
+  const [showCamera, setShowCamera] = React.useState(false);
+  const [cameraReady, setCameraReady] = React.useState(false);
+  const [cameraError, setCameraError] = React.useState(null);
+  const [justScanned, setJustScanned] = React.useState(false);
+
+  const html5QrCodeRef = React.useRef(null);
+
+  React.useEffect(() => {
+    let active = true;
+    if (!showCamera) return undefined;
+
+    setCameraError(null);
+    setCameraReady(false);
+
+    const html5QrCode = new Html5Qrcode("qr-reader-stock", {
+      verbose: false,
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+    });
+    html5QrCodeRef.current = html5QrCode;
+
+    html5QrCode.start(
+      { facingMode: "environment" },
+      {
+        fps: 20,
+        aspectRatio: 1.0,
+        qrbox: (w, h) => {
+          const s = Math.floor(Math.min(w, h) * 0.7);
+          return { width: s, height: s };
+        }
+      },
+      (msg) => {
+        const code = msg.trim();
+        const matched = stockCountList.find(l => l.qr === code || l.lot === code);
+        if (matched) {
+          if (navigator.vibrate) navigator.vibrate([150]);
+          setJustScanned(true);
+          setHighlightedLotId(matched.lotId);
+          setScannerInput('');
+          
+          setTimeout(() => {
+            if (active) {
+              setShowCamera(false);
+              setJustScanned(false);
+              const inputEl = inputRefs.current[matched.lotId];
+              if (inputEl) {
+                inputEl.focus();
+                inputEl.select();
+              }
+            }
+          }, 550);
+
+          setTimeout(() => {
+            setHighlightedLotId(prev => prev === matched.lotId ? null : prev);
+          }, 3500);
+        } else {
+          const matchedSub = stockCountList.find(l => 
+            l.qr.toLowerCase().includes(code.toLowerCase()) || 
+            l.lot.toLowerCase().includes(code.toLowerCase())
+          );
+          if (matchedSub) {
+            if (navigator.vibrate) navigator.vibrate([150]);
+            setJustScanned(true);
+            setHighlightedLotId(matchedSub.lotId);
+            setScannerInput('');
+
+            setTimeout(() => {
+              if (active) {
+                setShowCamera(false);
+                setJustScanned(false);
+                const inputEl = inputRefs.current[matchedSub.lotId];
+                if (inputEl) {
+                  inputEl.focus();
+                  inputEl.select();
+                }
+              }
+            }, 550);
+
+            setTimeout(() => {
+              setHighlightedLotId(prev => prev === matchedSub.lotId ? null : prev);
+            }, 3500);
+          } else {
+            if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+            setCameraError('ไม่พบรายการน้ำยาหรือ Lot นี้ในคิวตรวจนับ');
+            setTimeout(() => {
+              if (active) {
+                setCameraError(null);
+              }
+            }, 3000);
+          }
+        }
+      },
+      () => {}
+    ).then(() => {
+      if (active) setCameraReady(true);
+    }).catch((err) => {
+      if (active) {
+        console.error('Camera start error:', err);
+        setCameraError('ไม่สามารถเปิดกล้องได้ (โปรดอนุญาตสิทธิ์กล้องในเบราว์เซอร์)');
+      }
+    });
+
+    return () => {
+      active = false;
+      const scanner = html5QrCodeRef.current;
+      if (scanner) {
+        html5QrCodeRef.current = null;
+        if (scanner.isScanning) {
+          scanner.stop().catch((e) => console.log('Failed to stop camera:', e));
+        }
+      }
+    };
+  }, [showCamera, stockCountList]);
+
+  const cornerStyle = (top, left, right, bottom, scanned) => css(`
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border-color: ${scanned ? 'var(--green-600)' : 'var(--brand-500)'};
+    border-style: solid;
+    border-width: ${top ? '3px' : '0'} ${right ? '3px' : '0'} ${bottom ? '3px' : '0'} ${left ? '3px' : '0'};
+    border-top-left-radius: ${top && left ? '8px' : '0'};
+    border-top-right-radius: ${top && right ? '8px' : '0'};
+    border-bottom-left-radius: ${bottom && left ? '8px' : '0'};
+    border-bottom-right-radius: ${bottom && right ? '8px' : '0'};
+    top: ${top ? '14px' : 'auto'};
+    bottom: ${bottom ? '14px' : 'auto'};
+    left: ${left ? '14px' : 'auto'};
+    right: ${right ? '14px' : 'auto'};
+    filter: drop-shadow(0 0 6px ${scanned ? 'rgba(56,182,115,.7)' : 'rgba(91,192,217,.65)'});
+    transition: border-color var(--dur-base) var(--ease-out), filter var(--dur-base) var(--ease-out);
+    pointer-events: none;
+  `);
 
   if (!isStockCount) return null;
 
@@ -112,6 +246,16 @@ export function StockCount({ v }) {
             onBlur={(e) => e.currentTarget.style.borderColor = 'var(--border-default)'}
           />
         </div>
+        <button
+          type="button"
+          onClick={() => setShowCamera(true)}
+          style={css(`display:flex; align-items:center; gap:6px; padding:10px 16px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); box-shadow:var(--glow-brand-soft); transition:all var(--dur-fast); height:38px; flex-shrink:0;`)}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--brand-800)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--brand-700)'; e.currentTarget.style.transform = 'none'; }}
+        >
+          <span style={css(`display:inline-flex; align-items:center; justify-content:center;`)}>{ic.qr}</span>
+          <span>สแกน QR</span>
+        </button>
       </div>
 
       {/* Main Table Card */}
