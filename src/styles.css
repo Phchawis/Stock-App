@@ -2061,3 +2061,34 @@ input:focus, select:focus, textarea:focus {
   --content-ambient: radial-gradient(1100px 520px at 85% -10%, rgba(112,196,180,.09), transparent 60%), radial-gradient(900px 480px at -10% 30%, rgba(0,104,132,.16), transparent 55%), radial-gradient(760px 420px at 55% 115%, rgba(51,165,147,.08), transparent 60%), var(--surface-page);
 }
 
+
+/* ── View Transitions API Cinematic Transitions ── */
+::view-transition-old(root) {
+  animation: 160ms cubic-bezier(0.4, 0, 0.2, 1) both fade-out,
+             160ms cubic-bezier(0.4, 0, 0.2, 1) both scale-down;
+}
+::view-transition-new(root) {
+  animation: 220ms cubic-bezier(0.4, 0, 0.2, 1) both fade-in,
+             220ms cubic-bezier(0.4, 0, 0.2, 1) both scale-up;
+}
+@keyframes scale-down {
+  from { transform: scale(1); }
+  to { transform: scale(0.99); }
+}
+@keyframes scale-up {
+  from { transform: scale(1.01); }
+  to { transform: scale(1); }
+}
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root) {
+    animation: none !important;
+  }
+}
