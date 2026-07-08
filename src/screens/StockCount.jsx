@@ -340,6 +340,113 @@ export function StockCount({ v }) {
           </table>
         </div>
       </div>
+
+      {/* Camera scan popup — only mounted (and camera only started) when opened */}
+      {showCamera && (
+        <div
+          className="ov-in"
+          onClick={() => setShowCamera(false)}
+          style={css(`position:fixed; inset:0; background:rgba(8,12,18,.78); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); z-index:90; display:grid; place-items:center; padding:20px; --brand-700:#7AA2C4; --brand-800:#93b9e1; --brand-600:#7AA2C4; --brand-500:#93b9e1; --brand-400:#a9c7ee; --brand-100:rgba(122,162,196,0.22); --brand-50:rgba(122,162,196,0.12); --glow-brand-soft:0 6px 18px -8px rgba(122,162,196,0.5);`)}
+        >
+          <style>{`
+            @keyframes scanline-sweep {
+              0%   { top: 6%; opacity: 0; }
+              10%  { opacity: 1; }
+              90%  { opacity: 1; }
+              100% { top: 94%; opacity: 0; }
+            }
+            @keyframes scan-ring-pulse {
+              0%, 100% { box-shadow: 0 0 0 0 rgba(91,192,217,.45); }
+              50%      { box-shadow: 0 0 0 6px rgba(91,192,217,0); }
+            }
+            @keyframes success-pop {
+              0%   { transform: scale(.6); opacity: 0; }
+              60%  { transform: scale(1.08); opacity: 1; }
+              100% { transform: scale(1); opacity: 1; }
+            }
+            @keyframes spin {
+              from { transform: rotate(0deg); }
+              to   { transform: rotate(360deg); }
+            }
+            @media (prefers-reduced-motion: reduce) {
+              .qr-scanline, .qr-icon-badge, .qr-success-badge { animation: none !important; }
+            }
+          `}</style>
+          <div onClick={(e) => e.stopPropagation()} style={css(`width:min(400px,94vw); background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:2px solid #b2d1da; overflow:hidden; --surface-card:#e0ecf0; --text-primary:#10222a; --text-secondary:#2d444e; --text-tertiary:#526d79; --border-subtle:#b2d1da; --border-default:#b2d1da; --border-strong:#b2d1da; --slate-50:#d1e2e6; --slate-100:#b2d1da; --slate-200:#9abdc6; --surface-sunken:#d1e2e6;`)}>
+            <div style={css(`padding:16px 18px; border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; gap:11px; background:var(--surface-sunken);`)}>
+              <span
+                className="qr-icon-badge"
+                style={css(`width:32px; height:32px; border-radius:var(--radius-md); background:var(--brand-50); color:var(--brand-700); display:grid; place-items:center; flex-shrink:0; animation:${cameraReady && !cameraError ? 'scan-ring-pulse 2s infinite ease-out' : 'none'};`)}
+              >
+                {ic.qr}
+              </span>
+              <div style={css(`flex:1;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary);`)}>สแกน QR Code ตรวจนับคลัง</div>
+                <div style={css(`font:var(--text-3xs)/1.3 var(--font-body); color:var(--text-tertiary); margin-top:1px;`)}>
+                  {justScanned ? 'พบข้อมูลแล้ว' : cameraError ? cameraError : cameraReady ? 'กำลังค้นหา QR Code…' : 'กำลังเปิดกล้อง…'}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCamera(false)}
+                style={css(`border:none; background:var(--slate-100); cursor:pointer; padding:6px; border-radius:var(--radius-sm); color:var(--text-secondary); display:grid; place-items:center; transition:all var(--dur-fast);`)}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--slate-200)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--slate-100)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+              >
+                {ic.close}
+              </button>
+            </div>
+
+            <div style={css(`padding:18px;`)}>
+              <div style={css(`position:relative; width:100%; aspect-ratio:1/1; background:#050a10; border:1px solid var(--border-strong); border-radius:var(--radius-lg); overflow:hidden; display:flex; justify-content:center; align-items:center; box-shadow:inset 0 0 40px rgba(0,0,0,.5);`)}>
+                <div id="qr-reader-stock" style={{ width: '100%', height: '100%', opacity: cameraReady ? 1 : 0, transition: 'opacity .3s ease' }}></div>
+
+                {/* Vignette frame */}
+                <div style={css(`position:absolute; inset:0; box-shadow:inset 0 0 60px 18px rgba(0,0,0,.55); pointer-events:none;`)} />
+
+                <div style={cornerStyle(true, true, false, false, justScanned)} />
+                <div style={cornerStyle(true, false, true, false, justScanned)} />
+                <div style={cornerStyle(false, true, false, true, justScanned)} />
+                <div style={cornerStyle(false, false, true, true, justScanned)} />
+
+                {cameraReady && !cameraError && !justScanned && (
+                  <div
+                    className="qr-scanline"
+                    style={{
+                      position: 'absolute', left: '16%', right: '16%', height: '2.5px',
+                      background: 'linear-gradient(90deg, transparent, var(--brand-500) 20%, var(--brand-400) 50%, var(--brand-500) 80%, transparent)',
+                      boxShadow: '0 0 10px 1px rgba(91,192,217,.8)',
+                      animation: 'scanline-sweep 2.4s infinite cubic-bezier(0.45,0,0.55,1)',
+                      pointerEvents: 'none', zIndex: 10,
+                    }}
+                  />
+                )}
+
+                {/* Loading state */}
+                {!cameraReady && !cameraError && (
+                  <div style={css(`position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; z-index:5;`)}>
+                    <span style={css(`width:34px; height:34px; border-radius:50%; border:3px solid var(--slate-700); border-top-color:var(--brand-500); animation:spin .8s linear infinite;`)} />
+                    <div style={css(`font:var(--text-2xs)/1.4 var(--font-body); color:var(--slate-400);`)}>กำลังเปิดกล้อง…</div>
+                  </div>
+                )}
+
+                {/* Success flash */}
+                {justScanned && (
+                  <div style={css(`position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; background:rgba(15,30,22,.55); z-index:11;`)}>
+                    <span
+                      className="qr-success-badge"
+                      style={css(`width:52px; height:52px; border-radius:50%; background:var(--green-600); color:#fff; display:grid; place-items:center; box-shadow:0 0 24px rgba(56,182,115,.65); animation:success-pop .35s var(--ease-out) both;`)}
+                    >
+                      {ic.check}
+                    </span>
+                    <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-body); color:#fff;`)}>สแกนสำเร็จ</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
