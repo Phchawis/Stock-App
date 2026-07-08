@@ -16,6 +16,69 @@ import { EditTransactionModal } from './screens/EditTransactionModal.jsx';
 import { DisposeLotModal } from './screens/DisposeLotModal.jsx';
 import { SignatureModal } from './screens/SignatureModal.jsx';
 
+function triggerConfetti() {
+  const canvas = document.createElement('canvas');
+  canvas.style.position = 'fixed';
+  canvas.style.inset = '0';
+  canvas.style.pointerEvents = 'none';
+  canvas.style.zIndex = '9999';
+  document.body.appendChild(canvas);
+
+  const ctx = canvas.getContext('2d');
+  let W = (canvas.width = window.innerWidth);
+  let H = (canvas.height = window.innerHeight);
+
+  const colors = ['#0E9587', '#1A93B3', '#5BC0D9', '#E8F0F4', '#FFC107', '#E91E63'];
+  const particles = Array.from({ length: 90 }, () => {
+    return {
+      x: W / 2,
+      y: H / 2 - 50,
+      vx: (Math.random() - 0.5) * 16,
+      vy: (Math.random() - 0.7) * 20 - 4,
+      size: Math.random() * 8 + 6,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * 360,
+      rSpeed: (Math.random() - 0.5) * 10,
+      alpha: 1,
+      decay: Math.random() * 0.015 + 0.01
+    };
+  });
+
+  let active = true;
+  function update() {
+    ctx.clearRect(0, 0, W, H);
+    let alive = false;
+
+    particles.forEach((p) => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.45; // gravity
+      p.vx *= 0.98; // resistance
+      p.rotation += p.rSpeed;
+      p.alpha -= p.decay;
+
+      if (p.alpha > 0) {
+        alive = true;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        ctx.restore();
+      }
+    });
+
+    if (alive && active) {
+      requestAnimationFrame(update);
+    } else {
+      if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
+    }
+  }
+
+  requestAnimationFrame(update);
+}
+
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -251,12 +314,12 @@ class App extends React.Component {
       { key: 'settings', label: 'ตั้งค่าเกณฑ์ของระบบ' },
     ];
   }
-  login(id, name, initials, signature) { const r = this.ROLES().find(x => x.id === id); if (!r) return; this.user = { name: name || r.name, role: r.th, initials: initials || r.initials, roleId: r.id, signature: signature || null }; this.setState({ role: id, view: 'dashboard', detailId: null, modal: null }); }
+  login(id, name, initials, signature) { const r = this.ROLES().find(x => x.id === id); if (!r) return; this.user = { name: name || r.name, role: r.th, initials: initials || r.initials, roleId: r.id, signature: signature || null }; this.transitionState({ role: id, view: 'dashboard', detailId: null, modal: null }); }
   async logout() {
     try { await this.api('/api/logout', { method: 'POST' }); } catch (e) { /* best effort */ }
     sessionStorage.removeItem('authUser');
     this.user = { name: 'ทนพ. สมชาย ใจดี', role: 'นักเทคนิคการแพทย์', initials: 'สช' };
-    this.setState({ role: null, detailId: null, modal: null, reagents: [], lots: [], txns: [], users: [], loginForm: { username: '', password: '', error: '' } });
+    this.transitionState({ role: null, detailId: null, modal: null, reagents: [], lots: [], txns: [], users: [], loginForm: { username: '', password: '', error: '' } });
   }
   can(p) { const m = this.state.perms[this.state.role]; return m ? !!m[p] : false; }
 
@@ -490,6 +553,7 @@ class App extends React.Component {
         modal: null
       }));
       this.showToast(`ลงทะเบียนน้ำยา "${f.th}" สำเร็จ (รหัส: ${newReagent.code})`);
+      triggerConfetti();
     } catch (err) {
       this.showToast(err.message, 'warn');
     }
@@ -729,6 +793,7 @@ class App extends React.Component {
           this.fetchData();
           this.setState({ view: 'inventory' }); // Go back to inventory view
           this.showToast('ปรับปรุงยอดสต็อกคลาดเคลื่อนเรียบร้อยแล้ว');
+          triggerConfetti();
         } catch (err) {
           this.showToast(err.message, 'warn');
         }
@@ -953,6 +1018,15 @@ class App extends React.Component {
   }
 
   // ── handlers ──
+  transitionState(updater, callback) {
+    if (document.startViewTransition) {
+      document.startViewTransition(() => {
+        this.setState(updater, callback);
+      });
+    } else {
+      this.setState(updater, callback);
+    }
+  }
   nav(v) {
     const nextState = { view: v, detailId: null, sidebarOpen: false };
     if (v === 'stock_count') {
@@ -962,16 +1036,16 @@ class App extends React.Component {
         return acc;
       }, {});
     }
-    this.setState(nextState);
+    this.transitionState(nextState);
   }
   showToast(msg, kind) { if (this._toastT) clearTimeout(this._toastT); this.setState({ toast: { msg, kind: kind || 'ok' } }); this._toastT = setTimeout(() => this.setState({ toast: null }), 2800); }
-  openDetail(id) { this.setState({ detailId: id }); }
-  closeDetail() { this.setState({ detailId: null }); }
-  openReceive(rid) { if (!this.can('receive')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์รับเข้า', 'warn'); return; } this.setState({ modal: 'receive', rf: { ...this.blankRf(), rid: rid ? String(rid) : '' } }); }
+  openDetail(id) { this.transitionState({ detailId: id }); }
+  closeDetail() { this.transitionState({ detailId: null }); }
+  openReceive(rid) { if (!this.can('receive')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์รับเข้า', 'warn'); return; } this.transitionState({ modal: 'receive', rf: { ...this.blankRf(), rid: rid ? String(rid) : '' } }); }
   openIssue(rid) {
     if (!this.can('issue')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์เบิกจ่าย', 'warn'); return; }
     const r = this.state.reagents.find(x => x.id === rid);
-    this.setState({
+    this.transitionState({
       modal: 'issue',
       iform: {
         ...this.blankIf(),
@@ -1106,6 +1180,7 @@ class App extends React.Component {
       this.fetchData();
       const r = this.state.reagents.find(x => x.id === rid);
       this.showToast('รับเข้า ' + qty + ' ' + (r ? r.unit : '') + ' · Lot ' + f.lot + ' สำเร็จ');
+      triggerConfetti();
     } catch (err) {
       this.showToast(err.message, 'warn');
     }
@@ -1142,6 +1217,7 @@ class App extends React.Component {
       this.fetchData();
       const r = this.state.reagents.find(x => x.id === rid);
       this.showToast('เบิกจ่าย ' + qty + ' ' + (r ? r.unit : '') + ' สำเร็จ');
+      triggerConfetti();
     } catch (err) {
       this.showToast(err.message, 'warn');
     }
