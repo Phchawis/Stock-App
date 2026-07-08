@@ -20,7 +20,7 @@ export function Login({ v }) {
           
           <div style={css(`display:flex; align-items:center; gap:14px; position:relative;`)}>
             <div style={css(`width:60px; height:60px; border-radius:50%; background:rgba(255,255,255,.96); display:grid; place-items:center;`)}>
-              <img src="/assets/b082f9ab-2a3d-47e8-a44f-c9a7574496ec.png" alt="ตรา รพธ." style={css(`width:48px; height:48px; object-fit:contain;`)} />
+              <img src="/assets/tuh_lab_logo.jpg" alt="ตรา รพธ." style={css(`width:48px; height:48px; object-fit:contain;`)} />
             </div>
             <div>
               <div style={css(`font:600 12px/1.4 'IBM Plex Mono',monospace; letter-spacing:.16em; color:#C7CCF2;`)}>TUH · REAGENT INVENTORY</div>
@@ -48,7 +48,7 @@ export function Login({ v }) {
             {/* Mobile Brand Header */}
             <div className="login-mobile-brand" style={css(`display:flex; align-items:center; gap:12px; margin-bottom:28px;`)}>
               <div style={css(`width:48px; height:48px; border-radius:50%; background:rgba(255,255,255,.96); display:grid; place-items:center; flex-shrink:0; border:1px solid var(--border-subtle);`)}>
-                <img src="/assets/b082f9ab-2a3d-47e8-a44f-c9a7574496ec.png" alt="ตรา รพธ." style={css(`width:38px; height:38px; object-fit:contain;`)} />
+                <img src="/assets/tuh_lab_logo.jpg" alt="ตรา รพธ." style={css(`width:38px; height:38px; object-fit:contain;`)} />
               </div>
               <div style={css(`line-height:1.25;`)}>
                 <div style={css(`font:600 11px/1.3 'IBM Plex Mono',monospace; letter-spacing:.08em; color:var(--brand-700);`)}>TUH · REAGENT INVENTORY</div>
