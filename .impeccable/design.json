@@ -1,64 +1,65 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-06-30T04:21:40Z",
+  "generatedAt": "2026-07-08T01:23:42Z",
   "title": "Design System: TUH Laboratory Stock Design System",
   "extensions": {
     "colorMeta": {
       "primary": {
         "role": "primary",
-        "displayName": "Laboratory Indigo",
-        "canonical": "#343E9B",
-        "tonalRamp": ["#1B2152", "#262E73", "#343E9B", "#4250BC", "#5E6CD6", "#8893E3", "#B4BBEE", "#E3E6F9"]
+        "displayName": "Laboratory Teal",
+        "canonical": "#0E9587",
+        "tonalRamp": ["#03201D", "#073D38", "#0B5B52", "#0E796D", "#0E9587", "#2BBFB0", "#63D8CD", "#B6F3EC"]
       },
       "accent": {
         "role": "accent",
         "displayName": "Warning Coral",
         "canonical": "#EC6647",
-        "tonalRamp": ["#9E2D1A", "#B03722", "#C2422A", "#DD5236", "#EC6647", "#F2876E", "#FBE2DA", "#FDF0EC"]
+        "tonalRamp": ["#3A0E04", "#661E0E", "#93301B", "#C0452C", "#EC6647", "#F18B74", "#F7B2A3", "#FCE0DB"]
       },
       "neutral-bg": {
         "role": "neutral",
-        "displayName": "Cool Slate Background",
-        "canonical": "#F6F7FB",
-        "tonalRamp": ["#11131F", "#181B2A", "#262A3D", "#3A3F55", "#70758C", "#C4C8D6", "#EEEFF5", "#F6F7FB"]
+        "displayName": "Glass Ocean Background",
+        "canonical": "#002934",
+        "tonalRamp": ["#000B0E", "#00141A", "#001D25", "#002934", "#003F50", "#005E78", "#1E8FA9", "#78D3EA"]
       }
     },
     "typographyMeta": {
       "display": {
-        "displayName": "Display Anuphan",
-        "purpose": "Used for page display titles, covers, and primary numbers."
+        "displayName": "Anuphan Bold",
+        "purpose": "Hero headings and display panels."
       },
       "body": {
-        "displayName": "Body Sarabun",
-        "purpose": "Used for main reading text, records, and table inputs."
+        "displayName": "Sarabun Regular",
+        "purpose": "Standard document text, cell descriptions, and paragraph contents."
+      },
+      "label": {
+        "displayName": "IBM Plex Mono",
+        "purpose": "Tabular numbers, barcodes, dates, and lot numbers."
       }
     },
     "shadows": [
       {
-        "name": "glow-brand-soft",
-        "value": "0 6px 18px -8px rgba(52,62,155,.35)",
-        "purpose": "Soft interactive glow under buttons and dropdown highlights."
+        "name": "active-glow",
+        "value": "0 0 24px rgba(112, 196, 180, 0.28)",
+        "purpose": "Glow overlay applied on focused inputs and active states."
       }
     ],
     "motion": [
       {
-        "name": "transition-standard",
-        "value": "background 0.2s ease, transform 0.2s ease",
-        "purpose": "State feedback on buttons and lists."
+        "name": "view-transition-duration",
+        "value": "220ms",
+        "purpose": "Visual scale-and-crossfade transition using View Transitions API."
+      },
+      {
+        "name": "hover-shine",
+        "value": "850ms",
+        "purpose": "Diagonal light sheen sweep when hovering primary action items."
       }
     ],
     "breakpoints": [
       {
-        "name": "sm",
-        "value": "640px"
-      },
-      {
-        "name": "md",
-        "value": "768px"
-      },
-      {
-        "name": "lg",
-        "value": "1024px"
+        "name": "mobile",
+        "value": "767px"
       }
     ]
   },
@@ -67,32 +68,33 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Indigo gradient button used for main callouts and printable reports.",
-      "html": "<button class=\"ds-btn-primary\">พิมพ์รายงาน PDF</button>",
-      "css": ".ds-btn-primary { background: linear-gradient(135deg, #343E9B, #262E73); color: #fff; padding: 8px 16px; font-weight: 600; font-family: sans-serif; border: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(52,62,155,0.25); cursor: pointer; transition: all 0.2s; } .ds-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(52,62,155,0.35); }"
+      "description": "Primary action button with diagonal hover shine effect.",
+      "html": "<button class=\"ds-btn-primary\">🏷️ STICKER</button>",
+      "css": ".ds-btn-primary { background: #0E9587; color: #FFFFFF; font-family: 'Sarabun', sans-serif; font-size: 14px; font-weight: 600; padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer; position: relative; overflow: hidden; transition: background 0.2s, transform 0.1s; } .ds-btn-primary:hover { background: #1FA090; } .ds-btn-primary:active { transform: translateY(1px); }"
     },
     {
-      "name": "Reagent Card",
-      "kind": "card",
-      "refersTo": "card",
-      "description": "Reagent container card used on the Reagent Lists catalogue page.",
-      "html": "<div class=\"ds-card\"><div class=\"ds-card-title\">Glucose Test</div><div class=\"ds-card-desc\">Chemical Diagnostic Reagent</div></div>",
-      "css": ".ds-card { background: #ffffff; border: 1px solid #E0E2EC; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-family: sans-serif; } .ds-card-title { font-size: 14px; font-weight: bold; color: #181B2A; } .ds-card-desc { font-size: 11px; color: #70758C; margin-top: 4px; }"
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Standard alphanumeric code input with focused glow outline.",
+      "html": "<input class=\"ds-input-field\" type=\"text\" placeholder=\"ระบุเลขล็อต...\" value=\"LOT-12345\" />",
+      "css": ".ds-input-field { background: rgba(0, 30, 39, 0.6); color: #ECF7F4; font-family: 'IBM Plex Mono', monospace; font-size: 14px; border: 1px solid rgba(112, 196, 180, 0.25); border-radius: 8px; padding: 10px 14px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; } .ds-input-field:focus { border-color: #33A593; box-shadow: 0 0 12px rgba(112, 196, 180, 0.28); }"
     }
   ],
   "narrative": {
     "northStar": "The Clinical Lab Ledger",
-    "overview": "A high-density, high-readability user interface designed specifically for medical laboratory professionals operating under variable lighting conditions. The layout avoids decorative elements in favor of a clean, structured workspace resembling an official lab record book. It rejects the generic warm-neutral SaaS aesthetic in favor of a cool blue-slate palette representing security and scientific precision.",
-    "keyCharacteristics": [
-      "Grid system alignment",
-      "Tonal layering over heavy shadows",
-      "Priority status alerts"
-    ],
+    "overview": "A high-density, high-readability user interface designed specifically for medical laboratory professionals operating under variable lighting conditions. The layout avoids decorative elements in favor of a clean, structured workspace resembling an official lab record book.",
+    "keyCharacteristics": ["Strict grid alignment", "Translucent glass design", "Visual safety highlighting", "Cinematic transitions"],
     "rules": [
       {
         "name": "The Contrast Rule",
-        "body": "Body text must have a minimum contrast ratio of 4.5:1 against the background. Do not use light grey text on a white background for typography.",
+        "body": "Body text must have a minimum contrast ratio of 4.5:1 against the background.",
         "section": "colors"
+      },
+      {
+        "name": "The Tabular Number Rule",
+        "body": "Tables and lists rendering lot IDs, transaction records, and numeric quantities must use IBM Plex Mono to align values vertically.",
+        "section": "typography"
       },
       {
         "name": "The Flat-By-Default Rule",
@@ -100,15 +102,7 @@
         "section": "elevation"
       }
     ],
-    "dos": [
-      "Do check typography contrast",
-      "Do use IBM Plex Mono for codes/dates",
-      "Do use distinct status icons"
-    ],
-    "donts": [
-      "Don't use text gradients",
-      "Don't use side-stripe borders",
-      "Don't use warm sand-like backgrounds"
-    ]
+    "dos": ["Do check typography contrast", "Do use IBM Plex Mono for numeric columns", "Do trigger confetti on success"],
+    "donts": ["Don't use decorative gradients", "Don't allow transaction changes that drive lots below zero", "Don't use warm, sand-like backgrounds"]
   }
 }
