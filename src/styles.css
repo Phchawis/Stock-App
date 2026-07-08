@@ -1801,7 +1801,8 @@ input, select, textarea {
 }
 input:focus, select:focus, textarea:focus {
   outline: none;
-  box-shadow: 0 0 0 3px var(--brand-100);
+  border-color: var(--border-brand) !important;
+  box-shadow: 0 0 0 3px var(--brand-100) !important;
 }
 
 /* Placeholders: readable, consistent everywhere */
