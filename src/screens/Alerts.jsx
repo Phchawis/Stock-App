@@ -270,7 +270,7 @@ export function Alerts({ v }) {
               onMouseLeave={(e) => { e.currentTarget.style.background = '#06C755'; }}
             >
               <span style={css(`display:grid; place-items:center; color:#fff;`)}>{ic.qr}</span>
-              {isSendingLine ? 'กำลังส่ง...' : 'ส่งแจ้งเตือนสีแดงเข้า LINE'}
+              {isSendingLine ? 'กำลังส่ง...' : 'ส่งแจ้งเตือนน้ำยาใกล้หมดอายุเข้า LINE'}
             </button>
             <button className="alert-print-btn" onClick={() => window.print()}>
               <span style={css(`display:grid; place-items:center;`)}>{ic.list}</span>
