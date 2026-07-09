@@ -16,6 +16,7 @@ export function Help({ v }) {
     { id: 'reports', label: 'รายงานประจำเดือน (PDF)', icon: ic.list || '📄' },
     { id: 'reconciliation', label: 'การปรับปรุงสต็อก & ตัดจ่าย', icon: '⚖️' },
     { id: 'sticker', label: 'การสร้างสติกเกอร์ (Sticker)', icon: '🏷️' },
+    { id: 'alerts', label: 'การแจ้งเตือน & บอท LINE', icon: '🔔' },
   ];
 
   return (
@@ -593,6 +594,66 @@ export function Help({ v }) {
               <div style={css(`font-size:var(--text-xs); color:var(--text-secondary); line-height:1.6; display:flex; flex-direction:column; gap:8px;`)}>
                 <div>1. เมื่อพิมพ์กรอกข้อมูลครบถ้วนแล้ว ให้คลิกปุ่ม **"📥 ดาวน์โหลดไฟล์ PNG"** เพื่อเซฟไฟล์ภาพสติกเกอร์ความละเอียดระดับ HD ลงในเครื่อง</div>
                 <div>2. เพื่อความคมชัดสูงสุด แนะนำให้นำไฟล์ภาพที่ได้ไปสั่งพิมพ์ผ่านโปรแกรมพิมพ์สลากโดยเฉพาะของตัวเครื่องพิมพ์ความร้อน (เช่น **BarTender** หรือ **GoLabel**) เพื่อให้ไดรเวอร์เครื่องพิมพ์ทำการจับคู่พิกเซล 1-to-1 แบบขาวดำคมกริบ</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 8: Alerts & LINE */}
+        {activeTab === 'alerts' && (
+          <div style={css(`display:flex; flex-direction:column; gap:24px;`)}>
+            <div>
+              <h2 style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary); margin:0 0 8px 0;`)}>
+                ระบบแจ้งเตือนอัจฉริยะ & ตัวเชื่อมต่อบอท LINE (Alerts & LINE Notification System)
+              </h2>
+              <p style={css(`font:var(--text-sm)/1.6 var(--font-body); color:var(--text-secondary); margin:0;`)}>
+                คู่มือการทำรายการจัดการแจ้งเตือนภายในหน้าเว็บบราวเซอร์ และพฤติกรรมระบบการยิงแจ้งเตือนผ่านบอทไลน์เข้าห้องแชทกลุ่มอัตโนมัติ
+              </p>
+            </div>
+
+            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; align-items:flex-start;`)}>
+              {/* Section 1: In-App Alerts */}
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span style={css(`color:#f97316;`)}>🔔</span> 1. การจัดการการแจ้งเตือนในระบบ (In-App Alerts)
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
+                  <div>**ประเภทและเกณฑ์การแสดงผล:**
+                    <ul style={css(`margin:4px 0; padding-left:14px;`)}>
+                      <li>**สีแดง (วิกฤต):** น้ำยาหมดสต็อกคาคลัง หรือสารเคมีเหลืออายุใช้งาน ≤ 15 วัน</li>
+                      <li>**สีส้ม (สั่งซื้อแล้ว):** รายการสั่งซื้อซ้ำที่ได้รับการจัดการสั่งของไปแล้วและรอนำส่งมอบ</li>
+                    </ul>
+                  </div>
+                  <div>**วิธีการจัดการสถานะใบสั่งซื้อ (แนวทางที่ 2):**
+                    <ol style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:6px; color:var(--text-primary);`)}>
+                      <li>เมื่อมีรายการ **"ต่ำกว่าจุดสั่งซื้อ"** โผล่ขึ้นมา ให้กดปุ่ม **"สั่งซื้อแล้ว / รอของ"** บาร์จะเปลี่ยนเป็นสีส้มพาสเทลและดันลงไปด้านล่าง</li>
+                      <li>ตัวเลขวงกลมสีแดงในแถบเมนูข้างๆ จะลดลงโดยอัตโนมัติเพื่อลดความซ้ำซ้อน</li>
+                      <li>เมื่อของมาส่งมอบแล้ว ให้คลิกปุ่ม **"รับเข้า Lot"** สีเขียวเพื่อคีย์จำนวน ระบบจะเคลียร์การแจ้งเตือนทิ้งให้อัตโนมัติเมื่อสต็อกสูงกว่าจุด Min</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: LINE Notification */}
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span style={css(`color:#06C755;`)}>💬</span> 2. ระบบบอท LINE แจ้งเตือนอัตโนมัติ (LINE Notification)
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
+                  <div>**พฤติกรรมการยิงเตือน:**
+                    <ul style={css(`margin:4px 0; padding-left:14px;`)}>
+                      <li>บอทจะสแกนและส่งข้อความแจ้งเตือน **"น้ำยาหมดอายุ / วิกฤตใกล้หมดอายุ (สีแดง: ≤ 15 วัน)"** เข้ากลุ่มโดยตรง</li>
+                      <li>**แจ้งเตือนอัตโนมัติ:** ระบบจะทำงานส่งข้อมูลให้อัตโนมัติทุกวันในเวลา **08:00 น.** (ตั้งเวลาทำงานผ่าน Cron Job)</li>
+                      <li>**ส่งแมนนวล:** เจ้าหน้าที่สามารถกดปุ่มสีเขียว **"ส่งแจ้งเตือนน้ำยาใกล้หมดอายุเข้า LINE"** บนหน้าเว็บเพื่อส่งทันทีได้ตลอดเวลา</li>
+                    </ul>
+                  </div>
+                  <div>**เงื่อนไขการหยุดส่งเตือน:**
+                    <ol style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:6px; color:var(--text-primary);`)}>
+                      <li>บอทจะส่งซ้ำทุกวันตราบใดที่น้ำยาล็อตนั้นยังแช่อยู่ในสต็อก (แม้จะกดรับทราบแล้ว) เพื่อความปลอดภัยสูงสุด</li>
+                      <li>บอทจะหยุดส่งข้อความเตือนเมื่อมีการกด **"เบิกจ่ายจนเหลือ 0"** หรือกด **"ตัดจำหน่าย (Dispose)"** ล็อตที่เสื่อมสภาพทิ้งแล้วเท่านั้น</li>
+                    </ol>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
