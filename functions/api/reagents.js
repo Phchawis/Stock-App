@@ -2,6 +2,14 @@ import { requirePerm, json, actorName, nowStr } from './_lib.js';
 
 export async function onRequestGet(context) {
   try {
+    await context.env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS alert_acks (
+        key TEXT PRIMARY KEY,
+        status TEXT NOT NULL,
+        at TEXT NOT NULL,
+        by TEXT NOT NULL
+      )
+    `).run();
     const { results } = await context.env.DB.prepare('SELECT * FROM reagents').all();
     const mapped = results.map((r) => ({
       id: r.id, code: r.code, th: r.th, en: r.en, cat: r.cat, unit: r.unit,
