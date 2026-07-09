@@ -6,6 +6,7 @@ export function Dashboard({ v }) {
   const {
     go, isDash, title, dashAlerts, dashLow,
     recent, usageList, ic, user, usersList,
+    deadStockReagents, dynamicMinSuggestions,
   } = v;
 
   const [period, setPeriod] = React.useState('6m');
@@ -528,6 +529,101 @@ export function Dashboard({ v }) {
                     • <strong>Waste Rate (อัตราส่วนความสูญเสีย):</strong> ดัชนีแสดงความสูญเสียของของเสื่อมสภาพคาคลัง คำนวณจาก: [ยอดน้ำยาหมดอายุสะสม / ยอดคงคลังสะสมทั้งหมด × 100]
                   </div>
                 </div>
+              </div>
+            </div>
+            
+            {/* Panel D: Inventory Optimization */}
+            <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); padding:20px; display:flex; flex-direction:column; gap:16px; margin-top:20px;`)}>
+              <div style={css(`font:var(--type-card-title); color:var(--text-primary); display:flex; align-items:center; gap:8px;`)}>
+                <span>✨ ระบบแนะนำการเพิ่มประสิทธิภาพคลัง (Inventory Optimization & Safety Stock Suggestions)</span>
+              </div>
+              <p style={css(`font:var(--text-xs)/1.5 var(--font-body); color:var(--text-secondary); margin:0;`)}>
+                ระบบจะวิเคราะห์ประวัติการเบิกจ่ายจริงในช่วง 90 วันที่ผ่านมา เพื่อประเมินหาจุดความปลอดภัยต่ำสุดที่ควรจัดเก็บ (Safety Stock) และส่งสัญญาณเตือนน้ำยาที่เสี่ยงหมดอายุคาตู้เย็นจากการแช่ทิ้งไว้นานโดยไม่มีกิจกรรมการเคลื่อนไหว
+              </p>
+
+              <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px;`)}>
+                
+                {/* 1. Dead Stock Section */}
+                <div style={css(`background:var(--surface-sunken); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:12px;`)}>
+                  <div style={css(`font:var(--fw-bold) var(--text-xs)/1.2 var(--font-display); color:var(--text-primary); display:flex; align-items:center; gap:6px;`)}>
+                    <span>📦</span> น้ำยาแช่ตกค้างสะสม (Slow Moving / Dead Stock > 60 วัน)
+                  </div>
+                  
+                  {(!deadStockReagents || deadStockReagents.length === 0) ? (
+                    <div style={css(`display:flex; align-items:center; gap:8px; background:var(--white); padding:16px; border-radius:var(--radius-sm); border:1px solid var(--border-default); font-size:var(--text-xs); color:var(--green-700); font-weight:600;`)}>
+                      <span>✅</span> ยอดเยี่ยม: ไม่พบน้ำยาแช่ตกค้างที่ไม่มีการเบิกใช้เกิน 60 วัน
+                    </div>
+                  ) : (
+                    <div style={css(`overflow:auto; max-height:220px; border:1px solid var(--border-default); border-radius:var(--radius-sm); background:var(--white);`)}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10.5px', textAlign: 'left' }}>
+                        <thead>
+                          <tr style={{ background: 'var(--slate-50)', borderBottom: '1px solid var(--border-default)' }}>
+                            <th style={{ padding: '8px' }}>ชื่อน้ำยา</th>
+                            <th style={{ padding: '8px', textAlign: 'center' }}>คงคลัง</th>
+                            <th style={{ padding: '8px', textAlign: 'right' }}>เบิกใช้ล่าสุด</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {deadStockReagents.map((item, idx) => (
+                            <tr key={idx} style={{ borderBottom: idx < deadStockReagents.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
+                              <td style={{ padding: '8px', fontWeight: '600' }}>
+                                <div>{item.th}</div>
+                                <div style={{ fontSize: '9px', color: 'var(--text-tertiary)' }}>{item.en} ({item.code})</div>
+                              </td>
+                              <td style={{ padding: '8px', textAlign: 'center', fontFamily: 'var(--font-mono)' }}>{item.onHand} {item.unit}</td>
+                              <td style={{ padding: '8px', textAlign: 'right', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>{item.lastIssueDate}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. Dynamic Min Suggestions Section */}
+                <div style={css(`background:var(--surface-sunken); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:12px;`)}>
+                  <div style={css(`font:var(--fw-bold) var(--text-xs)/1.2 var(--font-display); color:var(--text-primary); display:flex; align-items:center; gap:6px;`)}>
+                    <span>⚙️</span> คำแนะนำปรับจุดสั่งซื้อตามการใช้งานจริง (Dynamic Min Recommendations)
+                  </div>
+
+                  {(!dynamicMinSuggestions || dynamicMinSuggestions.length === 0) ? (
+                    <div style={css(`display:flex; align-items:center; gap:8px; background:var(--white); padding:16px; border-radius:var(--radius-sm); border:1px solid var(--border-default); font-size:var(--text-xs); color:var(--brand-800); font-weight:600;`)}>
+                      <span>✅</span> ทุกรายการมีจุดสั่งซื้อสั่งขั้นต่ำสอดคล้องกับอัตราการใช้งานจริงแล้ว
+                    </div>
+                  ) : (
+                    <div style={css(`overflow:auto; max-height:220px; border:1px solid var(--border-default); border-radius:var(--radius-sm); background:var(--white);`)}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10.5px', textAlign: 'left' }}>
+                        <thead>
+                          <tr style={{ background: 'var(--slate-50)', borderBottom: '1px solid var(--border-default)' }}>
+                            <th style={{ padding: '8px' }}>ชื่อน้ำยา</th>
+                            <th style={{ padding: '8px', textAlign: 'center' }}>ค่า Min เดิม</th>
+                            <th style={{ padding: '8px', textAlign: 'center', color: 'var(--brand-800)' }}>แนะนำ</th>
+                            <th style={{ padding: '8px', textAlign: 'right' }}>คำแนะนำ</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {dynamicMinSuggestions.map((item, idx) => {
+                            const isIncrease = item.direction === 'increase';
+                            return (
+                              <tr key={idx} style={{ borderBottom: idx < dynamicMinSuggestions.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
+                                <td style={{ padding: '8px', fontWeight: '600' }}>
+                                  <div>{item.th}</div>
+                                  <div style={{ fontSize: '9px', color: 'var(--text-tertiary)' }}>ใช้เฉลี่ย {item.avgMonthly} {item.unit}/ด.</div>
+                                </td>
+                                <td style={{ padding: '8px', textAlign: 'center', fontFamily: 'var(--font-mono)' }}>{item.currentMin}</td>
+                                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', color: isIncrease ? 'var(--red-700)' : 'var(--green-700)', fontFamily: 'var(--font-mono)' }}>{item.recommendedMin}</td>
+                                <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: isIncrease ? '#c2410c' : 'var(--green-700)' }}>
+                                  {isIncrease ? '📈 ควรเพิ่ม Min' : '📉 ควรลด Min'}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
               </div>
             </div>
           </div>
