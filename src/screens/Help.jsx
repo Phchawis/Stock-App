@@ -17,6 +17,7 @@ export function Help({ v }) {
     { id: 'reconciliation', label: 'การปรับปรุงสต็อก & ตัดจ่าย', icon: '⚖️' },
     { id: 'sticker', label: 'การสร้างสติกเกอร์ (Sticker)', icon: '🏷️' },
     { id: 'alerts', label: 'การแจ้งเตือน & บอท LINE', icon: '🔔' },
+    { id: 'optimization', label: 'การควบคุม & เพิ่มประสิทธิภาพ', icon: '✨' },
   ];
 
   return (
@@ -655,6 +656,71 @@ export function Help({ v }) {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 9: Optimization & Security */}
+        {activeTab === 'optimization' && (
+          <div style={css(`display:flex; flex-direction:column; gap:24px;`)}>
+            <div>
+              <h2 style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary); margin:0 0 8px 0;`)}>
+                การควบคุมความปลอดภัย & เพิ่มประสิทธิภาพวิเคราะห์คลัง (Security & Optimization Guide)
+              </h2>
+              <p style={css(`font:var(--text-sm)/1.6 var(--font-body); color:var(--text-secondary); margin:0;`)}>
+                คู่มือการควบคุมความปลอดภัยหน้าจอกลางแล็บด้วยระบบตัดสิทธิ์เมื่อไม่มีการเคลื่อนไหว, การวิเคราะห์จุดสั่งซื้อแนะนำ, การตรวจสอบน้ำยาแช่ตกค้าง, และการติดตั้งเว็บแอปพลิเคชันลงเครื่องคอมพิวเตอร์/มือถือ (PWA)
+              </p>
+            </div>
+
+            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; align-items:flex-start;`)}>
+              
+              {/* Section 1: Auto Logout & Security */}
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span style={css(`color:#d97706;`)}>⏰</span> 1. ระบบออกจากระบบอัตโนมัติ (Idle Auto-Logout)
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
+                  <div>**เกณฑ์ความปลอดภัยสำหรับ Shared PC:**
+                    <ul style={css(`margin:4px 0; padding-left:14px;`)}>
+                      <li>หากหน้าจอค้างไว้และ **ไม่มีการเคลื่อนไหวเมาส์ พิมพ์คีย์บอร์ด คลิก หรือเลื่อนหน้าจอ เกิน 20 นาที** ระบบจะเตรียมการเซฟตี้</li>
+                      <li>**กล่องแจ้งเตือนเวลานับถอยหลัง**: ระบบจะแสดงป๊อปอัปแจ้งเตือนล่วงหน้า **30 วินาที** พร้อมตัวเลขนับถอยหลัง เพื่อป้องกันการตัดสิทธิ์ระหว่างใช้งานค้าง</li>
+                      <li>**ปุ่มยืนยัน**: เจ้าหน้าที่สามารถกด **"ทำงานต่อ (Resume)"** เพื่อต่ออายุเซสชัน หรือเลือกกดออกจากระบบทันทีได้</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: PWA Installation */}
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span style={css(`color:var(--brand-700);`)}>📱</span> 2. การติดตั้งแอปพลิเคชันลงบนเครื่องคอมพิวเตอร์/มือถือ (PWA)
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
+                  <div>**ประโยชน์ของระบบ PWA:**
+                    <ul style={css(`margin:4px 0; padding-left:14px;`)}>
+                      <li>ระบบรองรับการติดตั้งลงบนแท็บเล็ต มือถือ หรือเครื่อง PC ประจำเคาน์เตอร์วิเคราะห์โดยขึ้นไอคอนบนหน้าจอเหมือนแอปพลิเคชันปกติ (ไม่ต้องเข้า Browser ค้นหา URL)</li>
+                      <li>**การติดตั้งบน Google Chrome (PC)**: สังเกตที่ช่องกรอก URL ด้านบนขวา จะมีสัญลักษณ์ **"ติดตั้งแอป (Install App)"** หรือรูปหน้าต่างพร้อมลูกศรชี้ลง ให้กดตกลง</li>
+                      <li>**การติดตั้งบน iOS Safari (iPhone/iPad)**: กดปุ่ม **"แชร์ (Share)"** ตรงแถบเมนูด้านล่าง แล้วเลือก **"เพิ่มไปยังหน้าจอโฮม (Add to Home Screen)"**</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Optimization Metrics */}
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span style={css(`color:var(--green-700);`)}>📈</span> 3. ระบบวิเคราะห์และปรับปรุงคลัง (Inventory Optimization)
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
+                  <div>**การใช้งานระบบวิเคราะห์สต็อก:**
+                    <ul style={css(`margin:4px 0; padding-left:14px;`)}>
+                      <li>**Dead Stock (น้ำยาแช่ตกค้าง)**: แสดงยอดน้ำยาที่มีของในตู้เย็น แต่ไม่มีบันทึกการเบิกใช้เลยติดต่อกันเกิน **60 วัน** เพื่อป้องกันการหมดอายุคาตู้</li>
+                      <li>**Dynamic Min (จุดสั่งซื้อแนะนำ)**: ระบบคำนวณยอดใช้เฉลี่ยรายเดือนจริงในช่วง 90 วันล่าสุด และแนะค่า Min ที่เหมาะสม เช่น หากใช้น้อยลง ระบบจะแนะนำให้ลดค่า Min เพื่อลดพื้นที่เก็บ และลดภาระทุนจม</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         )}
