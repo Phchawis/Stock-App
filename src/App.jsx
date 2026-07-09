@@ -1610,6 +1610,7 @@ class App extends React.Component {
 
       toast: S.toast, toastBg: S.toast ? (S.toast.kind === 'warn' ? '#5A4410' : 'var(--slate-900)') : '',
       showToast: (msg, kind) => this.showToast(msg, kind),
+      api: (path, opts) => this.api(path, opts),
       sidebarOpen: S.sidebarOpen,
       toggleSidebar: () => this.setState(s => ({ sidebarOpen: !s.sidebarOpen })),
       closeSidebar: () => this.setState({ sidebarOpen: false }),
