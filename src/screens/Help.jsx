@@ -84,6 +84,70 @@ export function Help({ v }) {
             </div>
 
             <div style={css(`border-top:1px solid var(--border-subtle); padding-top:20px;`)}>
+              <h3 style={css(`font:var(--fw-semibold) var(--text-md)/1.3 var(--font-display); color:var(--text-primary); margin:0 0 12px 0;`)}>
+                เกณฑ์การแจ้งเตือนและระดับสี (Alerts & Color Severity Criteria)
+              </h3>
+              <p style={css(`font:var(--text-sm)/1.5 var(--font-body); color:var(--text-secondary); margin:0 0 16px 0;`)}>
+                ระบบจะตรวจสอบอายุการใช้งานของน้ำยาเคมีวิเคราะห์คลังหลักและระดับปริมาณเพื่อจัดทำประเภทสีการแจ้งเตือนตามเงื่อนไขดังนี้:
+              </p>
+
+              <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px;`)}>
+                {/* 1. Expiry alerts table card */}
+                <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:16px; display:flex; flex-direction:column; gap:10px;`)}>
+                  <div style={css(`font:var(--fw-bold) var(--text-xs)/1.2 var(--font-body); color:var(--text-primary); display:flex; align-items:center; gap:6px;`)}>
+                    <span>📅</span> <strong>การจัดกลุ่มวันหมดอายุ (Expiry Conditions)</strong>
+                  </div>
+                  <div style={css(`display:flex; flex-direction:column; gap:8px;`)}>
+                    <div style={css(`background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:10px; display:flex; justify-content:space-between; align-items:center;`)}>
+                      <div>
+                        <span style={css(`font-weight:bold; font-size:11px; background:var(--red-100); color:var(--red-700); padding:2px 8px; border-radius:var(--radius-pill);`)}>วิกฤต (Critical)</span>
+                        <div style={css(`font-size:10px; color:var(--text-secondary); margin-top:4px;`)}>หมดอายุแล้ว หรือเหลือ ≤ 15 วัน</div>
+                      </div>
+                      <span style={css(`font-size:20px;`)}>🔴</span>
+                    </div>
+                    <div style={css(`background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:10px; display:flex; justify-content:space-between; align-items:center;`)}>
+                      <div>
+                        <span style={css(`font-weight:bold; font-size:11px; background:var(--amber-100); color:var(--amber-700); padding:2px 8px; border-radius:var(--radius-pill);`)}>เฝ้าระวัง (Warning)</span>
+                        <div style={css(`font-size:10px; color:var(--text-secondary); margin-top:4px;`)}>มีอายุใช้งานเหลือ 16 - 60 วัน</div>
+                      </div>
+                      <span style={css(`font-size:20px;`)}>🟡</span>
+                    </div>
+                    <div style={css(`background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:10px; display:flex; justify-content:space-between; align-items:center;`)}>
+                      <div>
+                        <span style={css(`font-weight:bold; font-size:11px; background:var(--green-100); color:var(--green-700); padding:2px 8px; border-radius:var(--radius-pill);`)}>ปกติ (OK)</span>
+                        <div style={css(`font-size:10px; color:var(--text-secondary); margin-top:4px;`)}>มีอายุใช้งานเหลือมากกว่า 60 วันขึ้นไป</div>
+                      </div>
+                      <span style={css(`font-size:20px;`)}>🟢</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Reorder level alerts table card */}
+                <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:16px; display:flex; flex-direction:column; gap:10px;`)}>
+                  <div style={css(`font:var(--fw-bold) var(--text-xs)/1.2 var(--font-body); color:var(--text-primary); display:flex; align-items:center; gap:6px;`)}>
+                    <span>📦</span> <strong>การจัดกลุ่มระดับปริมาณสินค้า (Stock Level Conditions)</strong>
+                  </div>
+                  <div style={css(`display:flex; flex-direction:column; gap:8px;`)}>
+                    <div style={css(`background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:10px; display:flex; justify-content:space-between; align-items:center;`)}>
+                      <div>
+                        <span style={css(`font-weight:bold; font-size:11px; background:var(--red-100); color:var(--red-700); padding:2px 8px; border-radius:var(--radius-pill);`)}>วิกฤต (Critical)</span>
+                        <div style={css(`font-size:10px; color:var(--text-secondary); margin-top:4px;`)}>ยอดของคงคลังเหลือ 0 (หมดเกลี้ยง)</div>
+                      </div>
+                      <span style={css(`font-size:20px;`)}>🔴</span>
+                    </div>
+                    <div style={css(`background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:10px; display:flex; justify-content:space-between; align-items:center;`)}>
+                      <div>
+                        <span style={css(`font-weight:bold; font-size:11px; background:var(--amber-100); color:var(--amber-700); padding:2px 8px; border-radius:var(--radius-pill);`)}>เฝ้าระวัง (Warning)</span>
+                        <div style={css(`font-size:10px; color:var(--text-secondary); margin-top:4px;`)}>ยอดคงคลัง ≤ จุดสั่งซื้อขั้นต่ำ (Min) แต่มากกว่า 0</div>
+                      </div>
+                      <span style={css(`font-size:20px;`)}>🟡</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={css(`border-top:1px solid var(--border-subtle); padding-top:20px;`)}>
               <h3 style={css(`font:var(--fw-semibold) var(--text-md)/1.3 var(--font-display); color:var(--text-primary); margin:0 0 14px 0;`)}>
                 สิทธิ์การเข้าใช้งานแบ่งตามบทบาท (Roles & Permissions)
               </h3>
