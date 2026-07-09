@@ -1684,7 +1684,7 @@ class App extends React.Component {
       openSignature: () => this.openSignature(),
       modalSignature: S.modal === 'signature',
       onSaveSignature: (sig) => this.onSaveSignature(sig),
-      kpi: { total: S.reagents.length }, kpis, dashAlerts, dashLow, recent, usageList, catStats, monthlyData, weeklyPattern, insights,
+      kpi: { total: S.reagents.length }, kpis, dashAlerts, dashLow, recent, usageList, catStats, monthlyData, weeklyPattern, insights, deadStockReagents, dynamicMinSuggestions,
       invRows, invTabs, invTab: S.invTab, setInvTab: (v) => this.setState({ invTab: v }),
       search: S.search, onSearch: (e) => this.setState({ search: e.target.value }),
       hasInvRows: invRows.length > 0,
@@ -1859,6 +1859,48 @@ class App extends React.Component {
                 onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(194,66,42,0.3)'; }}
               >
                 ยืนยันทำรายการ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Idle Session Warning Overlay */}
+      {S.idleCountdown !== null && (
+        <div className="ov-in" style={css(`position:fixed; inset:0; background:rgba(14,24,34,.75); z-index:300; display:grid; place-items:center; padding:24px; backdrop-filter:blur(3px);`)}>
+          <div className="tt-in theme-light-scope confirm-card" style={css(`width:min(440px,94vw); background:#e0ecf0; border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:2px solid #b2d1da; padding:24px; display:flex; flex-direction:column; gap:20px; color:#10222a; --surface-card:#e0ecf0; --text-primary:#10222a; --text-secondary:#2d444e; --slate-100:#b2d1da;`)}>
+            <div style={css(`display:flex; align-items:flex-start; gap:16px;`)}>
+              <span style={css(`width:48px; height:48px; border-radius:50%; background:rgba(217,119,6,0.12); color:#d97706; display:grid; place-items:center; flex-shrink:0; font-size:24px;`)}>
+                ⏰
+              </span>
+              <div style={css(`flex:1; min-width:0;`)}>
+                <h3 style={css(`font:var(--fw-bold) var(--text-md)/1.3 var(--font-display); color:var(--text-primary); margin:0;`)}>
+                  ระบบกำลังจะออกจากระบบอัตโนมัติ
+                </h3>
+                <p style={css(`font:var(--text-xs)/1.5 var(--font-body); color:var(--text-secondary); margin:8px 0 0;`)}>
+                  ตรวจพบว่าไม่มีการเคลื่อนไหวหน้าจอเป็นเวลานานเกิน 20 นาที ระบบจะออกจากระบบเพื่อความปลอดภัยภายในอีก <strong style={css(`color:#d97706; font-size:14px; font-family:var(--font-mono);`)}>{S.idleCountdown}</strong> วินาที
+                </p>
+              </div>
+            </div>
+            <div style={css(`display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #b2d1da; padding-top:14px;`)}>
+              <button 
+                onClick={() => this.logout()}
+                style={css(`padding:9px 18px; border-radius:var(--radius-md); border:1px solid #b2d1da; background:#fff; color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#e0ecf0'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; }}
+              >
+                ออกจากระบบเลย
+              </button>
+              <button 
+                onClick={() => {
+                  this._lastActive = Date.now();
+                  this.setState({ idleCountdown: null });
+                }}
+                style={css(`padding:9px 18px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); box-shadow:var(--glow-brand-soft); transition:all var(--dur-fast);`)}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; }}
+              >
+                ทำงานต่อ (Resume)
               </button>
             </div>
           </div>
