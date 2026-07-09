@@ -3,13 +3,14 @@ import { css } from '../css.js';
 
 export function Alerts({ v }) {
   const {
-    isAlerts, alertRows, hasAlerts, ic, user, reorderReportRows, usersList,
+    isAlerts, alertRows, hasAlerts, ic, user, reorderReportRows, usersList, showToast
   } = v;
 
   if (!isAlerts) return null;
 
   const [selectedCategory, setSelectedCategory] = React.useState('all');
   const [selectedSupplier, setSelectedSupplier] = React.useState('all');
+  const [isSendingLine, setIsSendingLine] = React.useState(false);
 
   const cats = Array.from(new Set(reorderReportRows.map(r => r.cat).filter(Boolean)));
   const getCategoryLabel = (c) => ({
@@ -59,6 +60,25 @@ export function Alerts({ v }) {
     }).catch(err => {
       console.error("Failed to copy:", err);
     });
+  };
+
+  const handleSendLineAlert = async () => {
+    setIsSendingLine(true);
+    try {
+      const res = await fetch('/api/admin/line_notify', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error || 'เกิดข้อผิดพลาดในการส่งแจ้งเตือน', 'warn');
+      } else if (data.message) {
+        showToast(data.message, 'info');
+      } else {
+        showToast(`ส่งแจ้งเตือนน้ำยาวิกฤต (สีแดง) เข้ากลุ่ม LINE สำเร็จ (${data.count} รายการ)`);
+      }
+    } catch (err) {
+      showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้: ' + err.message, 'warn');
+    } finally {
+      setIsSendingLine(false);
+    }
   };
 
   const printStyle = `
@@ -239,6 +259,18 @@ export function Alerts({ v }) {
             <button className="alert-action-btn" onClick={handleCopyToClipboard} title="คัดลอกตารางข้อมูลสำหรับนำไปวางในโปรแกรม Excel">
               <span style={css(`display:grid; place-items:center;`)}>{ic.list}</span>
               คัดลอกด่วน (Copy)
+            </button>
+            <button 
+              className="alert-action-btn" 
+              onClick={handleSendLineAlert}
+              disabled={isSendingLine}
+              title="ส่งแจ้งเตือนน้ำยาวิกฤต (สีแดง) เข้ากลุ่ม LINE"
+              style={css(`background:#06C755; border-color:#05b04b; color:#fff; display:flex; align-items:center; gap:6px;`)}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#05b04b'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#06C755'; }}
+            >
+              <span style={css(`display:grid; place-items:center; color:#fff;`)}>{ic.qr}</span>
+              {isSendingLine ? 'กำลังส่ง...' : 'ส่งแจ้งเตือนสีแดงเข้า LINE'}
             </button>
             <button className="alert-print-btn" onClick={() => window.print()}>
               <span style={css(`display:grid; place-items:center;`)}>{ic.list}</span>
