@@ -3,7 +3,7 @@ import { css } from '../css.js';
 
 export function Alerts({ v }) {
   const {
-    isAlerts, alertRows, hasAlerts, ic, user, reorderReportRows, usersList, showToast
+    isAlerts, alertRows, hasAlerts, ic, user, reorderReportRows, usersList, showToast, api
   } = v;
 
   if (!isAlerts) return null;
@@ -65,7 +65,7 @@ export function Alerts({ v }) {
   const handleSendLineAlert = async () => {
     setIsSendingLine(true);
     try {
-      const res = await fetch('/api/admin/line_notify', { method: 'POST' });
+      const res = await api('/api/admin/line_notify', { method: 'POST' });
       const data = await res.json();
       if (!res.ok) {
         showToast(data.error || 'เกิดข้อผิดพลาดในการส่งแจ้งเตือน', 'warn');
