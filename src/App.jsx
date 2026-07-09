@@ -1804,6 +1804,7 @@ class App extends React.Component {
   }
 
   render() {
+    const S = this.state;
     const v = this.renderVals();
     const { setRoot } = v;
     return (
