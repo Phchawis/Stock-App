@@ -1358,7 +1358,7 @@ class App extends React.Component {
     // alerts screen rows
     const alertRows = alerts.map(a => ({ ...a, icon: I(a.kind === 'EXPIRY' ? 'CalendarClock' : 'TriangleAlert', a.fg, 18),
       kindLabel: a.kind === 'EXPIRY' ? 'ใกล้หมดอายุ' : 'จุดสั่งซื้อซ้ำ', sevLabel: this.sevCol(a.sev).th,
-      onAck: () => this.ack(a.key), onOpen: () => this.openDetail(a.rid) }));
+      onAck: () => this.setAlertStatus(a.key, 'acked'), onOpen: () => this.openDetail(a.rid) }));
 
     // audit rows
     const txnRows = S.txns.slice().sort((a, b) => b.at.localeCompare(a.at)).map(t => {
@@ -1489,7 +1489,7 @@ class App extends React.Component {
         helpBg: ns.help.bg, helpFg: ns.help.fg, helpIc: ns.help.ic,
         scBg: ns.sc.bg, scFg: ns.sc.fg, scIc: ns.sc.ic,
         csBg: ns.cs.bg, csFg: ns.cs.fg, csIc: ns.cs.ic,
-        alertCount: alerts.length },
+        alertCount: alerts.filter(a => !a.isOrdered).length },
       go: { dashboard: () => this.nav('dashboard'), inventory: () => this.nav('inventory'), reagentLists: () => this.nav('reagent_lists'), alerts: () => this.nav('alerts'), audit: () => this.nav('audit'), perms: () => this.nav('perms'), help: () => this.nav('help'), stockCount: () => this.nav('stock_count'), createSticker: () => this.nav('create_sticker'),
         alertsLink: (e) => { e.preventDefault(); this.nav('alerts'); }, auditLink: (e) => { e.preventDefault(); this.nav('audit'); } },
       isDash: dn === 'dashboard', isInv: dn === 'inventory', isReagentLists: dn === 'reagent_lists', isAlerts: dn === 'alerts', isAudit: dn === 'audit', isPerms: dn === 'perms', isHelp: dn === 'help', isStockCount: dn === 'stock_count', isCreateSticker: dn === 'create_sticker',
