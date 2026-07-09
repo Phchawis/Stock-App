@@ -455,6 +455,56 @@ class App extends React.Component {
       }
     };
     window.addEventListener('keydown', this._handleKeyDown);
+    this.setupIdleTimer();
+  }
+
+  setupIdleTimer() {
+    this._idleLimit = 20 * 60; // 20 minutes
+    this._warningLimit = 30; // 30 seconds
+    this._lastActive = Date.now();
+
+    const resetActive = () => {
+      this._lastActive = Date.now();
+      if (this.state.idleCountdown !== null) {
+        this.setState({ idleCountdown: null });
+      }
+    };
+
+    const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+    events.forEach(e => window.addEventListener(e, resetActive, { passive: true }));
+    this._idleEvents = { events, resetActive };
+
+    this._idleInterval = setInterval(() => {
+      const hasAuth = !!sessionStorage.getItem('authUser');
+      if (!hasAuth || !this.state.role) {
+        this._lastActive = Date.now();
+        if (this.state.idleCountdown !== null) {
+          this.setState({ idleCountdown: null });
+        }
+        return;
+      }
+
+      const idleSecs = Math.floor((Date.now() - this._lastActive) / 1000);
+      const remaining = this._idleLimit - idleSecs;
+
+      if (remaining <= 0) {
+        this.handleAutoLogout();
+      } else if (remaining <= this._warningLimit) {
+        if (this.state.idleCountdown !== remaining) {
+          this.setState({ idleCountdown: remaining });
+        }
+      } else {
+        if (this.state.idleCountdown !== null) {
+          this.setState({ idleCountdown: null });
+        }
+      }
+    }, 1000);
+  }
+
+  handleAutoLogout() {
+    this.setState({ idleCountdown: null });
+    this.showToast('ไม่มีการเคลื่อนไหวเกิน 20 นาที ออกจากระบบอัตโนมัติ', 'warn');
+    this.logout();
   }
 
   componentWillUnmount() {
@@ -462,6 +512,10 @@ class App extends React.Component {
     if (this._toastT) clearTimeout(this._toastT);
     if (this._handleKeyDown) {
       window.removeEventListener('keydown', this._handleKeyDown);
+    }
+    if (this._idleInterval) clearInterval(this._idleInterval);
+    if (this._idleEvents) {
+      this._idleEvents.events.forEach(e => window.removeEventListener(e, this._idleEvents.resetActive));
     }
   }
 
