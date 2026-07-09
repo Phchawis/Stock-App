@@ -546,7 +546,7 @@ export function Dashboard({ v }) {
                 {/* 1. Dead Stock Section */}
                 <div style={css(`background:var(--surface-sunken); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:12px;`)}>
                   <div style={css(`font:var(--fw-bold) var(--text-xs)/1.2 var(--font-display); color:var(--text-primary); display:flex; align-items:center; gap:6px;`)}>
-                    <span>📦</span> น้ำยาแช่ตกค้างสะสม (Slow Moving / Dead Stock > 60 วัน)
+                    <span>📦</span> {"น้ำยาแช่ตกค้างสะสม (Slow Moving / Dead Stock > 60 วัน)"}
                   </div>
                   
                   {(!deadStockReagents || deadStockReagents.length === 0) ? (
