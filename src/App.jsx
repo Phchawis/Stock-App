@@ -96,6 +96,7 @@ class App extends React.Component {
       editingTxnId: null, etForm: this.blankEtf(),
       confirmData: null,
       disposalLotId: null, dispForm: this.blankDispForm(),
+      idleCountdown: null,
     };
     this.user = { name: 'ทนพ. สมชาย ใจดี', role: 'นักเทคนิคการแพทย์', initials: 'สช' };
   }
