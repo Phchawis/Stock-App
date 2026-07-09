@@ -354,14 +354,15 @@ class App extends React.Component {
 
   async fetchData() {
     try {
-      const [reagentsRes, lotsRes, txnsRes, usersRes, permsRes] = await Promise.all([
+      const [reagentsRes, lotsRes, txnsRes, usersRes, permsRes, acksRes] = await Promise.all([
         this.api('/api/reagents'),
         this.api('/api/lots'),
         this.api('/api/transactions'),
         this.api('/api/users'),
-        this.api('/api/permissions')
+        this.api('/api/permissions'),
+        this.api('/api/alerts/acks')
       ]);
-      if (!reagentsRes.ok || !lotsRes.ok || !txnsRes.ok || !usersRes.ok || !permsRes.ok) {
+      if (!reagentsRes.ok || !lotsRes.ok || !txnsRes.ok || !usersRes.ok || !permsRes.ok || !acksRes.ok) {
         throw new Error('ดึงข้อมูลจากเซิร์ฟเวอร์ล้มเหลว');
       }
       const reagents = await reagentsRes.json();
@@ -369,7 +370,18 @@ class App extends React.Component {
       const txns = await txnsRes.json();
       const users = await usersRes.json();
       const perms = await permsRes.json();
-      this.setState(s => ({ reagents, lots, txns, users, perms: (perms && Object.keys(perms).length) ? perms : s.perms }));
+      const acksData = await acksRes.json();
+
+      const acked = {};
+      if (Array.isArray(acksData)) {
+        acksData.forEach(row => {
+          acked[row.key] = row.status;
+        });
+      }
+
+      this.setState(s => ({ reagents, lots, txns, users, acked, perms: (perms && Object.keys(perms).length) ? perms : s.perms }), () => {
+        this.autoClearAckedAlerts(reagents, lots, acked);
+      });
     } catch (err) {
       this.showToast('ดึงข้อมูลล้มเหลว: ' + err.message, 'warn');
     }
@@ -1132,7 +1144,77 @@ class App extends React.Component {
     }));
   }
   closeModal() { this.setState({ modal: null }); }
-  ack(key) { if (!this.can('ack')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์จัดการการแจ้งเตือน', 'warn'); return; } this.setState(s => ({ acked: { ...s.acked, [key]: true } })); this.showToast('รับทราบการแจ้งเตือนแล้ว'); }
+  async setAlertStatus(key, status) {
+    if (!this.can('ack')) {
+      this.showToast('บทบาทนี้ไม่มีสิทธิ์จัดการการแจ้งเตือน', 'warn');
+      return;
+    }
+    try {
+      if (!status) {
+        const res = await this.api(`/api/alerts/acks?key=${encodeURIComponent(key)}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error();
+        this.setState(s => {
+          const next = { ...s.acked };
+          delete next[key];
+          return { acked: next };
+        });
+        this.showToast('ยกเลิกสถานะการจัดการการแจ้งเตือนแล้ว');
+      } else {
+        const res = await this.api('/api/alerts/acks', {
+          method: 'POST',
+          body: JSON.stringify({ key, status })
+        });
+        if (!res.ok) throw new Error();
+        this.setState(s => ({
+          acked: { ...s.acked, [key]: status }
+        }));
+        this.showToast(status === 'ordered' ? 'บันทึกสถานะสั่งซื้อเรียบร้อยแล้ว' : 'รับทราบการแจ้งเตือนแล้ว');
+      }
+    } catch (err) {
+      this.showToast('ไม่สามารถบันทึกสถานะการแจ้งเตือนได้', 'warn');
+    }
+  }
+
+  async autoClearAckedAlerts(reagents, lots, acked) {
+    const promises = [];
+    const nextAcked = { ...acked };
+    let changed = false;
+
+    Object.keys(acked).forEach(key => {
+      if (key.startsWith('R')) {
+        const rid = parseInt(key.slice(1), 10);
+        const r = reagents.find(x => x.id === rid);
+        if (r) {
+          const activeLots = lots.filter(l => l.rid === rid && l.qty > 0 && l.status === 'ACTIVE');
+          const oh = activeLots.reduce((sum, l) => sum + l.qty, 0);
+          if (oh > r.min) {
+            changed = true;
+            delete nextAcked[key];
+            promises.push(this.api(`/api/alerts/acks?key=${encodeURIComponent(key)}`, { method: 'DELETE' }).catch(() => {}));
+          }
+        } else {
+          changed = true;
+          delete nextAcked[key];
+          promises.push(this.api(`/api/alerts/acks?key=${encodeURIComponent(key)}`, { method: 'DELETE' }).catch(() => {}));
+        }
+      } else if (key.startsWith('E')) {
+        const lid = parseInt(key.slice(1), 10);
+        const l = lots.find(x => x.id === lid);
+        if (!l || l.qty <= 0 || l.status !== 'ACTIVE') {
+          changed = true;
+          delete nextAcked[key];
+          promises.push(this.api(`/api/alerts/acks?key=${encodeURIComponent(key)}`, { method: 'DELETE' }).catch(() => {}));
+        }
+      }
+    });
+
+    if (changed) {
+      this.setState({ acked: nextAcked });
+    }
+    if (promises.length > 0) {
+      await Promise.all(promises);
+    }
+  }
   bindRf(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ rf: { ...s.rf, [k]: v } })); }; }
   bindIf(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ iform: { ...s.iform, [k]: v } })); }; }
 
@@ -1503,7 +1585,7 @@ class App extends React.Component {
       search: S.search, onSearch: (e) => this.setState({ search: e.target.value }),
       hasInvRows: invRows.length > 0,
       detailOpen: detail != null, detail, closeDetail: () => this.closeDetail(),
-      alertRows, hasAlerts: alertRows.length > 0, txnRows, reorderReportRows,
+      alertRows, hasAlerts: alertRows.length > 0, txnRows, reorderReportRows, acked: S.acked, setAlertStatus: (key, status) => this.setAlertStatus(key, status),
       modalReceive: S.modal === 'receive', modalIssue: S.modal === 'issue', closeModal: () => this.closeModal(),
       rf: S.rf, rfRid: this.bindRf('rid'), rfLot: this.bindRf('lot'), rfExpiry: this.bindRf('expiry'), rfQty: this.bindRf('qty'), rfSupplier: this.bindRf('supplier'), rfLoc: this.bindRf('loc'),
       reagentOpts, locOpts, supplierOpts, scanOpts, submitReceive: () => this.submitReceive(),
