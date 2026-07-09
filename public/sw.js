@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tuh-stock-v1';
+const CACHE_NAME = 'tuh-stock-v2';
 const ASSETS = [
   '/',
   '/index.html',
@@ -8,6 +8,8 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (e) => {
+  // Force the waiting service worker to become the active service worker
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS).catch(() => {});
@@ -16,15 +18,18 @@ self.addEventListener('install', (e) => {
 });
 
 self.addEventListener('activate', (e) => {
+  // Claim client pages immediately
   e.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
+    self.clients.claim().then(() => {
+      return caches.keys().then((keys) => {
+        return Promise.all(
+          keys.map((key) => {
+            if (key !== CACHE_NAME) {
+              return caches.delete(key);
+            }
+          })
+        );
+      });
     })
   );
 });
@@ -40,26 +45,21 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
+  // Network-First Strategy
   e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(e.request).then((response) => {
-        if (!response || response.status !== 200 || response.type !== 'basic') {
-          return response;
+    fetch(e.request)
+      .then((response) => {
+        if (response && response.status === 200 && response.type === 'basic') {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, responseToCache);
+          });
         }
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(e.request, responseToCache);
-        });
         return response;
-      }).catch(() => {
-        // Offline fallback for index.html
-        if (e.request.mode === 'navigate') {
-          return caches.match('/');
-        }
-      });
-    })
+      })
+      .catch(() => {
+        // Fallback to cache if network is unavailable
+        return caches.match(e.request);
+      })
   );
 });
