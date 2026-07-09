@@ -6,7 +6,8 @@ export async function onRequestPost(context) {
   const groupId = env.LINE_GROUP_ID;
 
   if (!channelAccessToken || !groupId) {
-    return json({ error: 'ยังไม่ได้ระบุโทเค็น LINE_CHANNEL_ACCESS_TOKEN หรือ LINE_GROUP_ID ในระบบ Cloudflare' }, 500);
+    const keys = Object.keys(env || {}).filter(k => k !== 'DB'); // Exclude DB binding for security/clarity
+    return json({ error: `ยังไม่ได้ระบุโทเค็น LINE_CHANNEL_ACCESS_TOKEN หรือ LINE_GROUP_ID ในระบบ Cloudflare (คีย์ที่อ่านได้: ${keys.join(', ') || 'ไม่มีเลย'})` }, 500);
   }
 
   try {
