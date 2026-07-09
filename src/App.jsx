@@ -1452,6 +1452,43 @@ class App extends React.Component {
         testsPerUnit: r.testsPerUnit, testsTotal: r.testsPerUnit ? oh * r.testsPerUnit : null };
     };
 
+    // Optimization Calculations (60-day Dead Stock & 90-day Dynamic Min suggestions)
+    const sixtyDaysAgoStr = new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString().slice(0, 10);
+    const ninetyDaysAgoStr = new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString().slice(0, 10);
+
+    const deadStockReagents = S.reagents.filter(r => {
+      const oh = this.onHand(r.id);
+      if (oh <= 0) return false;
+      const hasRecentIssue = S.txns.some(t => t.rid === r.id && t.type === 'ISSUE' && t.at.slice(0, 10) >= sixtyDaysAgoStr);
+      return !hasRecentIssue;
+    }).map(r => {
+      const issues = S.txns.filter(t => t.rid === r.id && t.type === 'ISSUE');
+      let lastIssueDate = '—';
+      if (issues.length > 0) {
+        const sorted = issues.sort((a, b) => b.at.localeCompare(a.at));
+        lastIssueDate = sorted[0].at.slice(0, 10);
+      }
+      return {
+        id: r.id, code: r.code, th: r.th, en: r.en, unit: r.unit,
+        onHand: this.onHand(r.id), lastIssueDate
+      };
+    });
+
+    const dynamicMinSuggestions = S.reagents.map(r => {
+      const issues = S.txns.filter(t => t.rid === r.id && t.type === 'ISSUE' && t.at.slice(0, 10) >= ninetyDaysAgoStr);
+      const totalIssued = issues.reduce((sum, t) => sum + Math.abs(t.qty), 0);
+      const avgMonthly = totalIssued / 3;
+      const recommendedMin = Math.max(Math.round(avgMonthly * 1.5), 1);
+      const diff = recommendedMin - r.min;
+      const pctDiff = r.min > 0 ? Math.abs(diff) / r.min : 1.0;
+      const isDiff = (pctDiff >= 0.25 && Math.abs(diff) >= 1) || (r.min === 0 && recommendedMin > 0);
+      return {
+        id: r.id, code: r.code, th: r.th, en: r.en, unit: r.unit,
+        currentMin: r.min, recommendedMin, avgMonthly: parseFloat(avgMonthly.toFixed(1)),
+        isDiff, direction: diff > 0 ? 'increase' : 'decrease'
+      };
+    }).filter(s => s.isDiff);
+
     // KPIs
     const lotsActive = S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE').length;
     const expiringSoon = S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE' && this.days(l.expiry) <= 60).length;
