@@ -1335,6 +1335,7 @@ class App extends React.Component {
       thermo: I('Thermometer', 'var(--text-tertiary)', 15), pkg: I('Package', 'var(--text-tertiary)', 15),
       cal: I('CalendarClock', 'var(--text-tertiary)', 15), check: I('Check', '#fff', 16), shield: I('ShieldCheck'),
       help: I('BookOpen'), menu: I('Menu', 'currentColor', 20),
+      eye: I('Eye', 'var(--text-tertiary)', 16), eyeOff: I('EyeOff', 'var(--text-tertiary)', 16),
     };
     const recvDateOf = (lotId) => {
       const t = S.txns.find(t => t.lotId === lotId && t.type === 'RECEIVE');

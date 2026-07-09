@@ -5,10 +5,11 @@ import { Input } from '../components/Input.jsx';
 export function Login({ v }) {
   const {
     notAuthed, loginForm, lfUser, lfPass, loginError, hasLoginError,
-    submitLogin, demoAccounts,
+    submitLogin, demoAccounts, ic,
   } = v;
 
   const [remember, setRemember] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
 
   return notAuthed ? (
     <>
@@ -64,7 +65,25 @@ export function Login({ v }) {
 
             <div style={css(`display:flex; flex-direction:column; gap:16px;`)}>
               <Input label="ชื่อผู้ใช้ (Username)" placeholder="เช่น admin" value={loginForm.username} onChange={lfUser} autoComplete="username" name="username" />
-              <Input label="รหัสผ่าน (Password)" type="password" placeholder="••••••••" value={loginForm.password} onChange={lfPass} autoComplete="new-password" name="password" />
+              <Input 
+                label="รหัสผ่าน (Password)" 
+                type={showPassword ? 'text' : 'password'} 
+                placeholder="••••••••" 
+                value={loginForm.password} 
+                onChange={lfPass} 
+                autoComplete="new-password" 
+                name="password"
+                suffix={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={css(`background:none; border:none; padding:4px; cursor:pointer; display:grid; place-items:center;`)}
+                    title={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+                  >
+                    {showPassword ? ic.eyeOff : ic.eye}
+                  </button>
+                }
+              />
               
               {/* Remember me & Forgot Password */}
               <div style={css(`display:flex; align-items:center; justify-content:space-between; font:400 13px/1 'Sarabun',sans-serif;`)}>
