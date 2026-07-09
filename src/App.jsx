@@ -107,7 +107,18 @@ class App extends React.Component {
   blankDispForm() { return { qty: '', reason: 'หมดอายุ', customReason: '' }; }
   defaultPerms() { const o = {}; this.ROLES().forEach(r => { o[r.id] = { ...r.perms }; }); return o; }
   USERNAMES() { return { admin: 'admin', supervisor: 'supervisor', technician: 'technician', viewer: 'viewer' }; }
-  bindLF(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ loginForm: { ...s.loginForm, [k]: v, error: '' } })); }; }
+  bindLF(k) {
+    return (e) => {
+      const v = e && e.target ? e.target.value : e;
+      this.setState(s => {
+        const nextLF = { ...s.loginForm, [k]: v, error: '' };
+        if (k === 'username') {
+          nextLF.password = '';
+        }
+        return { loginForm: nextLF };
+      });
+    };
+  }
   async submitLogin() {
     const f = this.state.loginForm;
     const username = (f.username || '').trim();
