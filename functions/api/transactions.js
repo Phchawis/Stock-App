@@ -1,8 +1,24 @@
 import { requirePerm, json } from './_lib.js';
 
+// GET ?months=N — every current caller (Dashboard analytics, recent-activity
+// feed, dead-stock/usage detection) only ever looks at the last 60–90 days or
+// the Dashboard's own 3/6/12-month selector, so bounding the default fetch to
+// a recent window keeps the response small as this table grows forever
+// (append-only: receives/issues are never deleted in normal operation). Pass
+// no `months` to get the complete, unbounded history — used by the Audit
+// screen's "load full history" action when someone needs to search further
+// back than the default window.
 export async function onRequestGet(context) {
   try {
-    const { results } = await context.env.DB.prepare('SELECT *, lot_id AS lotId FROM transactions').all();
+    const months = parseInt(new URL(context.request.url).searchParams.get('months'), 10);
+    let query = 'SELECT *, lot_id AS lotId FROM transactions';
+    const binds = [];
+    if (Number.isFinite(months) && months > 0) {
+      query += ` WHERE at >= datetime('now', ?)`;
+      binds.push(`-${months} months`);
+    }
+    query += ' ORDER BY at DESC';
+    const { results } = await context.env.DB.prepare(query).bind(...binds).all();
     return json(results);
   } catch (err) {
     return json({ error: err.message }, 500);
