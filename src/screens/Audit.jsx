@@ -4,6 +4,7 @@ import { css } from '../css.js';
 export function Audit({ v }) {
   const {
     isAudit, txnRows, user, clearTxns, canManage,
+    txnsFullyLoaded, loadingFullTxnHistory, loadFullTxnHistory,
   } = v;
 
   const [search, setSearch] = React.useState('');
@@ -146,6 +147,26 @@ export function Audit({ v }) {
             )}
           </div>
         </div>
+
+        {/* Full-history loader — by default only the last 12 months are loaded
+            (keeps the initial page load fast as this log grows forever); pull
+            everything older in on demand when someone needs to search further
+            back than that. */}
+        {!txnsFullyLoaded && (
+          <div style={css(`display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; background:var(--brand-50); border:1px solid var(--brand-100); border-radius:var(--radius-md); padding:10px 14px;`)}>
+            <div style={css(`font:var(--text-xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>
+              กำลังแสดงประวัติย้อนหลัง 12 เดือนล่าสุด
+            </div>
+            <button
+              type="button"
+              onClick={loadFullTxnHistory}
+              disabled={loadingFullTxnHistory}
+              style={css(`display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:var(--radius-md); border:1px solid var(--border-brand); background:var(--white); color:var(--brand-700); cursor:${loadingFullTxnHistory ? 'default' : 'pointer'}; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); opacity:${loadingFullTxnHistory ? 0.6 : 1};`)}
+            >
+              {loadingFullTxnHistory ? 'กำลังโหลด…' : '📜 โหลดประวัติทั้งหมด'}
+            </button>
+          </div>
+        )}
 
         {/* Movement Table */}
         <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); overflow:hidden;`)}>
