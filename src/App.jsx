@@ -86,7 +86,7 @@ class App extends React.Component {
     this.today = t;
     this.state = {
       view: 'dashboard', role: null, invTab: 'all', search: '', detailId: null, modal: null, toast: null, acked: {},
-      reagents: [], lots: [], txns: [],
+      reagents: [], lots: [], txns: [], txnsFullyLoaded: false, loadingFullTxnHistory: false,
       perms: this.defaultPerms(), loginForm: { username: '', password: '', error: '' },
       rf: this.blankRf(), iform: this.blankIf(), mform: this.blankMf(),
       users: [], uform: { name: '', username: '', role: 'technician', password: '' },
@@ -366,10 +366,16 @@ class App extends React.Component {
 
   async fetchData() {
     try {
+      // /api/transactions?months=12 bounds the payload to a recent window —
+      // every current consumer (Dashboard analytics, recent-activity feed,
+      // dead-stock/usage detection, the Dashboard's own period selector) only
+      // ever looks at ≤12 months, and the table is append-only (grows forever
+      // in normal use), so fetching everything on every load doesn't scale.
+      // The Audit screen can call loadFullTxnHistory() to search further back.
       const [reagentsRes, lotsRes, txnsRes, usersRes, permsRes, acksRes] = await Promise.all([
         this.api('/api/reagents'),
         this.api('/api/lots'),
-        this.api('/api/transactions'),
+        this.api('/api/transactions?months=12'),
         this.api('/api/users'),
         this.api('/api/permissions'),
         this.api('/api/alerts/acks')
@@ -391,11 +397,28 @@ class App extends React.Component {
         });
       }
 
-      this.setState(s => ({ reagents, lots, txns, users, acked, perms: (perms && Object.keys(perms).length) ? perms : s.perms }), () => {
+      this.setState(s => ({ reagents, lots, txns, users, acked, txnsFullyLoaded: false, perms: (perms && Object.keys(perms).length) ? perms : s.perms }), () => {
         this.autoClearAckedAlerts(reagents, lots, acked);
       });
     } catch (err) {
       this.showToast('ดึงข้อมูลล้มเหลว: ' + err.message, 'warn');
+    }
+  }
+
+  // Fetches the complete, unbounded transaction history (no `months` cutoff) —
+  // used by the Audit screen when someone needs to search further back than
+  // the last 12 months that fetchData() loads by default.
+  async loadFullTxnHistory() {
+    if (this.state.txnsFullyLoaded || this.state.loadingFullTxnHistory) return;
+    this.setState({ loadingFullTxnHistory: true });
+    try {
+      const res = await this.api('/api/transactions');
+      if (!res.ok) throw new Error('โหลดประวัติทั้งหมดล้มเหลว');
+      const txns = await res.json();
+      this.setState({ txns, txnsFullyLoaded: true, loadingFullTxnHistory: false });
+    } catch (err) {
+      this.setState({ loadingFullTxnHistory: false });
+      this.showToast(err.message, 'warn');
     }
   }
 
@@ -1657,6 +1680,9 @@ class App extends React.Component {
       deleteUser: (username) => this.deleteUser(username),
       deleteReagent: (id) => this.deleteReagent(id),
       clearTxns: () => this.clearTxns(),
+      txnsFullyLoaded: !!S.txnsFullyLoaded,
+      loadingFullTxnHistory: !!S.loadingFullTxnHistory,
+      loadFullTxnHistory: () => this.loadFullTxnHistory(),
       onBackupDatabase: () => this.onBackupDatabase(),
       onRestoreDatabase: (e) => this.onRestoreDatabase(e),
       openPrintSticker: (lot, reagent) => this.openPrintSticker(lot, reagent),
