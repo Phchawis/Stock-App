@@ -66,10 +66,11 @@ export function IssueModal({ v }) {
         html5QrCode.start(
           { facingMode: "environment" },
           {
-            fps: 20,
+            fps: 30, // Higher frame-rate for faster scan reactions
             aspectRatio: 1.0,
             qrbox: (w, h) => {
-              const s = Math.floor(Math.min(w, h) * 0.7);
+              // Larger scanning viewfinder box (85% instead of 70%) to let camera focus naturally from a distance
+              const s = Math.floor(Math.min(w, h) * 0.85);
               return { width: s, height: s };
             }
           },
@@ -90,6 +91,41 @@ export function IssueModal({ v }) {
           () => {}
         ).then(() => {
           if (active) setCameraReady(true);
+          // Safely apply advanced browser camera autofocus/zoom constraints
+          try {
+            const videoElem = document.querySelector("#qr-reader video");
+            if (videoElem && videoElem.srcObject) {
+              const tracks = videoElem.srcObject.getVideoTracks();
+              if (tracks && tracks.length > 0) {
+                const track = tracks[0];
+                const capabilities = typeof track.getCapabilities === "function" ? track.getCapabilities() : {};
+                const advanced = {};
+
+                // Attempt continuous autofocus
+                if (capabilities.focusMode && capabilities.focusMode.includes("continuous")) {
+                  advanced.focusMode = "continuous";
+                } else if (capabilities.focusMode && capabilities.focusMode.includes("macro")) {
+                  advanced.focusMode = "macro";
+                }
+
+                // If zoom is supported, apply a slight 1.25x zoom to aid focusing on small tubes
+                if (capabilities.zoom) {
+                  const minZoom = capabilities.zoom.min || 1;
+                  const maxZoom = capabilities.zoom.max || 1;
+                  const targetZoom = Math.min(minZoom * 1.25, maxZoom);
+                  advanced.zoom = targetZoom;
+                }
+
+                if (Object.keys(advanced).length > 0) {
+                  track.applyConstraints({ advanced: [advanced] }).catch(err => {
+                    console.warn("Could not apply advanced video constraints:", err);
+                  });
+                }
+              }
+            }
+          } catch (e) {
+            console.warn("Error setting up video constraints:", e);
+          }
         }).catch((err) => {
           if (active) {
             console.error('Camera start error:', err);
