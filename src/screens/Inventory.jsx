@@ -261,8 +261,8 @@ export function Inventory({ v }) {
                 </div>
               </div>
               
-              <div title={r.catLabel} style={css(`font:var(--fw-medium) var(--text-xs)/1.3 var(--font-body); color:var(--text-secondary); cursor:help; text-decoration:underline; text-decoration-style:dotted; text-underline-offset:2px;`)}>
-                {r.cat}
+              <div title={r.catLabel} style={css(`font:var(--fw-medium) var(--text-xs)/1.3 var(--font-body); color:var(--text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;`)}>
+                {r.catLabel}
               </div>
               
               <div style={css(`text-align:right;`)}>
@@ -308,8 +308,8 @@ export function Inventory({ v }) {
                   <div style={css(`font:var(--fw-semibold) var(--text-sm)/1.35 var(--font-body); color:var(--text-primary);`)}>
                     {r.th}
                   </div>
-                  <div title={r.catLabel} style={css(`font:var(--fw-medium) var(--text-2xs)/1.3 var(--font-body); color:var(--text-secondary); margin-top:2px; cursor:help; display:inline-block; border-bottom:1px dotted var(--border-strong);`)}>
-                    {r.cat}
+                  <div title={r.catLabel} style={css(`font:var(--fw-medium) var(--text-2xs)/1.3 var(--font-body); color:var(--text-secondary); margin-top:2px;`)}>
+                    {r.catLabel}
                   </div>
                 </div>
                 {(r.low || r.expiring) && (
