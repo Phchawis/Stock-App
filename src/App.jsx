@@ -1060,13 +1060,14 @@ class App extends React.Component {
 
   // ── derivations ──
   STORAGE_LABEL(s) { return ({ REFRIGERATED_2_8: '2–8°C', FROZEN_40: '−40°C', ROOM_TEMP: 'อุณหภูมิห้อง' })[s] || s; }
+  // Keep in sync with getCategoryLabel() in Dashboard/Alerts/ReagentLists —
+  // the active category codes are HMS/ADV (the old CHE/HEM/IMM/MIP/MDC set was
+  // retired). Without HMS here the Inventory list fell back to showing the raw
+  // code "HMS" instead of its Thai label.
   CAT_LABEL(c) {
     return ({
-      CHE: 'เคมีคลินิก (Clinical Chemistry)',
-      HEM: 'โลหิตวิทยา (Hematology)',
-      IMM: 'ภูมิคุ้มกันวิทยา (Immunology)',
-      MIP: 'จุลชีววิทยาคลินิก (Microbiology)',
-      MDC: 'วัสดุการแพทย์ (Medical Supplies)'
+      HMS: 'บริการศูนย์การแพทย์',
+      ADV: 'ตรวจวินิจฉัยขั้นสูง'
     })[c] || c;
   }
   days(d) { return Math.round((new Date(d + 'T00:00:00') - this.today) / 86400000); }
