@@ -1345,8 +1345,11 @@ class App extends React.Component {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (!res.ok) throw new Error('รับเข้าน้ำยาเข้าคลังล้มเหลว');
-      
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'รับเข้าน้ำยาเข้าคลังล้มเหลว');
+      }
+
       this.setState({ modal: null });
       this.fetchData();
       const r = this.state.reagents.find(x => x.id === rid);
