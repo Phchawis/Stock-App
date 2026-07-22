@@ -1,13 +1,21 @@
-import { json } from '../_lib.js';
+import { requirePerm, json } from '../_lib.js';
 
-export async function onRequest(context) {
+// POST only — must NOT be `onRequest` (all methods). A GET handler is treated as
+// a "safe method" by _middleware.js and would bypass the CSRF check entirely,
+// letting a third-party page trigger a LINE broadcast via a logged-in user.
+// Gated by the `ack` permission: whoever handles expiry alerts (admin /
+// supervisor / technician) may push them to LINE; viewers cannot.
+export async function onRequestPost(context) {
+  const denied = await requirePerm(context, { perm: 'ack' });
+  if (denied) return denied;
+
   const { env } = context;
   const channelAccessToken = env.LINE_CHANNEL_ACCESS_TOKEN;
   const groupId = env.LINE_GROUP_ID;
 
   if (!channelAccessToken || !groupId) {
-    const keys = Object.keys(env || {}).filter(k => k !== 'DB'); // Exclude DB binding for security/clarity
-    return json({ error: `ยังไม่ได้ระบุโทเค็น LINE_CHANNEL_ACCESS_TOKEN หรือ LINE_GROUP_ID ในระบบ Cloudflare (คีย์ที่อ่านได้: ${keys.join(', ') || 'ไม่มีเลย'})` }, 500);
+    // Do NOT enumerate env var / secret names back to the caller.
+    return json({ error: 'ยังไม่ได้ตั้งค่าการเชื่อมต่อ LINE ในระบบ กรุณาแจ้งผู้ดูแลระบบ' }, 500);
   }
 
   try {
