@@ -25,7 +25,38 @@ export async function onRequestPost(context) {
     const reagent = await env.DB.prepare('SELECT supplier FROM reagents WHERE id = ?').bind(rid).first();
     const supplierRef = reagent && reagent.supplier ? `รับจาก ${reagent.supplier}` : 'รับเข้าใหม่';
     const by = await actorName(context);           // trust the session, not the client
-    const qrCode = `QR-${lot}`;
+
+    // Same reagent + same lot number = the same manufacturer batch (identical
+    // expiry), so receiving it again merges into the existing lot record rather
+    // than creating a second row. This is both the correct FEFO behavior AND
+    // what avoids the `qr` UNIQUE-constraint failure that previously made
+    // receiving an already-known lot number fail outright. Merging also revives
+    // a fully-issued (DEPLETED) lot back to ACTIVE when its number is re-received.
+    const existing = await env.DB.prepare(
+      'SELECT * FROM lots WHERE rid = ? AND lot = ?'
+    ).bind(rid, lot).first();
+
+    if (existing) {
+      const mergedQty = existing.qty + numQty;
+      const mergedRecv = existing.recv + numQty;
+      await env.DB.batch([
+        env.DB.prepare("UPDATE lots SET qty = ?, recv = ?, expiry = ?, loc = ?, status = 'ACTIVE' WHERE id = ?")
+          .bind(mergedQty, mergedRecv, expiry, loc, existing.id),
+        env.DB.prepare(
+          `INSERT INTO transactions (lot_id, rid, type, qty, bal, ref, scan, by, at)
+           VALUES (?, ?, 'RECEIVE', ?, ?, ?, 'MANUAL', ?, ?)`
+        ).bind(existing.id, rid, numQty, mergedQty, supplierRef, by, nowStr())
+      ]);
+      return json({ id: existing.id, rid, lot, expiry, recv: mergedRecv, qty: mergedQty, loc, qr: existing.qr, status: 'ACTIVE', merged: true }, 200);
+    }
+
+    // Brand-new lot. QR is normally QR-{lot}, but the `qr` column is globally
+    // unique — if a DIFFERENT reagent already uses the same lot-number string,
+    // fall back to a unique suffix so the receive still succeeds. Scanning by
+    // the lot number itself still resolves it (scanQRCode matches qr OR lot).
+    let qrCode = `QR-${lot}`;
+    const qrTaken = await env.DB.prepare('SELECT 1 FROM lots WHERE qr = ?').bind(qrCode).first();
+    if (qrTaken) qrCode = `QR-${lot}-${Date.now().toString(36)}`;
 
     const lotResult = await env.DB.prepare(
       `INSERT INTO lots (rid, lot, expiry, recv, qty, loc, qr, status)
