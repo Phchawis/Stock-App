@@ -22,6 +22,55 @@ export function Help({ v }) {
 
   return (
     <div className="qms-rise" style={css(`max-width:1180px; display:flex; flex-direction:column; gap:20px;`)}>
+      {/* Motion layer — purposeful, comprehension-first: entrances reveal in
+          reading order, and the "teaching" infographics (FEFO queue, alert
+          urgency, scan-link) move to demonstrate cause, not to decorate.
+          Every animation collapses to instant under prefers-reduced-motion. */}
+      <style>{`
+        @keyframes hlpFadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes hlpPop { 0% { opacity:0; transform:scale(.9); } 60% { opacity:1; transform:scale(1.03); } 100% { opacity:1; transform:scale(1); } }
+        /* Urgent, fast heartbeat — critical/red. */
+        @keyframes hlpPulseCrit { 0%,100% { transform:scale(1); filter:drop-shadow(0 0 0 rgba(226,104,94,0)); } 50% { transform:scale(1.22); filter:drop-shadow(0 0 6px rgba(226,104,94,.7)); } }
+        /* Calmer breathing — warning/amber. */
+        @keyframes hlpBreathe { 0%,100% { transform:scale(1); } 50% { transform:scale(1.12); } }
+        /* FEFO "next out" — the front-of-queue lot glows and lifts, teaching
+           that the soonest-expiring lot is dispensed first. */
+        @keyframes hlpGlowNext { 0%,100% { box-shadow:0 0 0 0 rgba(226,104,94,.0), 0 4px 14px -6px rgba(226,104,94,.35); } 50% { box-shadow:0 0 0 3px rgba(226,104,94,.28), 0 8px 22px -8px rgba(226,104,94,.6); } }
+        /* Conveyor arrow flowing toward dispense. */
+        @keyframes hlpFlow { 0% { transform:translateY(-3px); opacity:.35; } 50% { opacity:1; } 100% { transform:translateY(5px); opacity:.35; } }
+        /* Scan beam sweeping a form/label. */
+        @keyframes hlpScan { 0% { top:6%; opacity:0; } 12% { opacity:1; } 88% { opacity:1; } 100% { top:94%; opacity:0; } }
+
+        /* Panel entrance replays on every tab switch (wrapper is keyed). Sections
+           reveal top-to-bottom so the eye follows the reading order. */
+        .hlp-panel > div > * { opacity:0; animation:hlpFadeUp .5s cubic-bezier(.22,1,.36,1) both; }
+        .hlp-panel > div > *:nth-child(1) { animation-delay:.02s; }
+        .hlp-panel > div > *:nth-child(2) { animation-delay:.10s; }
+        .hlp-panel > div > *:nth-child(3) { animation-delay:.18s; }
+        .hlp-panel > div > *:nth-child(4) { animation-delay:.26s; }
+        .hlp-panel > div > *:nth-child(5) { animation-delay:.34s; }
+        .hlp-panel > div > *:nth-child(6) { animation-delay:.42s; }
+
+        .hlp-kpi > * { opacity:0; animation:hlpPop .5s cubic-bezier(.34,1.4,.5,1) both; }
+        .hlp-kpi > *:nth-child(1) { animation-delay:.24s; }
+        .hlp-kpi > *:nth-child(2) { animation-delay:.36s; }
+        .hlp-kpi > *:nth-child(3) { animation-delay:.48s; }
+
+        .hlp-dot-crit { display:inline-block; animation:hlpPulseCrit 1.1s ease-in-out infinite; transform-origin:center; }
+        .hlp-dot-warn { display:inline-block; animation:hlpBreathe 2.6s ease-in-out infinite; transform-origin:center; }
+
+        .hlp-fefo-next { animation:hlpGlowNext 2s ease-in-out infinite; }
+        .hlp-flow { animation:hlpFlow 1.4s ease-in-out infinite; }
+
+        .hlp-step { position:relative; }
+        .hlp-scanline { position:absolute; left:8%; right:8%; height:2px; border-radius:2px; background:linear-gradient(90deg, transparent, var(--brand-500), transparent); box-shadow:0 0 8px 1px var(--brand-500); animation:hlpScan 2.6s cubic-bezier(.45,0,.55,1) infinite; pointer-events:none; z-index:2; }
+
+        @media (prefers-reduced-motion: reduce) {
+          .hlp-panel > div > *, .hlp-kpi > * { opacity:1 !important; animation:none !important; }
+          .hlp-dot-crit, .hlp-dot-warn, .hlp-fefo-next, .hlp-flow, .hlp-scanline { animation:none !important; }
+          .hlp-scanline { display:none; }
+        }
+      `}</style>
       {/* Help Tabs Header */}
       <div style={css(`display:flex; border-bottom:1px solid var(--border-subtle); gap:8px; flex-wrap:wrap;`)}>
         {tabs.map(t => {
@@ -39,8 +88,9 @@ export function Help({ v }) {
         })}
       </div>
 
-      {/* Help Content Area */}
-      <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; box-sizing:border-box; min-height:400px; display:flex; flex-direction:column; gap:20px;`)}>
+      {/* Help Content Area — keyed by activeTab so the entrance motion replays
+          each time the reader opens a new section. */}
+      <div key={activeTab} className="hlp-panel" style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; box-sizing:border-box; min-height:400px; display:flex; flex-direction:column; gap:20px;`)}>
 
         {/* Tab 1: General & Roles */}
         {activeTab === 'general' && (
@@ -60,7 +110,7 @@ export function Help({ v }) {
               <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.2 var(--font-body); color:var(--text-secondary); display:flex; align-items:center; gap:6px;`)}>
                 <span>🖥️</span> <strong>แผนผังภาพรวมหน้าหลักแอปพลิเคชัน (Dashboard Overview)</strong>
               </div>
-              <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;`)}>
+              <div className="hlp-kpi" style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;`)}>
                 <div style={css(`background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:12px; display:flex; gap:10px; align-items:center;`)}>
                   <span style={css(`font-size:24px;`)}>📦</span>
                   <div>
@@ -105,14 +155,14 @@ export function Help({ v }) {
                         <span style={css(`font-weight:bold; font-size:11px; background:var(--red-100); color:var(--red-700); padding:2px 8px; border-radius:var(--radius-pill);`)}>วิกฤต (Critical)</span>
                         <div style={css(`font-size:10px; color:var(--text-secondary); margin-top:4px;`)}>หมดอายุแล้ว หรือเหลือ ≤ 15 วัน</div>
                       </div>
-                      <span style={css(`font-size:20px;`)}>🔴</span>
+                      <span className="hlp-dot-crit" style={css(`font-size:20px;`)}>🔴</span>
                     </div>
                     <div style={css(`background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:10px; display:flex; justify-content:space-between; align-items:center;`)}>
                       <div>
                         <span style={css(`font-weight:bold; font-size:11px; background:var(--amber-100); color:var(--amber-700); padding:2px 8px; border-radius:var(--radius-pill);`)}>เฝ้าระวัง (Warning)</span>
                         <div style={css(`font-size:10px; color:var(--text-secondary); margin-top:4px;`)}>มีอายุใช้งานเหลือ 16 - 60 วัน</div>
                       </div>
-                      <span style={css(`font-size:20px;`)}>🟡</span>
+                      <span className="hlp-dot-warn" style={css(`font-size:20px;`)}>🟡</span>
                     </div>
                     <div style={css(`background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:10px; display:flex; justify-content:space-between; align-items:center;`)}>
                       <div>
@@ -135,14 +185,14 @@ export function Help({ v }) {
                         <span style={css(`font-weight:bold; font-size:11px; background:var(--red-100); color:var(--red-700); padding:2px 8px; border-radius:var(--radius-pill);`)}>วิกฤต (Critical)</span>
                         <div style={css(`font-size:10px; color:var(--text-secondary); margin-top:4px;`)}>ยอดของคงคลังเหลือ 0 (หมดเกลี้ยง)</div>
                       </div>
-                      <span style={css(`font-size:20px;`)}>🔴</span>
+                      <span className="hlp-dot-crit" style={css(`font-size:20px;`)}>🔴</span>
                     </div>
                     <div style={css(`background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:10px; display:flex; justify-content:space-between; align-items:center;`)}>
                       <div>
                         <span style={css(`font-weight:bold; font-size:11px; background:var(--amber-100); color:var(--amber-700); padding:2px 8px; border-radius:var(--radius-pill);`)}>เฝ้าระวัง (Warning)</span>
                         <div style={css(`font-size:10px; color:var(--text-secondary); margin-top:4px;`)}>ยอดคงคลัง ≤ จุดสั่งซื้อขั้นต่ำ (Min) แต่มากกว่า 0</div>
                       </div>
-                      <span style={css(`font-size:20px;`)}>🟡</span>
+                      <span className="hlp-dot-warn" style={css(`font-size:20px;`)}>🟡</span>
                     </div>
                   </div>
                 </div>
@@ -243,7 +293,8 @@ export function Help({ v }) {
               </div>
 
               {/* Visual Interface Simulator */}
-              <div style={css(`flex:1; min-width:320px; background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+              <div style={css(`position:relative; overflow:hidden; flex:1; min-width:320px; background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div className="hlp-scanline" />
                 <div style={css(`font:var(--fw-bold) var(--text-xs)/1.2 var(--font-display); color:var(--brand-800); margin-bottom:12px; display:flex; align-items:center; gap:6px;`)}>
                   <span>📥</span> จำลองหน้าต่างฟอร์มการรับเข้าคลัง (Form Simulation)
                 </div>
@@ -325,8 +376,8 @@ export function Help({ v }) {
                   <span>📊</span> แบบจำลองระบบเรียงลำดับคิวเบิกจ่าย (หมดอายุก่อน–เบิกก่อน)
                 </div>
 
-                <div style={css(`display:flex; flex-direction:column; gap:10px;`)}>
-                  <div style={css(`background:var(--white); border:2px solid var(--brand-600); border-radius:var(--radius-md); padding:10px 12px; display:flex; justify-content:space-between; align-items:center;`)}>
+                <div style={css(`display:flex; flex-direction:column; gap:6px;`)}>
+                  <div className="hlp-fefo-next" style={css(`background:var(--white); border:2px solid var(--brand-600); border-radius:var(--radius-md); padding:10px 12px; display:flex; justify-content:space-between; align-items:center;`)}>
                     <div>
                       <div style={css(`font-weight:bold; font-size:11px; color:var(--text-primary);`)}>Lot 07601UN23</div>
                       <div style={css(`font-size:9px; color:var(--red-700); font-family:var(--font-mono);`)}>หมดอายุ: 26/10/2026 (ใกล้สุด)</div>
@@ -336,6 +387,9 @@ export function Help({ v }) {
                       <div style={css(`font-size:10px; font-weight:bold; color:var(--text-secondary); margin-top:2px;`)}>เบิกออก: 1 กล่อง</div>
                     </div>
                   </div>
+
+                  {/* Conveyor arrow: dispensing pulls from the front of the queue. */}
+                  <div className="hlp-flow" style={css(`text-align:center; font-size:13px; line-height:1; color:var(--accent-600);`)}>⬇</div>
 
                   <div style={css(`background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:10px 12px; display:flex; justify-content:space-between; align-items:center; opacity:0.65;`)}>
                     <div>
