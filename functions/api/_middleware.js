@@ -2,7 +2,13 @@
 // except the public ones, and attaches the authenticated user to context.data.auth.
 import { getAuth, json } from './_lib.js';
 
-const PUBLIC_PATHS = new Set(['/api/login', '/api/logout']);
+// /api/admin/line_notify is public so the external scheduler (cron-job.org) can
+// fire the daily expiry alert via a plain GET — it has no user session to carry.
+// Trade-off accepted by the operator: anyone who knows the URL can trigger the
+// LINE broadcast, but it only pushes an expiry summary to the lab's own group
+// (no data is read, changed, or leaked). The endpoint keeps a generic error so
+// it never enumerates configured secret names.
+const PUBLIC_PATHS = new Set(['/api/login', '/api/logout', '/api/admin/line_notify']);
 // Cookies are sent automatically by the browser on every request, including
 // ones a malicious third-party site tricks the user into firing (CSRF). A
 // custom header can't be forged that way — cross-site JS can't read the
