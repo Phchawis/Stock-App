@@ -1,14 +1,11 @@
-import { requirePerm, json } from '../_lib.js';
+import { json } from '../_lib.js';
 
-// POST only — must NOT be `onRequest` (all methods). A GET handler is treated as
-// a "safe method" by _middleware.js and would bypass the CSRF check entirely,
-// letting a third-party page trigger a LINE broadcast via a logged-in user.
-// Gated by the `ack` permission: whoever handles expiry alerts (admin /
-// supervisor / technician) may push them to LINE; viewers cannot.
-export async function onRequestPost(context) {
-  const denied = await requirePerm(context, { perm: 'ack' });
-  if (denied) return denied;
-
+// Handles BOTH the daily external scheduler (GET, no session) and the in-app
+// "send now" button (POST). This path is listed as public in _middleware.js,
+// so there is intentionally no session/permission gate here — see that file for
+// the trade-off. The one security property kept from the hardened version: the
+// error below stays generic and never lists configured secret names.
+export async function onRequest(context) {
   const { env } = context;
   const channelAccessToken = env.LINE_CHANNEL_ACCESS_TOKEN;
   const groupId = env.LINE_GROUP_ID;
