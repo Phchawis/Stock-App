@@ -1961,20 +1961,30 @@ input:focus, select:focus, textarea:focus {
   --brand-300: #A9C7EE;
   --brand-100: rgba(43,166,198,.18);
   --brand-50: rgba(43,166,198,.12);
+  /* Brand-colored TEXT on a dark surface. --brand-700 is the fill role and is
+     far too dark to read as type here; see the note in theme.js. */
+  --brand-ink: #8FD8C8;
   --accent-700: #A9C7EE;
   --accent-600: #4E7CB0;
   --accent-500: #7AA2C4;
   --accent-400: #93B9E1;
   --accent-100: rgba(122,162,196,.20);
   --accent-50: rgba(122,162,196,.12);
-  --green-700: #5FD49A;
+  /* Status colors on the dark teal surface. The *-700 steps are the TEXT role
+     and must clear 4.5:1 against --surface-card; the *-fill steps are dark
+     enough to carry white text at the same bar. Splitting them is what keeps
+     "red" from meaning two incompatible things. */
+  --green-700: #7CE0AF;
   --green-600: #38B673;
+  --green-fill: #1E7A50;
   --green-100: rgba(56,182,115,.16);
   --amber-700: #F0C674;
   --amber-600: #D69A2E;
+  --amber-fill: #8A5A08;
   --amber-100: rgba(214,154,46,.16);
-  --red-700: #F18C8C;
+  --red-700: #FFA9A5;
   --red-600: #E2685E;
+  --red-fill: #C6473A;
   --red-100: rgba(226,104,94,.16);
   --blue-700: #8DBBCC;
   --blue-600: #5BC0D9;
@@ -2025,18 +2035,25 @@ input:focus, select:focus, textarea:focus {
   --border-default: rgba(112,196,180,.27);
   --border-strong: rgba(112,196,180,.45);
   --border-brand: #70C4B4;
+  /* --brand-700 is the FILL role: solid buttons carrying white text, so it has
+     to stay dark enough for #fff to clear 4.5:1 (the old #0E9587 hit only
+     3.71:1). Brand-colored TEXT on this dark surface is a separate role — use
+     --brand-ink, never --brand-700, which reads at ~2.3:1 and disappears. */
   --brand-900: #A8E1D6;
   --brand-800: #70C4B4;
-  --brand-700: #0E9587;
+  --brand-700: #0B7F73;
   --brand-600: #1FA090;
   --brand-500: #33A593;
   --brand-400: #70C4B4;
   --brand-300: #9FD9CC;
+  --brand-ink: #8FD8C8;
   --brand-100: rgba(112,196,180,.18);
   --brand-50: rgba(112,196,180,.10);
   --teal-900: #A8E1D6;
   --teal-800: #70C4B4;
-  --teal-700: #33A593;
+  /* Foreground-only alias (active tab label, its count, the underline), so it
+     tracks --brand-ink rather than the darker fill step. */
+  --teal-700: #8FD8C8;
   --teal-600: #1FA090;
   --teal-500: #33A593;
   --teal-300: #9FD9CC;
@@ -2053,6 +2070,16 @@ input:focus, select:focus, textarea:focus {
   --slate-200: #0D4757;
   --slate-100: #073947;
   --slate-50: #04303C;
+  /* Status colors re-tuned for THIS surface. The *-700 steps are read as text
+     on the dark teal card and must clear 4.5:1; the *-fill steps are dark
+     enough to carry white text at the same bar. The inherited light-theme
+     values landed at 3.3–4.3:1 here. */
+  --green-700: #7CE0AF;
+  --green-fill: #1E7A50;
+  --red-700: #FFA9A5;
+  --red-fill: #C6473A;
+  --amber-700: #F0C674;
+  --amber-fill: #B45309;
   --glow-brand: 0 0 24px rgba(112,196,180,.28);
   --glow-brand-soft: 0 6px 18px -8px rgba(112,196,180,.4);
   --content-glass-top: rgba(0, 41, 52, 0.7);
