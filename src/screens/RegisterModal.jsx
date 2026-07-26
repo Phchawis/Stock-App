@@ -2,6 +2,7 @@ import React from 'react';
 import { css } from '../css.js';
 import { Input } from '../components/Input.jsx';
 import { Select } from '../components/Select.jsx';
+import { CATEGORIES } from '../categories.js';
 import { modalHeaderStyle, modalHeaderBadgeStyle, modalHeaderTitleStyle, modalHeaderSubtitleStyle, modalHeaderCloseStyle, modalHeaderResponsiveCSS } from '../theme.js';
 
 export function RegisterModal({ v }) {
@@ -15,10 +16,7 @@ export function RegisterModal({ v }) {
 
   if (!modalRegister) return null;
 
-  const catOpts = [
-    { value: 'HMS', label: 'บริการศูนย์การแพทย์' },
-    { value: 'ADV', label: 'ตรวจวินิจฉัยขั้นสูง' }
-  ];
+  const catOpts = CATEGORIES;
 
   const parentCatOpts = [
     { value: 'MDC', label: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์' }
@@ -180,12 +178,9 @@ export function RegisterModal({ v }) {
               <Select 
                 label="หมวด" 
                 required={true} 
-                options={[
-                  { value: 'HMS', label: 'บริการศูนย์การแพทย์' },
-                  { value: 'ADV', label: 'ตรวจวินิจฉัยขั้นสูง' }
-                ]}
-                value={mform.cat} 
-                onChange={mfCat} 
+                options={catOpts}
+                value={mform.cat}
+                onChange={mfCat}
               />
             </div>
 
