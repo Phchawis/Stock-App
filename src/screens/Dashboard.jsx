@@ -1,6 +1,7 @@
 import React from 'react';
 import { css } from '../css.js';
 import { SearchableSelect } from '../components/SearchableSelect.jsx';
+import { categoryLabel } from '../categories.js';
 
 export function Dashboard({ v }) {
   const {
@@ -60,15 +61,9 @@ export function Dashboard({ v }) {
     { value: activeLots.filter(l => filteredReagentIds.includes(l.rid)).length, label: 'Lot คงคลัง', color: 'var(--green-700)', bg: 'var(--green-100)', icon: ic.dashboard },
   ];
 
-  // Category Overview Table — labels match App.jsx's CAT_LABEL() so the same
-  // code always reads the same way across screens (Inventory, Reagent Lists, here).
-  const getCategoryLabel = (c) => ({
-    HMS: 'บริการศูนย์การแพทย์',
-    ADV: 'ตรวจวินิจฉัยขั้นสูง',
-  })[c] || c;
-  // Derived from the real reagents in the system, not a hardcoded guess — HMS/ADV
-  // never match any actual reagent's `cat` field (real values are CHE/HEM/IMM/MIP/MDC),
-  // which is why this table and the category filter below always showed zero.
+  const getCategoryLabel = categoryLabel;
+  // Derived from the reagents actually present, so a legacy code left on an old
+  // record still shows up here instead of silently vanishing from the totals.
   const cats = [...new Set(reagents.map(r => r.cat))].sort();
   const catStats = cats.map(c => {
     const cReagents = filteredReagents.filter(r => r.cat === c);
@@ -521,7 +516,7 @@ export function Dashboard({ v }) {
                 
                 {/* KPI Glossary */}
                 <div style={css(`background:rgba(43,166,198,0.05); border:1px dashed var(--border-subtle); border-radius:var(--radius-md); padding:10px 12px; font-size:11px; color:var(--text-secondary); margin-top:6px; display:flex; flex-direction:column; gap:4px;`)}>
-                  <div style={css(`font-weight:bold; color:var(--brand-700); display:flex; align-items:center; gap:4px;`)}>
+                  <div style={css(`font-weight:bold; color:var(--brand-ink); display:flex; align-items:center; gap:4px;`)}>
                     💡 คำอธิบายดัชนีชี้วัดทางห้องปฏิบัติการ (KPI Glossary)
                   </div>
                   <div style={css(`line-height:1.45; color:var(--text-tertiary);`)}>
@@ -612,7 +607,7 @@ export function Dashboard({ v }) {
                                 </td>
                                 <td style={{ padding: '8px', textAlign: 'center', fontFamily: 'var(--font-mono)' }}>{item.currentMin}</td>
                                 <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', color: isIncrease ? 'var(--red-700)' : 'var(--green-700)', fontFamily: 'var(--font-mono)' }}>{item.recommendedMin}</td>
-                                <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: isIncrease ? '#c2410c' : 'var(--green-700)' }}>
+                                <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: isIncrease ? 'var(--amber-700)' : 'var(--green-700)' }}>
                                   {isIncrease ? '📈 ควรเพิ่ม Min' : '📉 ควรลด Min'}
                                 </td>
                               </tr>
