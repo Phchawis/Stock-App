@@ -107,7 +107,7 @@ export function Audit({ v }) {
             {isAdmin && (
               <button 
                 onClick={clearTxns}
-                style={css(`display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border-radius:var(--radius-md); border:1px solid var(--red-600); background:transparent; color:var(--red-600); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast); height:38px;`)}
+                style={css(`display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border-radius:var(--radius-md); border:1px solid var(--red-600); background:transparent; color:var(--red-700); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast); height:38px;`)}
                 onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(226,104,94,0.08)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
               >
@@ -140,7 +140,7 @@ export function Audit({ v }) {
               <button
                 type="button"
                 onClick={() => { setStartDate(''); setEndDate(''); }}
-                style={css(`border:none; background:transparent; color:var(--brand-700); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); text-decoration:underline;`)}
+                style={css(`border:none; background:transparent; color:var(--brand-ink); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); text-decoration:underline;`)}
               >
                 ล้างช่วงเวลา
               </button>
@@ -161,7 +161,7 @@ export function Audit({ v }) {
               type="button"
               onClick={loadFullTxnHistory}
               disabled={loadingFullTxnHistory}
-              style={css(`display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:var(--radius-md); border:1px solid var(--border-brand); background:var(--white); color:var(--brand-700); cursor:${loadingFullTxnHistory ? 'default' : 'pointer'}; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); opacity:${loadingFullTxnHistory ? 0.6 : 1};`)}
+              style={css(`display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:var(--radius-md); border:1px solid var(--border-brand); background:transparent; color:var(--text-primary); cursor:${loadingFullTxnHistory ? 'default' : 'pointer'}; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); opacity:${loadingFullTxnHistory ? 0.6 : 1};`)}
             >
               {loadingFullTxnHistory ? 'กำลังโหลด…' : '📜 โหลดประวัติทั้งหมด'}
             </button>
@@ -234,7 +234,7 @@ export function Audit({ v }) {
                           <button
                             type="button"
                             onClick={t.onDelete}
-                            style={css(`background:transparent; border:1px solid var(--red-600); border-radius:var(--radius-sm); padding:3px 8px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--red-600); cursor:pointer;`)}
+                            style={css(`background:transparent; border:1px solid var(--red-600); border-radius:var(--radius-sm); padding:3px 8px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--red-700); cursor:pointer;`)}
                           >
                             🗑️ ลบ
                           </button>
@@ -290,7 +290,7 @@ export function Audit({ v }) {
                           <button
                             type="button"
                             onClick={t.onDelete}
-                            style={css(`flex:1; background:transparent; border:1px solid var(--red-600); border-radius:var(--radius-md); padding:9px; font:var(--fw-semibold) var(--text-xs)/1.2 var(--font-body); color:var(--red-600); cursor:pointer;`)}
+                            style={css(`flex:1; background:transparent; border:1px solid var(--red-600); border-radius:var(--radius-md); padding:9px; font:var(--fw-semibold) var(--text-xs)/1.2 var(--font-body); color:var(--red-700); cursor:pointer;`)}
                           >
                             🗑️ ลบ
                           </button>
