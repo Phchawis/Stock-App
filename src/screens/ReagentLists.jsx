@@ -1,5 +1,6 @@
 import React from 'react';
 import { css } from '../css.js';
+import { categoryLabel } from '../categories.js';
 
 export function ReagentLists({ v }) {
   const {
@@ -22,7 +23,7 @@ export function ReagentLists({ v }) {
     (r.en || '').toLowerCase().includes(query)
   );
 
-  const getCategoryLabel = (c) => ({ HMS: 'บริการศูนย์การแพทย์', ADV: 'ตรวจวินิจฉัยขั้นสูง' })[c] || c;
+  const getCategoryLabel = categoryLabel;
   const getStorageLabel = (s) => ({ REFRIGERATED_2_8: '2–8°C', FROZEN_40: '−40°C', ROOM_TEMP: 'อุณหภูมิห้อง' })[s] || s;
 
   const formatStock = (qty, reagent) => {
@@ -419,7 +420,7 @@ export function ReagentLists({ v }) {
                                       <button
                                         type="button"
                                         onClick={() => v.deleteLotReceive(l.id)}
-                                        style={css(`background:var(--slate-50); border:1px solid var(--red-600); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-3xs)/1.2 var(--font-body); color:var(--red-600); cursor:pointer; display:inline-flex; align-items:center; gap:3px; transition:all var(--dur-fast);`)}
+                                        style={css(`background:var(--slate-50); border:1px solid var(--red-600); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-3xs)/1.2 var(--font-body); color:var(--red-700); cursor:pointer; display:inline-flex; align-items:center; gap:3px; transition:all var(--dur-fast);`)}
                                         onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(226,104,94,0.08)'; }}
                                         onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--slate-50)'; }}
                                       >
