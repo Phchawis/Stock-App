@@ -1,6 +1,7 @@
 import React from 'react';
 // Trigger Cloudflare Pages rebuild
 import { css } from './css.js';
+import { categoryLabel, CATEGORY_CODES, DEFAULT_CATEGORY } from './categories.js';
 import { Sidebar } from './layout/Sidebar.jsx';
 import { Main } from './layout/Main.jsx';
 import { DetailDrawer } from './screens/DetailDrawer.jsx';
@@ -104,7 +105,7 @@ class App extends React.Component {
   blankIf() { return { rid: '', qty: '', scan: 'MANUAL', ref: '', lotId: '', qrInput: '', searchInput: '' }; }
   blankElf() { return { expiry: '', qty: '', loc: '' }; }
   blankEtf() { return { qty: '', ref: '' }; }
-  blankMf() { return { code: '', th: '', en: '', cat: 'HMS', unit: 'vial', subUnit: '', subUnitQty: '', testsPerSubUnit: '', testsPerUnit: '', storage: 'REFRIGERATED_2_8', min: '', reorder: '', supplier: 'i-med', img: '/reagent_placeholder.png' }; }
+  blankMf() { return { code: '', th: '', en: '', cat: DEFAULT_CATEGORY, unit: 'vial', subUnit: '', subUnitQty: '', testsPerSubUnit: '', testsPerUnit: '', storage: 'REFRIGERATED_2_8', min: '', reorder: '', supplier: 'i-med', img: '/reagent_placeholder.png' }; }
   blankDispForm() { return { qty: '', reason: 'หมดอายุ', customReason: '' }; }
   defaultPerms() { const o = {}; this.ROLES().forEach(r => { o[r.id] = { ...r.perms }; }); return o; }
   USERNAMES() { return { admin: 'admin', supervisor: 'supervisor', technician: 'technician', viewer: 'viewer' }; }
@@ -163,7 +164,7 @@ class App extends React.Component {
       return;
     }
     const initials = name.split(' ').map(x => x[0]).filter(Boolean).slice(0, 2).join('') || name.slice(0, 2);
-    const color = ({ admin: '#1387A6', supervisor: '#4E7CB0', technician: '#2E9E63', viewer: '#6E8694' })[r] || '#6E8694';
+    const color = ({ admin: '#0E6A85', supervisor: '#3D6291', technician: '#217A4B', viewer: '#556A77' })[r] || '#556A77';
     const newUser = { username: u, name, role: r, initials, color, password: p };
 
     try {
@@ -309,10 +310,10 @@ class App extends React.Component {
   }
   ROLES() {
     return [
-      { id: 'admin', th: 'ผู้ดูแลระบบ', en: 'Administrator', name: 'ทนพ. ธนวัฒน์ ผู้ดูแลระบบ', initials: 'ธว', color: '#1387A6', perms: { view: 1, receive: 1, issue: 1, manage: 1, ack: 1, users: 1, settings: 1 } },
-      { id: 'supervisor', th: 'หัวหน้าคลังน้ำยา', en: 'Store Supervisor', name: 'ทนพญ.เบญจวรรณ รุ่งเรือง', initials: 'บว', color: '#4E7CB0', perms: { view: 1, receive: 1, issue: 1, manage: 1, ack: 1, users: 0, settings: 0 } },
-      { id: 'technician', th: 'นักเทคนิคการแพทย์', en: 'Medical Technologist', name: 'ทนพ. สมชาย ใจดี', initials: 'สช', color: '#2E9E63', perms: { view: 1, receive: 0, issue: 1, manage: 0, ack: 1, users: 0, settings: 0 } },
-      { id: 'viewer', th: 'ผู้ดูข้อมูล', en: 'Viewer', name: 'คุณวิภา (ผู้สังเกตการณ์)', initials: 'วภ', color: '#6E8694', perms: { view: 1, receive: 0, issue: 0, manage: 0, ack: 0, users: 0, settings: 0 } },
+      { id: 'admin', th: 'ผู้ดูแลระบบ', en: 'Administrator', name: 'ทนพ. ธนวัฒน์ ผู้ดูแลระบบ', initials: 'ธว', color: '#0E6A85', perms: { view: 1, receive: 1, issue: 1, manage: 1, ack: 1, users: 1, settings: 1 } },
+      { id: 'supervisor', th: 'หัวหน้าคลังน้ำยา', en: 'Store Supervisor', name: 'ทนพญ.เบญจวรรณ รุ่งเรือง', initials: 'บว', color: '#3D6291', perms: { view: 1, receive: 1, issue: 1, manage: 1, ack: 1, users: 0, settings: 0 } },
+      { id: 'technician', th: 'นักเทคนิคการแพทย์', en: 'Medical Technologist', name: 'ทนพ. สมชาย ใจดี', initials: 'สช', color: '#217A4B', perms: { view: 1, receive: 0, issue: 1, manage: 0, ack: 1, users: 0, settings: 0 } },
+      { id: 'viewer', th: 'ผู้ดูข้อมูล', en: 'Viewer', name: 'คุณวิภา (ผู้สังเกตการณ์)', initials: 'วภ', color: '#556A77', perms: { view: 1, receive: 0, issue: 0, manage: 0, ack: 0, users: 0, settings: 0 } },
     ];
   }
   PERM_LABELS() {
@@ -1060,16 +1061,7 @@ class App extends React.Component {
 
   // ── derivations ──
   STORAGE_LABEL(s) { return ({ REFRIGERATED_2_8: '2–8°C', FROZEN_40: '−40°C', ROOM_TEMP: 'อุณหภูมิห้อง' })[s] || s; }
-  // Keep in sync with getCategoryLabel() in Dashboard/Alerts/ReagentLists —
-  // the active category codes are HMS/ADV (the old CHE/HEM/IMM/MIP/MDC set was
-  // retired). Without HMS here the Inventory list fell back to showing the raw
-  // code "HMS" instead of its Thai label.
-  CAT_LABEL(c) {
-    return ({
-      HMS: 'บริการศูนย์การแพทย์',
-      ADV: 'ตรวจวินิจฉัยขั้นสูง'
-    })[c] || c;
-  }
+  CAT_LABEL(c) { return categoryLabel(c); }
   days(d) { return Math.round((new Date(d + 'T00:00:00') - this.today) / 86400000); }
   activeLots(rid) { return this.state.lots.filter(l => l.rid === rid && l.qty > 0 && l.status === 'ACTIVE'); }
   onHand(rid) { return this.activeLots(rid).reduce((s, l) => s + l.qty, 0); }
@@ -1605,7 +1597,7 @@ class App extends React.Component {
     }).sort((a, b) => b.used - a.used);
 
     // dashboard kpi calculations
-    const cats = ['CHE', 'HEM', 'IMM', 'MIP', 'MDC'];
+    const cats = CATEGORY_CODES;
     const catStats = cats.map(c => {
       const cReagents = S.reagents.filter(r => r.cat === c);
       const rIds = cReagents.map(r => r.id);
@@ -1644,7 +1636,7 @@ class App extends React.Component {
     ];
 
     const topCatObj = [...catStats].sort((a,b) => b.issue - a.issue)[0];
-    const topCatLabel = ({ HMS: 'บริการศูนย์การแพทย์', ADV: 'ตรวจวินิจฉัยขั้นสูง' })[topCatObj.cat] || topCatObj.cat;
+    const topCatLabel = categoryLabel(topCatObj.cat);
     const lowStockCount = S.reagents.filter(r => this.onHand(r.id) <= r.min).length;
     const insights = {
       topCatLabel,
