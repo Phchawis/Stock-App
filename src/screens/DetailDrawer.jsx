@@ -171,14 +171,14 @@ export function DetailDrawer({ v }) {
                             <button
                               type="button"
                               onClick={l.onDispose}
-                              style={css(`background:transparent; border:1px solid var(--red-600); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--red-600); cursor:pointer; display:flex; align-items:center; gap:3px;`)}
+                              style={css(`background:transparent; border:1px solid var(--red-600); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--red-700); cursor:pointer; display:flex; align-items:center; gap:3px;`)}
                             >
                               🗑️ ตัดจำหน่าย
                             </button>
                             <button
                               type="button"
                               onClick={l.onDelete}
-                              style={css(`background:transparent; border:1px solid var(--red-600); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--red-600); cursor:pointer; display:flex; align-items:center; gap:3px;`)}
+                              style={css(`background:transparent; border:1px solid var(--red-600); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--red-700); cursor:pointer; display:flex; align-items:center; gap:3px;`)}
                             >
                               🗑️ ลบ
                             </button>
@@ -191,7 +191,7 @@ export function DetailDrawer({ v }) {
                               closeDetail();
                               v.onIssueLot(detail.id, l.id);
                             }}
-                            style={css(`background:var(--brand-50); border:1px solid var(--brand-100); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--brand-700); cursor:pointer; display:flex; align-items:center; gap:3px;`)}
+                            style={css(`background:var(--brand-50); border:1px solid var(--brand-100); border-radius:var(--radius-sm); padding:2px 6px; font:var(--text-2xs)/1.2 var(--font-body); color:var(--brand-ink); cursor:pointer; display:flex; align-items:center; gap:3px;`)}
                             onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--brand-100)'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--brand-50)'; }}
                           >
