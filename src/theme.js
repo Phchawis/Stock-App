@@ -1,65 +1,7 @@
-// Content-area theme — "Emerald Ocean", a single committed look built from the
-// approved teal-green ramp:
-//   #003830 · #004F4B · #006884 · #008276 · #33A593 · #70C4B4
-// Scoped to the main content wrapper (and the detail drawer) so the sidebar
-// keeps its own look. --brand-700 is tuned to #0E9587 — the one tone in this
-// ramp readable both as text on the dark glass cards (~3.1:1) and under the
-// white text screens paint on solid brand buttons (~3.8:1).
-//
-// Layout hooks consumed by Main.jsx:
-//   --content-glass-top     header strip (translucent, sits under blur)
-//   --content-glass-bottom  mobile action bar
-//   --content-ambient       full background value for <main> (glow gradients)
-export const contentTheme = `
-  --surface-page:#002934;
-  --surface-card:rgba(0, 72, 92, 0.45);
-  --surface-sunken:rgba(0, 30, 39, 0.6);
-  --white:rgba(0, 72, 92, 0.65);
-  --surface-inverse:#ECF7F4;
-  --text-primary:#ECF7F4;
-  --text-secondary:#9FD9CC;
-  --text-tertiary:#70C4B4;
-  --text-link:#70C4B4;
-  --text-disabled:#3E7C72;
-  --border-subtle:rgba(112,196,180,.15);
-  --border-default:rgba(112,196,180,.27);
-  --border-strong:rgba(112,196,180,.45);
-  --border-brand:#70C4B4;
-  --brand-900:#A8E1D6;
-  --brand-800:#70C4B4;
-  --brand-700:#0E9587;
-  --brand-600:#1FA090;
-  --brand-500:#33A593;
-  --brand-400:#70C4B4;
-  --brand-300:#9FD9CC;
-  --brand-100:rgba(112,196,180,.18);
-  --brand-50:rgba(112,196,180,.10);
-  --teal-900:#A8E1D6;
-  --teal-800:#70C4B4;
-  --teal-700:#33A593;
-  --teal-600:#1FA090;
-  --teal-500:#33A593;
-  --teal-300:#9FD9CC;
-  --teal-100:rgba(112,196,180,.18);
-  --teal-50:rgba(112,196,180,.10);
-  --blue-700:#7FC9DC;
-  --blue-600:#9AD6E5;
-  --blue-100:rgba(0,104,132,.25);
-  --slate-700:#9FD9CC;
-  --slate-600:#70C4B4;
-  --slate-500:#5B95A6;
-  --slate-400:#3A7A8C;
-  --slate-300:#155568;
-  --slate-200:#0D4757;
-  --slate-100:#073947;
-  --slate-50:#04303C;
-  --glow-brand:0 0 24px rgba(112,196,180,.28);
-  --glow-brand-soft:0 6px 18px -8px rgba(112,196,180,.4);
-  --content-glass-top:rgba(0, 41, 52, 0.7);
-  --content-glass-bottom:rgba(0, 41, 52, 0.85);
-  --content-bar-shadow:0 -8px 24px rgba(0,0,0,.35);
-  --content-ambient:radial-gradient(1100px 520px at 85% -10%, rgba(112,196,180,.09), transparent 60%), radial-gradient(900px 480px at -10% 30%, rgba(0,104,132,.16), transparent 55%), radial-gradient(760px 420px at 55% 115%, rgba(51,165,147,.08), transparent 60%), var(--surface-page);
-`;
+// NOTE: the live content theme is the `.theme-content-teal` class in
+// styles.css (applied by Main.jsx and DetailDrawer.jsx). A duplicate JS copy
+// used to live here and silently drifted out of sync — edits to it had no
+// effect on the app. Change tokens in styles.css.
 
 // Header strip for the light-scoped modals (Receive / Issue / Register).
 // Base tone requested by the user (#a4b0be), lifted into a subtle gradient
