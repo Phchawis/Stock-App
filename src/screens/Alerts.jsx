@@ -1,5 +1,6 @@
 import React from 'react';
 import { css } from '../css.js';
+import { categoryLabel } from '../categories.js';
 
 export function Alerts({ v }) {
   const {
@@ -13,10 +14,7 @@ export function Alerts({ v }) {
   const [isSendingLine, setIsSendingLine] = React.useState(false);
 
   const cats = Array.from(new Set(reorderReportRows.map(r => r.cat).filter(Boolean)));
-  const getCategoryLabel = (c) => ({
-    HMS: 'บริการศูนย์การแพทย์',
-    ADV: 'ตรวจวินิจฉัยขั้นสูง'
-  })[c] || c;
+  const getCategoryLabel = categoryLabel;
 
   const suppliers = Array.from(new Set(reorderReportRows.map(r => r.supplier).filter(Boolean)));
 
@@ -310,7 +308,7 @@ export function Alerts({ v }) {
 
         <div style={css(`display:flex; flex-direction:column; gap:12px;`)}>
           {alertRows.map((a, aI) => (<React.Fragment key={aI}>
-            <div className="alert-row" style={css(`display:flex; align-items:center; gap:14px; padding:14px 18px; background:${a.isOrdered ? '#FEF8EC' : 'var(--surface-card)'}; border:1px solid ${a.isOrdered ? '#FCE3B4' : 'var(--border-subtle)'}; border-left:3px solid ${a.isOrdered ? '#f97316' : a.fg}; border-radius:var(--radius-md); box-shadow:var(--shadow-sm);`)}>
+            <div className="alert-row" style={css(`display:flex; align-items:center; gap:14px; padding:14px 18px; background:${a.isOrdered ? '#FEF8EC' : 'var(--surface-card)'}; border:1px solid ${a.isOrdered ? '#FCE3B4' : 'var(--border-subtle)'}; border-left:3px solid ${a.isOrdered ? 'var(--amber-fill)' : a.fg}; border-radius:var(--radius-md); box-shadow:var(--shadow-sm);`)}>
               <div style={css(`display:flex; align-items:center; gap:14px; flex:1; min-width:0;`)}>
                 <span style={css(`width:40px; height:40px; border-radius:var(--radius-md); background:${a.isOrdered ? '#FEF08A' : a.bg}; color:${a.isOrdered ? '#854D0E' : a.fg}; display:grid; place-items:center; flex-shrink:0;`)}>
                   {a.isOrdered ? <span style={css(`display:grid; place-items:center;`)}>{ic.list}</span> : a.icon}
@@ -351,7 +349,7 @@ export function Alerts({ v }) {
                   <>
                     <button 
                       onClick={() => setAlertStatus(a.key, 'ordered')} 
-                      style={css(`padding:7px 12px; border-radius:var(--radius-md); border:none; background:#f97316; color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); white-space:nowrap;`)}
+                      style={css(`padding:7px 12px; border-radius:var(--radius-md); border:none; background:var(--amber-fill); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); white-space:nowrap;`)}
                     >
                       สั่งซื้อแล้ว / รอของ
                     </button>
