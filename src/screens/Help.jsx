@@ -22,13 +22,13 @@ export function Help({ v }) {
 
   return (
     <div className="qms-rise" style={css(`max-width:1180px; display:flex; flex-direction:column; gap:20px;`)}>
-      {/* Motion layer — purposeful, comprehension-first: entrances reveal in
-          reading order, and the "teaching" infographics (FEFO queue, alert
-          urgency, scan-link) move to demonstrate cause, not to decorate.
-          Every animation collapses to instant under prefers-reduced-motion. */}
+      {/* Motion layer. Only two things move: the panel acknowledges a tab
+          change, and the FEFO / severity infographics demonstrate the rule they
+          document (soonest-expiring leaves first; red is more urgent than
+          amber). Nothing here is ambient decoration, and everything collapses
+          to instant under prefers-reduced-motion. */}
       <style>{`
-        @keyframes hlpFadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes hlpPop { 0% { opacity:0; transform:scale(.9); } 60% { opacity:1; transform:scale(1.03); } 100% { opacity:1; transform:scale(1); } }
+        @keyframes hlpFadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
         /* Urgent, fast heartbeat — critical/red. */
         @keyframes hlpPulseCrit { 0%,100% { transform:scale(1); filter:drop-shadow(0 0 0 rgba(226,104,94,0)); } 50% { transform:scale(1.22); filter:drop-shadow(0 0 6px rgba(226,104,94,.7)); } }
         /* Calmer breathing — warning/amber. */
@@ -38,23 +38,14 @@ export function Help({ v }) {
         @keyframes hlpGlowNext { 0%,100% { box-shadow:0 0 0 0 rgba(226,104,94,.0), 0 4px 14px -6px rgba(226,104,94,.35); } 50% { box-shadow:0 0 0 3px rgba(226,104,94,.28), 0 8px 22px -8px rgba(226,104,94,.6); } }
         /* Conveyor arrow flowing toward dispense. */
         @keyframes hlpFlow { 0% { transform:translateY(-3px); opacity:.35; } 50% { opacity:1; } 100% { transform:translateY(5px); opacity:.35; } }
-        /* Scan beam sweeping a form/label. */
-        @keyframes hlpScan { 0% { top:6%; opacity:0; } 12% { opacity:1; } 88% { opacity:1; } 100% { top:94%; opacity:0; } }
 
-        /* Panel entrance replays on every tab switch (wrapper is keyed). Sections
-           reveal top-to-bottom so the eye follows the reading order. */
-        .hlp-panel > div > * { opacity:0; animation:hlpFadeUp .5s cubic-bezier(.22,1,.36,1) both; }
-        .hlp-panel > div > *:nth-child(1) { animation-delay:.02s; }
-        .hlp-panel > div > *:nth-child(2) { animation-delay:.10s; }
-        .hlp-panel > div > *:nth-child(3) { animation-delay:.18s; }
-        .hlp-panel > div > *:nth-child(4) { animation-delay:.26s; }
-        .hlp-panel > div > *:nth-child(5) { animation-delay:.34s; }
-        .hlp-panel > div > *:nth-child(6) { animation-delay:.42s; }
-
-        .hlp-kpi > * { opacity:0; animation:hlpPop .5s cubic-bezier(.34,1.4,.5,1) both; }
-        .hlp-kpi > *:nth-child(1) { animation-delay:.24s; }
-        .hlp-kpi > *:nth-child(2) { animation-delay:.36s; }
-        .hlp-kpi > *:nth-child(3) { animation-delay:.48s; }
+        /* One short fade on tab change — it confirms "the panel swapped", which
+           is state feedback. Deliberately NOT a staggered per-section reveal:
+           this is a reference doc people scan, and an orchestrated load sequence
+           makes them wait to read. It also never starts from opacity:0, so the
+           content is readable even if the animation never runs (background tab,
+           headless render). */
+        .hlp-panel { animation:hlpFadeUp .18s ease-out; }
 
         .hlp-dot-crit { display:inline-block; animation:hlpPulseCrit 1.1s ease-in-out infinite; transform-origin:center; }
         .hlp-dot-warn { display:inline-block; animation:hlpBreathe 2.6s ease-in-out infinite; transform-origin:center; }
@@ -62,13 +53,9 @@ export function Help({ v }) {
         .hlp-fefo-next { animation:hlpGlowNext 2s ease-in-out infinite; }
         .hlp-flow { animation:hlpFlow 1.4s ease-in-out infinite; }
 
-        .hlp-step { position:relative; }
-        .hlp-scanline { position:absolute; left:8%; right:8%; height:2px; border-radius:2px; background:linear-gradient(90deg, transparent, var(--brand-500), transparent); box-shadow:0 0 8px 1px var(--brand-500); animation:hlpScan 2.6s cubic-bezier(.45,0,.55,1) infinite; pointer-events:none; z-index:2; }
-
         @media (prefers-reduced-motion: reduce) {
-          .hlp-panel > div > *, .hlp-kpi > * { opacity:1 !important; animation:none !important; }
-          .hlp-dot-crit, .hlp-dot-warn, .hlp-fefo-next, .hlp-flow, .hlp-scanline { animation:none !important; }
-          .hlp-scanline { display:none; }
+          .hlp-panel { animation:none !important; }
+          .hlp-dot-crit, .hlp-dot-warn, .hlp-fefo-next, .hlp-flow { animation:none !important; }
         }
       `}</style>
       {/* Help Tabs Header */}
@@ -110,12 +97,12 @@ export function Help({ v }) {
               <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.2 var(--font-body); color:var(--text-secondary); display:flex; align-items:center; gap:6px;`)}>
                 <span>🖥️</span> <strong>แผนผังภาพรวมหน้าหลักแอปพลิเคชัน (Dashboard Overview)</strong>
               </div>
-              <div className="hlp-kpi" style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;`)}>
+              <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;`)}>
                 <div style={css(`background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:12px; display:flex; gap:10px; align-items:center;`)}>
                   <span style={css(`font-size:24px;`)}>📦</span>
                   <div>
                     <div style={css(`font-size:10px; color:var(--text-tertiary);`)}>คลังสินค้าทั้งหมด</div>
-                    <div style={css(`font:var(--fw-bold) var(--text-md)/1.1 var(--font-mono); color:var(--brand-700);`)}>1,250 <span style={css(`font-size:11px;`)}>หน่วย</span></div>
+                    <div style={css(`font:var(--fw-bold) var(--text-md)/1.1 var(--font-mono); color:var(--brand-ink);`)}>1,250 <span style={css(`font-size:11px;`)}>หน่วย</span></div>
                   </div>
                 </div>
                 <div style={css(`background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:12px; display:flex; gap:10px; align-items:center;`)}>
@@ -294,7 +281,6 @@ export function Help({ v }) {
 
               {/* Visual Interface Simulator */}
               <div style={css(`position:relative; overflow:hidden; flex:1; min-width:320px; background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
-                <div className="hlp-scanline" />
                 <div style={css(`font:var(--fw-bold) var(--text-xs)/1.2 var(--font-display); color:var(--brand-800); margin-bottom:12px; display:flex; align-items:center; gap:6px;`)}>
                   <span>📥</span> จำลองหน้าต่างฟอร์มการรับเข้าคลัง (Form Simulation)
                 </div>
@@ -572,7 +558,7 @@ export function Help({ v }) {
               {/* Section 2: Reconciliation */}
               <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
                 <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
-                  <span style={css(`color:var(--brand-700);`)}>📋</span> 2. การตรวจนับสต็อกและปรับยอดคลาดเคลื่อน (ADJUST)
+                  <span style={css(`color:var(--brand-ink);`)}>📋</span> 2. การตรวจนับสต็อกและปรับยอดคลาดเคลื่อน (ADJUST)
                 </div>
                 <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
                   <div>**กรณีใช้งาน:** หลังการนับสต็อกประจำสัปดาห์หรือประจำเดือน (Physical Count) แล้วพบยอดน้ำยาจริงไม่ตรงกับระบบคอมพิวเตอร์</div>
@@ -643,7 +629,7 @@ export function Help({ v }) {
 
             {/* Printing Guidelines */}
             <div style={css(`background:var(--brand-50); border:1px solid var(--brand-300); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
-              <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--brand-700); margin-bottom:8px; display:flex; align-items:center; gap:8px;`)}>
+              <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--brand-ink); margin-bottom:8px; display:flex; align-items:center; gap:8px;`)}>
                 <span>🖨️</span> คำแนะนำในการดาวน์โหลดและสั่งพิมพ์ให้คมชัดที่สุด
               </div>
               <div style={css(`font-size:var(--text-xs); color:var(--text-secondary); line-height:1.6; display:flex; flex-direction:column; gap:8px;`)}>
@@ -747,7 +733,7 @@ export function Help({ v }) {
               {/* Section 2: PWA Installation */}
               <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
                 <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
-                  <span style={css(`color:var(--brand-700);`)}>📱</span> 2. การติดตั้งแอปพลิเคชันลงบนเครื่องคอมพิวเตอร์/มือถือ (PWA)
+                  <span style={css(`color:var(--brand-ink);`)}>📱</span> 2. การติดตั้งแอปพลิเคชันลงบนเครื่องคอมพิวเตอร์/มือถือ (PWA)
                 </div>
                 <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
                   <div>**ประโยชน์ของระบบ PWA:**
