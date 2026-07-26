@@ -242,7 +242,7 @@ export function Sidebar({ v }) {
           <button onClick={go.alerts} className="sidebar-btn-item" style={css(`background:${nav.alBg}; color:${nav.alFg};`)}>
             <span style={css(`width:22px; height:22px; display:grid; place-items:center; color:${nav.alIc};`)}>{ic.bell}</span>
             <span style={css(`flex:1;`)}>การแจ้งเตือน</span>
-            <span style={css(`min-width:22px; height:20px; display:inline-flex; align-items:center; justify-content:center; padding:0 6px; border-radius:var(--radius-pill); background:var(--red-600); color:#fff; font:var(--fw-bold) 12px/1 var(--font-mono);`)}>{nav.alertCount}</span>
+            <span style={css(`min-width:22px; height:20px; display:inline-flex; align-items:center; justify-content:center; padding:0 6px; border-radius:var(--radius-pill); background:var(--red-fill); color:#fff; font:var(--fw-bold) 12px/1 var(--font-mono);`)}>{nav.alertCount}</span>
           </button>
           
           <button onClick={go.inventory} className="sidebar-btn-item" style={css(`background:${nav.invBg}; color:${nav.invFg};`)}>
@@ -270,7 +270,7 @@ export function Sidebar({ v }) {
             <button onClick={go.stockCount} className="sidebar-btn-item" style={css(`background:${nav.scBg}; color:${nav.scFg};`)}>
               <span style={css(`width:22px; height:22px; display:grid; place-items:center; color:${nav.scIc};`)}>📋</span>
               <span style={css(`flex:1;`)}>ตรวจนับคลัง</span>
-              <span style={css(`font-size:9px; color:var(--text-tertiary); border:1px solid var(--border-subtle); padding:1px 4px; border-radius:var(--radius-sm); font-family:var(--font-mono);`)}>Alt+S</span>
+              <span style={css(`font-size:10px; color:var(--text-secondary); border:1px solid var(--border-subtle); padding:1px 4px; border-radius:var(--radius-sm); font-family:var(--font-mono);`)}>Alt+S</span>
             </button>
           )}
           
@@ -289,13 +289,13 @@ export function Sidebar({ v }) {
           <button onClick={openReceive} className="sidebar-op-receive">
             <span style={css(`width:22px; height:22px; display:grid; place-items:center;`)}>{ic.receive}</span>
             <span style={css(`flex:1;`)}>รับเข้า (Receive)</span>
-            <span style={css(`font-size:9px; color:var(--text-disabled); border:1px solid rgba(16,185,129,.25); padding:1px 4px; border-radius:var(--radius-sm); font-family:var(--font-mono); transition:all 0.2s;`)} className="sc-tag">Alt+R</span>
+            <span style={css(`font-size:10px; color:var(--text-secondary); border:1px solid rgba(16,185,129,.25); padding:1px 4px; border-radius:var(--radius-sm); font-family:var(--font-mono); transition:all 0.2s;`)} className="sc-tag">Alt+R</span>
           </button>
           
           <button onClick={openIssue} className="sidebar-op-withdraw">
             <span style={css(`width:22px; height:22px; display:grid; place-items:center;`)}>{ic.issue}</span>
             <span style={css(`flex:1;`)}>เบิกจ่าย (Withdraw)</span>
-            <span style={css(`font-size:9px; color:var(--text-disabled); border:1px solid rgba(245,158,11,.25); padding:1px 4px; border-radius:var(--radius-sm); font-family:var(--font-mono); transition:all 0.2s;`)} className="sc-tag">Alt+I</span>
+            <span style={css(`font-size:10px; color:var(--text-secondary); border:1px solid rgba(245,158,11,.25); padding:1px 4px; border-radius:var(--radius-sm); font-family:var(--font-mono); transition:all 0.2s;`)} className="sc-tag">Alt+I</span>
           </button>
         </div>
 
@@ -307,7 +307,7 @@ export function Sidebar({ v }) {
           onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--slate-100)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
         >
-          <span style={css(`width:38px; height:38px; border-radius:50%; background:var(--brand-700); color:#fff; display:grid; place-items:center; font:var(--fw-semibold) 15px/1 var(--font-body); flex-shrink:0;`)}>{user.initials}</span>
+          <span style={css(`width:38px; height:38px; border-radius:50%; background:color-mix(in srgb, var(--brand-700) 72%, #001A22); color:#fff; display:grid; place-items:center; font:var(--fw-semibold) 15px/1 var(--font-body); flex-shrink:0;`)}>{user.initials}</span>
           <div style={css(`flex:1; line-height:1.3; min-width:0;`)}>
             <div style={css(`font:var(--fw-semibold) var(--text-sm)/1.2 var(--font-body); color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>{user.name}</div>
             <div style={css(`font:var(--text-xs)/1.2 var(--font-body); color:var(--text-tertiary);`)}>{user.role}</div>
