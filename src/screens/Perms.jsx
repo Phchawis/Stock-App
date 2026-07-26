@@ -73,7 +73,7 @@ export function Perms({ v }) {
             {permRoles.map((r, rI) => (
               <div key={rI} style={css(`padding:10px 8px; text-align:center; border-left:1px solid var(--border-subtle); background:${r.headBg};`)}>
                 <div style={css(`font:var(--fw-semibold) var(--text-2xs)/1.3 var(--font-body); color:${r.headFg};`)}>{r.th}</div>
-                {r.current && <div style={css(`margin-top:4px; font:600 9px/1 var(--font-mono); color:${r.color}; letter-spacing:.04em;`)}>● บทบาทของคุณ</div>}
+                {r.current && <div style={css(`margin-top:4px; font:600 9px/1 var(--font-mono); color:var(--text-secondary); letter-spacing:.04em;`)}>● บทบาทของคุณ</div>}
               </div>
             ))}
           </div>
@@ -119,12 +119,12 @@ export function Perms({ v }) {
           return (
             <div key={idx} className="perm-user-row-desktop" style={css(`display:grid; grid-template-columns:1.5fr 1fr 1.2fr 1fr 0.6fr; border-bottom:1px solid var(--border-subtle); padding:12px 18px; align-items:center; font:var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>
               <div style={css(`display:flex; align-items:center; gap:10px;`)}>
-                <span style={css(`width:28px; height:28px; border-radius:50%; background:${u.color || 'var(--brand-700)'}; color:#fff; display:grid; place-items:center; font:600 11px/1 var(--font-body);`)}>{u.initials}</span>
+                <span style={css(`width:28px; height:28px; border-radius:50%; background:color-mix(in srgb, ${u.color || 'var(--brand-700)'} 72%, #001A22); color:#fff; display:grid; place-items:center; font:600 11px/1 var(--font-body);`)}>{u.initials}</span>
                 <span style={css(`font-weight:600;`)}>{u.name}</span>
               </div>
               <div style={css(`font-family:var(--font-mono); color:var(--text-secondary);`)}>{u.username}</div>
               <div>
-                <span style={css(`padding:2px 8px; border-radius:var(--radius-pill); background:var(--brand-50); color:var(--brand-700); font:var(--fw-semibold) var(--text-3xs)/1.2 var(--font-body);`)}>
+                <span style={css(`padding:2px 8px; border-radius:var(--radius-pill); background:var(--brand-50); color:var(--brand-ink); font:var(--fw-semibold) var(--text-3xs)/1.2 var(--font-body);`)}>
                   {rLabel}
                 </span>
               </div>
@@ -146,7 +146,7 @@ export function Perms({ v }) {
                           () => deleteUser(u.username)
                         );
                       }}
-                      style={css(`border:none; background:transparent; color:var(--red-600); cursor:pointer; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); padding:4px 8px; border-radius:var(--radius-sm);`)}
+                      style={css(`border:none; background:transparent; color:var(--red-700); cursor:pointer; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); padding:4px 8px; border-radius:var(--radius-sm);`)}
                       onMouseEnter={(e) => { e.currentTarget.style.textDecoration = 'underline'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.textDecoration = 'none'; }}
                     >
@@ -168,7 +168,7 @@ export function Perms({ v }) {
           return (
             <div key={'m' + idx} className="perm-user-row-mobile" style={css(`flex-direction:column; gap:10px; padding:14px 16px; border-bottom:1px solid var(--border-subtle);`)}>
               <div style={css(`display:flex; align-items:center; gap:10px;`)}>
-                <span style={css(`width:32px; height:32px; border-radius:50%; background:${u.color || 'var(--brand-700)'}; color:#fff; display:grid; place-items:center; font:600 12px/1 var(--font-body); flex-shrink:0;`)}>{u.initials}</span>
+                <span style={css(`width:32px; height:32px; border-radius:50%; background:color-mix(in srgb, ${u.color || 'var(--brand-700)'} 72%, #001A22); color:#fff; display:grid; place-items:center; font:600 12px/1 var(--font-body); flex-shrink:0;`)}>{u.initials}</span>
                 <div style={css(`flex:1; min-width:0;`)}>
                   <div style={css(`font:var(--fw-semibold) var(--text-sm)/1.3 var(--font-body); color:var(--text-primary);`)}>{u.name}</div>
                   <div style={css(`font:var(--text-2xs)/1.3 var(--font-mono); color:var(--text-tertiary); margin-top:1px;`)}>{u.username}</div>
@@ -178,7 +178,7 @@ export function Perms({ v }) {
                 </span>
               </div>
               <div style={css(`display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:10px; border-top:1px dashed var(--border-subtle);`)}>
-                <span style={css(`padding:3px 10px; border-radius:var(--radius-pill); background:var(--brand-50); color:var(--brand-700); font:var(--fw-semibold) var(--text-2xs)/1.3 var(--font-body);`)}>
+                <span style={css(`padding:3px 10px; border-radius:var(--radius-pill); background:var(--brand-50); color:var(--brand-ink); font:var(--fw-semibold) var(--text-2xs)/1.3 var(--font-body);`)}>
                   {rLabel}
                 </span>
                 {canDelete ? (
@@ -190,7 +190,7 @@ export function Perms({ v }) {
                         () => deleteUser(u.username)
                       );
                     }}
-                    style={css(`border:1px solid var(--red-600); background:transparent; color:var(--red-600); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); padding:6px 12px; border-radius:var(--radius-sm);`)}
+                    style={css(`border:1px solid var(--red-600); background:transparent; color:var(--red-700); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); padding:6px 12px; border-radius:var(--radius-sm);`)}
                   >
                     ลบผู้ใช้
                   </button>
