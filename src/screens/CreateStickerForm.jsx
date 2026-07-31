@@ -23,12 +23,19 @@ export function CreateStickerForm({ v }) {
     return parts[0] || '';
   };
 
+  // toISOString() is UTC, so between 00:00 and 07:00 Bangkok time it returns
+  // yesterday — a morning-shift label would be printed with the wrong date.
+  const todayLocal = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
   // Form 1: Aliquot Form State
   const [aliquotReagent, setAliquotReagent] = React.useState('');
   const [aliquotSearch, setAliquotSearch] = React.useState('');
   const [aliquotOpen, setAliquotOpen] = React.useState(false);
   const [aliquotLot, setAliquotLot] = React.useState('');
-  const [aliquotPrepDate, setAliquotPrepDate] = React.useState(new Date().toISOString().slice(0, 10));
+  const [aliquotPrepDate, setAliquotPrepDate] = React.useState(todayLocal());
   const [aliquotExpDate, setAliquotExpDate] = React.useState('');
   const [aliquotPrepBy, setAliquotPrepBy] = React.useState(user ? getFirstName(user.name) : '');
 
@@ -37,7 +44,7 @@ export function CreateStickerForm({ v }) {
   const [openedSearch, setOpenedSearch] = React.useState('');
   const [openedOpen, setOpenedOpen] = React.useState(false);
   const [openedType, setOpenedType] = React.useState('Control'); // 'Control' or 'Calibrator'
-  const [openedDate, setOpenedDate] = React.useState(new Date().toISOString().slice(0, 10));
+  const [openedDate, setOpenedDate] = React.useState(todayLocal());
   const [openedBy, setOpenedBy] = React.useState(user ? getFirstName(user.name) : '');
   const [openStorageDuration, setOpenStorageDuration] = React.useState('Until exp.');
   const [openedTemp, setOpenedTemp] = React.useState('2-8 °C');
