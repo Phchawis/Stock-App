@@ -16,6 +16,9 @@ export function ReagentLists({ v }) {
 
   if (!isReagentLists) return null;
 
+  // Local midnight, so the day-count matches what a person reads off a calendar.
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+
   const query = search.trim().toLowerCase();
   const filtered = reagentsList.filter(r => 
     r.code.toLowerCase().includes(query) || 
@@ -373,8 +376,13 @@ export function ReagentLists({ v }) {
                     {rLots.length > 0 ? (
                       <div style={css(`display:flex; flex-direction:column; gap:6px;`)}>
                         {rLots.map(l => {
-                          const d = Math.round((new Date(l.expiry + 'T00:00:00') - new Date('2026-06-29T00:00:00')) / 86400000);
-                          const severity = d <= 30 ? 'critical' : (d <= 60 ? 'warning' : (d <= 90 ? 'watch' : 'ok'));
+                          // Was pinned to a hardcoded 2026-06-29 "today", so every
+                          // countdown here drifted further off as real time passed
+                          // and expired lots kept reading as still usable.
+                          // Thresholds match sev() in App.jsx so a lot can't be
+                          // "วิกฤต" on one screen and "เฝ้าระวัง" on another.
+                          const d = Math.round((new Date(l.expiry + 'T00:00:00') - today) / 86400000);
+                          const severity = d <= 15 ? 'critical' : (d <= 60 ? 'warning' : 'ok');
                           const c = ({
                             critical: { fg: 'var(--red-700)', bg: 'var(--red-50)', border: 'var(--red-200)' },
                             warning: { fg: 'var(--amber-700)', bg: 'var(--amber-50)', border: 'var(--amber-200)' },
