@@ -43,6 +43,15 @@ export async function onRequestPut(context) {
     const lot = await env.DB.prepare('SELECT * FROM lots WHERE id = ?').bind(txn.lot_id).first();
     if (!lot) return json({ error: 'ไม่พบ Lot ที่เชื่อมโยงกับรายการนี้' }, 404);
 
+    // A correction may change the size of a movement, never its direction — an
+    // issue that turns into a receive is a different event, not an edit. Guard
+    // it here too rather than trusting the client's sign: a flipped sign applies
+    // twice the intended delta to the balance and silently inflates stock.
+    const wantsNegative = txn.type === 'ISSUE' || txn.type === 'DISPOSE' || (txn.type === 'ADJUST' && txn.qty < 0);
+    if (wantsNegative !== newQty < 0) {
+      return json({ error: 'แก้ไขได้เฉพาะจำนวน ไม่สามารถเปลี่ยนทิศทางของรายการ (รับเข้า/เบิกออก) ได้' }, 400);
+    }
+
     const delta = newQty - txn.qty;
     const newLotQty = lot.qty + delta;
     if (newLotQty < 0) {
@@ -50,17 +59,22 @@ export async function onRequestPut(context) {
     }
 
     const newStatus = newLotQty === 0 ? 'DEPLETED' : 'ACTIVE';
+    // `recv` is the lot's total-ever-received, so correcting the RECEIVE record
+    // that created it has to move `recv` by the same delta. Leaving it stale
+    // makes "ล้างประวัติทั้งหมด" (which resets qty = recv) restore the wrong
+    // balance, and skews any received-vs-used reporting off the same column.
+    const newRecv = txn.type === 'RECEIVE' ? Math.max(0, lot.recv + delta) : lot.recv;
     await env.DB.batch([
       env.DB.prepare('UPDATE transactions SET qty = ?, bal = ?, ref = ? WHERE id = ?')
         .bind(newQty, newLotQty, ref !== undefined ? ref : txn.ref, id),
-      env.DB.prepare('UPDATE lots SET qty = ?, status = ? WHERE id = ?')
-        .bind(newLotQty, newStatus, txn.lot_id)
+      env.DB.prepare('UPDATE lots SET qty = ?, recv = ?, status = ? WHERE id = ?')
+        .bind(newLotQty, newRecv, newStatus, txn.lot_id)
     ]);
 
     return json({
       success: true,
       txn: { id: +id, qty: newQty, bal: newLotQty, ref: ref !== undefined ? ref : txn.ref },
-      lot: { id: txn.lot_id, qty: newLotQty, status: newStatus }
+      lot: { id: txn.lot_id, qty: newLotQty, recv: newRecv, status: newStatus }
     });
   } catch (err) {
     return json({ error: err.message }, 500);
