@@ -18,6 +18,11 @@ export function Alerts({ v }) {
 
   const suppliers = Array.from(new Set(reorderReportRows.map(r => r.supplier).filter(Boolean)));
 
+  // Signature block on the printed purchase-request form.
+  const supervisorUser = (usersList || []).find(u => u.username === 'supervisor' || u.role === 'supervisor');
+  const supervisorSig = supervisorUser ? supervisorUser.signature : null;
+  const supervisorName = (supervisorUser && supervisorUser.name) || 'ทนพญ.เบญจวรรณ รุ่งเรือง';
+
   const filteredReportRows = reorderReportRows.filter(r => {
     if (selectedCategory !== 'all' && r.cat !== selectedCategory) return false;
     if (selectedSupplier !== 'all' && r.supplier !== selectedSupplier) return false;
@@ -424,16 +429,16 @@ export function Alerts({ v }) {
             <p style={css(`margin-top:2px; color:#666;`)}>ผู้จัดทำรายการสั่งซื้อ ( {user.role} )</p>
           </div>
           <div style={css(`text-align:center; width:220px; font-size:10px; color:#333; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;`)}>
-            {(() => {
-              const supervisorUser = (usersList || []).find(u => u.username === 'supervisor' || u.role === 'supervisor');
-              const supervisorSig = supervisorUser ? supervisorUser.signature : null;
-              return supervisorSig ? (
-                <img src={supervisorSig} alt="Supervisor Signature" style={css(`max-height:36px; object-fit:contain; margin-bottom:4px; background:#fff; padding:2px; border:1px solid #eee;`)} />
-              ) : (
-                <p>ลงชื่อ.......................................................</p>
-              );
-            })()}
-            <p style={css(`margin-top:6px; font-weight:bold;`)}>( ทนพญ.เบญจวรรณ รุ่งเรือง )</p>
+            {supervisorSig ? (
+              <img src={supervisorSig} alt="Supervisor Signature" style={css(`max-height:36px; object-fit:contain; margin-bottom:4px; background:#fff; padding:2px; border:1px solid #eee;`)} />
+            ) : (
+              <p>ลงชื่อ.......................................................</p>
+            )}
+            {/* The signature image is looked up from the supervisor account, so
+                the printed name has to come from the same account — a hardcoded
+                name here would put one person's signature over another person's
+                name on a purchasing document. */}
+            <p style={css(`margin-top:6px; font-weight:bold;`)}>( {supervisorName} )</p>
             <p style={css(`margin-top:2px; color:#666;`)}>หัวหน้าหมวดงานศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์</p>
           </div>
         </div>
