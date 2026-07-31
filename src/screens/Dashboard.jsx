@@ -46,9 +46,6 @@ export function Dashboard({ v }) {
 
   const getOnHand = (rid) => activeLots.filter(l => l.rid === rid).reduce((sum, l) => sum + l.qty, 0);
 
-  const totalReagentsCount = reagents.length || 1;
-  const filterRatio = filteredReagents.length / totalReagentsCount;
-
   // KPIs
   const lowCount = filteredReagents.filter(r => getOnHand(r.id) <= r.min).length;
   const getDaysLeft = (expiryDate) => Math.round((new Date(expiryDate + 'T00:00:00') - new Date('2026-06-29T00:00:00')) / 86400000);
@@ -77,27 +74,22 @@ export function Dashboard({ v }) {
     return { cat: c, types, stock, issue, turnover };
   });
 
-  // Monthly Data computed dynamically from filteredTxns
+  // Monthly data, entirely from real transactions. The window ends at the
+  // current month and walks backwards, so it advances on its own instead of
+  // sitting on a fixed date. A month with no movement reports 0 — this chart is
+  // read as a lab record, so an empty month has to look empty.
   const getMonthsList = (p) => {
     const count = p === '3m' ? 3 : p === '12m' ? 12 : 6;
-    const list = [];
     const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-    const baseData = {
-      '2026-01': { rec: 240, issue: 220 },
-      '2026-02': { rec: 200, issue: 180 },
-      '2026-03': { rec: 320, issue: 290 },
-      '2026-04': { rec: 220, issue: 210 },
-      '2026-05': { rec: 300, issue: 280 },
-      '2026-06': { rec: 240, issue: 142 }
-    };
+    const now = new Date();
+    const list = [];
     for (let i = count - 1; i >= 0; i--) {
-      const d = new Date(2026, 5 - i, 1);
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const mIdx = d.getMonth();
-      const yr = String(d.getFullYear()).slice(-2);
+      // Thai calendar year (พ.ศ. = ค.ศ. + 543), matching how the lab writes dates.
+      const yr = String(d.getFullYear() + 543).slice(-2);
       const prefix = d.getFullYear() + '-' + String(mIdx + 1).padStart(2, '0');
-      const label = `${thaiMonths[mIdx]} ${yr}`;
-      const base = baseData[prefix] || { rec: 100, issue: 80 };
-      list.push({ label, prefix, base });
+      list.push({ label: `${thaiMonths[mIdx]} ${yr}`, prefix });
     }
     return list;
   };
@@ -105,10 +97,8 @@ export function Dashboard({ v }) {
 
   const monthlyData = selectedMonths.map(m => {
     const monthTxns = filteredTxns.filter(t => filteredReagentIds.includes(t.rid) && t.at && t.at.startsWith(m.prefix));
-    const actualRec = monthTxns.filter(t => t.type === 'RECEIVE').reduce((sum, t) => sum + (t.qty || 0), 0);
-    const actualIssue = Math.abs(monthTxns.filter(t => t.type === 'ISSUE').reduce((sum, t) => sum + (t.qty || 0), 0));
-    const rec = actualRec || Math.round(m.base.rec * filterRatio);
-    const issue = actualIssue || Math.round(m.base.issue * filterRatio);
+    const rec = monthTxns.filter(t => t.type === 'RECEIVE').reduce((sum, t) => sum + (t.qty || 0), 0);
+    const issue = Math.abs(monthTxns.filter(t => t.type === 'ISSUE').reduce((sum, t) => sum + (t.qty || 0), 0));
     return { label: m.label, rec, issue };
   });
 
