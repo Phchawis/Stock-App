@@ -104,7 +104,7 @@ class App extends React.Component {
   blankRf() { return { rid: '', lot: '', expiry: '', qty: '', supplier: '', loc: 'ตู้เย็น A1' }; }
   blankIf() { return { rid: '', qty: '', scan: 'MANUAL', ref: '', lotId: '', qrInput: '', searchInput: '' }; }
   blankElf() { return { expiry: '', qty: '', loc: '' }; }
-  blankEtf() { return { qty: '', ref: '' }; }
+  blankEtf() { return { qty: '', ref: '', lot: '', expiry: '' }; }
   blankMf() { return { code: '', th: '', en: '', cat: DEFAULT_CATEGORY, unit: 'vial', subUnit: '', subUnitQty: '', testsPerSubUnit: '', testsPerUnit: '', storage: 'REFRIGERATED_2_8', min: '', reorder: '', supplier: 'i-med', img: '/reagent_placeholder.png' }; }
   blankDispForm() { return { qty: '', reason: 'หมดอายุ', customReason: '' }; }
   defaultPerms() { const o = {}; this.ROLES().forEach(r => { o[r.id] = { ...r.perms }; }); return o; }
@@ -997,7 +997,11 @@ class App extends React.Component {
     if (!this.can('manage')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์แก้ไขรายการนี้', 'warn'); return; }
     const t = this.state.txns.find(x => x.id === txnId);
     if (!t) return;
-    this.setState({ modal: 'editTxn', editingTxnId: txnId, etForm: { qty: Math.abs(t.qty), ref: t.ref || '' } });
+    const lotRow = this.state.lots.find(x => x.id === t.lotId);
+    this.setState({ modal: 'editTxn', editingTxnId: txnId, etForm: {
+      qty: Math.abs(t.qty), ref: t.ref || '',
+      lot: lotRow ? lotRow.lot : '', expiry: lotRow ? lotRow.expiry : ''
+    } });
   }
   async submitEditTxn() {
     if (!this.can('manage')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์แก้ไขรายการนี้', 'warn'); return; }
@@ -1007,8 +1011,31 @@ class App extends React.Component {
     const f = this.state.etForm;
     const magnitude = +f.qty;
     if (isNaN(magnitude) || magnitude <= 0) { this.showToast('กรุณากรอกจำนวนให้ถูกต้อง', 'warn'); return; }
-    const signedQty = t.type === 'ISSUE' ? -magnitude : magnitude;
+    // The form only ever shows a magnitude, so the record's own direction has to
+    // be restored on save. Outbound types are always negative; an ADJUST keeps
+    // whichever direction it was recorded with. Getting this wrong flips the
+    // sign and the server then applies twice the delta to the lot's balance.
+    const outbound = t.type === 'ISSUE' || t.type === 'DISPOSE' || (t.type === 'ADJUST' && t.qty < 0);
+    const signedQty = outbound ? -magnitude : magnitude;
+    // A RECEIVE record *is* the lot's creation, so correcting a mistyped lot
+    // number or expiry belongs here too — that's the mistake people actually
+    // catch while reading the movement history.
+    const lotRow = this.state.lots.find(x => x.id === t.lotId);
+    const fixesLot = t.type === 'RECEIVE' && lotRow &&
+      ((f.lot || '').trim() !== lotRow.lot || (f.expiry || '') !== lotRow.expiry);
+    if (fixesLot && !(f.lot || '').trim()) { this.showToast('กรุณากรอกเลข Lot', 'warn'); return; }
+    if (fixesLot && !f.expiry) { this.showToast('กรุณาระบุวันหมดอายุ', 'warn'); return; }
     try {
+      if (fixesLot) {
+        const lotRes = await this.api('/api/lots', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: lotRow.id, lot: (f.lot || '').trim(), expiry: f.expiry, qty: lotRow.qty, loc: lotRow.loc })
+        });
+        const lotData = await lotRes.json().catch(() => ({}));
+        if (!lotRes.ok) throw new Error(lotData.error || 'แก้ไขข้อมูล Lot ล้มเหลว');
+        this.setState(s => ({ lots: s.lots.map(l => l.id === lotData.lot.id ? { ...l, ...lotData.lot } : l) }));
+      }
       const res = await this.api('/api/transactions', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -1021,7 +1048,7 @@ class App extends React.Component {
         lots: s.lots.map(l => l.id === data.lot.id ? { ...l, ...data.lot } : l),
         modal: null, editingTxnId: null
       }));
-      this.showToast('แก้ไขรายการเรียบร้อยแล้ว');
+      this.showToast(fixesLot ? 'แก้ไขรายการและข้อมูล Lot เรียบร้อยแล้ว' : 'แก้ไขรายการเรียบร้อยแล้ว');
     } catch (err) {
       this.showToast(err.message, 'warn');
     }
@@ -1609,32 +1636,10 @@ class App extends React.Component {
       return { cat: c, types, stock, issue, turnover };
     });
 
-    const monthsHistory = [
-      { label: 'ม.ค. 26', issue: 220, rec: 240, change: 5.2 },
-      { label: 'ก.พ. 26', issue: 180, rec: 200, change: -18.1 },
-      { label: 'มี.ค. 26', issue: 290, rec: 320, change: 61.1 },
-      { label: 'เม.ย. 26', issue: 210, rec: 220, change: -27.5 },
-      { label: 'พ.ค. 26', issue: 280, rec: 300, change: 33.3 }
-    ];
-    const juneIssue = Math.abs(S.txns.filter(t => t.type === 'ISSUE' && t.at.startsWith('2026-06')).reduce((sum, t) => sum + t.qty, 0));
-    const juneRec = S.txns.filter(t => t.type === 'RECEIVE' && t.at.startsWith('2026-06')).reduce((sum, t) => sum + t.qty, 0);
-    const prevMonthIssue = monthsHistory[monthsHistory.length - 1].issue;
-    const juneChange = Math.round(((juneIssue - prevMonthIssue) / prevMonthIssue) * 1000) / 10;
-    const monthlyData = [
-      ...monthsHistory,
-      { label: 'มิ.ย. 26', issue: juneIssue || 142, rec: juneRec || 240, change: juneIssue ? juneChange : -49.2 }
-    ];
-
-    const weeklyPattern = [
-      { day: 'อา.', val: 12 },
-      { day: 'จ.', val: 45 },
-      { day: 'อ.', val: 68 },
-      { day: 'พ.', val: 55 },
-      { day: 'พฤ.', val: 62 },
-      { day: 'ศ.', val: 74 },
-      { day: 'ส.', val: 18 }
-    ];
-
+    // NOTE: the monthly chart and its insight lines are computed inside
+    // Dashboard.jsx from real transactions. A hardcoded demo series used to sit
+    // here as well; it was dead (Dashboard shadows these names) but it was also
+    // the source of the invented Jan–Jun 2026 figures, so it is gone for good.
     const topCatObj = [...catStats].sort((a,b) => b.issue - a.issue)[0];
     const topCatLabel = categoryLabel(topCatObj.cat);
     const lowStockCount = S.reagents.filter(r => this.onHand(r.id) <= r.min).length;
@@ -1643,8 +1648,6 @@ class App extends React.Component {
       totalStock: S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE').reduce((sum, l) => sum + l.qty, 0),
       lowStockCount,
       totalReagents: S.reagents.length,
-      juneIssue: juneIssue || 142,
-      juneRec: juneRec || 240
     };
 
     // modal forms
@@ -1706,7 +1709,7 @@ class App extends React.Component {
       openSignature: () => this.openSignature(),
       modalSignature: S.modal === 'signature',
       onSaveSignature: (sig) => this.onSaveSignature(sig),
-      kpi: { total: S.reagents.length }, kpis, dashAlerts, dashLow, recent, usageList, catStats, monthlyData, weeklyPattern, insights, deadStockReagents, dynamicMinSuggestions,
+      kpi: { total: S.reagents.length }, kpis, dashAlerts, dashLow, recent, usageList, catStats, insights, deadStockReagents, dynamicMinSuggestions,
       invRows, invTabs, invTab: S.invTab, setInvTab: (v) => this.setState({ invTab: v }),
       search: S.search, onSearch: (e) => this.setState({ search: e.target.value }),
       hasInvRows: invRows.length > 0,
@@ -1723,6 +1726,10 @@ class App extends React.Component {
         return {
           lotId: l.id,
           lot: l.lot,
+          // StockCount's scanner matches on qr as well as lot. It was missing
+          // here, so a scanned QR never matched and the fallback substring
+          // search threw on undefined.toLowerCase().
+          qr: l.qr || '',
           expiry: l.expiry,
           systemQty: l.qty,
           reagentName: r ? r.th : '—',
@@ -1806,6 +1813,7 @@ class App extends React.Component {
       // edit transaction (correct qty/reference of a past receive/issue/adjust record)
       modalEditTxn: S.modal === 'editTxn',
       etForm: S.etForm, etQty: this.bindEtf('qty'), etRef: this.bindEtf('ref'),
+      etLot: this.bindEtf('lot'), etExpiry: this.bindEtf('expiry'),
       submitEditTxn: () => this.submitEditTxn(),
       editingTxnData: (() => {
         const t = S.txns.find(x => x.id === S.editingTxnId);
