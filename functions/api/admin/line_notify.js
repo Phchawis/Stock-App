@@ -42,18 +42,34 @@ export async function onRequest(context) {
     messageText += `ห้องปฏิบัติการ CMTL Laboratory\n`;
     messageText += `──────────────────\n\n`;
 
-    redAlerts.forEach((item, idx) => {
-      const dayLabel = item.days_left < 0 
-        ? `หมดอายุแล้ว (ผ่านมา ${Math.abs(item.days_left)} วัน)` 
+    // LINE rejects a push whose text exceeds 5000 characters, and it rejects the
+    // whole message — so on a bad week (dozens of critical lots at once) the
+    // daily alert would fail outright, exactly when it matters most. Fill up to
+    // a safe budget, listing the most urgent first, then say how many were cut.
+    const FOOTER = `⚠️ โปรดเข้าตรวจสอบระบบ CMTL Reagent Inventory เพื่อตัดจำหน่ายหรือทำเรื่องจัดซื้อโดยเร็วครับ`;
+    const BUDGET = 4600;   // headroom for the footer + the "and N more" line
+    let listed = 0;
+    for (const item of redAlerts) {
+      const dayLabel = item.days_left < 0
+        ? `หมดอายุแล้ว (ผ่านมา ${Math.abs(item.days_left)} วัน)`
         : (item.days_left === 0 ? 'หมดอายุวันนี้!' : `เหลือเวลาอีก ${item.days_left} วัน`);
-        
-      messageText += `${idx + 1}. 🧪 ${item.name}\n`;
-      messageText += `   · Lot: ${item.lot}\n`;
-      messageText += `   · คงเหลือ: ${item.qty} ${item.unit}\n`;
-      messageText += `   · วันหมดอายุ: ${item.expiry} (${dayLabel})\n\n`;
-    });
 
-    messageText += `⚠️ โปรดเข้าตรวจสอบระบบ CMTL Reagent Inventory เพื่อตัดจำหน่ายหรือทำเรื่องจัดซื้อโดยเร็วครับ`;
+      const entry =
+        `${listed + 1}. 🧪 ${item.name}\n` +
+        `   · Lot: ${item.lot}\n` +
+        `   · คงเหลือ: ${item.qty} ${item.unit}\n` +
+        `   · วันหมดอายุ: ${item.expiry} (${dayLabel})\n\n`;
+
+      if (messageText.length + entry.length > BUDGET) break;
+      messageText += entry;
+      listed++;
+    }
+
+    const omitted = redAlerts.length - listed;
+    if (omitted > 0) {
+      messageText += `…และอีก ${omitted} รายการที่ยังไม่ได้แสดง (รวมทั้งหมด ${redAlerts.length} รายการ)\n\n`;
+    }
+    messageText += FOOTER;
 
     // ส่งข้อความไปที่ LINE Bot
     const res = await fetch('https://api.line.me/v2/bot/message/push', {
@@ -73,7 +89,7 @@ export async function onRequest(context) {
       throw new Error(`LINE API returned ${res.status}: ${errText}`);
     }
 
-    return json({ success: true, count: redAlerts.length });
+    return json({ success: true, count: redAlerts.length, listed });
   } catch (err) {
     return json({ error: err.message }, 500);
   }
