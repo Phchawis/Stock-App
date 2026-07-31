@@ -82,7 +82,7 @@ export async function onRequestPut(context) {
   if (denied) return denied;
   const { env, request } = context;
   try {
-    const { id, expiry, qty, loc } = await request.json();
+    const { id, expiry, qty, loc, lot } = await request.json();
     if (!id || !expiry || qty === undefined || !loc) {
       return json({ error: 'Missing required fields' }, 400);
     }
@@ -92,9 +92,33 @@ export async function onRequestPut(context) {
     const existing = await env.DB.prepare('SELECT * FROM lots WHERE id = ?').bind(id).first();
     if (!existing) return json({ error: 'ไม่พบ Lot นี้' }, 404);
 
+    // Correcting a mistyped lot number. `lot` is optional so existing callers
+    // that only edit expiry/qty/loc keep working unchanged.
+    let newLot = existing.lot;
+    let newQr = existing.qr;
+    if (lot !== undefined && String(lot).trim() && String(lot).trim() !== existing.lot) {
+      newLot = String(lot).trim();
+      // (reagent, lot) must stay unique — receiving merges on that pair, so a
+      // duplicate would make two rows silently compete for the same batch.
+      const clash = await env.DB.prepare('SELECT id FROM lots WHERE rid = ? AND lot = ? AND id != ?')
+        .bind(existing.rid, newLot, id).first();
+      if (clash) {
+        return json({ error: `มี Lot "${newLot}" ของน้ำยาตัวนี้อยู่แล้ว กรุณาตรวจสอบเลข Lot อีกครั้ง` }, 400);
+      }
+      // Keep the QR in step with the lot number, falling back to a unique
+      // suffix if another reagent already owns that QR string.
+      newQr = `QR-${newLot}`;
+      const qrTaken = await env.DB.prepare('SELECT id FROM lots WHERE qr = ? AND id != ?').bind(newQr, id).first();
+      if (qrTaken) newQr = `QR-${newLot}-${Date.now().toString(36)}`;
+    }
+
     const newStatus = numQty === 0 ? 'DEPLETED' : 'ACTIVE';
-    await env.DB.prepare('UPDATE lots SET expiry = ?, qty = ?, loc = ?, status = ? WHERE id = ?')
-      .bind(expiry, numQty, loc, newStatus, id).run();
+    // On-hand can never exceed total-ever-received. Adjusting a lot upward past
+    // its recorded `recv` would break that invariant, and "ล้างประวัติทั้งหมด"
+    // (which resets qty = recv) would then silently shrink the lot back down.
+    const newRecv = Math.max(existing.recv, numQty);
+    await env.DB.prepare('UPDATE lots SET lot = ?, qr = ?, expiry = ?, qty = ?, recv = ?, loc = ?, status = ? WHERE id = ?')
+      .bind(newLot, newQr, expiry, numQty, newRecv, loc, newStatus, id).run();
 
     let txn = null;
     const delta = numQty - existing.qty;
@@ -108,7 +132,7 @@ export async function onRequestPut(context) {
       txn = { id: result.meta.last_row_id, lotId: +id, rid: existing.rid, type: 'ADJUST', qty: delta, bal: numQty, ref: 'ปรับปรุงคงคลังโดยผู้ดูแลระบบ/หัวหน้าคลัง', scan: 'MANUAL', by, at };
     }
 
-    return json({ success: true, lot: { id: +id, expiry, qty: numQty, loc, status: newStatus }, txn });
+    return json({ success: true, lot: { id: +id, lot: newLot, qr: newQr, expiry, qty: numQty, recv: newRecv, loc, status: newStatus }, txn });
   } catch (err) {
     return json({ error: err.message }, 500);
   }
