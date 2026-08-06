@@ -2,6 +2,13 @@ import React from 'react';
 // Trigger Cloudflare Pages rebuild
 import { css } from './css.js';
 import { categoryLabel, CATEGORY_CODES, DEFAULT_CATEGORY } from './categories.js';
+
+// Sticker types recorded in the preparation log.
+const STICKER_KIND_LABEL = {
+  ALIQUOT: 'ฉลากแบ่งบรรจุ (Aliquot)',
+  OPENED: 'ฉลากเปิดใช้ (Opened)',
+  LOT_QR: 'ฉลาก QR ประจำ Lot',
+};
 import { Sidebar } from './layout/Sidebar.jsx';
 import { Main } from './layout/Main.jsx';
 import { DetailDrawer } from './screens/DetailDrawer.jsx';
@@ -88,6 +95,7 @@ class App extends React.Component {
     this.state = {
       view: 'dashboard', role: null, invTab: 'all', search: '', detailId: null, modal: null, toast: null, acked: {},
       reagents: [], lots: [], txns: [], txnsFullyLoaded: false, loadingFullTxnHistory: false,
+      stickerLogs: [], stickerLogsFullyLoaded: false, loadingFullStickerLogs: false,
       perms: this.defaultPerms(), loginForm: { username: '', password: '', error: '' },
       rf: this.blankRf(), iform: this.blankIf(), mform: this.blankMf(),
       users: [], uform: { name: '', username: '', role: 'technician', password: '' },
@@ -373,13 +381,14 @@ class App extends React.Component {
       // ever looks at ≤12 months, and the table is append-only (grows forever
       // in normal use), so fetching everything on every load doesn't scale.
       // The Audit screen can call loadFullTxnHistory() to search further back.
-      const [reagentsRes, lotsRes, txnsRes, usersRes, permsRes, acksRes] = await Promise.all([
+      const [reagentsRes, lotsRes, txnsRes, usersRes, permsRes, acksRes, stickerRes] = await Promise.all([
         this.api('/api/reagents'),
         this.api('/api/lots'),
         this.api('/api/transactions?months=12'),
         this.api('/api/users'),
         this.api('/api/permissions'),
-        this.api('/api/alerts/acks')
+        this.api('/api/alerts/acks'),
+        this.api('/api/sticker_logs?months=12')
       ]);
       if (!reagentsRes.ok || !lotsRes.ok || !txnsRes.ok || !usersRes.ok || !permsRes.ok || !acksRes.ok) {
         throw new Error('ดึงข้อมูลจากเซิร์ฟเวอร์ล้มเหลว');
@@ -390,6 +399,9 @@ class App extends React.Component {
       const users = await usersRes.json();
       const perms = await permsRes.json();
       const acksData = await acksRes.json();
+      // Not fatal: the preparation log is a record-keeping screen, so a failure
+      // here must not stop the inventory itself from loading.
+      const stickerLogs = stickerRes.ok ? await stickerRes.json() : [];
 
       const acked = {};
       if (Array.isArray(acksData)) {
@@ -398,7 +410,7 @@ class App extends React.Component {
         });
       }
 
-      this.setState(s => ({ reagents, lots, txns, users, acked, txnsFullyLoaded: false, perms: (perms && Object.keys(perms).length) ? perms : s.perms }), () => {
+      this.setState(s => ({ reagents, lots, txns, users, acked, stickerLogs, stickerLogsFullyLoaded: false, txnsFullyLoaded: false, perms: (perms && Object.keys(perms).length) ? perms : s.perms }), () => {
         this.autoClearAckedAlerts(reagents, lots, acked);
       });
     } catch (err) {
@@ -421,6 +433,60 @@ class App extends React.Component {
       this.setState({ loadingFullTxnHistory: false });
       this.showToast(err.message, 'warn');
     }
+  }
+
+  // Same "load further back on demand" escape hatch as the movement history.
+  async loadFullStickerLogs() {
+    if (this.state.stickerLogsFullyLoaded || this.state.loadingFullStickerLogs) return;
+    this.setState({ loadingFullStickerLogs: true });
+    try {
+      const res = await this.api('/api/sticker_logs');
+      if (!res.ok) throw new Error('โหลดบันทึกทั้งหมดล้มเหลว');
+      const stickerLogs = await res.json();
+      this.setState({ stickerLogs, stickerLogsFullyLoaded: true, loadingFullStickerLogs: false });
+    } catch (err) {
+      this.setState({ loadingFullStickerLogs: false });
+      this.showToast(err.message, 'warn');
+    }
+  }
+
+  // Called the moment a sticker is actually downloaded or printed. The label is
+  // already on its way to a bottle by then, so a failure here must never block
+  // or undo the download — it warns and leaves the log short instead.
+  async logSticker(payload) {
+    try {
+      const res = await this.api('/api/sticker_logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'บันทึกประวัติสติกเกอร์ล้มเหลว');
+      this.setState(s => ({ stickerLogs: [data, ...s.stickerLogs] }));
+      return true;
+    } catch (err) {
+      this.showToast('สติกเกอร์ถูกสร้างแล้ว แต่บันทึกประวัติไม่สำเร็จ: ' + err.message, 'warn');
+      return false;
+    }
+  }
+
+  async deleteStickerLog(id) {
+    if (this.state.role !== 'admin') { this.showToast('เฉพาะผู้ดูแลระบบเท่านั้นที่ลบบันทึกนี้ได้', 'warn'); return; }
+    this.askConfirm(
+      'ยืนยันการลบบันทึก',
+      'ลบบันทึกการเตรียมน้ำยารายการนี้ใช่หรือไม่? บันทึกนี้ใช้อ้างอิงตอนตรวจประเมิน การลบไม่สามารถเรียกคืนได้',
+      async () => {
+        try {
+          const res = await this.api(`/api/sticker_logs?id=${id}`, { method: 'DELETE' });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'ลบบันทึกล้มเหลว');
+          this.setState(s => ({ stickerLogs: s.stickerLogs.filter(r => r.id !== id) }));
+          this.showToast('ลบบันทึกเรียบร้อยแล้ว');
+        } catch (err) {
+          this.showToast(err.message, 'warn');
+        }
+      }
+    );
   }
 
   componentDidMount() {
@@ -1453,8 +1519,9 @@ class App extends React.Component {
       help: ['คู่มือการใช้งาน', 'วิธีการใช้งานระบบจัดเก็บคลังน้ำยาและบริหารคลังอย่างเป็นขั้นตอน'],
       stock_count: ['ตรวจนับคลัง (Stock Count)', 'บันทึกยอดการตรวจนับน้ำยาจริงประจำสัปดาห์หรือเดือน'],
       create_sticker: ['สร้างสติกเกอร์ (Sticker Generator)', 'แบบฟอร์มออกแบบและพิมพ์สติกเกอร์สำหรับขวดน้ำยาและสติกเกอร์แบ่งส่วน'],
+      sticker_log: ['บันทึกการเตรียมน้ำยา', 'ทะเบียนฉลากที่ดาวน์โหลด/พิมพ์ สำหรับใช้อ้างอิงตอนตรวจประเมิน'],
     };
-    const ns = { dash: this.navStyle('dashboard'), inv: this.navStyle('inventory'), rlist: this.navStyle('reagent_lists'), al: this.navStyle('alerts'), au: this.navStyle('audit'), pm: this.navStyle('perms'), help: this.navStyle('help'), sc: this.navStyle('stock_count'), cs: this.navStyle('create_sticker') };
+    const ns = { dash: this.navStyle('dashboard'), inv: this.navStyle('inventory'), rlist: this.navStyle('reagent_lists'), al: this.navStyle('alerts'), au: this.navStyle('audit'), pm: this.navStyle('perms'), help: this.navStyle('help'), sc: this.navStyle('stock_count'), cs: this.navStyle('create_sticker'), sl: this.navStyle('sticker_log') };
     const alerts = this.buildAlerts(crit);
 
     // Reorder report rows — every reagent currently at/under its reorder point,
@@ -1682,6 +1749,32 @@ class App extends React.Component {
       txnsFullyLoaded: !!S.txnsFullyLoaded,
       loadingFullTxnHistory: !!S.loadingFullTxnHistory,
       loadFullTxnHistory: () => this.loadFullTxnHistory(),
+
+      // Preparation-record screen. Rows are shaped here so the screen stays
+      // presentational, matching how every other screen consumes `v`.
+      stickerLogRows: (S.stickerLogs || []).map(r => ({
+        id: r.id,
+        kind: r.kind,
+        kindLabel: STICKER_KIND_LABEL[r.kind] || r.kind,
+        action: r.action,
+        actionLabel: r.action === 'PRINT' ? 'สั่งพิมพ์' : 'ดาวน์โหลด',
+        reagentName: r.reagent_name,
+        lot: r.lot || '',
+        subType: r.sub_type || '',
+        prepDate: r.prep_date || '',
+        expDate: r.exp_date || '',
+        storageTemp: r.storage_temp || '',
+        storageDuration: r.storage_duration || '',
+        preparedBy: r.prepared_by || '',
+        qty: r.qty || 1,
+        by: r.by,
+        at: r.at,
+      })),
+      stickerLogsFullyLoaded: !!S.stickerLogsFullyLoaded,
+      loadingFullStickerLogs: !!S.loadingFullStickerLogs,
+      loadFullStickerLogs: () => this.loadFullStickerLogs(),
+      deleteStickerLog: (id) => this.deleteStickerLog(id),
+      logSticker: (payload) => this.logSticker(payload),
       onBackupDatabase: () => this.onBackupDatabase(),
       onRestoreDatabase: (e) => this.onRestoreDatabase(e),
       openPrintSticker: (lot, reagent) => this.openPrintSticker(lot, reagent),
@@ -1700,10 +1793,11 @@ class App extends React.Component {
         helpBg: ns.help.bg, helpFg: ns.help.fg, helpIc: ns.help.ic,
         scBg: ns.sc.bg, scFg: ns.sc.fg, scIc: ns.sc.ic,
         csBg: ns.cs.bg, csFg: ns.cs.fg, csIc: ns.cs.ic,
+        slBg: ns.sl.bg, slFg: ns.sl.fg, slIc: ns.sl.ic,
         alertCount: alerts.filter(a => !a.isOrdered).length },
-      go: { dashboard: () => this.nav('dashboard'), inventory: () => this.nav('inventory'), reagentLists: () => this.nav('reagent_lists'), alerts: () => this.nav('alerts'), audit: () => this.nav('audit'), perms: () => this.nav('perms'), help: () => this.nav('help'), stockCount: () => this.nav('stock_count'), createSticker: () => this.nav('create_sticker'),
+      go: { dashboard: () => this.nav('dashboard'), inventory: () => this.nav('inventory'), reagentLists: () => this.nav('reagent_lists'), alerts: () => this.nav('alerts'), audit: () => this.nav('audit'), perms: () => this.nav('perms'), help: () => this.nav('help'), stockCount: () => this.nav('stock_count'), createSticker: () => this.nav('create_sticker'), stickerLog: () => this.nav('sticker_log'),
         alertsLink: (e) => { e.preventDefault(); this.nav('alerts'); }, auditLink: (e) => { e.preventDefault(); this.nav('audit'); } },
-      isDash: dn === 'dashboard', isInv: dn === 'inventory', isReagentLists: dn === 'reagent_lists', isAlerts: dn === 'alerts', isAudit: dn === 'audit', isPerms: dn === 'perms', isHelp: dn === 'help', isStockCount: dn === 'stock_count', isCreateSticker: dn === 'create_sticker',
+      isDash: dn === 'dashboard', isInv: dn === 'inventory', isReagentLists: dn === 'reagent_lists', isAlerts: dn === 'alerts', isAudit: dn === 'audit', isPerms: dn === 'perms', isHelp: dn === 'help', isStockCount: dn === 'stock_count', isCreateSticker: dn === 'create_sticker', isStickerLog: dn === 'sticker_log',
       title: titles[dn][0], subtitle: titles[dn][1],
       openReceive: (rid) => this.openReceive(rid), openIssue: (rid) => this.openIssue(rid),
       openSignature: () => this.openSignature(),
