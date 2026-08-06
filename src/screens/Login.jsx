@@ -24,14 +24,17 @@ export function Login({ v }) {
               <img src="/assets/tuh_lab_logo.jpg" alt="ตรา รพธ." style={css(`width:102%; height:102%; object-fit:cover; border-radius:50%;`)} />
             </div>
             <div>
-              <div style={css(`font:600 12px/1.4 'IBM Plex Mono',monospace; letter-spacing:.16em; color:#C7CCF2;`)}>TUH · REAGENT INVENTORY</div>
+              <div style={css(`font:600 12px/1.4 'IBM Plex Mono',monospace; letter-spacing:.16em; color:#C7CCF2;`)}>CMTL · REAGENT INVENTORY</div>
               <div style={css(`font:700 20px/1.2 'Anuphan',sans-serif;`)}>ระบบจัดการ Stock น้ำยา</div>
             </div>
           </div>
 
           <div style={css(`position:relative;`)}>
-            <div style={css(`font:700 26px/1.3 'Anuphan',sans-serif; letter-spacing:-.01em;`)}>
-              ระบบบริหารคลังน้ำยา<br />และสารเคมีวิเคราะห์<br />ห้องปฏิบัติการเทคนิคการแพทย์
+            {/* The unit's full official name is the longest line here, so the
+                size is capped to what that line can hold — at a flat 26px it
+                wrapped and left "แพทย์" orphaned on its own row. */}
+            <div style={css(`font:700 clamp(17px, 1.45vw, 23px)/1.35 'Anuphan',sans-serif; letter-spacing:-.01em; text-wrap:balance;`)}>
+              ระบบบริหารคลังน้ำยา<br />และสารเคมีวิเคราะห์<br />ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์<br />ห้องปฏิบัติการเทคนิคการแพทย์
             </div>
             <div style={css(`margin-top:12px; font:400 15px/1.7 'Sarabun',sans-serif; color:#E7E9F8; max-width:34ch;`)}>
               โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ · คลังควบคุมและติดตามการใช้งานอย่างเป็นระบบตามเกณฑ์มาตรฐาน Quality Management System
@@ -52,7 +55,7 @@ export function Login({ v }) {
                 <img src="/assets/tuh_lab_logo.jpg" alt="ตรา รพธ." style={css(`width:102%; height:102%; object-fit:cover; border-radius:50%;`)} />
               </div>
               <div style={css(`line-height:1.25;`)}>
-                <div style={css(`font:600 11px/1.3 'IBM Plex Mono',monospace; letter-spacing:.08em; color:var(--brand-700);`)}>TUH · REAGENT INVENTORY</div>
+                <div style={css(`font:600 11px/1.3 'IBM Plex Mono',monospace; letter-spacing:.08em; color:var(--brand-700);`)}>CMTL · REAGENT INVENTORY</div>
                 <div style={css(`font:700 15px/1.2 'Anuphan',sans-serif; color:var(--text-primary);`)}>ระบบจัดการ Stock น้ำยา</div>
               </div>
             </div>
