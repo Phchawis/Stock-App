@@ -227,7 +227,7 @@ export function Sidebar({ v }) {
           </div>
           <div style={css(`line-height:1.25;`)}>
             <div className="sidebar-logo-title">คลังน้ำยาห้องปฏิบัติการ</div>
-            <div className="sidebar-logo-subtitle">TUH · Reagent Inventory</div>
+            <div className="sidebar-logo-subtitle">CMTL · Reagent Inventory</div>
           </div>
         </div>
 
@@ -282,6 +282,13 @@ export function Sidebar({ v }) {
           <button onClick={go.createSticker} className="sidebar-btn-item" style={css(`background:${nav.csBg}; color:${nav.csFg};`)}>
             <span style={css(`width:22px; height:22px; display:grid; place-items:center; color:${nav.csIc};`)}>🏷️</span>
             <span style={css(`flex:1;`)}>สร้างสติกเกอร์</span>
+          </button>
+
+          {/* Sits directly under the sticker generator: the log is the record of
+              what that screen produced, so the two read as one pair. */}
+          <button onClick={go.stickerLog} className="sidebar-btn-item" style={css(`background:${nav.slBg}; color:${nav.slFg};`)}>
+            <span style={css(`width:22px; height:22px; display:grid; place-items:center; color:${nav.slIc};`)}>🧾</span>
+            <span style={css(`flex:1;`)}>บันทึกการเตรียมน้ำยา</span>
           </button>
 
           <div className="sidebar-section-title" style={css(`margin-top:10px;`)}>การทำงาน</div>
