@@ -10,6 +10,7 @@ import { ReagentLists } from '../screens/ReagentLists.jsx';
 import { Help } from '../screens/Help.jsx';
 import { StockCount } from '../screens/StockCount.jsx';
 import { CreateStickerForm } from '../screens/CreateStickerForm.jsx';
+import { StickerLog } from '../screens/StickerLog.jsx';
 
 export function Main({ v }) {
   const {
@@ -194,6 +195,7 @@ export function Main({ v }) {
         <Help v={v} />
         <StockCount v={v} />
         <CreateStickerForm v={v} />
+        <StickerLog v={v} />
       </main>
     </div>
   );
