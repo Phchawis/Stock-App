@@ -2,7 +2,7 @@ import React from 'react';
 import { css } from '../css.js';
 
 export function CreateStickerForm({ v }) {
-  const { isCreateSticker, reagentsList, user } = v;
+  const { isCreateSticker, reagentsList, user, logSticker, showToast } = v;
 
   if (!isCreateSticker) return null;
 
@@ -331,13 +331,41 @@ export function CreateStickerForm({ v }) {
   const handleDownload = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const isAliquot = activeTab === 'aliquot';
+    const reagentName = (isAliquot ? aliquotReagent : openedReagent) || '';
+    if (!reagentName.trim()) {
+      // Without a reagent name the label is unusable AND the record would be
+      // meaningless, so stop here rather than filing a blank preparation entry.
+      if (showToast) showToast('กรุณาเลือกชื่อน้ำยาก่อนดาวน์โหลดสติกเกอร์', 'warn');
+      return;
+    }
+
     const url = canvas.toDataURL('image/png');
     const a = document.createElement('a');
     a.href = url;
-    a.download = activeTab === 'aliquot' ? 'Aliquot_Sticker.png' : 'Opened_Sticker.png';
+    a.download = isAliquot ? 'Aliquot_Sticker.png' : 'Opened_Sticker.png';
     document.body.appendChild(a);
     a.click();
     a.remove();
+
+    // File the preparation record with exactly what was printed on the label.
+    // Fire-and-forget: the sticker is already downloaded, so a logging failure
+    // warns via toast (handled in App.logSticker) instead of blocking anything.
+    const matched = (reagentsList || []).find(r => r.th === reagentName || r.en === reagentName);
+    if (logSticker) {
+      logSticker(isAliquot ? {
+        kind: 'ALIQUOT', action: 'DOWNLOAD',
+        reagentName, reagentId: matched ? matched.id : null,
+        lot: aliquotLot, prepDate: aliquotPrepDate, expDate: aliquotExpDate,
+        preparedBy: aliquotPrepBy,
+      } : {
+        kind: 'OPENED', action: 'DOWNLOAD',
+        reagentName, reagentId: matched ? matched.id : null,
+        subType: openedType, prepDate: openedDate,
+        storageTemp: openedTemp, storageDuration: openStorageDuration,
+        preparedBy: openedBy,
+      });
+    }
   };
 
 
