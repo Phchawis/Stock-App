@@ -4,7 +4,7 @@ import { css } from '../css.js';
 
 export function PrintStickerModal({ v }) {
   const {
-    stop, modalPrintSticker, closePrintSticker, printLotData, ic,
+    stop, modalPrintSticker, closePrintSticker, printLotData, ic, logSticker, user,
   } = v;
 
   const [qrUrl, setQrUrl] = React.useState('');
@@ -171,6 +171,21 @@ export function PrintStickerModal({ v }) {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      // File the same preparation record the Aliquot/Opened stickers write, so
+      // every label the lab produces is traceable from one screen.
+      if (logSticker) {
+        logSticker({
+          kind: 'LOT_QR', action: 'DOWNLOAD',
+          reagentName: reagent.th || reagent.en || '',
+          reagentId: reagent.id ?? null,
+          lot: lot.lot, expDate: lot.expiry,
+          // A lot sticker records where the bottle lives rather than a storage
+          // temperature; label it so the printed record can't be misread.
+          storageTemp: lot.loc ? `ตำแหน่งเก็บ ${lot.loc}` : '',
+          preparedBy: (user && user.name) || '',
+        });
+      }
     } finally {
       setDownloading(false);
     }
