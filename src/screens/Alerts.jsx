@@ -380,8 +380,12 @@ export function Alerts({ v }) {
             <img src="/assets/tuh_lab_logo.jpg" alt="TUH Logo" style={{ width: '102%', height: '102%', objectFit: 'cover', borderRadius: '50%' }} />
           </div>
           <div style={css(`flex:1; text-align:left;`)}>
-            <h1 style={css(`margin:0; font-size:15px; font-weight:bold; color:#000; font-family:var(--font-display);`)}>โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ</h1>
-            <h2 style={css(`margin:1px 0 0; font-size:10px; font-weight:normal; color:#444;`)}>Thammasat University Hospital Laboratory Center</h2>
+            {/* Same masthead as the preparation record — both are official forms
+                issued by this unit, so they must name it identically. */}
+            <h1 style={css(`margin:0; font-size:13px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์</h1>
+            <div style={css(`margin:0; font-size:12px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>ห้องปฏิบัติการเทคนิคการแพทย์</div>
+            <div style={css(`margin:0; font-size:12px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ</div>
+            <h2 style={css(`margin:2px 0 0; font-size:9px; font-weight:normal; color:#444;`)}>Thammasat University Hospital Laboratory Center</h2>
             <h3 style={css(`margin:6px 0 0; font-size:12px; font-weight:bold; color:#111;`)}>รายงานน้ำยาที่ต้องสั่งซื้อ (Reorder Report)</h3>
             <p style={css(`margin:3px 0 0; font-size:9px; color:#555;`)}>
               พิมพ์เอกสารเมื่อ: {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} น. · ผู้พิมพ์: {user.name}
