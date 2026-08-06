@@ -84,7 +84,7 @@ export function Help({ v }) {
           <div style={css(`display:flex; flex-direction:column; gap:24px;`)}>
             <div>
               <h2 style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary); margin:0 0 8px 0;`)}>
-                คู่มือการใช้งานระบบคลังน้ำยา TUH Reagent Inventory
+                คู่มือการใช้งานระบบคลังน้ำยา CMTL Reagent Inventory
               </h2>
               <p style={css(`font:var(--text-sm)/1.6 var(--font-body); color:var(--text-secondary); margin:0;`)}>
                 ระบบจัดการคลังน้ำยาเคมีสำหรับห้องปฏิบัติการ ธรรมศาสตร์เฉลิมพระเกียรติ พัฒนาขึ้นเพื่อช่วยบริหารสต็อก ติดตามล็อตน้ำยา 
