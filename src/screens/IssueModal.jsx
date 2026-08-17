@@ -1,7 +1,6 @@
 import React from 'react';
 import { css } from '../css.js';
 import { Input } from '../components/Input.jsx';
-import { Html5Qrcode } from 'html5-qrcode';
 import { modalHeaderStyle, modalHeaderBadgeStyle, modalHeaderTitleStyle, modalHeaderSubtitleStyle, modalHeaderCloseStyle, modalHeaderResponsiveCSS } from '../theme.js';
 
 export function IssueModal({ v }) {
@@ -52,6 +51,12 @@ export function IssueModal({ v }) {
         // useBarCodeDetectorIfSupported switches to the browser's native,
         // hardware-accelerated BarcodeDetector where available (big speedup on
         // Android Chrome); browsers without it silently keep the JS decoder.
+        // The scanner library is ~375KB — a third of the whole bundle — and is
+        // only needed once someone actually opens the camera. Loading it here
+        // instead of at module scope keeps it off the critical path for every
+        // page load, including the many that never scan anything.
+        const { Html5Qrcode } = await import('html5-qrcode');
+        if (!active) return;
         const html5QrCode = new Html5Qrcode("qr-reader", {
           verbose: false,
           experimentalFeatures: { useBarCodeDetectorIfSupported: true },
