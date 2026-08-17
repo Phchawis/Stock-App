@@ -1,6 +1,5 @@
 import React from 'react';
 import { css } from '../css.js';
-import { Html5Qrcode } from 'html5-qrcode';
 
 export function StockCount({ v }) {
   const {
@@ -25,6 +24,13 @@ export function StockCount({ v }) {
 
     setCameraError(null);
     setCameraReady(false);
+
+    // Loaded on demand: the scanner library is ~375KB and only matters once the
+    // camera is actually opened. Keeping it out of the entry bundle speeds up
+    // every page load, including the ones that never scan.
+    (async () => {
+    const { Html5Qrcode } = await import('html5-qrcode');
+    if (!active) return;
 
     const html5QrCode = new Html5Qrcode("qr-reader-stock", {
       verbose: false,
@@ -148,6 +154,8 @@ export function StockCount({ v }) {
         setCameraError('ไม่สามารถเปิดกล้องได้ (โปรดอนุญาตสิทธิ์กล้องในเบราว์เซอร์)');
       }
     });
+
+    })();
 
     return () => {
       active = false;
