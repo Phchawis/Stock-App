@@ -2,12 +2,13 @@ import React from 'react';
 import { css } from '../css.js';
 import { SearchableSelect } from '../components/SearchableSelect.jsx';
 import { categoryLabel } from '../categories.js';
+import { daysUntil } from '../domain/stock.js';
 
 export function Dashboard({ v }) {
   const {
     go, isDash, title, dashAlerts, dashLow,
     recent, usageList, ic, user, usersList,
-    deadStockReagents, dynamicMinSuggestions,
+    deadStockReagents, dynamicMinSuggestions, backupHealth, errorsLast7Days,
   } = v;
 
   const [period, setPeriod] = React.useState('6m');
@@ -48,7 +49,10 @@ export function Dashboard({ v }) {
 
   // KPIs
   const lowCount = filteredReagents.filter(r => getOnHand(r.id) <= r.min).length;
-  const getDaysLeft = (expiryDate) => Math.round((new Date(expiryDate + 'T00:00:00') - new Date('2026-06-29T00:00:00')) / 86400000);
+  // Was measured from a hardcoded 2026-06-29, so the "Lot ใกล้หมดอายุ" count and
+  // the waste-rate insight drifted further from reality every day. Same rule as
+  // every other screen now.
+  const getDaysLeft = (expiryDate) => daysUntil(expiryDate, new Date());
   const expiringSoonCount = activeLots.filter(l => filteredReagentIds.includes(l.rid) && getDaysLeft(l.expiry) <= 60).length;
   
   const kpis = [
@@ -243,7 +247,21 @@ export function Dashboard({ v }) {
 
       {/* Screen view content */}
       <div className="qms-rise no-print" style={css(`max-width:1180px; display:flex; flex-direction:column; gap:20px;`)}>
-        
+
+        {/* Operational health — admins only. A backup nobody took and an error
+            nobody reported are both invisible until the day they matter, so
+            they are stated here rather than left to be discovered. */}
+        {backupHealth && backupHealth.level === 'warn' && (
+          <div style={css(`background:var(--amber-100); border:1px solid var(--amber-fill); border-radius:var(--radius-md); padding:12px 16px; display:flex; align-items:center; gap:10px; font:var(--text-xs)/1.5 var(--font-body); color:var(--amber-700);`)}>
+            <span>🗄️</span><span style={css(`flex:1;`)}>{backupHealth.text}</span>
+          </div>
+        )}
+        {errorsLast7Days > 0 && (
+          <div style={css(`background:var(--red-100); border:1px solid var(--red-fill); border-radius:var(--radius-md); padding:12px 16px; display:flex; align-items:center; gap:10px; font:var(--text-xs)/1.5 var(--font-body); color:var(--red-700);`)}>
+            <span>⚠️</span><span style={css(`flex:1;`)}>ระบบพบข้อผิดพลาดฝั่งผู้ใช้ {errorsLast7Days} ครั้งในรอบ 7 วัน — หากเกิดซ้ำ กรุณาแจ้งผู้พัฒนาพร้อมบอกว่าทำอะไรอยู่ตอนนั้น</span>
+          </div>
+        )}
+
         {/* Dashboard Header & Filter action bar */}
         <div style={css(`display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:16px;`)}>
           <div>

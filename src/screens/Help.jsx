@@ -18,6 +18,7 @@ export function Help({ v }) {
     { id: 'sticker', label: 'การสร้างสติกเกอร์ (Sticker)', icon: '🏷️' },
     { id: 'alerts', label: 'การแจ้งเตือน & บอท LINE', icon: '🔔' },
     { id: 'optimization', label: 'การควบคุม & เพิ่มประสิทธิภาพ', icon: '✨' },
+    { id: 'preplog', label: 'บันทึกการเตรียมน้ำยา', icon: '🧾' },
     { id: 'downtime', label: 'แผนรองรับเมื่อระบบใช้งานไม่ได้', icon: '🚨' },
   ];
 
@@ -762,6 +763,76 @@ export function Help({ v }) {
                 </div>
               </div>
 
+            </div>
+          </div>
+        )}
+
+        {/* Tab 10: Preparation record — what the sticker log is for and how it
+            is meant to be used when an inspector asks for it. */}
+        {activeTab === 'preplog' && (
+          <div style={css(`display:flex; flex-direction:column; gap:24px;`)}>
+            <div>
+              <h2 style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary); margin:0 0 8px 0;`)}>
+                บันทึกการเตรียมน้ำยา (Reagent Preparation Record)
+              </h2>
+              <p style={css(`font:var(--text-sm)/1.6 var(--font-body); color:var(--text-secondary); margin:0; max-width:78ch;`)}>
+                ทุกครั้งที่ดาวน์โหลดสติกเกอร์จากหน้า <strong>สร้างสติกเกอร์</strong> หรือพิมพ์ฉลาก QR ประจำ Lot ระบบจะบันทึกรายละเอียดบนฉลากไว้อัตโนมัติ ไม่ต้องกดบันทึกเอง เพื่อใช้เป็นหลักฐานย้อนหลังตอนตรวจประเมิน
+              </p>
+            </div>
+
+            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; align-items:flex-start;`)}>
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span>🏷️</span> 1. ระบบเก็บอะไรบ้าง
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.6;`)}>
+                  <ul style={css(`margin:0; padding-left:16px; display:flex; flex-direction:column; gap:7px;`)}>
+                    <li><strong>ฉลากแบ่งบรรจุ (Aliquot)</strong> — ชื่อน้ำยา · เลข Lot · วันที่เตรียม · วันหมดอายุ · ผู้เตรียม</li>
+                    <li><strong>ฉลากเปิดใช้ (Opened)</strong> — ชื่อน้ำยา · Control/Calibrator · วันที่เปิดใช้ · อุณหภูมิเก็บ · อายุหลังเปิด · ผู้เปิด</li>
+                    <li><strong>ฉลาก QR ประจำ Lot</strong> — ชื่อน้ำยา · เลข Lot · วันหมดอายุ · ตำแหน่งเก็บ</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span>🔍</span> 2. ทำไมเชื่อถือได้
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.6;`)}>
+                  <ul style={css(`margin:0; padding-left:16px; display:flex; flex-direction:column; gap:7px;`)}>
+                    <li>ระบบแยก 2 ชื่อ: <strong>ผู้เตรียม</strong> คือชื่อที่พิมพ์ลงบนฉลาก (แก้ได้) ส่วน <strong>ผู้ทำรายการ</strong> ดึงจากบัญชีที่เข้าสู่ระบบ</li>
+                    <li><strong>วันเวลาและผู้ทำรายการปลอมไม่ได้</strong> — บันทึกจากนาฬิกาเซิร์ฟเวอร์และเซสชันผู้ใช้ ไม่ได้รับค่าจากหน้าจอ</li>
+                    <li><strong>ผู้ใช้ทั่วไปลบบันทึกไม่ได้</strong> เฉพาะผู้ดูแลระบบเท่านั้น และปุ่มลบจะไม่ปรากฏให้บทบาทอื่นเห็น</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span>🖨</span> 3. ใช้ตอนตรวจประเมินอย่างไร
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.6;`)}>
+                  <ul style={css(`margin:0; padding-left:16px; display:flex; flex-direction:column; gap:7px;`)}>
+                    <li>เข้าเมนู <strong>บันทึกการเตรียมน้ำยา</strong> แล้วกรองตาม <strong>ช่วงวันที่</strong> หรือ <strong>ประเภทฉลาก</strong> ที่ผู้ตรวจขอดู</li>
+                    <li>กด <strong>พิมพ์เอกสาร / บันทึกเป็น PDF</strong> จะได้ฟอร์ม <strong>FM-LAB-PREP-01</strong> พร้อมหัวกระดาษและช่องลงนาม 2 ช่อง</li>
+                    <li>เอกสารจะพิมพ์<strong>เฉพาะรายการที่กรองไว้</strong> ไม่ใช่ทั้งหมด</li>
+                    <li>ต้องการเปิดใน Excel ให้กด <strong>ส่งออก Excel (CSV)</strong> ภาษาไทยไม่เพี้ยน</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span style={css(`color:var(--amber-700);`)}>⚠️</span> 4. ข้อควรระวัง
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.6;`)}>
+                  <ul style={css(`margin:0; padding-left:16px; display:flex; flex-direction:column; gap:7px;`)}>
+                    <li>ต้อง<strong>เลือกชื่อน้ำยาก่อน</strong>จึงจะดาวน์โหลดได้ ระบบไม่ยอมให้บันทึกฉลากที่ไม่มีชื่อน้ำยา</li>
+                    <li>ดาวน์โหลดซ้ำหลายครั้งจะถูกบันทึกเป็น<strong>หลายรายการ</strong> ตามความจริงที่เกิดขึ้น</li>
+                    <li>หน้าจอแสดงย้อนหลัง <strong>12 เดือน</strong> ถ้าต้องการเก่ากว่านั้นให้กด <strong>โหลดบันทึกทั้งหมด</strong></li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         )}

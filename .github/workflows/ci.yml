@@ -1,0 +1,43 @@
+name: CI
+
+# Every push to this repository deploys straight to the lab's live inventory
+# system via Cloudflare Pages. This workflow is the only thing standing between
+# a bad commit and the people counting reagents, so it runs on both the push
+# and the pull request.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests (stock rules)
+        run: npm test
+
+      - name: Production build
+        run: npm run build
+
+      # A migration whose number collides with another one applies in an
+      # undefined order. This has already happened once, so it is checked here
+      # rather than left to be noticed later.
+      - name: Check migration numbering
+        run: |
+          dupes=$(ls migrations | cut -d_ -f1 | sort | uniq -d)
+          if [ -n "$dupes" ]; then
+            echo "::error::เลข migration ซ้ำกัน: $dupes"
+            exit 1
+          fi
+          echo "ลำดับ migration ไม่ซ้ำ ✓"

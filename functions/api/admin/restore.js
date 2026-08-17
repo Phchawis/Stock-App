@@ -1,4 +1,4 @@
-import { requirePerm, json } from '../_lib.js';
+import { requirePerm, nowStr, json } from '../_lib.js';
 
 export async function onRequestPost(context) {
   const denied = await requirePerm(context, { adminOnly: true });
@@ -129,6 +129,12 @@ export async function onRequestPost(context) {
     if (queries.length > 0) {
       await env.DB.batch(queries);
     }
+
+    try {
+      await env.DB.prepare(
+        "INSERT INTO system_events (kind, detail, context, by, at) VALUES ('RESTORE', ?, 'admin/restore', ?, ?)"
+      ).bind(`lots=${(backup.lots||[]).length} txns=${(backup.transactions||[]).length}`, actorUsername, nowStr()).run();
+    } catch { /* bookkeeping only */ }
 
     const message = needPasswordReset > 0
       ? `กู้คืนข้อมูลระบบเสร็จสิ้น · มีผู้ใช้ ${needPasswordReset} รายที่ไม่เคยมีอยู่ในระบบนี้ ต้องตั้งรหัสผ่านใหม่ให้ก่อนจึงจะเข้าใช้งานได้`

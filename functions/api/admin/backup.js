@@ -1,4 +1,4 @@
-import { requirePerm, json } from '../_lib.js';
+import { requirePerm, actorName, nowStr, json } from '../_lib.js';
 
 export async function onRequestGet(context) {
   const denied = await requirePerm(context, { adminOnly: true });
@@ -27,6 +27,17 @@ export async function onRequestGet(context) {
       users: users.results || [],
       permissions: permissions.results || []
     };
+
+    // Leave a trace that a backup was taken, so the app can tell the lab when
+    // the last one was — an untaken backup is invisible until it is needed.
+    try {
+      await env.DB.prepare(
+        "INSERT INTO system_events (kind, detail, context, by, at) VALUES ('BACKUP', ?, 'admin/backup', ?, ?)"
+      ).bind(
+        `reagents=${backupData.reagents.length} lots=${backupData.lots.length} txns=${backupData.transactions.length}`,
+        await actorName(context), nowStr()
+      ).run();
+    } catch { /* never let bookkeeping block the download itself */ }
 
     return new Response(JSON.stringify(backupData, null, 2), {
       status: 200,

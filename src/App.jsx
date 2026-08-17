@@ -382,14 +382,15 @@ class App extends React.Component {
       // ever looks at ≤12 months, and the table is append-only (grows forever
       // in normal use), so fetching everything on every load doesn't scale.
       // The Audit screen can call loadFullTxnHistory() to search further back.
-      const [reagentsRes, lotsRes, txnsRes, usersRes, permsRes, acksRes, stickerRes] = await Promise.all([
+      const [reagentsRes, lotsRes, txnsRes, usersRes, permsRes, acksRes, stickerRes, healthRes] = await Promise.all([
         this.api('/api/reagents'),
         this.api('/api/lots'),
         this.api('/api/transactions?months=12'),
         this.api('/api/users'),
         this.api('/api/permissions'),
         this.api('/api/alerts/acks'),
-        this.api('/api/sticker_logs?months=12')
+        this.api('/api/sticker_logs?months=12'),
+        this.api('/api/system_events')
       ]);
       if (!reagentsRes.ok || !lotsRes.ok || !txnsRes.ok || !usersRes.ok || !permsRes.ok || !acksRes.ok) {
         throw new Error('ดึงข้อมูลจากเซิร์ฟเวอร์ล้มเหลว');
@@ -403,6 +404,9 @@ class App extends React.Component {
       // Not fatal: the preparation log is a record-keeping screen, so a failure
       // here must not stop the inventory itself from loading.
       const stickerLogs = stickerRes.ok ? await stickerRes.json() : [];
+      // Operational health: when stock was last backed up, and whether the app
+      // has been throwing errors for anyone. Also non-fatal.
+      const health = healthRes.ok ? await healthRes.json() : null;
 
       const acked = {};
       if (Array.isArray(acksData)) {
@@ -411,7 +415,7 @@ class App extends React.Component {
         });
       }
 
-      this.setState(s => ({ reagents, lots, txns, users, acked, stickerLogs, stickerLogsFullyLoaded: false, txnsFullyLoaded: false, perms: (perms && Object.keys(perms).length) ? perms : s.perms }), () => {
+      this.setState(s => ({ reagents, lots, txns, users, acked, stickerLogs, health, stickerLogsFullyLoaded: false, txnsFullyLoaded: false, perms: (perms && Object.keys(perms).length) ? perms : s.perms }), () => {
         this.autoClearAckedAlerts(reagents, lots, acked);
       });
     } catch (err) {
@@ -1790,6 +1794,21 @@ class App extends React.Component {
         by: r.by,
         at: r.at,
       })),
+      // Surfaced on the dashboard for admins only: a backup nobody takes is
+      // indistinguishable from one that succeeded, until the day it matters.
+      backupHealth: (() => {
+        const h = S.health;
+        if (!h || S.role !== 'admin') return null;
+        if (!h.lastBackupAt) {
+          return { level: 'warn', text: 'ยังไม่เคยสำรองข้อมูลระบบเลย — แนะนำให้สำรองและเก็บไฟล์ไว้อย่างน้อย 2 ที่' };
+        }
+        const days = Math.floor((Date.now() - new Date(h.lastBackupAt.replace(' ', 'T')).getTime()) / 86400000);
+        if (days >= 7) {
+          return { level: 'warn', text: `สำรองข้อมูลครั้งล่าสุดเมื่อ ${days} วันที่แล้ว (${h.lastBackupAt}) — แนะนำให้สำรองทุกสัปดาห์` };
+        }
+        return { level: 'ok', text: `สำรองข้อมูลล่าสุด ${h.lastBackupAt} โดย ${h.lastBackupBy || '—'}` };
+      })(),
+      errorsLast7Days: (S.health && S.role === 'admin') ? S.health.errorsLast7Days : 0,
       stickerLogsFullyLoaded: !!S.stickerLogsFullyLoaded,
       loadingFullStickerLogs: !!S.loadingFullStickerLogs,
       loadFullStickerLogs: () => this.loadFullStickerLogs(),

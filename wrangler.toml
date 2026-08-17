@@ -18,3 +18,6 @@ pages_build_output_dir = "dist"
 binding = "DB"
 database_name = "tuh-reagent-db"
 database_id = "48793752-5aaa-4a9e-a928-549b41fe8a47"
+# Lets `wrangler d1 migrations list/apply` track which files have already run,
+# instead of applying them by hand and checking sqlite_master to find out.
+migrations_dir = "migrations"
