@@ -31,8 +31,13 @@ export async function onRequestPost(context) {
       const newStatus = numQty === 0 ? 'DEPLETED' : 'ACTIVE';
       const ref = reason ? `ตรวจนับคลัง: ${reason}` : 'ตรวจนับคลังประจำช่วงเวลา';
 
+      // A physical count can legitimately find more than the system recorded
+      // (a box logged to the wrong lot, a receipt never keyed). The stock on the
+      // shelf is the truth, so raise the received total to match rather than
+      // refusing the count — `recv` may never be smaller than `qty`.
       queries.push(
-        env.DB.prepare('UPDATE lots SET qty = ?, status = ? WHERE id = ?').bind(numQty, newStatus, lotId)
+        env.DB.prepare('UPDATE lots SET qty = ?, recv = MAX(recv, ?), status = ? WHERE id = ?')
+          .bind(numQty, numQty, newStatus, lotId)
       );
       queries.push(
         env.DB.prepare(
