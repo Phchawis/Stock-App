@@ -2,6 +2,7 @@ import React from 'react';
 // Trigger Cloudflare Pages rebuild
 import { css } from './css.js';
 import { categoryLabel, CATEGORY_CODES, DEFAULT_CATEGORY } from './categories.js';
+import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity } from './domain/stock.js';
 
 // Sticker types recorded in the preparation log.
 const STICKER_KIND_LABEL = {
@@ -1081,8 +1082,7 @@ class App extends React.Component {
     // be restored on save. Outbound types are always negative; an ADJUST keeps
     // whichever direction it was recorded with. Getting this wrong flips the
     // sign and the server then applies twice the delta to the lot's balance.
-    const outbound = t.type === 'ISSUE' || t.type === 'DISPOSE' || (t.type === 'ADJUST' && t.qty < 0);
-    const signedQty = outbound ? -magnitude : magnitude;
+    const signedQty = signedQuantity(t.type, magnitude, t.qty);
     // A RECEIVE record *is* the lot's creation, so correcting a mistyped lot
     // number or expiry belongs here too — that's the mistake people actually
     // catch while reading the movement history.
@@ -1155,18 +1155,21 @@ class App extends React.Component {
   // ── derivations ──
   STORAGE_LABEL(s) { return ({ REFRIGERATED_2_8: '2–8°C', FROZEN_40: '−40°C', ROOM_TEMP: 'อุณหภูมิห้อง' })[s] || s; }
   CAT_LABEL(c) { return categoryLabel(c); }
-  days(d) { return Math.round((new Date(d + 'T00:00:00') - this.today) / 86400000); }
-  activeLots(rid) { return this.state.lots.filter(l => l.rid === rid && l.qty > 0 && l.status === 'ACTIVE'); }
-  onHand(rid) { return this.activeLots(rid).reduce((s, l) => s + l.qty, 0); }
-  earliest(rid) { const a = this.activeLots(rid).map(l => l.expiry).sort(); return a[0] || null; }
-  sev(days, crit) { if (days <= 15) return 'critical'; if (days <= 60) return 'warning'; return 'ok'; }
+  // Thin wrappers over src/domain/stock.js — the rules themselves live there so
+  // they can be unit tested without mounting React. `crit` is kept in the
+  // signature because callers still pass it; the thresholds are shared now.
+  days(d) { return daysUntil(d, this.today); }
+  activeLots(rid) { return activeLots(this.state.lots, rid); }
+  onHand(rid) { return onHand(this.state.lots, rid); }
+  earliest(rid) { return earliestExpiry(this.state.lots, rid); }
+  sev(days) { return severityOf(days); }
   sevCol(s) { return ({
     critical: { fg: 'var(--red-700)', bg: 'var(--red-100)', dot: 'var(--red-600)', th: 'วิกฤต' },
     warning: { fg: 'var(--amber-700)', bg: 'var(--amber-100)', dot: 'var(--amber-600)', th: 'เฝ้าระวัง' },
     watch: { fg: 'var(--blue-700)', bg: 'var(--blue-100)', dot: 'var(--blue-600)', th: 'ติดตาม' },
     ok: { fg: 'var(--green-700)', bg: 'var(--green-100)', dot: 'var(--green-600)', th: 'ปกติ' },
   })[s]; }
-  dayLabel(d) { return d < 0 ? 'หมดอายุแล้ว' : (d === 0 ? 'หมดอายุวันนี้' : 'เหลือ ' + d + ' วัน'); }
+  dayLabel(d) { return fmtDayLabel(d); }
   txnMeta(type) { return ({
     RECEIVE: { label: 'รับเข้า', fg: 'var(--green-700)', bg: 'var(--green-100)' },
     ISSUE: { label: 'เบิกจ่าย', fg: 'var(--accent-700)', bg: 'var(--accent-50)' },
@@ -1207,9 +1210,19 @@ class App extends React.Component {
   // ── handlers ──
   transitionState(updater, callback) {
     if (document.startViewTransition) {
-      document.startViewTransition(() => {
+      const t = document.startViewTransition(() => {
         this.setState(updater, callback);
       });
+      // Starting a second transition before the first settles aborts the first,
+      // and EACH of its three promises rejects independently — `ready` is the
+      // one that fires on an abort. The navigation itself still happens, so this
+      // is only noise, but uncaught rejections in the console make real errors
+      // harder to spot when someone clicks through the nav quickly.
+      if (t) {
+        for (const p of [t.ready, t.finished, t.updateCallbackDone]) {
+          if (p && typeof p.catch === 'function') p.catch(() => {});
+        }
+      }
     } else {
       this.setState(updater, callback);
     }
@@ -1393,23 +1406,30 @@ class App extends React.Component {
   bindRf(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ rf: { ...s.rf, [k]: v } })); }; }
   bindIf(k) { return (e) => { const v = e && e.target ? e.target.value : e; this.setState(s => ({ iform: { ...s.iform, [k]: v } })); }; }
 
-  issuePlan(crit) {
-    const f = this.state.iform; const rid = +f.rid; let need = +f.qty || 0;
-    const rows = []; let short = need;
+  // Preview of what a withdrawal would consume. The allocation itself is
+  // planFefo() in the domain module — the same rule the server applies — so the
+  // preview cannot drift from what actually happens. Only the display bits
+  // (day label, severity colour) are added here.
+  issuePlan() {
+    const f = this.state.iform;
+    const rid = +f.rid;
+    const need = +f.qty || 0;
     if (!rid) return { rows: [], short: 0, need };
-    if (f.lotId) {
-      const l = this.state.lots.find(x => x.id === +f.lotId);
-      if (l) {
-        const take = Math.min(short, l.qty); const d = this.days(l.expiry);
-        rows.push({ lotId: l.id, lot: l.lot, expiry: l.expiry, take, dayLabel: this.dayLabel(d), col: this.sevCol(this.sev(d, crit)).fg, after: l.qty - take });
-        short -= take;
-      }
-    } else {
-      const lots = this.activeLots(rid).slice().sort((a, b) => a.expiry.localeCompare(b.expiry));
-      for (const l of lots) { if (short <= 0) break; const take = Math.min(short, l.qty); const d = this.days(l.expiry);
-        rows.push({ lotId: l.id, lot: l.lot, expiry: l.expiry, take, dayLabel: this.dayLabel(d), col: this.sevCol(this.sev(d, crit)).fg, after: l.qty - take }); short -= take; }
-    }
-    return { rows, short: short > 0 ? short : 0, need };
+
+    // Issuing from one chosen lot is the same allocation over a one-lot pool.
+    const pool = f.lotId
+      ? this.state.lots.filter(l => l.id === +f.lotId)
+      : this.state.lots;
+    const { rows, shortBy } = planFefo(pool, rid, need);
+
+    return {
+      rows: rows.map(r => {
+        const d = this.days(r.expiry);
+        return { ...r, dayLabel: this.dayLabel(d), col: this.sevCol(this.sev(d)).fg };
+      }),
+      short: shortBy,
+      need,
+    };
   }
 
   async submitReceive() {
@@ -1449,7 +1469,7 @@ class App extends React.Component {
   async submitIssue() {
     const crit = this.props.criticalDays ?? 30;
     const f = this.state.iform; const rid = +f.rid; const qty = +f.qty;
-    const plan = this.issuePlan(crit);
+    const plan = this.issuePlan();
     if (!rid || !(qty > 0)) { this.showToast('กรุณาเลือกน้ำยาและจำนวน', 'warn'); return; }
     if (plan.short > 0) { this.showToast('คงเหลือไม่พอเบิก (ขาด ' + plan.short + ')', 'warn'); return; }
 
@@ -1722,7 +1742,7 @@ class App extends React.Component {
     const locOpts = ['ตู้เย็น A1', 'ตู้เย็น A2', 'ตู้แช่แข็ง F1', 'ชั้นวาง B2', 'ชั้นวาง C1'].map(x => ({ value: x, label: x }));
     const supplierOpts = ['i-med', 'Firmer', 'Med-one'].map(x => ({ value: x, label: x }));
     const scanOpts = [{ value: 'MANUAL', label: 'พิมพ์ชื่อ / เลือกเอง' }, { value: 'QR', label: 'สแกน QR code' }, { value: 'BARCODE', label: 'สแกนบาร์โค้ด' }];
-    const plan = this.issuePlan(crit);
+    const plan = this.issuePlan();
     const issueReagent = S.reagents.find(r => r.id === +S.iform.rid);
     const issueOnHand = issueReagent ? this.onHand(issueReagent.id) : 0;
 
