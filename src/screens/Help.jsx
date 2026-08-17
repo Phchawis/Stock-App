@@ -18,6 +18,7 @@ export function Help({ v }) {
     { id: 'sticker', label: 'การสร้างสติกเกอร์ (Sticker)', icon: '🏷️' },
     { id: 'alerts', label: 'การแจ้งเตือน & บอท LINE', icon: '🔔' },
     { id: 'optimization', label: 'การควบคุม & เพิ่มประสิทธิภาพ', icon: '✨' },
+    { id: 'downtime', label: 'แผนรองรับเมื่อระบบใช้งานไม่ได้', icon: '🚨' },
   ];
 
   return (
@@ -88,7 +89,7 @@ export function Help({ v }) {
               </h2>
               <p style={css(`font:var(--text-sm)/1.6 var(--font-body); color:var(--text-secondary); margin:0;`)}>
                 ระบบจัดการคลังน้ำยาเคมีสำหรับห้องปฏิบัติการ ธรรมศาสตร์เฉลิมพระเกียรติ พัฒนาขึ้นเพื่อช่วยบริหารสต็อก ติดตามล็อตน้ำยา 
-                และควบคุมการใช้งานแบบ **หมดอายุก่อน–เบิกก่อน (First-Expired, First-Out)** เพื่อประสิทธิภาพสูงสุดในการตรวจวินิจฉัยทางการแพทย์
+                และควบคุมการใช้งานแบบ <strong>หมดอายุก่อน–เบิกก่อน (First-Expired, First-Out)</strong> เพื่อประสิทธิภาพสูงสุดในการตรวจวินิจฉัยทางการแพทย์
               </p>
             </div>
 
@@ -258,23 +259,23 @@ export function Help({ v }) {
                 <div style={css(`display:flex; flex-direction:column; gap:12px;`)}>
                   <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
                     <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--brand-700); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>1</span>
-                    <div>คลิกปุ่ม **"รับเข้า Lot"** หรือปุ่มนำเข้าบริเวณด้านขวาบนหน้าจอหลัก</div>
+                    <div>คลิกปุ่ม <strong>"รับเข้า Lot"</strong> หรือปุ่มนำเข้าบริเวณด้านขวาบนหน้าจอหลัก</div>
                   </div>
                   <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
                     <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--brand-700); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>2</span>
-                    <div>ค้นหาหรือเลือกชื่อน้ำยา เช่น **Glucose** จากช่องเลือกน้ำยาหลัก</div>
+                    <div>ค้นหาหรือเลือกชื่อน้ำยา เช่น <strong>Glucose</strong> จากช่องเลือกน้ำยาหลัก</div>
                   </div>
                   <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
                     <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--brand-700); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>3</span>
-                    <div>กรอก **เลข Lot** ของน้ำยา (ตรวจสอบจากข้างขวดหรือกล่องบรรจุให้ถูกต้อง)</div>
+                    <div>กรอก <strong>เลข Lot</strong> ของน้ำยา (ตรวจสอบจากข้างขวดหรือกล่องบรรจุให้ถูกต้อง)</div>
                   </div>
                   <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
                     <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--brand-700); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>4</span>
-                    <div>ระบุ **วันหมดอายุ (Expiry Date)** *เป็นส่วนที่สำคัญที่สุดเพราะระบบจะเรียงคิวเบิกจ่ายอัตโนมัติตามจุดนี้*</div>
+                    <div>ระบุ <strong>วันหมดอายุ (Expiry Date)</strong> *เป็นส่วนที่สำคัญที่สุดเพราะระบบจะเรียงคิวเบิกจ่ายอัตโนมัติตามจุดนี้*</div>
                   </div>
                   <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
                     <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--brand-700); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>5</span>
-                    <div>ระบุ **จำนวนรับเข้า** และกด **"บันทึกรับเข้า"** เพื่อเสร็จสิ้นขั้นตอน</div>
+                    <div>ระบุ <strong>จำนวนรับเข้า</strong> และกด <strong>"บันทึกรับเข้า"</strong> เพื่อเสร็จสิ้นขั้นตอน</div>
                   </div>
                 </div>
               </div>
@@ -334,7 +335,7 @@ export function Help({ v }) {
                 การเบิกจ่ายระบบจ่ายตามเกณฑ์หมดอายุก่อน–เบิกก่อน (Withdraw Process)
               </h2>
               <p style={css(`font:var(--text-sm)/1.6 var(--font-body); color:var(--text-secondary); margin:0;`)}>
-                ระบบจ่ายคิวอัตโนมัติแบบ **หมดอายุก่อน–เบิกก่อน (First-Expired, First-Out)** โดยยุบขั้นตอนเหลือเพียง 2 ขั้นตอนสั้นๆ เพื่อความรวดเร็วในการเบิกจ่ายที่หน้างานจริง
+                ระบบจ่ายคิวอัตโนมัติแบบ <strong>หมดอายุก่อน–เบิกก่อน (First-Expired, First-Out)</strong> โดยยุบขั้นตอนเหลือเพียง 2 ขั้นตอนสั้นๆ เพื่อความรวดเร็วในการเบิกจ่ายที่หน้างานจริง
               </p>
             </div>
 
@@ -347,11 +348,11 @@ export function Help({ v }) {
                 <div style={css(`display:flex; flex-direction:column; gap:12px;`)}>
                   <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
                     <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--accent-600); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>1</span>
-                    <div>**สแกนบาร์โค้ด หรือ ระบุ Lot:** กดเบิกจ่ายแล้วสแกนคิวอาร์โค้ดฉลากขวด หรือพิมพ์เลข Lot ทันที ระบบจะผูกข้อมูลล็อตและชื่อน้ำยาให้อัตโนมัติ (สามารถกดเลือกชื่อน้ำยาด้วยตนเองเป็นทางเลือกสำรองได้) แล้วกด **"ถัดไป"**</div>
+                    <div><strong>สแกนบาร์โค้ด หรือ ระบุ Lot:</strong> กดเบิกจ่ายแล้วสแกนคิวอาร์โค้ดฉลากขวด หรือพิมพ์เลข Lot ทันที ระบบจะผูกข้อมูลล็อตและชื่อน้ำยาให้อัตโนมัติ (สามารถกดเลือกชื่อน้ำยาด้วยตนเองเป็นทางเลือกสำรองได้) แล้วกด <strong>"ถัดไป"</strong></div>
                   </div>
                   <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
                     <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--accent-600); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>2</span>
-                    <div>**ระบุจำนวนเบิกจ่าย:** ระบุจำนวนที่ต้องการเบิก (โดยไม่ต้องกรอกเลขที่ใบเบิก/เลขเอกสารอ้างอิงให้เสียเวลา) ตรวจสอบแผนการจัดสรรคิวล็อต FEFO ด้านล่าง แล้วกด **"ยืนยันเบิกจ่าย"** เพื่อตัดยอดคงคลังทันที</div>
+                    <div><strong>ระบุจำนวนเบิกจ่าย:</strong> ระบุจำนวนที่ต้องการเบิก (โดยไม่ต้องกรอกเลขที่ใบเบิก/เลขเอกสารอ้างอิงให้เสียเวลา) ตรวจสอบแผนการจัดสรรคิวล็อต FEFO ด้านล่าง แล้วกด <strong>"ยืนยันเบิกจ่าย"</strong> เพื่อตัดยอดคงคลังทันที</div>
                   </div>
                 </div>
               </div>
@@ -412,14 +413,14 @@ export function Help({ v }) {
                   หลักการกำหนดค่าหน่วยนับสินค้าที่ถูกต้อง:
                 </h3>
                 <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
-                  <div>1. **ชื่อน้ำยา:** ระบุชื่อเรียกทางการแพทย์ให้ครบถ้วนทั้งภาษาไทยและอังกฤษ</div>
-                  <div>2. **เกณฑ์สั่งซื้อซ้ำ (Min):** ระบุจำนวนกล่องขั้นต่ำเพื่อเตือนสต็อกสั่งซื้อ</div>
-                  <div>3. **หน่วยนับหลัก และหน่วยนับย่อย:** 
+                  <div>1. <strong>ชื่อน้ำยา:</strong> ระบุชื่อเรียกทางการแพทย์ให้ครบถ้วนทั้งภาษาไทยและอังกฤษ</div>
+                  <div>2. <strong>เกณฑ์สั่งซื้อซ้ำ (Min):</strong> ระบุจำนวนกล่องขั้นต่ำเพื่อเตือนสต็อกสั่งซื้อ</div>
+                  <div>3. <strong>หน่วยนับหลัก และหน่วยนับย่อย:</strong> 
                     <div style={css(`padding-left:14px; margin-top:4px; border-left:2px solid var(--brand-300); color:var(--text-primary);`)}>
-                      ตัวอย่าง: น้ำยา BUN บรรจุเป็นกล่องหลัก คือ **`Box (กล่อง)`** และมีหน่วยย่อยข้างใน คือ **`Cassette`** โดยกำหนดปริมาณบรรจุ **`2`** Cassette ต่อกล่อง ระบบจะคำนวณและแสดงค่าคลังเป็น `2 Cassette (1 Box)` อัตโนมัติ
+                      ตัวอย่าง: น้ำยา BUN บรรจุเป็นกล่องหลัก คือ <strong>`Box (กล่อง)`</strong> และมีหน่วยย่อยข้างใน คือ <strong>`Cassette`</strong> โดยกำหนดปริมาณบรรจุ <strong>`2`</strong> Cassette ต่อกล่อง ระบบจะคำนวณและแสดงค่าคลังเป็น `2 Cassette (1 Box)` อัตโนมัติ
                     </div>
                   </div>
-                  <div>4. **อัปโหลดภาพ:** สามารถเลือกไฟล์รูปภาพขวดน้ำยาจริงบันทึกประกอบหน้าต่างสารบัญได้</div>
+                  <div>4. <strong>อัปโหลดภาพ:</strong> สามารถเลือกไฟล์รูปภาพขวดน้ำยาจริงบันทึกประกอบหน้าต่างสารบัญได้</div>
                 </div>
               </div>
 
@@ -462,7 +463,7 @@ export function Help({ v }) {
                 การสั่งพิมพ์รายงานประจำเดือน A4 ขาวสะอาด (Clean PDF Printing Guide)
               </h2>
               <p style={css(`font:var(--text-sm)/1.6 var(--font-body); color:var(--text-secondary); margin:0;`)}>
-                แอปพลิเคชันรองรับการพิมพ์ใบรายงานยอดใช้จ่ายคลังน้ำยาในลักษณะเอกสารราชการสีขาวสะอาด ปราศจากปุ่มและรหัสน้ำยารกกระดาษ เพื่อใช้แนบเสนอประเมิน QMS โดยระบบได้ล็อกระยะขอบกระดาษทุกด้านไว้ที่ **2 cm (20mm)** เป็นมาตรฐานเรียบร้อยแล้ว
+                แอปพลิเคชันรองรับการพิมพ์ใบรายงานยอดใช้จ่ายคลังน้ำยาในลักษณะเอกสารราชการสีขาวสะอาด ปราศจากปุ่มและรหัสน้ำยารกกระดาษ เพื่อใช้แนบเสนอประเมิน QMS โดยระบบได้ล็อกระยะขอบกระดาษทุกด้านไว้ที่ <strong>2 cm (20mm)</strong> เป็นมาตรฐานเรียบร้อยแล้ว
               </p>
             </div>
 
@@ -473,18 +474,18 @@ export function Help({ v }) {
                   การตั้งค่าเครื่องพิมพ์บราวเซอร์เพื่อให้ได้ผลลัพธ์ที่ดีที่สุด:
                 </h3>
                 <div style={css(`display:flex; flex-direction:column; gap:12px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
-                  <div>1. ไปที่เมนู **Dashboard** จากนั้นเลือกช่วงเวลาประเมินที่ต้องการ และคลิกปุ่ม **"พิมพ์รายงาน PDF"**</div>
+                  <div>1. ไปที่เมนู <strong>Dashboard</strong> จากนั้นเลือกช่วงเวลาประเมินที่ต้องการ และคลิกปุ่ม <strong>"พิมพ์รายงาน PDF"</strong></div>
                   <div>2. หน้าต่างเครื่องมือพิมพ์ของ Google Chrome/Safari จะเปิดขึ้น</div>
                   <div>3. กำหนดตัวเลือกในแถบการพิมพ์ดังต่อไปนี้:
                     <ul style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
-                      <li>**ปลายทาง (Destination):** บันทึกเป็น PDF (Save as PDF) หรือเลือกเครื่องพิมพ์</li>
-                      <li>**การจัดวาง (Layout):** แนวตั้ง (Portrait)</li>
-                      <li>**ขนาดกระดาษ (Paper size):** A4</li>
-                      <li>**ระยะขอบ (Margins):** เลือกค่าเริ่มต้น (Default) *ระบบจัดระยะขอบ 2 cm ทุกด้านให้อัตโนมัติในสไตล์ชีทแล้ว*</li>
-                      <li>**ส่วนหัวและส่วนท้าย (Headers & Footers):** *ไม่เช็คถูก (Uncheck)* เพื่อลบ URL และวันที่ขอบกระดาษออก</li>
+                      <li><strong>ปลายทาง (Destination):</strong> บันทึกเป็น PDF (Save as PDF) หรือเลือกเครื่องพิมพ์</li>
+                      <li><strong>การจัดวาง (Layout):</strong> แนวตั้ง (Portrait)</li>
+                      <li><strong>ขนาดกระดาษ (Paper size):</strong> A4</li>
+                      <li><strong>ระยะขอบ (Margins):</strong> เลือกค่าเริ่มต้น (Default) *ระบบจัดระยะขอบ 2 cm ทุกด้านให้อัตโนมัติในสไตล์ชีทแล้ว*</li>
+                      <li><strong>ส่วนหัวและส่วนท้าย (Headers & Footers):</strong> *ไม่เช็คถูก (Uncheck)* เพื่อลบ URL และวันที่ขอบกระดาษออก</li>
                     </ul>
                   </div>
-                  <div>4. กดปุ่ม **"พิมพ์ (Print)"** หรือ **"บันทึก (Save)"** เพื่อเซฟไฟล์เอกสารสวยงามลงคอมพิวเตอร์</div>
+                  <div>4. กดปุ่ม <strong>"พิมพ์ (Print)"</strong> หรือ <strong>"บันทึก (Save)"</strong> เพื่อเซฟไฟล์เอกสารสวยงามลงคอมพิวเตอร์</div>
                 </div>
               </div>
 
@@ -542,14 +543,14 @@ export function Help({ v }) {
                   <span style={css(`color:var(--red-600);`)}>🗑️</span> 1. การตัดจำหน่ายน้ำยาหมดอายุ/ชำรุด (DISPOSE)
                 </div>
                 <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
-                  <div>**กรณีใช้งาน:** เมื่อน้ำยาหมดอายุคาคลัง หรือเกิดการแตกร้าว ปนเปื้อน หรือเสื่อมสภาพก่อนเบิกใช้งานปกติ</div>
-                  <div>**ขั้นตอนดำเนินการ:**
+                  <div><strong>กรณีใช้งาน:</strong> เมื่อน้ำยาหมดอายุคาคลัง หรือเกิดการแตกร้าว ปนเปื้อน หรือเสื่อมสภาพก่อนเบิกใช้งานปกติ</div>
+                  <div><strong>ขั้นตอนดำเนินการ:</strong>
                     <ol style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
-                      <li>ไปที่หน้า **คลังน้ำยา (Inventory)** คลิกรายการน้ำยาที่ต้องการ</li>
+                      <li>ไปที่หน้า <strong>คลังน้ำยา (Inventory)</strong> คลิกรายการน้ำยาที่ต้องการ</li>
                       <li>ดูที่ตารางรายการ Lot ค้นหา Lot ที่หมดอายุหรือชำรุด</li>
-                      <li>คลิกปุ่ม **"🗑️ ตัดจำหน่าย"** (เฉพาะ Admin/Supervisor)</li>
+                      <li>คลิกปุ่ม <strong>"🗑️ ตัดจำหน่าย"</strong> (เฉพาะ Admin/Supervisor)</li>
                       <li>ระบุจำนวนกล่อง/ขวดที่ต้องการคัดทิ้ง และเลือกสาเหตุ (เช่น หมดอายุ, เสื่อมสภาพ/ชำรุด)</li>
-                      <li>กด **"ยืนยันตัดจำหน่าย"** ระบบจะตัดสต็อกและสร้างประวัติประเภท `DISPOSE`</li>
+                      <li>กด <strong>"ยืนยันตัดจำหน่าย"</strong> ระบบจะตัดสต็อกและสร้างประวัติประเภท `DISPOSE`</li>
                     </ol>
                   </div>
                 </div>
@@ -561,14 +562,14 @@ export function Help({ v }) {
                   <span style={css(`color:var(--brand-ink);`)}>📋</span> 2. การตรวจนับสต็อกและปรับยอดคลาดเคลื่อน (ADJUST)
                 </div>
                 <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
-                  <div>**กรณีใช้งาน:** หลังการนับสต็อกประจำสัปดาห์หรือประจำเดือน (Physical Count) แล้วพบยอดน้ำยาจริงไม่ตรงกับระบบคอมพิวเตอร์</div>
-                  <div>**ขั้นตอนดำเนินการ:**
+                  <div><strong>กรณีใช้งาน:</strong> หลังการนับสต็อกประจำสัปดาห์หรือประจำเดือน (Physical Count) แล้วพบยอดน้ำยาจริงไม่ตรงกับระบบคอมพิวเตอร์</div>
+                  <div><strong>ขั้นตอนดำเนินการ:</strong>
                     <ol style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
-                      <li>คลิกเมนูหลัก **"ตรวจนับคลัง"** ที่แถบเมนูด้านซ้าย (เฉพาะ Admin/Supervisor)</li>
+                      <li>คลิกเมนูหลัก <strong>"ตรวจนับคลัง"</strong> ที่แถบเมนูด้านซ้าย (เฉพาะ Admin/Supervisor)</li>
                       <li>ตารางจะรวบรวม Lot ที่เปิดใช้งานอยู่ทั้งหมดมาแสดงผล</li>
-                      <li>กรอกจำนวนที่นับได้จริงลงในช่อง **"นับได้จริง"** ระบบจะคำนวณส่วนต่างคลาดเคลื่อนให้อัตโนมัติ</li>
+                      <li>กรอกจำนวนที่นับได้จริงลงในช่อง <strong>"นับได้จริง"</strong> ระบบจะคำนวณส่วนต่างคลาดเคลื่อนให้อัตโนมัติ</li>
                       <li>กรอกเหตุผลที่ยอดไม่ตรงลงในช่องหมายเหตุ (เช่น ลืมคีย์เบิกจ่าย, นับผิดพลาด)</li>
-                      <li>คลิก **"บันทึกผลการตรวจนับทั้งหมด"** และกดยืนยันในป๊อปอัปเพื่อลงบันทึกธุรกรรมปรับยอดประเภท `ADJUST`</li>
+                      <li>คลิก <strong>"บันทึกผลการตรวจนับทั้งหมด"</strong> และกดยืนยันในป๊อปอัปเพื่อลงบันทึกธุรกรรมปรับยอดประเภท `ADJUST`</li>
                     </ol>
                   </div>
                 </div>
@@ -596,13 +597,13 @@ export function Help({ v }) {
                   <span>🏷️</span> 1. Aliquot Sticker Form (3x2 cm)
                 </div>
                 <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
-                  <div>**จุดประสงค์:** ใช้ติดขวดแบ่งส่วนน้ำยา (Aliquot Tube) เพื่อบันทึกข้อมูลย้อนกลับ</div>
-                  <div>**รายละเอียดข้อมูลและองค์ประกอบ:**
+                  <div><strong>จุดประสงค์:</strong> ใช้ติดขวดแบ่งส่วนน้ำยา (Aliquot Tube) เพื่อบันทึกข้อมูลย้อนกลับ</div>
+                  <div><strong>รายละเอียดข้อมูลและองค์ประกอบ:</strong>
                     <ul style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
-                      <li>**ชื่อน้ำยาเคมี:** มีระบบค้นหาและเลือกจากฐานข้อมูลอัจฉริยะ (พิมพ์และเลือกได้ทันที)</li>
-                      <li>**เลข Lot:** ดึงข้อมูล Lot เพื่อเชื่อมโยงการสืบย้อน</li>
-                      <li>**วันที่เตรียม / วัน Exp.:** บันทึกช่วงเวลาการทำ Aliquot</li>
-                      <li>**ชื่อผู้เตรียม:** ดึงชื่อผู้ใช้ปัจจุบันที่ Login อัตโนมัติ (โดยตัดคำนำหน้าวิชาชีพ ทนพ./ทนพญ. ออกให้โดยอัตโนมัติ)</li>
+                      <li><strong>ชื่อน้ำยาเคมี:</strong> มีระบบค้นหาและเลือกจากฐานข้อมูลอัจฉริยะ (พิมพ์และเลือกได้ทันที)</li>
+                      <li><strong>เลข Lot:</strong> ดึงข้อมูล Lot เพื่อเชื่อมโยงการสืบย้อน</li>
+                      <li><strong>วันที่เตรียม / วัน Exp.:</strong> บันทึกช่วงเวลาการทำ Aliquot</li>
+                      <li><strong>ชื่อผู้เตรียม:</strong> ดึงชื่อผู้ใช้ปัจจุบันที่ Login อัตโนมัติ (โดยตัดคำนำหน้าวิชาชีพ ทนพ./ทนพญ. ออกให้โดยอัตโนมัติ)</li>
                     </ul>
                   </div>
                 </div>
@@ -614,13 +615,13 @@ export function Help({ v }) {
                   <span>🧴</span> 2. Opened Sticker Form (4.5x2 cm)
                 </div>
                 <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
-                  <div>**จุดประสงค์:** ใช้ติดขวดหลักเมื่อเริ่มมีการเปิดจุกขวดน้ำยาใช้งานจริงครั้งแรก</div>
-                  <div>**รายละเอียดข้อมูลและองค์ประกอบ:**
+                  <div><strong>จุดประสงค์:</strong> ใช้ติดขวดหลักเมื่อเริ่มมีการเปิดจุกขวดน้ำยาใช้งานจริงครั้งแรก</div>
+                  <div><strong>รายละเอียดข้อมูลและองค์ประกอบ:</strong>
                     <ul style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
-                      <li>**ชื่อน้ำยาเคมี:** ค้นหาอัจฉริยะพร้อมกล่องพิมพ์แยกสีทึบแสง (Opaque) บังส่วนอื่นป้องกันการสับสน</li>
-                      <li>**วันที่เปิด (Opened Date) / ผู้เปิดใช้งาน:** ระบุวันที่เปิดขวดและผู้รับผิดชอบ</li>
-                      <li>**การเก็บรักษาระยะยาว:** แสดงอุณหภูมิเก็บรักษา (After open storage 2-8 °C) พร้อมระบุระยะเวลาที่น้ำยาอยู่ได้หลังเปิด (7 วัน, 14 วัน, 30 วัน หรือ จนกว่าจะหมดอายุ)</li>
-                      <li>**รูปแบบสติกเกอร์:** ดีไซน์แบบไม่มีขอบตัวการ์ดเพื่อขยายข้อความให้คมชัดที่สุด</li>
+                      <li><strong>ชื่อน้ำยาเคมี:</strong> ค้นหาอัจฉริยะพร้อมกล่องพิมพ์แยกสีทึบแสง (Opaque) บังส่วนอื่นป้องกันการสับสน</li>
+                      <li><strong>วันที่เปิด (Opened Date) / ผู้เปิดใช้งาน:</strong> ระบุวันที่เปิดขวดและผู้รับผิดชอบ</li>
+                      <li><strong>การเก็บรักษาระยะยาว:</strong> แสดงอุณหภูมิเก็บรักษา (After open storage 2-8 °C) พร้อมระบุระยะเวลาที่น้ำยาอยู่ได้หลังเปิด (7 วัน, 14 วัน, 30 วัน หรือ จนกว่าจะหมดอายุ)</li>
+                      <li><strong>รูปแบบสติกเกอร์:</strong> ดีไซน์แบบไม่มีขอบตัวการ์ดเพื่อขยายข้อความให้คมชัดที่สุด</li>
                     </ul>
                   </div>
                 </div>
@@ -633,8 +634,8 @@ export function Help({ v }) {
                 <span>🖨️</span> คำแนะนำในการดาวน์โหลดและสั่งพิมพ์ให้คมชัดที่สุด
               </div>
               <div style={css(`font-size:var(--text-xs); color:var(--text-secondary); line-height:1.6; display:flex; flex-direction:column; gap:8px;`)}>
-                <div>1. เมื่อพิมพ์กรอกข้อมูลครบถ้วนแล้ว ให้คลิกปุ่ม **"📥 ดาวน์โหลดไฟล์ PNG"** เพื่อเซฟไฟล์ภาพสติกเกอร์ความละเอียดระดับ HD ลงในเครื่อง</div>
-                <div>2. เพื่อความคมชัดสูงสุด แนะนำให้นำไฟล์ภาพที่ได้ไปสั่งพิมพ์ผ่านโปรแกรมพิมพ์สลากโดยเฉพาะของตัวเครื่องพิมพ์ความร้อน (เช่น **BarTender** หรือ **GoLabel**) เพื่อให้ไดรเวอร์เครื่องพิมพ์ทำการจับคู่พิกเซล 1-to-1 แบบขาวดำคมกริบ</div>
+                <div>1. เมื่อพิมพ์กรอกข้อมูลครบถ้วนแล้ว ให้คลิกปุ่ม <strong>"📥 ดาวน์โหลดไฟล์ PNG"</strong> เพื่อเซฟไฟล์ภาพสติกเกอร์ความละเอียดระดับ HD ลงในเครื่อง</div>
+                <div>2. เพื่อความคมชัดสูงสุด แนะนำให้นำไฟล์ภาพที่ได้ไปสั่งพิมพ์ผ่านโปรแกรมพิมพ์สลากโดยเฉพาะของตัวเครื่องพิมพ์ความร้อน (เช่น <strong>BarTender</strong> หรือ <strong>GoLabel</strong>) เพื่อให้ไดรเวอร์เครื่องพิมพ์ทำการจับคู่พิกเซล 1-to-1 แบบขาวดำคมกริบ</div>
               </div>
             </div>
           </div>
@@ -659,17 +660,17 @@ export function Help({ v }) {
                   <span style={css(`color:#f97316;`)}>🔔</span> 1. การจัดการการแจ้งเตือนในระบบ (In-App Alerts)
                 </div>
                 <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
-                  <div>**ประเภทและเกณฑ์การแสดงผล:**
+                  <div><strong>ประเภทและเกณฑ์การแสดงผล:</strong>
                     <ul style={css(`margin:4px 0; padding-left:14px;`)}>
-                      <li>**สีแดง (วิกฤต):** น้ำยาหมดสต็อกคาคลัง หรือสารเคมีเหลืออายุใช้งาน ≤ 15 วัน</li>
-                      <li>**สีส้ม (สั่งซื้อแล้ว):** รายการสั่งซื้อซ้ำที่ได้รับการจัดการสั่งของไปแล้วและรอนำส่งมอบ</li>
+                      <li><strong>สีแดง (วิกฤต):</strong> น้ำยาหมดสต็อกคาคลัง หรือสารเคมีเหลืออายุใช้งาน ≤ 15 วัน</li>
+                      <li><strong>สีส้ม (สั่งซื้อแล้ว):</strong> รายการสั่งซื้อซ้ำที่ได้รับการจัดการสั่งของไปแล้วและรอนำส่งมอบ</li>
                     </ul>
                   </div>
-                  <div>**วิธีการจัดการสถานะใบสั่งซื้อ (แนวทางที่ 2):**
+                  <div><strong>วิธีการจัดการสถานะใบสั่งซื้อ (แนวทางที่ 2):</strong>
                     <ol style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:6px; color:var(--text-primary);`)}>
-                      <li>เมื่อมีรายการ **"ต่ำกว่าจุดสั่งซื้อ"** โผล่ขึ้นมา ให้กดปุ่ม **"สั่งซื้อแล้ว / รอของ"** บาร์จะเปลี่ยนเป็นสีส้มพาสเทลและดันลงไปด้านล่าง</li>
+                      <li>เมื่อมีรายการ <strong>"ต่ำกว่าจุดสั่งซื้อ"</strong> โผล่ขึ้นมา ให้กดปุ่ม <strong>"สั่งซื้อแล้ว / รอของ"</strong> บาร์จะเปลี่ยนเป็นสีส้มพาสเทลและดันลงไปด้านล่าง</li>
                       <li>ตัวเลขวงกลมสีแดงในแถบเมนูข้างๆ จะลดลงโดยอัตโนมัติเพื่อลดความซ้ำซ้อน</li>
-                      <li>เมื่อของมาส่งมอบแล้ว ให้คลิกปุ่ม **"รับเข้า Lot"** สีเขียวเพื่อคีย์จำนวน ระบบจะเคลียร์การแจ้งเตือนทิ้งให้อัตโนมัติเมื่อสต็อกสูงกว่าจุด Min</li>
+                      <li>เมื่อของมาส่งมอบแล้ว ให้คลิกปุ่ม <strong>"รับเข้า Lot"</strong> สีเขียวเพื่อคีย์จำนวน ระบบจะเคลียร์การแจ้งเตือนทิ้งให้อัตโนมัติเมื่อสต็อกสูงกว่าจุด Min</li>
                     </ol>
                   </div>
                 </div>
@@ -681,17 +682,17 @@ export function Help({ v }) {
                   <span style={css(`color:#06C755;`)}>💬</span> 2. ระบบบอท LINE แจ้งเตือนอัตโนมัติ (LINE Notification)
                 </div>
                 <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
-                  <div>**พฤติกรรมการยิงเตือน:**
+                  <div><strong>พฤติกรรมการยิงเตือน:</strong>
                     <ul style={css(`margin:4px 0; padding-left:14px;`)}>
-                      <li>บอทจะสแกนและส่งข้อความแจ้งเตือน **"น้ำยาหมดอายุ / วิกฤตใกล้หมดอายุ (สีแดง: ≤ 15 วัน)"** เข้ากลุ่มโดยตรง</li>
-                      <li>**แจ้งเตือนอัตโนมัติ:** ระบบจะทำงานส่งข้อมูลให้อัตโนมัติทุกวันในเวลา **08:00 น.** (ตั้งเวลาทำงานผ่าน Cron Job)</li>
-                      <li>**ส่งแมนนวล:** เจ้าหน้าที่สามารถกดปุ่มสีเขียว **"ส่งแจ้งเตือนน้ำยาใกล้หมดอายุเข้า LINE"** บนหน้าเว็บเพื่อส่งทันทีได้ตลอดเวลา</li>
+                      <li>บอทจะสแกนและส่งข้อความแจ้งเตือน <strong>"น้ำยาหมดอายุ / วิกฤตใกล้หมดอายุ (สีแดง: ≤ 15 วัน)"</strong> เข้ากลุ่มโดยตรง</li>
+                      <li><strong>แจ้งเตือนอัตโนมัติ:</strong> ระบบจะทำงานส่งข้อมูลให้อัตโนมัติทุกวันในเวลา <strong>08:00 น.</strong> (ตั้งเวลาทำงานผ่าน Cron Job)</li>
+                      <li><strong>ส่งแมนนวล:</strong> เจ้าหน้าที่สามารถกดปุ่มสีเขียว <strong>"ส่งแจ้งเตือนน้ำยาใกล้หมดอายุเข้า LINE"</strong> บนหน้าเว็บเพื่อส่งทันทีได้ตลอดเวลา</li>
                     </ul>
                   </div>
-                  <div>**เงื่อนไขการหยุดส่งเตือน:**
+                  <div><strong>เงื่อนไขการหยุดส่งเตือน:</strong>
                     <ol style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:6px; color:var(--text-primary);`)}>
                       <li>บอทจะส่งซ้ำทุกวันตราบใดที่น้ำยาล็อตนั้นยังแช่อยู่ในสต็อก (แม้จะกดรับทราบแล้ว) เพื่อความปลอดภัยสูงสุด</li>
-                      <li>บอทจะหยุดส่งข้อความเตือนเมื่อมีการกด **"เบิกจ่ายจนเหลือ 0"** หรือกด **"ตัดจำหน่าย (Dispose)"** ล็อตที่เสื่อมสภาพทิ้งแล้วเท่านั้น</li>
+                      <li>บอทจะหยุดส่งข้อความเตือนเมื่อมีการกด <strong>"เบิกจ่ายจนเหลือ 0"</strong> หรือกด <strong>"ตัดจำหน่าย (Dispose)"</strong> ล็อตที่เสื่อมสภาพทิ้งแล้วเท่านั้น</li>
                     </ol>
                   </div>
                 </div>
@@ -720,11 +721,11 @@ export function Help({ v }) {
                   <span style={css(`color:#d97706;`)}>⏰</span> 1. ระบบออกจากระบบอัตโนมัติ (Idle Auto-Logout)
                 </div>
                 <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
-                  <div>**เกณฑ์ความปลอดภัยสำหรับ Shared PC:**
+                  <div><strong>เกณฑ์ความปลอดภัยสำหรับ Shared PC:</strong>
                     <ul style={css(`margin:4px 0; padding-left:14px;`)}>
-                      <li>หากหน้าจอค้างไว้และ **ไม่มีการเคลื่อนไหวเมาส์ พิมพ์คีย์บอร์ด คลิก หรือเลื่อนหน้าจอ เกิน 20 นาที** ระบบจะเตรียมการเซฟตี้</li>
-                      <li>**กล่องแจ้งเตือนเวลานับถอยหลัง**: ระบบจะแสดงป๊อปอัปแจ้งเตือนล่วงหน้า **30 วินาที** พร้อมตัวเลขนับถอยหลัง เพื่อป้องกันการตัดสิทธิ์ระหว่างใช้งานค้าง</li>
-                      <li>**ปุ่มยืนยัน**: เจ้าหน้าที่สามารถกด **"ทำงานต่อ (Resume)"** เพื่อต่ออายุเซสชัน หรือเลือกกดออกจากระบบทันทีได้</li>
+                      <li>หากหน้าจอค้างไว้และ <strong>ไม่มีการเคลื่อนไหวเมาส์ พิมพ์คีย์บอร์ด คลิก หรือเลื่อนหน้าจอ เกิน 20 นาที</strong> ระบบจะเตรียมการเซฟตี้</li>
+                      <li><strong>กล่องแจ้งเตือนเวลานับถอยหลัง</strong>: ระบบจะแสดงป๊อปอัปแจ้งเตือนล่วงหน้า <strong>30 วินาที</strong> พร้อมตัวเลขนับถอยหลัง เพื่อป้องกันการตัดสิทธิ์ระหว่างใช้งานค้าง</li>
+                      <li><strong>ปุ่มยืนยัน</strong>: เจ้าหน้าที่สามารถกด <strong>"ทำงานต่อ (Resume)"</strong> เพื่อต่ออายุเซสชัน หรือเลือกกดออกจากระบบทันทีได้</li>
                     </ul>
                   </div>
                 </div>
@@ -736,11 +737,11 @@ export function Help({ v }) {
                   <span style={css(`color:var(--brand-ink);`)}>📱</span> 2. การติดตั้งแอปพลิเคชันลงบนเครื่องคอมพิวเตอร์/มือถือ (PWA)
                 </div>
                 <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
-                  <div>**ประโยชน์ของระบบ PWA:**
+                  <div><strong>ประโยชน์ของระบบ PWA:</strong>
                     <ul style={css(`margin:4px 0; padding-left:14px;`)}>
                       <li>ระบบรองรับการติดตั้งลงบนแท็บเล็ต มือถือ หรือเครื่อง PC ประจำเคาน์เตอร์วิเคราะห์โดยขึ้นไอคอนบนหน้าจอเหมือนแอปพลิเคชันปกติ (ไม่ต้องเข้า Browser ค้นหา URL)</li>
-                      <li>**การติดตั้งบน Google Chrome (PC)**: สังเกตที่ช่องกรอก URL ด้านบนขวา จะมีสัญลักษณ์ **"ติดตั้งแอป (Install App)"** หรือรูปหน้าต่างพร้อมลูกศรชี้ลง ให้กดตกลง</li>
-                      <li>**การติดตั้งบน iOS Safari (iPhone/iPad)**: กดปุ่ม **"แชร์ (Share)"** ตรงแถบเมนูด้านล่าง แล้วเลือก **"เพิ่มไปยังหน้าจอโฮม (Add to Home Screen)"**</li>
+                      <li><strong>การติดตั้งบน Google Chrome (PC)</strong>: สังเกตที่ช่องกรอก URL ด้านบนขวา จะมีสัญลักษณ์ <strong>"ติดตั้งแอป (Install App)"</strong> หรือรูปหน้าต่างพร้อมลูกศรชี้ลง ให้กดตกลง</li>
+                      <li><strong>การติดตั้งบน iOS Safari (iPhone/iPad)</strong>: กดปุ่ม <strong>"แชร์ (Share)"</strong> ตรงแถบเมนูด้านล่าง แล้วเลือก <strong>"เพิ่มไปยังหน้าจอโฮม (Add to Home Screen)"</strong></li>
                     </ul>
                   </div>
                 </div>
@@ -752,10 +753,10 @@ export function Help({ v }) {
                   <span style={css(`color:var(--green-700);`)}>📈</span> 3. ระบบวิเคราะห์และปรับปรุงคลัง (Inventory Optimization)
                 </div>
                 <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
-                  <div>**การใช้งานระบบวิเคราะห์สต็อก:**
+                  <div><strong>การใช้งานระบบวิเคราะห์สต็อก:</strong>
                     <ul style={css(`margin:4px 0; padding-left:14px;`)}>
-                      <li>**Dead Stock (น้ำยาแช่ตกค้าง)**: แสดงยอดน้ำยาที่มีของในตู้เย็น แต่ไม่มีบันทึกการเบิกใช้เลยติดต่อกันเกิน **60 วัน** เพื่อป้องกันการหมดอายุคาตู้</li>
-                      <li>**Dynamic Min (จุดสั่งซื้อแนะนำ)**: ระบบคำนวณยอดใช้เฉลี่ยรายเดือนจริงในช่วง 90 วันล่าสุด และแนะค่า Min ที่เหมาะสม เช่น หากใช้น้อยลง ระบบจะแนะนำให้ลดค่า Min เพื่อลดพื้นที่เก็บ และลดภาระทุนจม</li>
+                      <li><strong>Dead Stock (น้ำยาแช่ตกค้าง)</strong>: แสดงยอดน้ำยาที่มีของในตู้เย็น แต่ไม่มีบันทึกการเบิกใช้เลยติดต่อกันเกิน <strong>60 วัน</strong> เพื่อป้องกันการหมดอายุคาตู้</li>
+                      <li><strong>Dynamic Min (จุดสั่งซื้อแนะนำ)</strong>: ระบบคำนวณยอดใช้เฉลี่ยรายเดือนจริงในช่วง 90 วันล่าสุด และแนะค่า Min ที่เหมาะสม เช่น หากใช้น้อยลง ระบบจะแนะนำให้ลดค่า Min เพื่อลดพื้นที่เก็บ และลดภาระทุนจม</li>
                     </ul>
                   </div>
                 </div>
@@ -765,6 +766,230 @@ export function Help({ v }) {
           </div>
         )}
 
+        {/* Tab 10: Downtime plan.
+            The app is browser-only with no offline mode, so an internet or
+            platform outage takes away expiry checking, FEFO issuing and every
+            movement record at once. This tab is the paper procedure for that
+            window, plus the form the lab writes on while the system is down. */}
+        {activeTab === 'downtime' && (
+          <div style={css(`display:flex; flex-direction:column; gap:24px;`)}>
+            <div>
+              <h2 style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary); margin:0 0 8px 0;`)}>
+                แผนรองรับเมื่อระบบใช้งานไม่ได้ (Downtime Plan)
+              </h2>
+              <p style={css(`font:var(--text-sm)/1.6 var(--font-body); color:var(--text-secondary); margin:0; max-width:78ch;`)}>
+                ระบบนี้ทำงานผ่านอินเทอร์เน็ตทั้งหมด ไม่มีโหมดออฟไลน์ หากเปิดใช้งานไม่ได้จะ<strong> ตรวจสอบวันหมดอายุ เบิกจ่ายตามหลัก FEFO และบันทึกการเคลื่อนไหวไม่ได้ทันที</strong> ขั้นตอนด้านล่างคือสิ่งที่ต้องทำระหว่างนั้น เพื่อให้งานเดินต่อได้และข้อมูลไม่สูญหาย
+              </p>
+            </div>
+
+            {/* Print the paper fallback form */}
+            <div style={css(`background:var(--amber-100); border:1px solid var(--amber-fill); border-radius:var(--radius-lg); padding:16px 20px; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;`)}>
+              <div style={css(`font:var(--text-xs)/1.6 var(--font-body); color:var(--amber-700); max-width:64ch;`)}>
+                <strong>เตรียมล่วงหน้า:</strong> พิมพ์ฟอร์มกระดาษสำรองเก็บใส่แฟ้มไว้ที่คลังน้ำยาอย่างน้อย 10 ชุด — ตอนระบบล่มจะเปิดหน้านี้เพื่อสั่งพิมพ์ไม่ได้
+              </div>
+              <button onClick={() => window.print()}
+                style={css(`padding:10px 18px; border-radius:var(--radius-md); border:none; background:var(--accent-600); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body); white-space:nowrap; box-shadow:var(--glow-accent);`)}>
+                🖨 พิมพ์ฟอร์มกระดาษสำรอง
+              </button>
+            </div>
+
+            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; align-items:flex-start;`)}>
+
+              {/* Step 1 — triage */}
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span className="hlp-dot-crit" style={css(`color:var(--red-700);`)}>●</span> 1. ตรวจสอบก่อนว่าเป็นที่อะไร
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.6;`)}>
+                  <ul style={css(`margin:0; padding-left:16px; display:flex; flex-direction:column; gap:7px;`)}>
+                    <li><strong>เข้าสู่ระบบไม่ได้ ขึ้นว่าผิดหลายครั้ง</strong> — ระบบล็อกบัญชี 15 นาทีเพื่อกันการเดารหัส ให้รอครบเวลาแล้วลองใหม่ ไม่ใช่ระบบล่ม</li>
+                    <li><strong>เว็บเปิดไม่ขึ้นทั้งหน้า</strong> — ลองเปิดเว็บอื่นดู ถ้าเปิดไม่ได้เหมือนกันคือ<strong>อินเทอร์เน็ตของห้องแล็บ</strong> ให้แจ้งฝ่าย IT โรงพยาบาล</li>
+                    <li><strong>เว็บเปิดได้แต่ข้อมูลไม่ขึ้น / ขึ้นแจ้งเตือนสีแดง</strong> — เป็นที่ฐานข้อมูลหรือผู้ให้บริการ ให้แจ้งผู้ดูแลระบบตามข้อ 5</li>
+                  </ul>
+                  <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:10px 12px;`)}>
+                    ⏱ <strong>ไม่ต้องรอนาน</strong> — ถ้าเกิน 10 นาทีแล้วยังใช้ไม่ได้ ให้เปลี่ยนไปใช้ฟอร์มกระดาษทันที อย่าหยุดงานรอระบบ
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2 — work on paper */}
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span>📝</span> 2. ระหว่างระบบใช้ไม่ได้ — บันทึกลงกระดาษ
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.6;`)}>
+                  <ul style={css(`margin:0; padding-left:16px; display:flex; flex-direction:column; gap:7px;`)}>
+                    <li>หยิบ <strong>ฟอร์มบันทึกสำรอง (FM-LAB-DT-01)</strong> จากแฟ้มที่คลังน้ำยา</li>
+                    <li>ทุกครั้งที่ <strong>รับเข้า</strong> หรือ <strong>เบิกจ่าย</strong> ให้เขียนลงฟอร์ม ห้ามข้าม แม้จะจำได้ก็ตาม</li>
+                    <li>เขียนให้ครบ: วันเวลา · ชื่อน้ำยา · <strong>เลข Lot</strong> · วันหมดอายุ · จำนวน · ผู้ทำรายการ · ลงชื่อ</li>
+                    <li>การเบิกจ่ายยังต้องยึด <strong>หมดอายุก่อน–เบิกก่อน (FEFO)</strong> เหมือนเดิม โดยดูจากวันหมดอายุที่ฉลากขวดจริง</li>
+                    <li>ถ้าต้องติดฉลากน้ำยาที่เตรียมใหม่ ให้เขียนฉลากด้วยมือ แล้วบันทึกลงฟอร์มด้วย เพื่อคีย์เข้าระบบย้อนหลังภายหลัง</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Step 3 — catch up */}
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span>⏪</span> 3. เมื่อระบบกลับมา — คีย์ย้อนหลัง
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.6;`)}>
+                  <ul style={css(`margin:0; padding-left:16px; display:flex; flex-direction:column; gap:7px;`)}>
+                    <li>คีย์รายการจากฟอร์มกระดาษเข้าระบบ <strong>เรียงตามลำดับเวลาที่เกิดจริง</strong> (รายการแรกสุดก่อน) เพื่อให้ยอดคงเหลือเดินถูกต้อง</li>
+                    <li>ใส่วันเวลาที่เกิดจริงลงในช่อง <strong>เลขที่อ้างอิง</strong> เช่น <code>ตามฟอร์ม DT 6 ส.ค. 69 เวลา 09:15</code></li>
+                    <li>คีย์ครบแล้วให้ไปที่ <strong>ตรวจนับคลัง</strong> เพื่อตรวจว่ายอดในระบบตรงกับของจริงในตู้</li>
+                    <li>ลงชื่อผู้คีย์และผู้ตรวจสอบในท้ายฟอร์ม แล้ว<strong>เก็บฟอร์มเข้าแฟ้ม ห้ามทิ้ง</strong></li>
+                  </ul>
+                  <div style={css(`background:var(--amber-100); border:1px solid var(--amber-fill); border-radius:var(--radius-md); padding:10px 12px; color:var(--amber-700);`)}>
+                    ⚠️ <strong>ข้อควรรู้:</strong> รายการที่คีย์ย้อนหลังจะถูกบันทึกด้วย<strong>เวลาที่คีย์</strong> ไม่ใช่เวลาที่ทำจริง ระบบออกแบบให้แก้ย้อนหลังไม่ได้เพื่อกันการปลอมแปลง ดังนั้น <strong>ฟอร์มกระดาษคือหลักฐานหลักของช่วงเวลานั้น</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 4 — prevention */}
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span style={css(`color:var(--green-700);`)}>🛡️</span> 4. เตรียมล่วงหน้า (ทำเป็นประจำ)
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.6;`)}>
+                  <ul style={css(`margin:0; padding-left:16px; display:flex; flex-direction:column; gap:7px;`)}>
+                    <li><strong>สำรองข้อมูลทุกสัปดาห์</strong> — ผู้ดูแลระบบกดปุ่มสำรองข้อมูล แล้วเก็บไฟล์ไว้อย่างน้อย 2 ที่ (เครื่องคอมพ์ + ไดรฟ์ของหน่วยงาน) ไฟล์สำรอง<strong>ไม่มีรหัสผ่านติดไปด้วย</strong> จึงเก็บได้อย่างปลอดภัย</li>
+                    <li><strong>พิมพ์รายการ Lot ใกล้หมดอายุทุกสัปดาห์</strong> จากหน้าการแจ้งเตือน เก็บใส่แฟ้ม — ตอนระบบล่มจะได้ยังตรวจสอบวันหมดอายุและเบิกตาม FEFO ได้</li>
+                    <li><strong>เก็บฟอร์มกระดาษสำรองไว้อย่างน้อย 10 ชุด</strong> ในแฟ้มที่คลังน้ำยา</li>
+                    <li>อย่าให้เหลือผู้ดูแลระบบ (Admin) เพียงคนเดียว ควรมีอย่างน้อย 2 คน เผื่อคนหนึ่งลาหรือติดต่อไม่ได้</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Step 5 — contacts */}
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span>📞</span> 5. ติดต่อใคร
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.6;`)}>
+                  <div style={css(`background:var(--surface-card); border:1px dashed var(--border-default); border-radius:var(--radius-md); padding:12px 14px; display:flex; flex-direction:column; gap:8px;`)}>
+                    <div>ผู้ดูแลระบบคลังน้ำยา: <strong>............................................</strong> โทร <strong>........................</strong></div>
+                    <div>หัวหน้าห้องปฏิบัติการ: <strong>............................................</strong> โทร <strong>........................</strong></div>
+                    <div>ฝ่าย IT โรงพยาบาล (กรณีเน็ตล่ม): โทร <strong>........................</strong></div>
+                  </div>
+                  <div style={css(`color:var(--text-tertiary);`)}>
+                    ※ ช่องว่างด้านบนให้เขียนเติมลงในเอกสารที่พิมพ์ออกมา หรือแจ้งผู้พัฒนาให้ใส่ชื่อ–เบอร์ลงในระบบถาวรก็ได้
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* ── Printed paper fallback form (screen-hidden) ─────────────────── */}
+      <style>{`
+        @page { size: A4 portrait; margin: 1.5cm; }
+        @media print {
+          *, *::before, *::after {
+            background-color: transparent !important; color: #000 !important;
+            box-shadow: none !important; text-shadow: none !important;
+          }
+          html, body, #root, main, .qms-rise, .dt-doc, .dt-doc * {
+            background: #ffffff !important; color: #000000 !important;
+          }
+          html, body, #root, #root > div, main, .qms-rise {
+            height: auto !important; min-height: auto !important;
+            overflow: visible !important; display: block !important; position: static !important;
+          }
+          aside, header, button, .no-print, nav,
+          .qms-rise > *:not(.dt-doc), [class*="Sidebar"], [class*="Header"] { display: none !important; }
+          main, .qms-rise { padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+          .dt-doc {
+            display: block !important; width: 17.8cm !important; max-width: 17.8cm !important;
+            margin: 0 auto !important; padding: 0 !important; box-sizing: border-box;
+          }
+          .dt-table { width: 100% !important; border-collapse: collapse !important; margin-top: 6px !important; }
+          .dt-table th, .dt-table td {
+            border: 1px solid #7a7a7a !important; padding: 3px 5px !important;
+            font-size: 8px !important; color: #000 !important; vertical-align: middle !important;
+          }
+          .dt-table th { background: #ececec !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-weight: bold !important; }
+          /* Hand-written rows need real height to write in. */
+          .dt-table tbody tr { height: 26px !important; page-break-inside: avoid !important; }
+          .dt-signoff { page-break-inside: avoid !important; }
+        }
+        @media screen { .dt-doc { display: none; } }
+      `}</style>
+
+      <div className="dt-doc" style={css(`color:#000; font-family:var(--font-body);`)}>
+        <div style={css(`display:flex; align-items:center; gap:12px; border-bottom:2px solid #000; padding-bottom:8px;`)}>
+          <div style={css(`width:52px; height:52px; border-radius:50%; overflow:hidden; flex-shrink:0;`)}>
+            <img src="/assets/tuh_lab_logo.jpg" alt="TUH Logo" style={{ width: '102%', height: '102%', objectFit: 'cover', borderRadius: '50%' }} />
+          </div>
+          <div style={css(`flex:1; text-align:left;`)}>
+            <h1 style={css(`margin:0; font-size:13px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์</h1>
+            <div style={css(`margin:0; font-size:12px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>ห้องปฏิบัติการเทคนิคการแพทย์</div>
+            <div style={css(`margin:0; font-size:12px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ</div>
+            <h3 style={css(`margin:6px 0 0; font-size:12px; font-weight:bold; color:#111;`)}>ฟอร์มบันทึกสำรองเมื่อระบบคลังน้ำยาใช้งานไม่ได้ (Downtime Log)</h3>
+          </div>
+          <div style={css(`text-align:right; font-size:8px; color:#333; line-height:1.5; flex-shrink:0;`)}>
+            <div style={css(`font-weight:bold;`)}>FM-LAB-DT-01</div>
+            <div>แก้ไขครั้งที่ 00</div>
+            <div>หน้า ........ / ........</div>
+          </div>
+        </div>
+
+        <div style={css(`font-size:9px; color:#000; margin-top:8px; line-height:2.1;`)}>
+          <div>วันที่เกิดเหตุ ................................................ ระบบใช้งานไม่ได้ตั้งแต่เวลา .................... น. ถึงเวลา .................... น.</div>
+          <div>อาการ / สาเหตุที่พบ ..............................................................................................................................................................</div>
+          <div>ผู้บันทึกประจำเวร ................................................................ แจ้งผู้ดูแลระบบเมื่อเวลา .................... น.</div>
+        </div>
+
+        <table className="dt-table">
+          <thead>
+            <tr>
+              <th style={{ width: '4%' }}>ที่</th>
+              <th style={{ width: '11%' }}>วัน–เวลาที่ทำจริง</th>
+              <th style={{ width: '11%' }}>รับเข้า / เบิกจ่าย</th>
+              <th style={{ width: '21%' }}>ชื่อน้ำยา</th>
+              <th style={{ width: '12%' }}>เลข Lot</th>
+              <th style={{ width: '11%' }}>วันหมดอายุ</th>
+              <th style={{ width: '8%' }}>จำนวน</th>
+              <th style={{ width: '11%' }}>ผู้ทำรายการ</th>
+              <th style={{ width: '11%' }}>ลงชื่อ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* Blank rows to write on. 14 fills an A4 page without crowding. */}
+            {Array.from({ length: 14 }, (_, i) => (
+              <tr key={i}>
+                <td style={{ textAlign: 'center' }}>{i + 1}</td>
+                <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <div style={css(`margin-top:10px; border:1px solid #7a7a7a; padding:8px 10px; font-size:8.5px; line-height:1.9; color:#000;`)}>
+          <div style={css(`font-weight:bold; margin-bottom:3px;`)}>ส่วนที่ 2 — ยืนยันการคีย์ข้อมูลย้อนหลังเข้าระบบ (กรอกเมื่อระบบกลับมาใช้งานได้แล้ว)</div>
+          <div>คีย์ข้อมูลย้อนหลังครบถ้วนเมื่อวันที่ ............................ เวลา .................... น. · จำนวนรายการที่คีย์ ............ รายการ</div>
+          <div>ตรวจนับคลังเทียบยอดหลังคีย์: ☐ ตรงกัน ☐ ไม่ตรงกัน (ระบุส่วนต่างและการแก้ไข) ..........................................................</div>
+        </div>
+
+        <div className="dt-signoff" style={css(`display:flex; justify-content:space-around; gap:24px; margin-top:22px; font-size:9px; color:#000;`)}>
+          <div style={css(`text-align:center; width:200px;`)}>
+            <p style={css(`margin:0 0 24px;`)}>ลงชื่อ.................................................</p>
+            <p style={css(`margin:0; font-weight:bold;`)}>( ............................................. )</p>
+            <p style={css(`margin:2px 0 0; color:#666;`)}>ผู้คีย์ข้อมูลย้อนหลัง</p>
+          </div>
+          <div style={css(`text-align:center; width:200px;`)}>
+            <p style={css(`margin:0 0 24px;`)}>ลงชื่อ.................................................</p>
+            <p style={css(`margin:0; font-weight:bold;`)}>( ............................................. )</p>
+            <p style={css(`margin:2px 0 0; color:#666;`)}>หัวหน้าห้องปฏิบัติการ / ผู้ตรวจสอบ</p>
+          </div>
+        </div>
+
+        <p style={css(`margin-top:14px; font-size:7.5px; color:#555; border-top:1px solid #ccc; padding-top:5px; line-height:1.6;`)}>
+          ฟอร์มนี้เป็นหลักฐานหลักของการรับเข้า–เบิกจ่ายในช่วงที่ระบบใช้งานไม่ได้ เนื่องจากรายการที่คีย์ย้อนหลังจะถูกบันทึกด้วยเวลาที่คีย์ ไม่ใช่เวลาที่เกิดจริง · เก็บเข้าแฟ้มหลังคีย์ข้อมูลและลงนามครบถ้วนแล้ว
+        </p>
       </div>
     </div>
   );
