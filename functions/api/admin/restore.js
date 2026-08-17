@@ -60,7 +60,10 @@ export async function onRequestPost(context) {
           env.DB.prepare(
             `INSERT INTO lots (id, rid, lot, expiry, recv, qty, loc, qr, status)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-          ).bind(l.id, l.rid, l.lot, l.expiry, l.recv, l.qty, l.loc, l.qr, l.status)
+          // Older backup files can contain lots whose `recv` drifted below
+          // `qty` (a bug since fixed). Repairing on the way in keeps a restore
+          // from aborting wholesale on historical data the lab can't edit.
+          ).bind(l.id, l.rid, l.lot, l.expiry, Math.max(l.recv ?? 0, l.qty ?? 0), l.qty, l.loc, l.qr, l.status)
         );
       }
     }
