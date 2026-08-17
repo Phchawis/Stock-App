@@ -43,7 +43,7 @@ export function IssueModal({ v }) {
     setCameraReady(false);
     setJustScanned(false);
 
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
       if (!active) return;
       try {
         // Constructor options only pick the DECODER — they never touch
