@@ -267,7 +267,7 @@ export function StickerLog({ v }) {
             {/* Unit → department → institution, the order an official Thai
                 form is read in. Stacked rather than run together on one line so
                 the issuing unit stays the most prominent name on the page. */}
-            <h1 style={css(`margin:0; font-size:13px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์</h1>
+            <h1 style={css(`margin:0; font-size:13px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>หมวดงานปฏิบัติการตรวจวินิจฉัยทางการแพทย์</h1>
             <div style={css(`margin:0; font-size:12px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>ห้องปฏิบัติการเทคนิคการแพทย์</div>
             <div style={css(`margin:0; font-size:12px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ</div>
             <h2 style={css(`margin:2px 0 0; font-size:9px; font-weight:normal; color:#444;`)}>Thammasat University Hospital Laboratory Center</h2>

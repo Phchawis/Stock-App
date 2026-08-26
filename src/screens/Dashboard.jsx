@@ -901,7 +901,7 @@ export function Dashboard({ v }) {
               );
             })()}
             <p style={css(`margin-top:6px; font-weight:bold;`)}>( ทนพญ.เบญจวรรณ รุ่งเรือง )</p>
-            <p style={css(`margin-top:2px; color:#666;`)}>หัวหน้าหมวดงานศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์</p>
+            <p style={css(`margin-top:2px; color:#666;`)}>หัวหน้าหมวดงานปฏิบัติการตรวจวินิจฉัยทางการแพทย์</p>
           </div>
         </div>
       </div>

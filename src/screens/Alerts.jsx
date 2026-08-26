@@ -382,7 +382,7 @@ export function Alerts({ v }) {
           <div style={css(`flex:1; text-align:left;`)}>
             {/* Same masthead as the preparation record — both are official forms
                 issued by this unit, so they must name it identically. */}
-            <h1 style={css(`margin:0; font-size:13px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์</h1>
+            <h1 style={css(`margin:0; font-size:13px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>หมวดงานปฏิบัติการตรวจวินิจฉัยทางการแพทย์</h1>
             <div style={css(`margin:0; font-size:12px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>ห้องปฏิบัติการเทคนิคการแพทย์</div>
             <div style={css(`margin:0; font-size:12px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ</div>
             <h2 style={css(`margin:2px 0 0; font-size:9px; font-weight:normal; color:#444;`)}>Thammasat University Hospital Laboratory Center</h2>
@@ -443,7 +443,7 @@ export function Alerts({ v }) {
                 name here would put one person's signature over another person's
                 name on a purchasing document. */}
             <p style={css(`margin-top:6px; font-weight:bold;`)}>( {supervisorName} )</p>
-            <p style={css(`margin-top:2px; color:#666;`)}>หัวหน้าหมวดงานศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์</p>
+            <p style={css(`margin-top:2px; color:#666;`)}>หัวหน้าหมวดงานปฏิบัติการตรวจวินิจฉัยทางการแพทย์</p>
           </div>
         </div>
       </div>

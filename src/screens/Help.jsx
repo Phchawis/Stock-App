@@ -996,7 +996,7 @@ export function Help({ v }) {
             <img src="/assets/tuh_lab_logo.jpg" alt="TUH Logo" style={{ width: '102%', height: '102%', objectFit: 'cover', borderRadius: '50%' }} />
           </div>
           <div style={css(`flex:1; text-align:left;`)}>
-            <h1 style={css(`margin:0; font-size:13px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์</h1>
+            <h1 style={css(`margin:0; font-size:13px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>หมวดงานปฏิบัติการตรวจวินิจฉัยทางการแพทย์</h1>
             <div style={css(`margin:0; font-size:12px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>ห้องปฏิบัติการเทคนิคการแพทย์</div>
             <div style={css(`margin:0; font-size:12px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ</div>
             <h3 style={css(`margin:6px 0 0; font-size:12px; font-weight:bold; color:#111;`)}>ฟอร์มบันทึกสำรองเมื่อระบบคลังน้ำยาใช้งานไม่ได้ (Downtime Log)</h3>

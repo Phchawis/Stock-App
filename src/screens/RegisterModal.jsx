@@ -19,7 +19,7 @@ export function RegisterModal({ v }) {
   const catOpts = CATEGORIES;
 
   const parentCatOpts = [
-    { value: 'MDC', label: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์' }
+    { value: 'MDC', label: 'ปฏิบัติการตรวจวินิจฉัยทางการแพทย์' }
   ];
 
   const unitOpts = [
@@ -170,7 +170,7 @@ export function RegisterModal({ v }) {
                 label="หมวดงาน" 
                 required={true}
                 options={[
-                  { value: 'MDC', label: 'ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์' }
+                  { value: 'MDC', label: 'ปฏิบัติการตรวจวินิจฉัยทางการแพทย์' }
                 ]}
                 value="MDC"
                 onChange={() => {}}

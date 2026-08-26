@@ -296,7 +296,7 @@ export function ReagentLists({ v }) {
                       <div>
                         <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs); text-transform:uppercase;`)}>หมวดงาน</div>
                         <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); margin-top:2px;`)}>
-                          ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์
+                          ปฏิบัติการตรวจวินิจฉัยทางการแพทย์
                         </div>
                       </div>
                       <div>

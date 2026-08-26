@@ -34,7 +34,7 @@ export function Login({ v }) {
                 size is capped to what that line can hold — at a flat 26px it
                 wrapped and left "แพทย์" orphaned on its own row. */}
             <div style={css(`font:700 clamp(17px, 1.45vw, 23px)/1.35 'Anuphan',sans-serif; letter-spacing:-.01em; text-wrap:balance;`)}>
-              ระบบบริหารคลังน้ำยา<br />และสารเคมีวิเคราะห์<br />ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์<br />ห้องปฏิบัติการเทคนิคการแพทย์
+              ระบบบริหารคลังน้ำยา<br />และสารเคมีวิเคราะห์<br />หมวดงานปฏิบัติการตรวจวินิจฉัยทางการแพทย์<br />ห้องปฏิบัติการเทคนิคการแพทย์
             </div>
             <div style={css(`margin-top:12px; font:400 15px/1.7 'Sarabun',sans-serif; color:#E7E9F8; max-width:34ch;`)}>
               โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ · คลังควบคุมและติดตามการใช้งานอย่างเป็นระบบตามเกณฑ์มาตรฐาน Quality Management System

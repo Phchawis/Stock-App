@@ -101,7 +101,7 @@ export function DetailDrawer({ v }) {
               <span style={css(`display:grid; place-items:center;`)}>{ic.pkg}</span>
               หมวดงาน&nbsp;
               <strong style={css(`color:var(--text-primary); font-weight:600;`)}>
-                ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์
+                ปฏิบัติการตรวจวินิจฉัยทางการแพทย์
               </strong>
               &nbsp;· ผู้ขาย {detail.supplier}
             </div>
