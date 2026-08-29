@@ -6,7 +6,7 @@ export function ReagentLists({ v }) {
   const {
     isReagentLists, reagentsList, activeLotsList, ic,
     canManage, openRegister, txnRows, openPrintSticker, deleteReagent, user,
-    updateReagentCategory, askConfirm,
+    updateReagentCategory, askConfirm, openSds,
   } = v;
 
   const isAdmin = user && user.roleId === 'admin';
@@ -352,6 +352,29 @@ export function ReagentLists({ v }) {
                       <div style={css(`grid-column:1/3; border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
                         <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs);`)}>ผู้จัดจำหน่าย</div>
                         <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary); margin-top:2px;`)}>{r.supplier}</div>
+                      </div>
+
+                      {/* Safety data sheet. A reagent with no SDS is stated as
+                          such rather than left blank — an empty row reads as
+                          "nothing to see", and a missing SDS is a finding an
+                          inspector will raise. */}
+                      <div style={css(`grid-column:1/3; border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
+                        <div style={css(`color:var(--text-tertiary); font-size:var(--text-3xs);`)}>เอกสารความปลอดภัย (SDS)</div>
+                        {r.sdsFile ? (
+                          <div style={css(`margin-top:4px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;`)}>
+                            <span style={css(`font:var(--text-2xs)/1.4 var(--font-mono); color:var(--text-secondary); word-break:break-all; flex:1; min-width:150px;`)}>
+                              📄 {r.sdsFile}
+                            </span>
+                            <button type="button" onClick={() => openSds(r)}
+                              style={css(`padding:6px 13px; border-radius:var(--radius-sm); border:none; background:var(--accent-600); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-3xs)/1 var(--font-body); white-space:nowrap;`)}>
+                              เปิดเอกสาร
+                            </button>
+                          </div>
+                        ) : (
+                          <div style={css(`margin-top:4px; display:inline-block; padding:4px 10px; border-radius:999px; background:var(--amber-100); color:var(--amber-700); font:var(--fw-semibold) var(--text-3xs)/1.4 var(--font-body);`)}>
+                            ยังไม่มีเอกสาร SDS
+                          </div>
+                        )}
                       </div>
                       
                       <div style={css(`grid-column:1/3; border-top:1px dashed var(--border-subtle); padding-top:6px; display:flex; justify-content:space-between; align-items:center;`)}>

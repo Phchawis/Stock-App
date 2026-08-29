@@ -20,6 +20,7 @@ import { Login } from './screens/Login.jsx';
 import { RegisterModal } from './screens/RegisterModal.jsx';
 import { AddUserModal } from './screens/AddUserModal.jsx';
 import { PrintStickerModal } from './screens/PrintStickerModal.jsx';
+import { SdsModal } from './screens/SdsModal.jsx';
 import { EditLotModal } from './screens/EditLotModal.jsx';
 import { EditTransactionModal } from './screens/EditTransactionModal.jsx';
 import { DisposeLotModal } from './screens/DisposeLotModal.jsx';
@@ -282,6 +283,18 @@ class App extends React.Component {
       }
     });
   }
+  openSds(reagent) {
+    this.setState({
+      modal: 'sds',
+      sdsData: {
+        reagentName: reagent.th || reagent.en || '',
+        file: reagent.sdsFile || '',
+        url: reagent.sdsUrl || '',
+      },
+    });
+  }
+  closeSds() { this.setState({ modal: null, sdsData: null }); }
+
   openPrintSticker(lot, reagent) {
     this.setState({ printLotData: { lot, reagent }, modal: 'printSticker' });
   }
@@ -1809,6 +1822,11 @@ class App extends React.Component {
         return { level: 'ok', text: `สำรองข้อมูลล่าสุด ${h.lastBackupAt} โดย ${h.lastBackupBy || '—'}` };
       })(),
       errorsLast7Days: (S.health && S.role === 'admin') ? S.health.errorsLast7Days : 0,
+      modalSds: S.modal === 'sds',
+      sdsData: S.sdsData || null,
+      closeSds: () => this.closeSds(),
+      openSds: (reagent) => this.openSds(reagent),
+      sdsFolderUrl: (S.settings && S.settings.sds_folder_url) || '',
       stickerLogsFullyLoaded: !!S.stickerLogsFullyLoaded,
       loadingFullStickerLogs: !!S.loadingFullStickerLogs,
       loadFullStickerLogs: () => this.loadFullStickerLogs(),
@@ -1983,6 +2001,7 @@ class App extends React.Component {
       <RegisterModal v={v} />
       <AddUserModal v={v} />
       <PrintStickerModal v={v} />
+      <SdsModal v={v} />
       <EditLotModal v={v} />
       <EditTransactionModal v={v} />
       <DisposeLotModal v={v} />

@@ -14,7 +14,8 @@ export async function onRequestGet(context) {
     const mapped = results.map((r) => ({
       id: r.id, code: r.code, th: r.th, en: r.en, cat: r.cat, unit: r.unit,
       subUnit: r.subUnit || '', testsPerUnit: r.testsPerUnit, storage: r.storage,
-      min: r.min_qty, reorder: r.reorder_qty, supplier: r.supplier, img: r.img
+      min: r.min_qty, reorder: r.reorder_qty, supplier: r.supplier, img: r.img,
+      sdsFile: r.sds_file || '', sdsUrl: r.sds_url || '', sdsSource: r.sds_source || ''
     }));
     return json(mapped);
   } catch (err) {
@@ -103,6 +104,37 @@ export async function onRequestDelete(context) {
       ).bind(refString, actor, timestamp)
     ]);
     return json({ success: true, id: Number(id) });
+  } catch (err) {
+    return json({ error: err.message }, 500);
+  }
+}
+
+// PATCH — set or clear a reagent's SDS link (perm: manage).
+// Separate from the full PUT because filling in Drive links is its own task,
+// often done in bulk, and must not require re-sending every catalogue field.
+export async function onRequestPatch(context) {
+  const denied = await requirePerm(context, { perm: 'manage' });
+  if (denied) return denied;
+  const { env, request } = context;
+  try {
+    const { id, sdsUrl, sdsFile } = await request.json();
+    if (!id) return json({ error: 'Missing reagent id' }, 400);
+
+    const url = (sdsUrl || '').trim();
+    // Only ever store an http(s) link. A `javascript:` or `data:` URL here would
+    // execute the moment somebody opened the document from the reagent page.
+    if (url && !/^https?:\/\//i.test(url)) {
+      return json({ error: 'ลิงก์ต้องขึ้นต้นด้วย http:// หรือ https:// เท่านั้น' }, 400);
+    }
+
+    const sets = ['sds_url = ?'];
+    const binds = [url || null];
+    if (sdsFile !== undefined) { sets.push('sds_file = ?'); binds.push((sdsFile || '').trim() || null); }
+    binds.push(id);
+
+    const res = await env.DB.prepare(`UPDATE reagents SET ${sets.join(', ')} WHERE id = ?`).bind(...binds).run();
+    if (!res.meta || res.meta.changes === 0) return json({ error: 'ไม่พบน้ำยานี้' }, 404);
+    return json({ success: true, id: +id, sdsUrl: url });
   } catch (err) {
     return json({ error: err.message }, 500);
   }
