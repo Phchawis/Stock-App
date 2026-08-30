@@ -26,67 +26,65 @@ import { EditTransactionModal } from './screens/EditTransactionModal.jsx';
 import { DisposeLotModal } from './screens/DisposeLotModal.jsx';
 import { SignatureModal } from './screens/SignatureModal.jsx';
 
-function triggerConfetti() {
-  const canvas = document.createElement('canvas');
-  canvas.style.position = 'fixed';
-  canvas.style.inset = '0';
-  canvas.style.pointerEvents = 'none';
-  canvas.style.zIndex = '9999';
-  document.body.appendChild(canvas);
+// Brief confirmation that a write actually landed — a green tick that pops in
+// over the centre of the screen and fades out.
+//
+// This replaced a full-screen confetti burst. Receiving and issuing happen
+// dozens of times a shift, and ninety falling pieces of paper on every one of
+// them stopped reading as celebration long before the end of the day; it also
+// sat oddly in a hospital lab with an assessor watching over your shoulder.
+// Same visual language as the QR scan-success badge, so "it worked" looks the
+// same everywhere in the app.
+function triggerSuccessPop() {
+  // Never stack: a second confirmation replaces the first rather than
+  // animating on top of it.
+  const prev = document.getElementById('tuh-success-pop');
+  if (prev) prev.remove();
 
-  const ctx = canvas.getContext('2d');
-  let W = (canvas.width = window.innerWidth);
-  let H = (canvas.height = window.innerHeight);
+  const host = document.createElement('div');
+  host.id = 'tuh-success-pop';
+  // pointer-events:none so the confirmation can never swallow a click meant
+  // for the screen underneath.
+  host.style.cssText =
+    'position:fixed;inset:0;pointer-events:none;z-index:9999;display:grid;place-items:center';
+  host.innerHTML =
+    '<svg width="88" height="88" viewBox="0 0 88 88" aria-hidden="true">' +
+      '<circle cx="44" cy="44" r="44" fill="#38B673"/>' +
+      '<path d="M27 45.5 l11 11 l23 -25" fill="none" stroke="#08202A" ' +
+        'stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '</svg>';
+  document.body.appendChild(host);
 
-  const colors = ['#0E9587', '#1A93B3', '#5BC0D9', '#E8F0F4', '#FFC107', '#E91E63'];
-  const particles = Array.from({ length: 90 }, () => {
-    return {
-      x: W / 2,
-      y: H / 2 - 50,
-      vx: (Math.random() - 0.5) * 16,
-      vy: (Math.random() - 0.7) * 20 - 4,
-      size: Math.random() * 8 + 6,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      rotation: Math.random() * 360,
-      rSpeed: (Math.random() - 0.5) * 10,
-      alpha: 1,
-      decay: Math.random() * 0.015 + 0.01
-    };
-  });
+  const done = () => { if (host.parentNode) host.remove(); };
 
-  let active = true;
-  function update() {
-    ctx.clearRect(0, 0, W, H);
-    let alive = false;
-
-    particles.forEach((p) => {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy += 0.45; // gravity
-      p.vx *= 0.98; // resistance
-      p.rotation += p.rSpeed;
-      p.alpha -= p.decay;
-
-      if (p.alpha > 0) {
-        alive = true;
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate((p.rotation * Math.PI) / 180);
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.alpha;
-        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-        ctx.restore();
-      }
-    });
-
-    if (alive && active) {
-      requestAnimationFrame(update);
-    } else {
-      if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
-    }
+  // Someone who has asked their device to reduce motion usually did so because
+  // movement makes them ill. They still get the confirmation — it just appears
+  // instead of springing.
+  const reduced = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced || typeof host.animate !== 'function') {
+    setTimeout(done, 900);
+    return;
   }
 
-  requestAnimationFrame(update);
+  const badge = host.firstChild;
+  badge.animate(
+    [
+      { transform: 'scale(.5)', opacity: 0 },
+      { transform: 'scale(1.12)', opacity: 1, offset: .6 },
+      { transform: 'scale(1)', opacity: 1 },
+    ],
+    { duration: 380, easing: 'cubic-bezier(.2,.9,.3,1.2)', fill: 'both' }
+  );
+
+  const out = badge.animate(
+    [{ opacity: 1 }, { opacity: 0 }],
+    { duration: 260, delay: 620, easing: 'ease-out', fill: 'both' }
+  );
+  out.onfinish = done;
+  // If the tab is backgrounded the animation may never finish; clean up anyway
+  // rather than leaving an invisible overlay on the page.
+  setTimeout(done, 1600);
 }
 
 class App extends React.Component {
@@ -739,7 +737,7 @@ class App extends React.Component {
         modal: null
       }));
       this.showToast(`ลงทะเบียนน้ำยา "${f.th}" สำเร็จ (รหัส: ${newReagent.code})`);
-      triggerConfetti();
+      triggerSuccessPop();
     } catch (err) {
       this.showToast(err.message, 'warn');
     }
@@ -979,7 +977,7 @@ class App extends React.Component {
           this.fetchData();
           this.setState({ view: 'inventory' }); // Go back to inventory view
           this.showToast('ปรับปรุงยอดสต็อกคลาดเคลื่อนเรียบร้อยแล้ว');
-          triggerConfetti();
+          triggerSuccessPop();
         } catch (err) {
           this.showToast(err.message, 'warn');
         }
@@ -1477,7 +1475,7 @@ class App extends React.Component {
       this.fetchData();
       const r = this.state.reagents.find(x => x.id === rid);
       this.showToast('รับเข้า ' + qty + ' ' + (r ? r.unit : '') + ' · Lot ' + f.lot + ' สำเร็จ');
-      triggerConfetti();
+      triggerSuccessPop();
     } catch (err) {
       this.showToast(err.message, 'warn');
     }
@@ -1514,7 +1512,7 @@ class App extends React.Component {
       this.fetchData();
       const r = this.state.reagents.find(x => x.id === rid);
       this.showToast('เบิกจ่าย ' + qty + ' ' + (r ? r.unit : '') + ' สำเร็จ');
-      triggerConfetti();
+      triggerSuccessPop();
     } catch (err) {
       this.showToast(err.message, 'warn');
     }
