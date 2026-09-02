@@ -535,8 +535,11 @@ export function Dashboard({ v }) {
               </div>
             </div>
             
-            {/* Panel D: Inventory Optimization */}
-            <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); padding:20px; display:flex; flex-direction:column; gap:16px; margin-top:20px;`)}>
+            {/* Panel D: Inventory Optimization.
+                grid-column spans the full width on purpose: this is the third
+                item in a two-column grid, so without it the panel sits in
+                column one and leaves the right half of the screen blank. */}
+            <div style={css(`grid-column:1/-1; background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); padding:22px 24px; display:flex; flex-direction:column; gap:16px; margin-top:20px;`)}>
               <div style={css(`font:var(--type-card-title); color:var(--text-primary); display:flex; align-items:center; gap:8px;`)}>
                 <span>✨ ระบบแนะนำการเพิ่มประสิทธิภาพคลัง (Inventory Optimization & Safety Stock Suggestions)</span>
               </div>
@@ -548,7 +551,7 @@ export function Dashboard({ v }) {
                 
                 {/* 1. Dead Stock Section */}
                 <div style={css(`background:var(--surface-sunken); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:12px;`)}>
-                  <div style={css(`font:var(--fw-bold) var(--text-xs)/1.2 var(--font-display); color:var(--text-primary); display:flex; align-items:center; gap:6px;`)}>
+                  <div style={css(`font:var(--fw-bold) var(--text-sm)/1.3 var(--font-display); color:var(--text-primary); display:flex; align-items:center; gap:7px;`)}>
                     <span>📦</span> {"น้ำยาแช่ตกค้างสะสม (Slow Moving / Dead Stock > 60 วัน)"}
                   </div>
                   
@@ -557,24 +560,24 @@ export function Dashboard({ v }) {
                       <span>✅</span> ยอดเยี่ยม: ไม่พบน้ำยาแช่ตกค้างที่ไม่มีการเบิกใช้เกิน 60 วัน
                     </div>
                   ) : (
-                    <div style={css(`overflow:auto; max-height:220px; border:1px solid var(--border-default); border-radius:var(--radius-sm); background:var(--white);`)}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10.5px', textAlign: 'left' }}>
+                    <div style={css(`overflow:auto; max-height:340px; border:1px solid var(--border-default); border-radius:var(--radius-sm); background:var(--white);`)}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left' }}>
                         <thead>
                           <tr style={{ background: 'var(--slate-50)', borderBottom: '1px solid var(--border-default)' }}>
-                            <th style={{ padding: '8px' }}>ชื่อน้ำยา</th>
-                            <th style={{ padding: '8px', textAlign: 'center' }}>คงคลัง</th>
-                            <th style={{ padding: '8px', textAlign: 'right' }}>เบิกใช้ล่าสุด</th>
+                            <th style={{ padding: '11px 12px' }}>ชื่อน้ำยา</th>
+                            <th style={{ padding: '11px 12px', textAlign: 'center' }}>คงคลัง</th>
+                            <th style={{ padding: '11px 12px', textAlign: 'right' }}>เบิกใช้ล่าสุด</th>
                           </tr>
                         </thead>
                         <tbody>
                           {deadStockReagents.map((item, idx) => (
                             <tr key={idx} style={{ borderBottom: idx < deadStockReagents.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
-                              <td style={{ padding: '8px', fontWeight: '600' }}>
+                              <td style={{ padding: '11px 12px', fontWeight: '600' }}>
                                 <div>{item.th}</div>
-                                <div style={{ fontSize: '9px', color: 'var(--text-tertiary)' }}>{item.en} ({item.code})</div>
+                                <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '2px' }}>{item.en} ({item.code})</div>
                               </td>
-                              <td style={{ padding: '8px', textAlign: 'center', fontFamily: 'var(--font-mono)' }}>{item.onHand} {item.unit}</td>
-                              <td style={{ padding: '8px', textAlign: 'right', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>{item.lastIssueDate}</td>
+                              <td style={{ padding: '11px 12px', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '14px' }}>{item.onHand} {item.unit}</td>
+                              <td style={{ padding: '11px 12px', textAlign: 'right', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>{item.lastIssueDate}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -585,7 +588,7 @@ export function Dashboard({ v }) {
 
                 {/* 2. Dynamic Min Suggestions Section */}
                 <div style={css(`background:var(--surface-sunken); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:12px;`)}>
-                  <div style={css(`font:var(--fw-bold) var(--text-xs)/1.2 var(--font-display); color:var(--text-primary); display:flex; align-items:center; gap:6px;`)}>
+                  <div style={css(`font:var(--fw-bold) var(--text-sm)/1.3 var(--font-display); color:var(--text-primary); display:flex; align-items:center; gap:7px;`)}>
                     <span>⚙️</span> คำแนะนำปรับจุดสั่งซื้อตามการใช้งานจริง (Dynamic Min Recommendations)
                   </div>
 
@@ -594,14 +597,14 @@ export function Dashboard({ v }) {
                       <span>✅</span> ทุกรายการมีจุดสั่งซื้อสั่งขั้นต่ำสอดคล้องกับอัตราการใช้งานจริงแล้ว
                     </div>
                   ) : (
-                    <div style={css(`overflow:auto; max-height:220px; border:1px solid var(--border-default); border-radius:var(--radius-sm); background:var(--white);`)}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10.5px', textAlign: 'left' }}>
+                    <div style={css(`overflow:auto; max-height:340px; border:1px solid var(--border-default); border-radius:var(--radius-sm); background:var(--white);`)}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left' }}>
                         <thead>
                           <tr style={{ background: 'var(--slate-50)', borderBottom: '1px solid var(--border-default)' }}>
-                            <th style={{ padding: '8px' }}>ชื่อน้ำยา</th>
-                            <th style={{ padding: '8px', textAlign: 'center' }}>ค่า Min เดิม</th>
-                            <th style={{ padding: '8px', textAlign: 'center', color: 'var(--brand-800)' }}>แนะนำ</th>
-                            <th style={{ padding: '8px', textAlign: 'right' }}>คำแนะนำ</th>
+                            <th style={{ padding: '11px 12px' }}>ชื่อน้ำยา</th>
+                            <th style={{ padding: '11px 12px', textAlign: 'center' }}>ค่า Min เดิม</th>
+                            <th style={{ padding: '11px 12px', textAlign: 'center', color: 'var(--brand-800)' }}>แนะนำ</th>
+                            <th style={{ padding: '11px 12px', textAlign: 'right' }}>คำแนะนำ</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -609,13 +612,13 @@ export function Dashboard({ v }) {
                             const isIncrease = item.direction === 'increase';
                             return (
                               <tr key={idx} style={{ borderBottom: idx < dynamicMinSuggestions.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
-                                <td style={{ padding: '8px', fontWeight: '600' }}>
+                                <td style={{ padding: '11px 12px', fontWeight: '600' }}>
                                   <div>{item.th}</div>
-                                  <div style={{ fontSize: '9px', color: 'var(--text-tertiary)' }}>ใช้เฉลี่ย {item.avgMonthly} {item.unit}/ด.</div>
+                                  <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '2px' }}>ใช้เฉลี่ย {item.avgMonthly} {item.unit}/ด.</div>
                                 </td>
-                                <td style={{ padding: '8px', textAlign: 'center', fontFamily: 'var(--font-mono)' }}>{item.currentMin}</td>
-                                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', color: isIncrease ? 'var(--red-700)' : 'var(--green-700)', fontFamily: 'var(--font-mono)' }}>{item.recommendedMin}</td>
-                                <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: isIncrease ? 'var(--amber-700)' : 'var(--green-700)' }}>
+                                <td style={{ padding: '11px 12px', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '14px' }}>{item.currentMin}</td>
+                                <td style={{ padding: '11px 12px', textAlign: 'center', fontWeight: 'bold', fontSize: '15px', color: isIncrease ? 'var(--red-700)' : 'var(--green-700)', fontFamily: 'var(--font-mono)' }}>{item.recommendedMin}</td>
+                                <td style={{ padding: '11px 12px', textAlign: 'right', fontWeight: 'bold', color: isIncrease ? 'var(--amber-700)' : 'var(--green-700)', whiteSpace: 'nowrap' }}>
                                   {isIncrease ? '📈 ควรเพิ่ม Min' : '📉 ควรลด Min'}
                                 </td>
                               </tr>
