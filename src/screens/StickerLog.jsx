@@ -183,7 +183,15 @@ export function StickerLog({ v }) {
     canBackfillStickerLog, addStickerLogBackfill, reagentsList, usersList,
   } = v;
 
-  const [kindFilter, setKindFilter] = React.useState('all');
+  // The form is a *preparation* record, so it opens on preparation events only.
+  //
+  // A QR label is an identity tag stuck on a box so it can be scanned; nothing
+  // was prepared, opened or given a new expiry when one was printed. They are
+  // also the overwhelming majority — over nine in ten rows — so leaving them in
+  // by default buried the twenty-odd rows the form exists to show. They are
+  // still recorded and still one dropdown away; they are just not what
+  // FM-LAB-PREP-01 is about.
+  const [kindFilter, setKindFilter] = React.useState('PREP');
   const [startDate, setStartDate] = React.useState('');
   const [endDate, setEndDate] = React.useState('');
   const [search, setSearch] = React.useState('');
@@ -193,9 +201,17 @@ export function StickerLog({ v }) {
 
   const isAdmin = user && user.roleId === 'admin';
 
+  const matchesKind = (r) => {
+    if (kindFilter === 'all') return true;
+    if (kindFilter === 'PREP') return r.kind !== 'LOT_QR';
+    return r.kind === kindFilter;
+  };
+
   const q = search.trim().toLowerCase();
-  const rows = stickerLogRows.filter(r => {
-    if (kindFilter !== 'all' && r.kind !== kindFilter) return false;
+  // Split in two so the summary tiles can report the true mix for the period
+  // while the table and the printed form show only the selected kinds. A tile
+  // reading "ฉลาก QR 0" under the default filter would look like data loss.
+  const inPeriod = stickerLogRows.filter(r => {
     const day = (r.at || '').slice(0, 10);
     if (startDate && day < startDate) return false;
     if (endDate && day > endDate) return false;
@@ -205,13 +221,24 @@ export function StickerLog({ v }) {
     }
     return true;
   });
+  const rows = inPeriod.filter(matchesKind);
 
   const totalLabels = rows.reduce((sum, r) => sum + (r.qty || 1), 0);
   const byKind = ['ALIQUOT', 'OPENED', 'LOT_QR'].map(k => ({
     kind: k,
     label: ({ ALIQUOT: 'ฉลากแบ่งบรรจุ', OPENED: 'ฉลากเปิดใช้', LOT_QR: 'ฉลาก QR ประจำ Lot' })[k],
-    count: rows.filter(r => r.kind === k).length,
+    count: inPeriod.filter(r => r.kind === k).length,
+    included: matchesKind({ kind: k }),
   }));
+  const hiddenCount = inPeriod.length - rows.length;
+
+  const kindFilterLabel = ({
+    all: 'ทุกประเภท (รวมฉลาก QR ประจำ Lot)',
+    PREP: 'เฉพาะการเตรียมและเปิดใช้ (ไม่รวมฉลาก QR ประจำ Lot)',
+    ALIQUOT: 'ฉลากแบ่งบรรจุ (Aliquot)',
+    OPENED: 'ฉลากเปิดใช้ (Opened)',
+    LOT_QR: 'ฉลาก QR ประจำ Lot',
+  })[kindFilter] || kindFilter;
 
   // Thai Buddhist-era date, matching the rest of the app.
   const thaiDateTime = (at) => {
@@ -325,7 +352,8 @@ export function StickerLog({ v }) {
           <p style={css(`margin:6px 0 0; font:var(--text-xs)/1.5 var(--font-body); color:var(--text-secondary); max-width:64ch;`)}>
             ทุกครั้งที่ดาวน์โหลดหรือสั่งพิมพ์สติกเกอร์ ระบบจะบันทึกรายละเอียดบนฉลากไว้ที่นี่โดยอัตโนมัติ
             เพื่อใช้แสดงเป็นหลักฐานย้อนหลังตอนตรวจประเมินคุณภาพห้องปฏิบัติการ
-            ระบบเริ่มบันทึกอัตโนมัติตั้งแต่ 7 ส.ค. 2569 · ฉลากที่ทำก่อนหน้านั้นเพิ่มได้จากปุ่ม “เพิ่มบันทึกย้อนหลัง”
+            หน้านี้ตั้งต้นแสดงเฉพาะ<strong>การเตรียมและการเปิดใช้น้ำยา</strong> ซึ่งเป็นเนื้อหาของเอกสาร ส่วนฉลาก QR ประจำ Lot ดูได้จากตัวกรอง
+            · ระบบเริ่มบันทึกอัตโนมัติตั้งแต่ 7 ส.ค. 2569 ฉลากที่ทำก่อนหน้านั้นเพิ่มได้จากปุ่ม “เพิ่มบันทึกย้อนหลัง”
           </p>
         </div>
         <div style={css(`display:flex; gap:10px; flex-wrap:wrap;`)}>
@@ -363,7 +391,8 @@ export function StickerLog({ v }) {
         <label style={css(`display:flex; flex-direction:column; gap:5px; flex:1 1 190px;`)}>
           <span style={css(`font:var(--text-2xs)/1 var(--font-body); color:var(--text-secondary);`)}>ประเภทฉลาก</span>
           <select value={kindFilter} onChange={(e) => setKindFilter(e.target.value)} style={css(fieldStyle)}>
-            <option value="all">ทุกประเภท</option>
+            <option value="PREP">เฉพาะการเตรียม / เปิดใช้ (ค่าตั้งต้น)</option>
+            <option value="all">ทุกประเภท (รวมฉลาก QR)</option>
             <option value="ALIQUOT">ฉลากแบ่งบรรจุ (Aliquot)</option>
             <option value="OPENED">ฉลากเปิดใช้ (Opened)</option>
             <option value="LOT_QR">ฉลาก QR ประจำ Lot</option>
@@ -377,8 +406,8 @@ export function StickerLog({ v }) {
           <span style={css(`font:var(--text-2xs)/1 var(--font-body); color:var(--text-secondary);`)}>ถึงวันที่</span>
           <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={css(fieldStyle)} />
         </label>
-        {(search || kindFilter !== 'all' || startDate || endDate) && (
-          <button onClick={() => { setSearch(''); setKindFilter('all'); setStartDate(''); setEndDate(''); }}
+        {(search || kindFilter !== 'PREP' || startDate || endDate) && (
+          <button onClick={() => { setSearch(''); setKindFilter('PREP'); setStartDate(''); setEndDate(''); }}
             style={css(`padding:9px 14px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:transparent; color:var(--text-secondary); cursor:pointer; font:var(--text-xs)/1 var(--font-body);`)}>
             ล้างตัวกรอง
           </button>
@@ -388,17 +417,36 @@ export function StickerLog({ v }) {
       {/* ── Summary ───────────────────────────────────────────────────── */}
       <div className="no-print" style={css(`display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px;`)}>
         <div style={css(`${cardStyle} padding:14px 18px;`)}>
-          <div style={css(`font:var(--text-2xs)/1 var(--font-body); color:var(--text-secondary);`)}>รายการในช่วงที่เลือก</div>
+          <div style={css(`font:var(--text-2xs)/1 var(--font-body); color:var(--text-secondary);`)}>รายการที่จะแสดงในเอกสาร</div>
           <div style={css(`margin-top:6px; font:var(--fw-bold) var(--text-xl)/1 var(--font-display); color:var(--brand-ink,var(--text-primary));`)}>{rows.length}</div>
           <div style={css(`margin-top:4px; font:var(--text-3xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>รวม {totalLabels} ดวง</div>
         </div>
         {byKind.map(k => (
-          <div key={k.kind} style={css(`${cardStyle} padding:14px 18px;`)}>
+          // Excluded kinds are dimmed rather than hidden. The count still has
+          // to be visible — someone must be able to see that 264 QR labels
+          // exist and are simply not part of this form.
+          <div key={k.kind} style={css(`${cardStyle} padding:14px 18px; opacity:${k.included ? '1' : '.5'};`)}>
             <div style={css(`font:var(--text-2xs)/1 var(--font-body); color:var(--text-secondary);`)}>{k.label}</div>
             <div style={css(`margin-top:6px; font:var(--fw-bold) var(--text-xl)/1 var(--font-display); color:var(--text-primary);`)}>{k.count}</div>
+            {!k.included && k.count > 0 && (
+              <div style={css(`margin-top:4px; font:var(--text-3xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>ไม่รวมในเอกสาร</div>
+            )}
           </div>
         ))}
       </div>
+
+      {kindFilter === 'PREP' && hiddenCount > 0 && (
+        <div className="no-print" style={css(`${cardStyle} padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;`)}>
+          <span style={css(`font:var(--text-xs)/1.6 var(--font-body); color:var(--text-secondary); max-width:82ch;`)}>
+            เอกสารนี้คือ <strong>บันทึกการเตรียมน้ำยา</strong> จึงแสดงเฉพาะฉลากแบ่งบรรจุและฉลากเปิดใช้
+            · ซ่อนฉลาก QR ประจำ Lot ไว้ <strong>{hiddenCount}</strong> รายการ (เป็นฉลากระบุตัวตนสำหรับแปะข้างกล่องเพื่อสแกน ไม่ใช่การเตรียมน้ำยา — ยังเก็บไว้ในระบบครบ)
+          </span>
+          <button onClick={() => setKindFilter('all')}
+            style={css(`padding:8px 14px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--surface-card); color:var(--text-primary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); white-space:nowrap;`)}>
+            แสดงทุกประเภท
+          </button>
+        </div>
+      )}
 
       {!stickerLogsFullyLoaded && (
         <div className="no-print" style={css(`${cardStyle} padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;`)}>
@@ -426,7 +474,9 @@ export function StickerLog({ v }) {
             <tbody>
               {rows.length === 0 ? (
                 <tr><td colSpan="8" style={css(`padding:38px 14px; text-align:center; font:var(--text-xs)/1.6 var(--font-body); color:var(--text-tertiary);`)}>
-                  ยังไม่มีบันทึกในช่วงที่เลือก · บันทึกจะถูกสร้างอัตโนมัติเมื่อดาวน์โหลดสติกเกอร์จากหน้า “สร้างสติกเกอร์”
+                  {hiddenCount > 0
+                    ? `ไม่มีการเตรียม/เปิดใช้น้ำยาในช่วงที่เลือก · มีเฉพาะฉลาก QR ประจำ Lot ${hiddenCount} รายการ ซึ่งไม่นับเป็นการเตรียม`
+                    : 'ยังไม่มีบันทึกในช่วงที่เลือก · บันทึกจะถูกสร้างอัตโนมัติเมื่อดาวน์โหลดสติกเกอร์จากหน้า “สร้างสติกเกอร์”'}
                 </td></tr>
               ) : rows.map(r => (
                 <tr key={r.id} className="qrow" style={css(`border-bottom:1px solid var(--border-subtle);`)}>
@@ -490,7 +540,7 @@ export function StickerLog({ v }) {
         <div style={css(`display:flex; justify-content:space-between; gap:16px; font-size:9px; color:#222; margin-top:8px; line-height:1.6;`)}>
           <div>
             <div><strong>ช่วงเวลาของบันทึก:</strong> {rangeLabel}</div>
-            <div><strong>ประเภทฉลากที่แสดง:</strong> {kindFilter === 'all' ? 'ทุกประเภท' : (byKind.find(k => k.kind === kindFilter) || {}).label}</div>
+            <div><strong>ประเภทฉลากที่แสดง:</strong> {kindFilterLabel}</div>
           </div>
           <div style={css(`text-align:right;`)}>
             <div><strong>จำนวนรายการ:</strong> {rows.length} รายการ (รวม {totalLabels} ดวง)</div>

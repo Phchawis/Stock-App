@@ -821,8 +821,9 @@ export function Help({ v }) {
                 <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.6;`)}>
                   <ul style={css(`margin:0; padding-left:16px; display:flex; flex-direction:column; gap:7px;`)}>
                     <li>เข้าเมนู <strong>บันทึกการเตรียมน้ำยา</strong> แล้วกรองตาม <strong>ช่วงวันที่</strong> หรือ <strong>ประเภทฉลาก</strong> ที่ผู้ตรวจขอดู</li>
+                    <li>หน้านี้<strong>ตั้งต้นแสดงเฉพาะฉลากแบ่งบรรจุและฉลากเปิดใช้</strong> เพราะเอกสารคือบันทึก<em>การเตรียม</em>น้ำยา · ฉลาก QR ประจำ Lot เป็นฉลากระบุตัวตนสำหรับแปะข้างกล่องเพื่อสแกน ไม่ได้เกิดจากการเตรียม จึงไม่รวมอยู่ในเอกสาร (ยังเก็บไว้ในระบบครบ เลือก <strong>ทุกประเภท</strong> เพื่อดู)</li>
                     <li>กด <strong>พิมพ์เอกสาร / บันทึกเป็น PDF</strong> จะได้ฟอร์ม <strong>FM-LAB-PREP-01</strong> พร้อมหัวกระดาษและช่องลงนาม 2 ช่อง</li>
-                    <li>เอกสารจะพิมพ์<strong>เฉพาะรายการที่กรองไว้</strong> ไม่ใช่ทั้งหมด</li>
+                    <li>เอกสารจะพิมพ์<strong>เฉพาะรายการที่กรองไว้</strong> ไม่ใช่ทั้งหมด และระบุไว้บนหัวเอกสารว่ากรองประเภทใดไว้</li>
                     <li>ต้องการเปิดใน Excel ให้กด <strong>ส่งออก Excel (CSV)</strong> ภาษาไทยไม่เพี้ยน</li>
                   </ul>
                 </div>
