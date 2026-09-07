@@ -244,7 +244,7 @@ export function StockCount({ v }) {
   };
 
   return (
-    <div className="qms-rise" style={css(`max-width:1180px; display:flex; flex-direction:column; gap:20px;`)}>
+    <div className="qms-rise page-shell" style={css(`gap:20px;`)}>
       {/* Header Actions */}
       <div className="stock-count-header" style={css(`display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:18px 24px; box-shadow:var(--shadow-sm);`)}>
         <div style={css(`flex:1; min-width:240px;`)}>

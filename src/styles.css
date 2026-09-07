@@ -677,6 +677,13 @@
 
   /* layout */
   --container-max: 1320px;
+  /* How wide a screen is allowed to grow. Every screen's outer
+     container reads this, so the whole app is re-proportioned from
+     one number instead of ten hand-edited ones. The cap is not
+     decoration: past it a table row stretches far enough that the
+     eye loses the line between a reagent's name on the left and its
+     buttons on the right. */
+  --page-max: 1600px;
   --sidebar-width: 264px;
   --topbar-height: 60px;
   --page-gutter: var(--space-8);
@@ -761,6 +768,16 @@ code, kbd, samp { font-family: var(--font-mono); }
 @keyframes qms-grow {
   from { transform: scaleX(0); }
   to   { transform: scaleX(1); }
+}
+
+/* The outermost container of every screen. Left-aligned rather than
+   centred: the sidebar already anchors the layout on the left, and a
+   centred column would float away from it. */
+.page-shell {
+  width: 100%;
+  max-width: var(--page-max, 1600px);
+  display: flex;
+  flex-direction: column;
 }
 
 .qms-rise { animation: qms-rise var(--dur-slow) var(--ease-out); }
@@ -1455,6 +1472,13 @@ code, kbd, samp { font-family: var(--font-mono); }
 
   /* layout */
   --container-max: 1320px;
+  /* How wide a screen is allowed to grow. Every screen's outer
+     container reads this, so the whole app is re-proportioned from
+     one number instead of ten hand-edited ones. The cap is not
+     decoration: past it a table row stretches far enough that the
+     eye loses the line between a reagent's name on the left and its
+     buttons on the right. */
+  --page-max: 1600px;
   --sidebar-width: 264px;
   --topbar-height: 60px;
   --page-gutter: var(--space-8);
@@ -1539,6 +1563,16 @@ code, kbd, samp { font-family: var(--font-mono); }
 @keyframes qms-grow {
   from { transform: scaleX(0); }
   to   { transform: scaleX(1); }
+}
+
+/* The outermost container of every screen. Left-aligned rather than
+   centred: the sidebar already anchors the layout on the left, and a
+   centred column would float away from it. */
+.page-shell {
+  width: 100%;
+  max-width: var(--page-max, 1600px);
+  display: flex;
+  flex-direction: column;
 }
 
 .qms-rise { animation: qms-rise var(--dur-slow) var(--ease-out); }

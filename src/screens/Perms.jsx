@@ -13,7 +13,7 @@ export function Perms({ v }) {
   const isAdmin = user && user.roleId === 'admin';
 
   return (
-    <div className="qms-rise" style={css(`max-width:1080px; display:flex; flex-direction:column; gap:20px;`)}>
+    <div className="qms-rise page-shell" style={css(`gap:20px;`)}>
       <style>{`
         .perm-user-row-mobile { display: none; }
         .perm-user-header {

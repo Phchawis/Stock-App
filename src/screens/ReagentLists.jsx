@@ -123,7 +123,7 @@ export function ReagentLists({ v }) {
     <>
       <style>{localStyle}</style>
 
-      <div className="qms-rise" style={css(`max-width:1180px; display:flex; flex-direction:column; gap:18px;`)}>
+      <div className="qms-rise page-shell" style={css(`gap:18px;`)}>
         {/* Search and Action bar */}
         <div style={css(`display:flex; align-items:center; gap:14px; flex-wrap:wrap; width:100%;`)}>
           <div style={css(`position:relative; flex:1; max-width:480px; min-width:240px;`)}>

@@ -542,10 +542,13 @@ class App extends React.Component {
           e.preventDefault();
           this.openIssue();
         }
-        // Alt + S -> Switch to Stock Count screen
+        // Alt + S -> Switch to Stock Count screen.
+        // Must go through nav(): it is the only path that seeds
+        // stockCountForm from the active lots, and it is the only place the
+        // view name 'stock_count' is spelled correctly.
         if (e.key.toLowerCase() === 's' && this.can('receive')) {
           e.preventDefault();
-          this.setState({ view: 'stockCount' });
+          this.nav('stock_count');
         }
       }
 
@@ -1853,7 +1856,11 @@ class App extends React.Component {
       go: { dashboard: () => this.nav('dashboard'), inventory: () => this.nav('inventory'), reagentLists: () => this.nav('reagent_lists'), alerts: () => this.nav('alerts'), audit: () => this.nav('audit'), perms: () => this.nav('perms'), help: () => this.nav('help'), stockCount: () => this.nav('stock_count'), createSticker: () => this.nav('create_sticker'), stickerLog: () => this.nav('sticker_log'),
         alertsLink: (e) => { e.preventDefault(); this.nav('alerts'); }, auditLink: (e) => { e.preventDefault(); this.nav('audit'); } },
       isDash: dn === 'dashboard', isInv: dn === 'inventory', isReagentLists: dn === 'reagent_lists', isAlerts: dn === 'alerts', isAudit: dn === 'audit', isPerms: dn === 'perms', isHelp: dn === 'help', isStockCount: dn === 'stock_count', isCreateSticker: dn === 'create_sticker', isStickerLog: dn === 'sticker_log',
-      title: titles[dn][0], subtitle: titles[dn][1],
+      // Fallback, not decoration: a view name with no entry here used to
+      // throw inside renderVals, and a throw in renderVals takes the whole
+      // app down to a blank screen with no way back except a reload. A
+      // mistyped route should cost the user a wrong header, not their work.
+      title: (titles[dn] || titles.dashboard)[0], subtitle: (titles[dn] || titles.dashboard)[1],
       openReceive: (rid) => this.openReceive(rid), openIssue: (rid) => this.openIssue(rid),
       openSignature: () => this.openSignature(),
       modalSignature: S.modal === 'signature',

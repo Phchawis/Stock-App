@@ -246,7 +246,7 @@ export function Dashboard({ v }) {
       <style>{printStyle}</style>
 
       {/* Screen view content */}
-      <div className="qms-rise no-print" style={css(`max-width:1180px; display:flex; flex-direction:column; gap:20px;`)}>
+      <div className="qms-rise no-print page-shell" style={css(`gap:20px;`)}>
 
         {/* Operational health — admins only. A backup nobody took and an error
             nobody reported are both invisible until the day they matter, so

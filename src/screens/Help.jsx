@@ -23,7 +23,7 @@ export function Help({ v }) {
   ];
 
   return (
-    <div className="qms-rise" style={css(`max-width:1180px; display:flex; flex-direction:column; gap:20px;`)}>
+    <div className="qms-rise page-shell" style={css(`gap:20px;`)}>
       {/* Motion layer. Only two things move: the panel acknowledges a tab
           change, and the FEFO / severity infographics demonstrate the rule they
           document (soonest-expiring leaves first; red is more urgent than
@@ -48,6 +48,13 @@ export function Help({ v }) {
            content is readable even if the animation never runs (background tab,
            headless render). */
         .hlp-panel { animation:hlpFadeUp .18s ease-out; }
+
+        /* The panel itself grows with the page, but running text does not:
+           past roughly 90 characters the eye loses its place on the way back
+           to the start of the next line. Explanatory paragraphs and list text
+           stay readable; anything laid out in a grid cell is already narrower
+           than the cap, so this leaves those untouched. */
+        .hlp-panel p, .hlp-panel li { max-width: 90ch; }
 
         .hlp-dot-crit { display:inline-block; animation:hlpPulseCrit 1.1s ease-in-out infinite; transform-origin:center; }
         .hlp-dot-warn { display:inline-block; animation:hlpBreathe 2.6s ease-in-out infinite; transform-origin:center; }

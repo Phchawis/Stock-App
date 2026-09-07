@@ -132,7 +132,7 @@ export function StickerLog({ v }) {
   const fieldStyle = `padding:8px 10px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--surface-input,var(--surface-card)); color:var(--text-primary); font:var(--text-xs)/1.2 var(--font-body); min-width:0;`;
 
   return (
-    <div className="qms-rise" style={css(`max-width:1180px; display:flex; flex-direction:column; gap:18px;`)}>
+    <div className="qms-rise page-shell" style={css(`gap:18px;`)}>
       <style>{printStyle}</style>
 
       {/* ── Header + actions ───────────────────────────────────────────── */}

@@ -216,6 +216,22 @@ export function Alerts({ v }) {
     .alert-action-btn:active {
       transform: translateY(0);
     }
+    /* The reorder list routinely runs past a hundred rows, and each row is
+       short — a name, a count, three buttons. On a wide screen one row per
+       line wastes most of the width and turns the list into a long scroll,
+       so the rows flow into as many columns as fit. 600px is the width below
+       which the buttons start crowding the reagent name, so that is the
+       point at which it drops back to a single column. */
+    .alerts-grid {
+      display: grid;
+      /* min() is load-bearing: a bare minmax(600px, 1fr) forces a 600px track
+         even inside a 340px phone screen, pushing the whole page sideways. */
+      grid-template-columns: repeat(auto-fill, minmax(min(600px, 100%), 1fr));
+      gap: 12px;
+      align-items: stretch;
+    }
+    .alerts-grid > * { min-width: 0; }
+
     @media (max-width: 768px) {
       .alert-row {
         flex-direction: column !important;
@@ -248,7 +264,7 @@ export function Alerts({ v }) {
       <style>{printStyle}</style>
       <style>{buttonStyle}</style>
 
-      <div className="qms-rise no-print" style={css(`max-width:920px; display:flex; flex-direction:column; gap:16px;`)}>
+      <div className="qms-rise no-print page-shell" style={css(`gap:16px;`)}>
 
         <div className="alerts-header-row" style={css(`display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;`)}>
           <div style={css(`font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>
@@ -311,7 +327,7 @@ export function Alerts({ v }) {
           </div>
         </div>
 
-        <div style={css(`display:flex; flex-direction:column; gap:12px;`)}>
+        <div className="alerts-grid">
           {alertRows.map((a, aI) => (<React.Fragment key={aI}>
             <div className="alert-row" style={css(`display:flex; align-items:center; gap:14px; padding:14px 18px; background:${a.isOrdered ? '#FEF8EC' : 'var(--surface-card)'}; border:1px solid ${a.isOrdered ? '#FCE3B4' : 'var(--border-subtle)'}; border-left:3px solid ${a.isOrdered ? 'var(--amber-fill)' : a.fg}; border-radius:var(--radius-md); box-shadow:var(--shadow-sm);`)}>
               <div style={css(`display:flex; align-items:center; gap:14px; flex:1; min-width:0;`)}>

@@ -203,7 +203,7 @@ export function Inventory({ v }) {
     <>
       <style>{localStyle}</style>
 
-      <div className="qms-rise" style={css(`max-width:1180px; display:flex; flex-direction:column; gap:16px;`)}>
+      <div className="qms-rise page-shell" style={css(`gap:16px;`)}>
         
         {/* Search, Tabs, and Optional Action button */}
         <div style={css(`display:flex; align-items:center; gap:14px; flex-wrap:wrap; width:100%;`)}>

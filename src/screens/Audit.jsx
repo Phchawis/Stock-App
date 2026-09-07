@@ -60,7 +60,7 @@ export function Audit({ v }) {
           .audit-row-mobile { display: flex !important; }
         }
       `}</style>
-      <div className="qms-rise" style={css(`max-width:1180px; display:flex; flex-direction:column; gap:16px;`)}>
+      <div className="qms-rise page-shell" style={css(`gap:16px;`)}>
         {/* Controls Grid */}
         <div style={css(`display:flex; flex-direction:column; gap:12px;`)}>
           <div style={css(`display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:14px;`)}>

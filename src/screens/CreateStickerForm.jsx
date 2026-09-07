@@ -370,7 +370,7 @@ export function CreateStickerForm({ v }) {
 
 
   return (
-    <div className="qms-rise" style={css(`max-width:1100px; display:flex; flex-direction:column; gap:20px;`)}>
+    <div className="qms-rise page-shell" style={css(`gap:20px;`)}>
       {/* Title & Tabs Card */}
       <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px 24px; box-shadow:var(--shadow-sm); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;`)}>
         <div>
