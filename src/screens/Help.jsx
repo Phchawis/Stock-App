@@ -808,7 +808,7 @@ export function Help({ v }) {
                 <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.6;`)}>
                   <ul style={css(`margin:0; padding-left:16px; display:flex; flex-direction:column; gap:7px;`)}>
                     <li>ระบบแยก 2 ชื่อ: <strong>ผู้เตรียม</strong> คือชื่อที่พิมพ์ลงบนฉลาก (แก้ได้) ส่วน <strong>ผู้ทำรายการ</strong> ดึงจากบัญชีที่เข้าสู่ระบบ</li>
-                    <li><strong>วันเวลาและผู้ทำรายการปลอมไม่ได้</strong> — บันทึกจากนาฬิกาเซิร์ฟเวอร์และเซสชันผู้ใช้ ไม่ได้รับค่าจากหน้าจอ</li>
+                    <li><strong>วันเวลาและผู้ทำรายการปลอมไม่ได้</strong> — บันทึกจากนาฬิกาเซิร์ฟเวอร์และเซสชันผู้ใช้ ไม่ได้รับค่าจากหน้าจอ (ยกเว้นรายการที่กรอกย้อนหลัง ดูข้อ 5)</li>
                     <li><strong>ผู้ใช้ทั่วไปลบบันทึกไม่ได้</strong> เฉพาะผู้ดูแลระบบเท่านั้น และปุ่มลบจะไม่ปรากฏให้บทบาทอื่นเห็น</li>
                   </ul>
                 </div>
@@ -838,6 +838,27 @@ export function Help({ v }) {
                     <li>ดาวน์โหลดซ้ำหลายครั้งจะถูกบันทึกเป็น<strong>หลายรายการ</strong> ตามความจริงที่เกิดขึ้น</li>
                     <li>หน้าจอแสดงย้อนหลัง <strong>12 เดือน</strong> ถ้าต้องการเก่ากว่านั้นให้กด <strong>โหลดบันทึกทั้งหมด</strong></li>
                   </ul>
+                </div>
+              </div>
+
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span>✎</span> 5. บันทึกย้อนหลัง (ก่อน 7 ส.ค. 2569)
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.6;`)}>
+                  <p style={css(`margin:0;`)}>
+                    ระบบเริ่มบันทึกฉลากอัตโนมัติตั้งแต่ <strong>7 ส.ค. 2569</strong> ส่วนฉลากที่ทำก่อนหน้านั้น
+                    (ตั้งแต่เริ่มใช้ระบบ 7 ก.ค. 2569) ให้กรอกเข้าไปจากปุ่ม <strong>เพิ่มบันทึกย้อนหลัง</strong> โดยคัดลอกจากบันทึกเดิมที่หน่วยงานเก็บไว้
+                  </p>
+                  <ul style={css(`margin:0; padding-left:16px; display:flex; flex-direction:column; gap:7px;`)}>
+                    <li>ใช้ได้เฉพาะ <strong>ผู้ดูแลระบบ</strong> และ <strong>หัวหน้าหน่วยงาน</strong></li>
+                    <li>ทุกรายการจะติดป้าย <strong>“✎ กรอกย้อนหลัง”</strong> ทั้งบนหน้าจอและบนเอกสาร FM-LAB-PREP-01 ที่พิมพ์ออกมา พร้อมชื่อผู้กรอก เวลาที่กรอก และแหล่งอ้างอิง</li>
+                    <li>ป้ายนี้<strong>ลบหรือแก้ให้กลายเป็นรายการอัตโนมัติไม่ได้</strong> ฐานข้อมูลบังคับไว้ที่ระดับตาราง</li>
+                    <li>กรอกวันที่<strong>ล่วงหน้าไม่ได้</strong> และต้องระบุ <strong>ผู้ทำรายการเดิม</strong> ตามบันทึกจริงเสมอ</li>
+                  </ul>
+                  <p style={css(`margin:0; color:var(--amber-700);`)}>
+                    กรอกเฉพาะรายการที่มีหลักฐานเดิมรองรับเท่านั้น การกรอกจากความจำจะทำให้บันทึกทั้งชุดเชื่อถือไม่ได้ตอนตรวจประเมิน
+                  </p>
                 </div>
               </div>
             </div>

@@ -1,6 +1,173 @@
 import React from 'react';
 import { css } from '../css.js';
 
+const KIND_OPTIONS = [
+  { value: 'ALIQUOT', label: 'ฉลากแบ่งบรรจุ (Aliquot)' },
+  { value: 'OPENED', label: 'ฉลากเปิดใช้ (Opened)' },
+  { value: 'LOT_QR', label: 'ฉลาก QR ประจำ Lot' },
+];
+
+const fieldCss = `padding:8px 10px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--surface-input,var(--surface-card)); color:var(--text-primary); font:var(--text-xs)/1.2 var(--font-body); min-width:0; width:100%; box-sizing:border-box;`;
+
+function Field({ label, hint, required, children, span }) {
+  return (
+    <label style={css(`display:flex; flex-direction:column; gap:5px; min-width:0; ${span ? `grid-column:span ${span};` : ''}`)}>
+      <span style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-secondary);`)}>
+        {label}{required ? <span style={css(`color:var(--red-700);`)}> *</span> : null}
+      </span>
+      {children}
+      {hint ? <span style={css(`font:var(--text-3xs)/1.4 var(--font-body); color:var(--text-tertiary);`)}>{hint}</span> : null}
+    </label>
+  );
+}
+
+// Entering a label that was made before this screen existed.
+//
+// It stays open after each save and keeps the fields that repeat across a
+// stack of paper records — the date, the label type, whose handwriting it is,
+// which book it came from — while clearing the ones that change every row.
+// Copying a month of records in is the actual task; a modal that closes and
+// forgets after every entry would make it miserable.
+function BackfillPanel({ reagentsList, usersList, user, onSubmit, onClose }) {
+  const blank = {
+    date: '', time: '09:00', kind: 'ALIQUOT', action: 'PRINT',
+    reagentName: '', lot: '', subType: '', prepDate: '', expDate: '',
+    storageTemp: '', storageDuration: '', preparedBy: '', qty: '1',
+    by: user ? user.name : '', sourceNote: '',
+  };
+  const [f, setF] = React.useState(blank);
+  const [saving, setSaving] = React.useState(false);
+  const nameRef = React.useRef(null);
+  const set = (k) => (e) => setF(s => ({ ...s, [k]: e.target.value }));
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (saving) return;
+    setSaving(true);
+    const ok = await onSubmit({
+      at: `${f.date} ${f.time}`,
+      kind: f.kind, action: f.action,
+      reagentName: f.reagentName.trim(),
+      reagentId: (reagentsList.find(r => r.th === f.reagentName.trim() || r.en === f.reagentName.trim()) || {}).id,
+      lot: f.lot.trim(), subType: f.subType.trim(),
+      prepDate: f.prepDate, expDate: f.expDate,
+      storageTemp: f.storageTemp.trim(), storageDuration: f.storageDuration.trim(),
+      preparedBy: f.preparedBy.trim(), qty: f.qty,
+      by: f.by.trim(), sourceNote: f.sourceNote.trim(),
+    });
+    setSaving(false);
+    if (ok) {
+      // Keep what repeats down a page of the old record; clear what does not.
+      setF(s => ({
+        ...blank, date: s.date, time: s.time, kind: s.kind, action: s.action,
+        by: s.by, sourceNote: s.sourceNote, storageTemp: s.storageTemp,
+      }));
+      if (nameRef.current) nameRef.current.focus();
+    }
+  };
+
+  const isOpened = f.kind === 'OPENED';
+
+  return (
+    <form onSubmit={submit} className="no-print"
+      style={css(`background:var(--surface-card); border:1px solid var(--amber-fill); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:20px 24px; display:flex; flex-direction:column; gap:16px;`)}>
+
+      <div style={css(`display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;`)}>
+        <div style={css(`min-width:0;`)}>
+          <h3 style={css(`margin:0; font:var(--fw-bold) var(--text-md)/1.2 var(--font-display); color:var(--text-primary);`)}>
+            เพิ่มบันทึกย้อนหลัง
+          </h3>
+          <p style={css(`margin:6px 0 0; font:var(--text-xs)/1.6 var(--font-body); color:var(--text-secondary); max-width:78ch;`)}>
+            ใช้สำหรับฉลากที่ทำก่อนระบบจะเริ่มบันทึกอัตโนมัติ (ก่อน 7 ส.ค. 2569) โดยคัดลอกจากบันทึกเดิมที่หน่วยงานเก็บไว้
+            รายการที่กรอกที่นี่จะถูกทำเครื่องหมายว่า <strong>“กรอกย้อนหลัง”</strong> ทั้งบนหน้าจอและบนเอกสารที่พิมพ์
+            พร้อมบันทึกว่าใครเป็นผู้กรอกและกรอกเมื่อใด เพื่อให้ผู้ตรวจประเมินแยกออกจากรายการที่ระบบบันทึกเองได้
+          </p>
+        </div>
+        <button type="button" onClick={onClose}
+          style={css(`padding:7px 13px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:transparent; color:var(--text-secondary); cursor:pointer; font:var(--text-xs)/1 var(--font-body); white-space:nowrap;`)}>
+          ปิด
+        </button>
+      </div>
+
+      <div style={css(`display:grid; grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr)); gap:14px;`)}>
+        <Field label="วันที่ทำฉลาก" required>
+          <input type="date" required value={f.date} onChange={set('date')} style={css(fieldCss)} />
+        </Field>
+        <Field label="เวลา" required hint="ถ้าบันทึกเดิมไม่ได้ระบุเวลา ใช้เวลาโดยประมาณได้">
+          <input type="time" required value={f.time} onChange={set('time')} style={css(fieldCss)} />
+        </Field>
+        <Field label="ประเภทฉลาก" required>
+          <select value={f.kind} onChange={set('kind')} style={css(fieldCss)}>
+            {KIND_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </Field>
+        <Field label="การทำรายการ" required>
+          <select value={f.action} onChange={set('action')} style={css(fieldCss)}>
+            <option value="PRINT">สั่งพิมพ์</option>
+            <option value="DOWNLOAD">ดาวน์โหลด</option>
+          </select>
+        </Field>
+
+        <Field label="ชื่อน้ำยา" required span="2">
+          <input ref={nameRef} required list="backfill-reagents" value={f.reagentName} onChange={set('reagentName')}
+            placeholder="พิมพ์ชื่อ หรือเลือกจากรายการ" style={css(fieldCss)} />
+          <datalist id="backfill-reagents">
+            {reagentsList.map(r => <option key={r.id} value={r.th}>{r.en && r.en !== r.th ? r.en : ''}</option>)}
+          </datalist>
+        </Field>
+        <Field label="Lot">
+          <input value={f.lot} onChange={set('lot')} style={css(fieldCss)} />
+        </Field>
+        <Field label="จำนวนดวง" required>
+          <input type="number" min="1" required value={f.qty} onChange={set('qty')} style={css(fieldCss)} />
+        </Field>
+
+        <Field label={isOpened ? 'วันที่เปิดใช้' : 'วันที่เตรียม'}>
+          <input type="date" value={f.prepDate} onChange={set('prepDate')} style={css(fieldCss)} />
+        </Field>
+        <Field label="วันหมดอายุบนฉลาก">
+          <input type="date" value={f.expDate} onChange={set('expDate')} style={css(fieldCss)} />
+        </Field>
+        <Field label="อุณหภูมิจัดเก็บ">
+          <input value={f.storageTemp} onChange={set('storageTemp')} placeholder="เช่น 2-8 °C" style={css(fieldCss)} />
+        </Field>
+        {isOpened ? (
+          <Field label="ชนิดย่อย">
+            <input value={f.subType} onChange={set('subType')} placeholder="Control / Calibrator" style={css(fieldCss)} />
+          </Field>
+        ) : (
+          <Field label="อายุหลังเปิด/หลังเตรียม">
+            <input value={f.storageDuration} onChange={set('storageDuration')} placeholder="เช่น 28 วัน" style={css(fieldCss)} />
+          </Field>
+        )}
+
+        <Field label="ผู้เตรียม (ชื่อบนฉลาก)">
+          <input value={f.preparedBy} onChange={set('preparedBy')} style={css(fieldCss)} />
+        </Field>
+        <Field label="ผู้ทำรายการเดิม" required hint="ชื่อผู้ที่ทำฉลากนั้นจริงตามบันทึกเดิม">
+          <input required list="backfill-users" value={f.by} onChange={set('by')} style={css(fieldCss)} />
+          <datalist id="backfill-users">
+            {(usersList || []).map(u => <option key={u.username} value={u.name} />)}
+          </datalist>
+        </Field>
+        <Field label="อ้างอิงจาก" span="2" hint="ระบุแหล่งที่คัดลอกมา เพื่อให้ผู้ตรวจตามกลับไปดูต้นฉบับได้">
+          <input value={f.sourceNote} onChange={set('sourceNote')} placeholder="เช่น สมุดบันทึกการเตรียมน้ำยา ก.ค. 2569 หน้า 12" style={css(fieldCss)} />
+        </Field>
+      </div>
+
+      <div style={css(`display:flex; align-items:center; gap:12px; flex-wrap:wrap; border-top:1px solid var(--border-subtle); padding-top:14px;`)}>
+        <button type="submit" disabled={saving}
+          style={css(`padding:9px 18px; border-radius:var(--radius-md); border:none; background:var(--accent-600); color:#fff; cursor:${saving ? 'wait' : 'pointer'}; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body); opacity:${saving ? '.6' : '1'};`)}>
+          {saving ? 'กำลังบันทึก...' : 'บันทึกรายการนี้'}
+        </button>
+        <span style={css(`font:var(--text-3xs)/1.5 var(--font-body); color:var(--text-tertiary);`)}>
+          ฟอร์มจะยังเปิดค้างไว้หลังบันทึก และคงค่า วันที่ · ประเภทฉลาก · ผู้ทำรายการเดิม · อ้างอิงจาก ไว้ให้กรอกรายการถัดไปต่อได้เลย
+        </span>
+      </div>
+    </form>
+  );
+}
+
 // บันทึกการเตรียมน้ำยา (Reagent Preparation & Labelling Record)
 //
 // Every sticker downloaded or printed writes one row here. The screen exists to
@@ -13,12 +180,14 @@ export function StickerLog({ v }) {
     isStickerLog, stickerLogRows, user, ic,
     stickerLogsFullyLoaded, loadingFullStickerLogs, loadFullStickerLogs,
     deleteStickerLog, showToast,
+    canBackfillStickerLog, addStickerLogBackfill, reagentsList, usersList,
   } = v;
 
   const [kindFilter, setKindFilter] = React.useState('all');
   const [startDate, setStartDate] = React.useState('');
   const [endDate, setEndDate] = React.useState('');
   const [search, setSearch] = React.useState('');
+  const [showBackfill, setShowBackfill] = React.useState(false);
 
   if (!isStickerLog) return null;
 
@@ -66,13 +235,25 @@ export function StickerLog({ v }) {
     return bits.length ? bits.join(' · ') : '—';
   };
 
+  // Everything known about where a hand-entered row came from, in one string.
+  const manualTitle = (r) => [
+    'รายการนี้กรอกย้อนหลัง ไม่ได้บันทึกโดยระบบขณะทำฉลาก',
+    r.enteredBy ? `ผู้กรอก: ${r.enteredBy}` : '',
+    r.enteredAt ? `กรอกเมื่อ: ${thaiDateTime(r.enteredAt)}` : '',
+    r.sourceNote ? `อ้างอิงจาก: ${r.sourceNote}` : '',
+  ].filter(Boolean).join('\n');
+
+  const manualCount = rows.filter(r => r.isManual).length;
+
   const exportCSV = () => {
     if (!rows.length) { showToast('ไม่มีรายการให้ส่งออก', 'warn'); return; }
-    const head = ['ลำดับ', 'วันที่-เวลา', 'ประเภทฉลาก', 'การทำรายการ', 'ชื่อน้ำยา', 'Lot', 'รายละเอียดบนฉลาก', 'จำนวน', 'ผู้เตรียม (บนฉลาก)', 'ผู้ทำรายการ (ระบบ)'];
+    const head = ['ลำดับ', 'วันที่-เวลา', 'ประเภทฉลาก', 'การทำรายการ', 'ชื่อน้ำยา', 'Lot', 'รายละเอียดบนฉลาก', 'จำนวน', 'ผู้เตรียม (บนฉลาก)', 'ผู้ทำรายการ', 'ที่มาของบันทึก', 'ผู้กรอกย้อนหลัง', 'กรอกเมื่อ', 'อ้างอิงจาก'];
     const esc = (s) => `"${String(s == null ? '' : s).replace(/"/g, '""')}"`;
     const body = rows.map((r, i) => [
       i + 1, r.at, r.kindLabel, r.actionLabel, r.reagentName, r.lot || '—',
       detailOf(r), r.qty, r.preparedBy || '—', r.by,
+      r.isManual ? 'กรอกย้อนหลัง' : 'ระบบบันทึกอัตโนมัติ',
+      r.enteredBy || '—', r.enteredAt || '—', r.sourceNote || '—',
     ].map(esc).join(','));
     // BOM so Excel opens Thai text in the right encoding.
     const blob = new Blob(['﻿' + [head.map(esc).join(','), ...body].join('\n')], { type: 'text/csv;charset=utf-8;' });
@@ -129,7 +310,7 @@ export function StickerLog({ v }) {
   `;
 
   const cardStyle = `background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm);`;
-  const fieldStyle = `padding:8px 10px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--surface-input,var(--surface-card)); color:var(--text-primary); font:var(--text-xs)/1.2 var(--font-body); min-width:0;`;
+  const fieldStyle = fieldCss;
 
   return (
     <div className="qms-rise page-shell" style={css(`gap:18px;`)}>
@@ -144,9 +325,16 @@ export function StickerLog({ v }) {
           <p style={css(`margin:6px 0 0; font:var(--text-xs)/1.5 var(--font-body); color:var(--text-secondary); max-width:64ch;`)}>
             ทุกครั้งที่ดาวน์โหลดหรือสั่งพิมพ์สติกเกอร์ ระบบจะบันทึกรายละเอียดบนฉลากไว้ที่นี่โดยอัตโนมัติ
             เพื่อใช้แสดงเป็นหลักฐานย้อนหลังตอนตรวจประเมินคุณภาพห้องปฏิบัติการ
+            ระบบเริ่มบันทึกอัตโนมัติตั้งแต่ 7 ส.ค. 2569 · ฉลากที่ทำก่อนหน้านั้นเพิ่มได้จากปุ่ม “เพิ่มบันทึกย้อนหลัง”
           </p>
         </div>
         <div style={css(`display:flex; gap:10px; flex-wrap:wrap;`)}>
+          {canBackfillStickerLog && (
+            <button onClick={() => setShowBackfill(x => !x)}
+              style={css(`padding:9px 16px; border-radius:var(--radius-md); border:1px solid var(--amber-fill); background:transparent; color:var(--amber-700); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body);`)}>
+              {showBackfill ? '✕ ปิดฟอร์มย้อนหลัง' : '➕ เพิ่มบันทึกย้อนหลัง'}
+            </button>
+          )}
           <button onClick={exportCSV} style={css(`padding:9px 16px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--surface-card); color:var(--text-primary); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body);`)}>
             ⬇ ส่งออก Excel (CSV)
           </button>
@@ -155,6 +343,16 @@ export function StickerLog({ v }) {
           </button>
         </div>
       </div>
+
+      {canBackfillStickerLog && showBackfill && (
+        <BackfillPanel
+          reagentsList={reagentsList || []}
+          usersList={usersList}
+          user={user}
+          onSubmit={addStickerLogBackfill}
+          onClose={() => setShowBackfill(false)}
+        />
+      )}
 
       {/* ── Filters ────────────────────────────────────────────────────── */}
       <div className="no-print" style={css(`${cardStyle} padding:16px 20px; display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;`)}>
@@ -236,6 +434,15 @@ export function StickerLog({ v }) {
                   <td style={css(`padding:11px 14px;`)}>
                     <span style={css(`display:inline-block; padding:3px 9px; border-radius:999px; font:var(--fw-semibold) var(--text-3xs)/1.4 var(--font-body); background:var(--accent-50); color:var(--accent-700); white-space:nowrap;`)}>{r.kindLabel}</span>
                     <div style={css(`margin-top:4px; font:var(--text-3xs)/1 var(--font-body); color:var(--text-tertiary);`)}>{r.actionLabel}{r.qty > 1 ? ` · ${r.qty} ดวง` : ''}</div>
+                    {r.isManual && (
+                      // The provenance mark sits with the row, not in a column
+                      // of its own: someone scanning this table for evidence
+                      // must not be able to miss it by scrolling sideways.
+                      <div title={manualTitle(r)}
+                        style={css(`margin-top:5px; display:inline-block; padding:2px 8px; border-radius:999px; font:var(--fw-semibold) var(--text-3xs)/1.4 var(--font-body); background:var(--amber-100); color:var(--amber-700); white-space:nowrap; cursor:help;`)}>
+                        ✎ กรอกย้อนหลัง
+                      </div>
+                    )}
                   </td>
                   <td style={css(`padding:11px 14px; font:var(--fw-semibold) var(--text-xs)/1.4 var(--font-body); color:var(--text-primary);`)}>{r.reagentName}</td>
                   <td style={css(`padding:11px 14px; font:var(--text-2xs)/1.4 var(--font-mono); color:var(--text-secondary);`)}>{r.lot || '—'}</td>
@@ -287,6 +494,13 @@ export function StickerLog({ v }) {
           </div>
           <div style={css(`text-align:right;`)}>
             <div><strong>จำนวนรายการ:</strong> {rows.length} รายการ (รวม {totalLabels} ดวง)</div>
+            {/* Stated on the form itself, not only in the footnote: an
+                inspector reading the summary block should learn the mix before
+                they start reading rows. */}
+            <div>
+              <strong>ที่มา:</strong> ระบบบันทึกอัตโนมัติ {rows.length - manualCount} รายการ
+              {manualCount > 0 ? ` · กรอกย้อนหลัง ${manualCount} รายการ` : ''}
+            </div>
             <div><strong>พิมพ์เอกสารเมื่อ:</strong> {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} น.</div>
             <div><strong>ผู้พิมพ์:</strong> {user ? user.name : '—'}</div>
           </div>
@@ -317,7 +531,19 @@ export function StickerLog({ v }) {
                 <td>{r.lot || '—'}</td>
                 <td>{detailOf(r)}</td>
                 <td>{r.preparedBy || '—'}</td>
-                <td>{r.by}</td>
+                {/* Provenance is printed inside the row, since the printed
+                    form is the artefact the inspector actually keeps. Marking
+                    only the screen would let a hand-entered row leave the
+                    building looking machine-recorded. */}
+                <td>
+                  {r.by}
+                  {r.isManual && (
+                    <><br /><span style={{ color: '#555' }}>
+                      ✎ กรอกย้อนหลัง{r.enteredBy ? ` โดย ${r.enteredBy}` : ''}
+                      {r.sourceNote ? <><br />อ้างอิง: {r.sourceNote}</> : null}
+                    </span></>
+                  )}
+                </td>
               </tr>
             )) : (
               <tr><td colSpan="8" style={{ textAlign: 'center', color: '#666', padding: '14px' }}>ไม่มีบันทึกในช่วงเวลาที่เลือก</td></tr>
@@ -338,8 +564,17 @@ export function StickerLog({ v }) {
           </div>
         </div>
 
+        {/* The old wording claimed every row was machine-witnessed and
+            unalterable. That is still true of the automatic rows and must not
+            be watered down — but it is not true of a backfilled one, so the
+            two are stated separately rather than blurred into one sentence. */}
         <p style={css(`margin-top:16px; font-size:7.5px; color:#555; border-top:1px solid #ccc; padding-top:5px; line-height:1.6;`)}>
-          เอกสารนี้สร้างอัตโนมัติจากระบบ CMTL Reagent Inventory · ข้อมูล “วันที่/เวลา” และ “ผู้ทำรายการ” บันทึกจากบัญชีผู้ใช้ที่เข้าสู่ระบบขณะดาวน์โหลดฉลาก ไม่สามารถแก้ไขย้อนหลังได้
+          เอกสารนี้สร้างอัตโนมัติจากระบบ CMTL Reagent Inventory · รายการที่ไม่ได้ทำเครื่องหมายใด ๆ คือรายการที่ระบบบันทึกเองขณะดาวน์โหลด/สั่งพิมพ์ฉลาก
+          โดย “วันที่/เวลา” และ “ผู้ทำรายการ” มาจากบัญชีผู้ใช้ที่เข้าสู่ระบบขณะนั้น ไม่สามารถแก้ไขย้อนหลังได้
+          {manualCount > 0 ? (
+            <> · รายการที่ทำเครื่องหมาย <strong>“✎ กรอกย้อนหลัง”</strong> เป็นฉลากที่ทำขึ้นก่อนระบบจะเริ่มบันทึกอัตโนมัติ (ก่อน 7 ส.ค. 2569)
+              และคัดลอกเข้าระบบภายหลังจากบันทึกเดิมของหน่วยงาน โดยระบุผู้กรอกและแหล่งอ้างอิงกำกับไว้ทุกรายการ</>
+          ) : null}
         </p>
       </div>
     </div>

@@ -486,6 +486,37 @@ class App extends React.Component {
     }
   }
 
+  // Entering a label that was produced before this screen existed, from the
+  // lab's earlier records. Unlike logSticker() this is a deliberate act of data
+  // entry, so a failure must be loud and the row must not appear until the
+  // server has accepted it.
+  async addStickerLogBackfill(payload) {
+    if (!this.can('manage')) {
+      this.showToast('บทบาทนี้ไม่มีสิทธิ์เพิ่มบันทึกย้อนหลัง', 'warn');
+      return false;
+    }
+    try {
+      const res = await this.api('/api/sticker_logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...payload, backfill: true })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'เพิ่มบันทึกย้อนหลังล้มเหลว');
+      // The list is ordered newest-first and a backfilled row belongs in the
+      // past, so it is sorted into place rather than pushed onto the front.
+      this.setState(s => ({
+        stickerLogs: [data, ...s.stickerLogs].sort((a, b) =>
+          a.at === b.at ? b.id - a.id : (a.at < b.at ? 1 : -1)),
+      }));
+      this.showToast(`เพิ่มบันทึกย้อนหลัง ${data.reagent_name} เรียบร้อย`);
+      return true;
+    } catch (err) {
+      this.showToast(err.message, 'warn');
+      return false;
+    }
+  }
+
   async deleteStickerLog(id) {
     if (this.state.role !== 'admin') { this.showToast('เฉพาะผู้ดูแลระบบเท่านั้นที่ลบบันทึกนี้ได้', 'warn'); return; }
     this.askConfirm(
@@ -1807,6 +1838,13 @@ class App extends React.Component {
         qty: r.qty || 1,
         by: r.by,
         at: r.at,
+        // Provenance. Rows written before migration 0014 have no `source`
+        // column value in memory yet on an old cached payload, and every one of
+        // those was machine-written, so absence means AUTO.
+        isManual: r.source === 'MANUAL',
+        enteredBy: r.entered_by || '',
+        enteredAt: r.entered_at || '',
+        sourceNote: r.source_note || '',
       })),
       // Surfaced on the dashboard for admins only: a backup nobody takes is
       // indistinguishable from one that succeeded, until the day it matters.
@@ -1833,6 +1871,8 @@ class App extends React.Component {
       loadFullStickerLogs: () => this.loadFullStickerLogs(),
       deleteStickerLog: (id) => this.deleteStickerLog(id),
       logSticker: (payload) => this.logSticker(payload),
+      canBackfillStickerLog: this.can('manage'),
+      addStickerLogBackfill: (payload) => this.addStickerLogBackfill(payload),
       onBackupDatabase: () => this.onBackupDatabase(),
       onRestoreDatabase: (e) => this.onRestoreDatabase(e),
       openPrintSticker: (lot, reagent) => this.openPrintSticker(lot, reagent),
