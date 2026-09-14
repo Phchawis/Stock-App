@@ -25,3 +25,12 @@ src/lib/impeccable/__runtime.js
 src/lib/impeccable/[0-9a-f]*/
 # impeccable-live-ignore-end
 .wrangler
+
+# Local AI-assistant tooling, not part of the app.
+# .agents/ is a second copy of the impeccable skill already committed under
+# .claude/; .codex/ is Codex's own hook config; AGENTS.md duplicates CLAUDE.md.
+# They are kept on disk so those tools keep working, but they are one
+# machine's setup rather than anything the app builds, ships, or runs on.
+.agents/
+.codex/
+AGENTS.md
