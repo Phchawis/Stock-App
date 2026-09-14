@@ -329,7 +329,7 @@ export function Alerts({ v }) {
 
         <div className="alerts-grid">
           {alertRows.map((a, aI) => (<React.Fragment key={aI}>
-            <div className="alert-row" style={css(`display:flex; align-items:center; gap:14px; padding:14px 18px; background:${a.isOrdered ? '#FEF8EC' : 'var(--surface-card)'}; border:1px solid ${a.isOrdered ? '#FCE3B4' : 'var(--border-subtle)'}; border-left:3px solid ${a.isOrdered ? 'var(--amber-fill)' : a.fg}; border-radius:var(--radius-md); box-shadow:var(--shadow-sm);`)}>
+            <div className="alert-row" style={css(`display:flex; align-items:center; gap:14px; padding:14px 18px; background:${a.isOrdered ? '#FEF8EC' : 'var(--surface-card)'}; border:1px solid ${a.isOrdered ? '#FCE3B4' : 'var(--border-subtle)'};  border-radius:var(--radius-md); box-shadow:var(--shadow-sm);`)}>
               <div style={css(`display:flex; align-items:center; gap:14px; flex:1; min-width:0;`)}>
                 <span style={css(`width:40px; height:40px; border-radius:var(--radius-md); background:${a.isOrdered ? '#FEF08A' : a.bg}; color:${a.isOrdered ? '#854D0E' : a.fg}; display:grid; place-items:center; flex-shrink:0;`)}>
                   {a.isOrdered ? <span style={css(`display:grid; place-items:center;`)}>{ic.list}</span> : a.icon}
