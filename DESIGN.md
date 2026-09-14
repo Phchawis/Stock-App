@@ -142,3 +142,24 @@ The system is flat by default to maintain official document aesthetics. Depth is
 - **Don't** use side-stripe borders as indicators on tables or cards (use solid status badges instead).
 - **Don't** allow transactions or corrections that drive a lot balance below zero.
 - **Don't** use warm, sand-like backgrounds. Neutral backgrounds must remain cool slate-grey.
+
+## September 2026 visual refinement
+
+`src/redesign.css` is loaded after the legacy stylesheet. It owns the shared
+screen-only refinement: opaque dark teal surfaces, readable neutral text,
+consistent receive/issue actions, quiet table hover and visible keyboard focus.
+Print layouts retain their existing styles. Modal headers use a pale teal surface.
+
+Dashboard's `StockOverview` presents mutually exclusive counts of active lots
+with positive balance: expired before today, today through 60 days, and later
+than 60 days. It counts lots (never adds incompatible reagent units) and is
+explicitly independent of the report filters. Data comes from `renderVals()`.
+The graphic has text labels, an accessible summary, and an empty state.
+
+Motion uses short crossfades, directional drawer entry and control feedback;
+reduced-motion disables transitions throughout. Mobile report controls wrap.
+
+Validation: production build and 36 domain tests passed. Local visual review
+used a temporary sample-data harness for desktop 1440×1000 and narrow mobile
+layouts, including dashboard, inventory, sticker form and receive modal.
+Live D1 transactions and printed output were not exercised in this design pass.
