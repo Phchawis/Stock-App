@@ -152,6 +152,8 @@ export function Main({ v }) {
         <button 
           onClick={toggleSidebar} 
           className="hamburger-btn"
+          aria-label="เปิดหรือปิดเมนู"
+          aria-expanded={v.sidebarOpen}
           style={css(`display:grid; place-items:center; background:none; border:none; color:var(--text-primary); cursor:pointer; padding:6px; margin-left:-6px; border-radius:var(--radius-sm);`)}
         >
           {ic.menu}
