@@ -74,7 +74,7 @@ export function Login({ v }) {
                 placeholder="••••••••" 
                 value={loginForm.password} 
                 onChange={lfPass} 
-                autoComplete="new-password" 
+                autoComplete="current-password"
                 name="password"
                 suffix={
                   <button
