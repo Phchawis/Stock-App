@@ -1916,6 +1916,11 @@ class App extends React.Component {
       reagentOpts, locOpts, supplierOpts, scanOpts, submitReceive: () => this.submitReceive(),
       iform: S.iform, ifRid: this.bindIf('rid'), ifQty: this.bindIf('qty'), ifScan: this.bindIf('scan'), ifRef: this.bindIf('ref'), ifSearchInput: this.bindIf('searchInput'), ifQrInput: this.bindIf('qrInput'), submitIssue: () => this.submitIssue(),
       scanQRCode: (code) => this.scanQRCode(code), unlinkLot: () => this.unlinkLot(), selectReagentForIssue: (rid) => this.selectReagentForIssue(rid),
+      expiryOverview: [
+        { label: 'หมดอายุแล้ว', detail: 'ตรวจสอบและแยกออกจากคลัง', tone: 'expired', count: S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE' && this.days(l.expiry) < 0).length },
+        { label: 'ภายใน 60 วัน', detail: 'วางแผนใช้งานตาม FEFO', tone: 'soon', count: S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE' && this.days(l.expiry) >= 0 && this.days(l.expiry) <= 60).length },
+        { label: 'มากกว่า 60 วัน', detail: 'ติดตามอายุล็อตอย่างต่อเนื่อง', tone: 'later', count: S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE' && this.days(l.expiry) > 60).length },
+      ],
       activeLotsList: S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE').map(l => ({ ...l, recvDate: recvDateOf(l.id) })),
       stockCountList: S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE').map(l => {
         const r = S.reagents.find(x => x.id === l.rid);
