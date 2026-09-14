@@ -2,6 +2,7 @@ import React from 'react';
 import { css } from '../css.js';
 import { SearchableSelect } from '../components/SearchableSelect.jsx';
 import { categoryLabel } from '../categories.js';
+import { StockOverview } from '../components/StockOverview.jsx';
 import { daysUntil } from '../domain/stock.js';
 
 export function Dashboard({ v }) {
@@ -248,6 +249,8 @@ export function Dashboard({ v }) {
       {/* Screen view content */}
       <div className="qms-rise no-print page-shell" style={css(`gap:20px;`)}>
 
+        <StockOverview v={v} />
+
         {/* Operational health — admins only. A backup nobody took and an error
             nobody reported are both invisible until the day they matter, so
             they are stated here rather than left to be discovered. */}
@@ -265,13 +268,13 @@ export function Dashboard({ v }) {
         {/* Dashboard Header & Filter action bar */}
         <div style={css(`display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:16px;`)}>
           <div>
-            <h1 style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary); margin:0;`)}>รายงานประสิทธิภาพและดัชนีคลังประจำเดือน</h1>
-            <p style={css(`font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); margin:4px 0 0;`)}>สรุปยอดสรุปอัตราการใช้งานน้ำยาเคมี และข้อมูลความมั่นคงคลังสินค้า</p>
+            <h1 style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary); margin:0;`)}>วิเคราะห์การใช้งานคลัง</h1>
+            <p style={css(`font:var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); margin:4px 0 0;`)}>เลือกช่วงเวลาและกลุ่มน้ำยาเพื่อวิเคราะห์การรับเข้าและเบิกจ่าย</p>
           </div>
           
           <div style={css(`display:flex; align-items:center; gap:12px; flex-wrap:wrap;`)}>
             {/* Period selector */}
-            <div style={css(`display:flex; background:var(--surface-sunken); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:2px;`)}>
+            <div className="report-period" style={css(`display:flex; background:var(--surface-sunken); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:2px;`)}>
               <button 
                 onClick={() => setPeriod('3m')}
                 style={css(`padding:6px 12px; border-radius:var(--radius-sm); border:none; cursor:pointer; font:var(--fw-medium) var(--text-3xs)/1 var(--font-body); background:${period === '3m' ? 'var(--white)' : 'transparent'}; color:${period === '3m' ? 'var(--brand-800)' : 'var(--text-secondary)'}; box-shadow:${period === '3m' ? 'var(--shadow-sm)' : 'none'};`)}
@@ -405,7 +408,7 @@ export function Dashboard({ v }) {
 
         {/* Report Tabs Switcher */}
         <div style={css(`display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-subtle); padding-bottom:10px; margin-top:10px;`)}>
-          <div style={css(`display:flex; gap:8px; background:var(--surface-sunken); padding:4px; border-radius:var(--radius-md); border:1px solid var(--border-subtle);`)}>
+          <div className="report-tabs" style={css(`display:flex; gap:8px; background:var(--surface-sunken); padding:4px; border-radius:var(--radius-md); border:1px solid var(--border-subtle);`)}>
             <button
               onClick={() => setActiveReportTab('charts')}
               style={css(`padding:6px 16px; border-radius:var(--radius-sm); border:none; background:${activeReportTab === 'charts' ? 'var(--brand-700)' : 'transparent'}; color:${activeReportTab === 'charts' ? '#fff' : 'var(--text-secondary)'}; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
@@ -422,7 +425,7 @@ export function Dashboard({ v }) {
                 }
               }}
             >
-              📊 กราฟวิเคราะห์และคำแนะนำ (Charts & Insights)
+              กราฟและคำแนะนำ
             </button>
             <button
               onClick={() => setActiveReportTab('category')}
@@ -440,7 +443,7 @@ export function Dashboard({ v }) {
                 }
               }}
             >
-              🗂️ สถานะแยกรายหมวดหมู่ (Category Overview)
+              แยกตามหมวดงาน
             </button>
           </div>
         </div>
