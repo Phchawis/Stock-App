@@ -140,3 +140,95 @@
  }
  .dark-theme :is(.header-btn-withdraw,.sidebar-op-withdraw) .sc-tag { border-color:var(--border-default) !important; }
 }
+
+/* ── Light mode ────────────────────────────────────────────────────────────
+   Added as a second class on the same root rather than by swapping
+   .dark-theme out: every structural rule in this file and in mobile.css is
+   written against .dark-theme, so replacing it would drop the whole layout
+   along with the colours. .dark-theme.theme-light therefore keeps the
+   structure and redefines only what carries colour.
+
+   The ramps below are the ones already proven in .theme-light-scope, which
+   has been running inside the modals since the redesign — reusing them means
+   light mode is not a second palette anyone has to keep in step with the
+   first. What that scope never needed, because it only ever painted a panel,
+   is the page-level surfaces; those are defined here.
+
+   The literals in the block after it are the handful of places in this file
+   that paint a colour directly instead of through a token. Each one is light
+   text or a dark fill, invisible or inverted on a light page. They are
+   overridden rather than tokenised in place because tokenising them touches
+   the dark theme too, and the dark theme is what the lab is using today. */
+@media screen {
+/* .theme-content-teal re-declares the dark ramp on the <main> wrapper, so the
+   root alone is not enough — without naming it here the page turns light and
+   everything inside it stays dark. */
+.dark-theme.theme-light,
+.dark-theme.theme-light .theme-content-teal {
+  --surface-page:#eef2f0; --surface-card:#ffffff; --surface-sunken:#e7edea;
+  --white:#ffffff; --text-primary:#172c28; --text-secondary:#344e47;
+  --text-tertiary:#4a625b; --text-link:#0b7365; --text-disabled:#5c716b;
+  --border-subtle:#d3ded9; --border-default:#b3c5bd; --border-strong:#8aa79c;
+  --brand-900:#16473b; --brand-800:#125746; --brand-700:#0b7365;
+  --brand-600:#096556; --brand-500:#278f78; --brand-400:#71bba6;
+  --brand-100:#c8e2d7; --brand-50:#dcefe6; --brand-ink:#0b7365;
+  --focus-ring:#0b7365; --border-brand:#0b7365;
+  /* The count badge on a tab reads with this; left on the dark theme's mint it
+     came out at 1.4:1 on white. */
+  --teal-700:#0b7365;
+  --slate-50:#f1f5f3; --slate-100:#e2eae6; --slate-200:#cfdcd6;
+  --green-700:#226343; --green-600:#2e7a55; --green-100:#cfe8d9; --green-fill:#1f7a4d;
+  --amber-700:#734500; --amber-600:#8a5a10; --amber-100:#f6e6c2; --amber-fill:#8a5a10;
+  --red-700:#982e24; --red-600:#b0473c; --red-100:#f6d8d2; --red-fill:#b0362a;
+  --blue-700:#255775; --blue-600:#356d8d; --blue-100:#d5e6f0;
+  --content-glass-top:#f7faf8; --content-glass-bottom:#f7faf8;
+  --content-ambient:var(--surface-page);
+  --shadow-xs:0 1px 2px #0f291f14;
+  --shadow-sm:0 1px 3px #0f291f1f, 0 1px 2px #0f291f14;
+  --glow-brand-soft:none; --glow-brand:none;
+  color-scheme: light;
+}
+
+/* Surfaces and text that were painted with literals. */
+.dark-theme.theme-light .main-sidebar { background:#f5f8f6 !important; }
+.dark-theme.theme-light .tuh-mhead { background:#e2eae6 !important; border-bottom:1px solid #cfdcd6 !important; }
+.dark-theme.theme-light .stock-overview p,
+.dark-theme.theme-light .expiry-value span,
+.dark-theme.theme-light .fefo-note { color:var(--text-secondary); }
+.dark-theme.theme-light .expiry-label { color:var(--text-primary); }
+.dark-theme.theme-light .overview-link,
+.dark-theme.theme-light .fefo-note button { color:var(--brand-700); }
+.dark-theme.theme-light .expiry-track { background:var(--slate-200); }
+.dark-theme.theme-light .fefo-note { border-top-color:var(--border-subtle); }
+.dark-theme.theme-light .fefo-mark { color:var(--brand-700); border-color:var(--brand-100); }
+
+/* The Alt+R / Alt+I hints sit on the filled Receive and Withdraw buttons. They
+   were painted with --text-secondary: 1.5:1 against the fill in light mode and
+   3.6:1 in dark, so neither passed. Both now take the button's own white ink,
+   which is the only colour guaranteed to sit on a saturated fill. */
+.dark-theme :is(.sidebar-op-receive,.sidebar-op-withdraw) .sc-tag {
+  color:#fff !important; border-color:#ffffff59 !important; background:#ffffff26 !important;
+}
+
+/* The login hero stays dark in both modes. It is a full-bleed panel carrying
+   white text over the hospital's colour — inverting it would mean recolouring
+   the lockup for a screen people see for five seconds. */
+
+/* The theme button itself. */
+.theme-toggle-btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  min-height:40px; padding:8px 14px; border-radius:var(--radius-md);
+  border:1px solid var(--border-default); background:var(--surface-card);
+  color:var(--text-primary); cursor:pointer; flex-shrink:0;
+  font:var(--fw-semibold) var(--text-xs)/1 var(--font-body);
+  transition:background var(--dur-fast), border-color var(--dur-fast);
+}
+.theme-toggle-btn:hover { background:var(--surface-sunken); border-color:var(--border-strong); }
+.theme-toggle-btn .theme-toggle-label { white-space:nowrap; }
+/* On a phone the header has two action buttons already; the glyph alone is
+   unambiguous once the label has been read on a larger screen. */
+@media (max-width:768px) {
+  .theme-toggle-btn .theme-toggle-label { display:none; }
+  .theme-toggle-btn { padding:8px 10px; min-width:40px; }
+}
+}

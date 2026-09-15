@@ -101,6 +101,14 @@ class App extends React.Component {
       users: [], uform: { name: '', username: '', role: 'technician', password: '' },
       printLotData: null,
       sidebarOpen: false,
+      // Read straight from storage on the first render so the page never
+      // paints dark and then flips — a flash of the wrong theme on every load
+      // is worse than not offering the choice. Dark stays the default: it is
+      // what the lab is already using.
+      theme: (() => {
+        try { return localStorage.getItem('uiTheme') === 'light' ? 'light' : 'dark'; }
+        catch { return 'dark'; }
+      })(),
       editingLotId: null, elForm: this.blankElf(),
       editingTxnId: null, etForm: this.blankEtf(),
       confirmData: null,
@@ -2036,6 +2044,15 @@ class App extends React.Component {
       showToast: (msg, kind) => this.showToast(msg, kind),
       api: (path, opts) => this.api(path, opts),
       sidebarOpen: S.sidebarOpen,
+      theme: S.theme,
+      toggleTheme: () => this.setState(s => {
+        const theme = s.theme === 'light' ? 'dark' : 'light';
+        // Private to this browser and this device on purpose — two people
+        // sharing a bench terminal should not be changing each other's screen,
+        // and it is a comfort setting, not lab data.
+        try { localStorage.setItem('uiTheme', theme); } catch { /* private mode */ }
+        return { theme };
+      }),
       toggleSidebar: () => this.setState(s => ({ sidebarOpen: !s.sidebarOpen })),
       closeSidebar: () => this.setState({ sidebarOpen: false }),
     };
@@ -2046,7 +2063,7 @@ class App extends React.Component {
     const v = this.renderVals();
     const { setRoot } = v;
     return (
-<div ref={setRoot} className="dark-theme" style={css(`display:flex; height:100vh; overflow:hidden; background:var(--surface-page); font-family:var(--font-body); color:var(--text-primary);`)}>
+<div ref={setRoot} className={`dark-theme${S.theme === 'light' ? ' theme-light' : ''}`} style={css(`display:flex; height:100vh; overflow:hidden; background:var(--surface-page); font-family:var(--font-body); color:var(--text-primary);`)}>
       {v.sidebarOpen && (
         <div className="sidebar-backdrop" onClick={v.closeSidebar} />
       )}

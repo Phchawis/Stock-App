@@ -14,8 +14,10 @@ import { StickerLog } from '../screens/StickerLog.jsx';
 
 export function Main({ v }) {
   const {
-    ic, title, subtitle, openReceive, openIssue, toggleSidebar,
+    ic, title, subtitle, openReceive, openIssue, toggleSidebar, theme, toggleTheme,
   } = v;
+
+  const isLight = theme === 'light';
 
   const localStyle = `
     /* Matches the sidebar's "การทำงาน" receive/withdraw buttons — same green/amber
@@ -173,6 +175,21 @@ export function Main({ v }) {
         <button onClick={openIssue} className="header-btn-withdraw">
           <span style={css(`width:16px; height:16px; display:grid; place-items:center;`)}>{ic.issue}</span>
           เบิกจ่าย (Withdraw)
+        </button>
+
+        {/* Sits after the two actions, not before: Receive and Withdraw are
+            what people come to the header for, and a display setting should
+            not take the first position they reach for. aria-pressed rather
+            than a label that changes, so a screen reader announces the state
+            of one control instead of a button that appears to rename itself. */}
+        <button
+          onClick={toggleTheme}
+          className="theme-toggle-btn"
+          aria-pressed={isLight}
+          title={isLight ? 'สลับเป็นโหมดมืด' : 'สลับเป็นโหมดสว่าง'}
+        >
+          <span aria-hidden="true">{isLight ? '🌙' : '☀️'}</span>
+          <span className="theme-toggle-label">{isLight ? 'โหมดมืด' : 'โหมดสว่าง'}</span>
         </button>
       </header>
 

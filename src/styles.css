@@ -626,13 +626,20 @@
   --fw-bold: 700;     /* @kind font */
 
   /* type scale (rem @ 16px root) */
-  --text-2xs: 0.6875rem;  /* 11px — table meta, codes */
-  --text-xs:  0.75rem;    /* 12px — captions, badges */
-  --text-sm:  0.8125rem;  /* 13px — secondary UI */
-  --text-base:0.9375rem;  /* 15px — body, table cells */
-  --text-md:  1.0625rem;  /* 17px — emphasised body */
-  --text-lg:  1.25rem;    /* 20px — card titles */
-  --text-xl:  1.5rem;     /* 24px — section heads */
+  /* Bumped one step across the board (≈ +13%) — the lab reads this at arm's
+     length on a bench, often through safety glasses, and 11px meta text was
+     being squinted at. Written as literal values rather than calc() on a
+     multiplier because these feed the `font:` shorthand everywhere in the app,
+     and a shorthand that fails to parse takes every size on the screen with
+     it. Keep the steps distinct: the scale is what separates a table cell from
+     its caption. */
+  --text-2xs: 0.7813rem;  /* 12.5px — table meta, codes */
+  --text-xs:  0.8438rem;  /* 13.5px — captions, badges */
+  --text-sm:  0.9375rem;  /* 15px — secondary UI */
+  --text-base:1.0625rem;  /* 17px — body, table cells */
+  --text-md:  1.1875rem;  /* 19px — emphasised body */
+  --text-lg:  1.375rem;   /* 22px — card titles */
+  --text-xl:  1.625rem;   /* 26px — section heads */
   --text-2xl: 1.875rem;   /* 30px — page titles */
   --text-3xl: 2.375rem;   /* 38px — hero / display */
   --text-4xl: 3rem;       /* 48px — login / cover */
@@ -1421,13 +1428,20 @@ code, kbd, samp { font-family: var(--font-mono); }
   --fw-bold: 700;     /* @kind font */
 
   /* type scale (rem @ 16px root) */
-  --text-2xs: 0.6875rem;  /* 11px — table meta, codes */
-  --text-xs:  0.75rem;    /* 12px — captions, badges */
-  --text-sm:  0.8125rem;  /* 13px — secondary UI */
-  --text-base:0.9375rem;  /* 15px — body, table cells */
-  --text-md:  1.0625rem;  /* 17px — emphasised body */
-  --text-lg:  1.25rem;    /* 20px — card titles */
-  --text-xl:  1.5rem;     /* 24px — section heads */
+  /* Bumped one step across the board (≈ +13%) — the lab reads this at arm's
+     length on a bench, often through safety glasses, and 11px meta text was
+     being squinted at. Written as literal values rather than calc() on a
+     multiplier because these feed the `font:` shorthand everywhere in the app,
+     and a shorthand that fails to parse takes every size on the screen with
+     it. Keep the steps distinct: the scale is what separates a table cell from
+     its caption. */
+  --text-2xs: 0.7813rem;  /* 12.5px — table meta, codes */
+  --text-xs:  0.8438rem;  /* 13.5px — captions, badges */
+  --text-sm:  0.9375rem;  /* 15px — secondary UI */
+  --text-base:1.0625rem;  /* 17px — body, table cells */
+  --text-md:  1.1875rem;  /* 19px — emphasised body */
+  --text-lg:  1.375rem;   /* 22px — card titles */
+  --text-xl:  1.625rem;   /* 26px — section heads */
   --text-2xl: 1.875rem;   /* 30px — page titles */
   --text-3xl: 2.375rem;   /* 38px — hero / display */
   --text-4xl: 3rem;       /* 48px — login / cover */
@@ -2239,5 +2253,14 @@ input:focus, select:focus, textarea:focus {
   }
   .dark-theme .app-workspace button:not(.sidebar-btn-item):not(.hamburger-btn) {
     min-height: 40px;
+  }
+
+  /* The stock-count table is seven columns carrying 18px of padding a side.
+     At the larger type that came to 709px inside a 698px shell, so it opened a
+     12px sideways scroll — enough to nudge the sheet out of line while someone
+     is typing counted quantities into it. The padding is where the room is. */
+  .stock-count-table :is(th, td) {
+    padding-left: 11px !important;
+    padding-right: 11px !important;
   }
 }
