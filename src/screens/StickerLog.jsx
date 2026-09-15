@@ -667,7 +667,10 @@ export function StickerLog({ v }) {
             the workbook rather than cells, which is why the first pass — which
             read cells — reproduced the words and none of the furniture. */}
         <div className="pd-head">
-          <img className="pd-logo" src="/assets/tuh_lab_logo.jpg" alt="" />
+          {/* The hospital crest, not the laboratory's own badge — the form is
+              issued by the hospital. Cut from the roundel embedded in
+              tuh_lab_logo_circle.png, which already carried it. */}
+          <img className="pd-logo" src="/assets/tuh_crest.png" alt="" />
           <div className="pd-headtext">
             <div className="pd-h1">ศูนย์ห้องปฏิบัติการทางการแพทย์&nbsp;&nbsp;โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ</div>
             <div className="pd-h2">งานห้องปฏิบัติการเทคนิคการแพทย์</div>
