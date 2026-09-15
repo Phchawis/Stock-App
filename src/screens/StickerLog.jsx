@@ -168,6 +168,53 @@ function BackfillPanel({ reagentsList, usersList, user, onSubmit, onClose }) {
   );
 }
 
+// The institution's name on the printed form.
+const PREP_HEAD_LINE = 'ศูนย์ห้องปฏิบัติการทางการแพทย์  โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ';
+
+// How much room that line has on the sheet, in CSS px. Every term is a value
+// set in the print rules below, so the two move together: an A4 body 17.8cm
+// wide, less the header block's own border and padding, less the gap the crest
+// and the control box are floated into on either side.
+const PREP_HEAD_WIDTH = (17.8 / 2.54) * 96 - 2 - 20 - 74 - 124;
+
+// The workbook sets the heading in CordiaUPC. That face is roughly six tenths
+// the width of a normal Thai face at the same point size, and the form leans on
+// it: the institution's name only fits on one line at 18pt because of it.
+//
+// A machine without Cordia silently falls through to a wider face and the line
+// runs under the crest and the control box — but by how much depends on which
+// face it landed on, and CSS cannot report that. So measure the line as this
+// machine will actually draw it and condense by exactly the shortfall: 1 where
+// Cordia is installed and nothing is needed, less where it is not. The point
+// sizes stay at the workbook's own throughout, because dropping them would make
+// the institution's name the smallest line on a form where it is the largest.
+//
+// The factor is applied to all four heading lines, not just the one that
+// overflows — Cordia condenses the whole block, and squeezing one line alone
+// would leave it narrower than the shorter lines beneath it.
+function headCondenseFactor() {
+  try {
+    const probe = document.createElement('span');
+    probe.textContent = PREP_HEAD_LINE;
+    probe.style.cssText =
+      "position:absolute;left:-9999px;top:-9999px;visibility:hidden;white-space:nowrap;" +
+      "font-weight:bold;font-size:24px;" + // 18pt, the workbook's size for this line
+      "font-family:'CordiaUPC','Cordia New','TH SarabunPSK','Sarabun',sans-serif;";
+    document.body.appendChild(probe);
+    const natural = probe.getBoundingClientRect().width;
+    probe.remove();
+    if (!natural) return 1;
+    // Never stretch a line that already fits, and never condense past
+    // legibility — a factor that low would mean a font nothing here
+    // anticipated. The 2% is slack for the print renderer, whose metrics are
+    // close to the screen's but not identical, and the cost of being wrong is
+    // the institution's name running under the control box.
+    return Math.min(1, Math.max(0.55, (PREP_HEAD_WIDTH * 0.98) / natural));
+  } catch {
+    return 1;
+  }
+}
+
 // บันทึกการเตรียมน้ำยา (Reagent Preparation & Labelling Record)
 //
 // Every sticker downloaded or printed writes one row here. The screen exists to
@@ -196,6 +243,10 @@ export function StickerLog({ v }) {
   const [endDate, setEndDate] = React.useState('');
   const [search, setSearch] = React.useState('');
   const [showBackfill, setShowBackfill] = React.useState(false);
+  // Measured once on mount, not guessed: CSS can name a font stack but cannot
+  // tell you which entry the machine actually resolved to, and the heading
+  // layout depends on the answer.
+  const [headCondense] = React.useState(headCondenseFactor);
 
   if (!isStickerLog) return null;
 
@@ -291,7 +342,8 @@ export function StickerLog({ v }) {
     if (!ymd) return '';
     const [y, m, d] = String(ymd).slice(0, 10).split('-');
     if (!y || !m || !d) return ymd;
-    return `${+d}/${+m}/${+y + 543}`;
+    // d/m/yy with a two-digit Buddhist year, as the form prints it: 2/7/69.
+    return `${+d}/${+m}/${String(+y + 543).slice(-2)}`;
   };
 
   // The form is filled in a month at a time. When the selection sits inside one
@@ -368,6 +420,23 @@ export function StickerLog({ v }) {
         box-shadow: none !important;
         text-shadow: none !important;
       }
+      html, body, #root, main, .qms-rise, .prep-doc {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      /* Text only. Giving the form's descendants a white background too paints
+         over the header band from the inside: the fill is on .pd-head, and the
+         title lines sitting on it were each drawing an opaque white block. The
+         universal reset above already clears any inherited app colour. */
+      .prep-doc * { color: #000000 !important; }
+      /* The form's own fills and its blue, restated after the reset and not
+         before it. The reset's .prep-doc * and .pd-head carry the same
+         specificity, so whichever is written last wins — with the fills above
+         the reset, the header band and the control box printed white and the
+         form's name printed black, and only the table's header row kept its
+         colour, because .prep-table th happens to be one point more specific.
+         These are the colours of a controlled document, not app chrome: they
+         are part of what makes the printout the form. */
       .pd-head, .prep-table th, .pd-ctrl {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
@@ -376,10 +445,6 @@ export function StickerLog({ v }) {
       .prep-table th { background: #cc99ff !important; }
       .pd-ctrl { background: #d8d8f5 !important; }
       .pd-title, .pd-ctrl-code { color: #0000ff !important; }
-      html, body, #root, main, .qms-rise, .prep-doc, .prep-doc * {
-        background: #ffffff !important;
-        color: #000000 !important;
-      }
       html, body, #root, #root > div, main, .qms-rise {
         height: auto !important; min-height: auto !important;
         overflow: visible !important; display: block !important; position: static !important;
@@ -396,16 +461,40 @@ export function StickerLog({ v }) {
            for the table. Both ship with Thai Windows and Office, so on the
            machines this is printed from the sheet comes out in the same type it
            has always been in; Sarabun is the app's own fallback elsewhere. */
-        font-family: 'TH SarabunPSK', 'Sarabun', 'Cordia New', 'CordiaUPC', sans-serif !important;
+        font-family: 'TH SarabunPSK', 'Sarabun', sans-serif !important;
       }
       /* Point sizes taken from the workbook's own cells rather than converted
          by eye — Thai faces run small for their point size, so guessing in
          pixels lands nowhere near. */
-      .prep-doc .pd-h1 { font-size: 15pt !important; }
-      .prep-doc .pd-h2 { font-size: 14pt !important; }
-      .prep-doc .pd-unit { font-size: 13pt !important; }
+      /* The heading block is Cordia in the workbook — a condensed face, and
+         that is the only reason the institution's name fits on one line at
+         18pt. Named first so a machine that has it (every Thai Windows PC in
+         the department) prints the sheet in the type it was drawn in. */
+      .prep-doc .pd-head {
+        font-family: 'CordiaUPC', 'Cordia New', 'TH SarabunPSK', 'Sarabun', sans-serif !important;
+      }
+      /* Condensed to whatever this machine's face actually needs — see
+         headCondenseFactor(). 1 on a machine with Cordia, so this is a no-op
+         there.
+
+         The flex centring above it is load-bearing, not tidying. text-align
+         centres the glyphs inside the line box, but a nowrap line wider than
+         its container puts the whole overhang on one side — the right, which
+         is the side the control box is on — so scaling about the centre was
+         shrinking a line that had never been centred and it still finished
+         under the box. A column flex item overflows its container evenly, so
+         the line straddles the centre and the scale brings it back inside the
+         gap on both sides at once. */
+      .prep-doc .pd-headtext { display: flex; flex-direction: column; align-items: center; }
+      .prep-doc .pd-headtext > div {
+        transform: scaleX(var(--pd-condense, 1));
+        transform-origin: center;
+      }
+      .prep-doc .pd-h1 { font-size: 18pt !important; }
+      .prep-doc .pd-h2 { font-size: 17pt !important; }
+      .prep-doc .pd-unit { font-size: 16pt !important; }
       .prep-doc .pd-period td { font-size: 13pt !important; }
-      .prep-doc .pd-title { font-size: 15pt !important; }
+      .prep-doc .pd-title { font-size: 18pt !important; }
       .prep-doc .prep-signoff { font-size: 16pt !important; }
       .prep-table th { font-size: 12pt !important; }
       .prep-table td { font-size: 14pt !important; }
@@ -659,7 +748,7 @@ export function StickerLog({ v }) {
           in the same order and wording, and the single ผู้ดูแล / ควบคุม
           signature. Anyone comparing a printout against the workbook should
           find nothing to reconcile. */}
-      <div className="prep-doc" style={css(`color:#000; font-family:var(--font-body);`)}>
+      <div className="prep-doc" style={css(`color:#000; font-family:var(--font-body); --pd-condense:${headCondense};`)}>
         {/* The header is a filled block, not an outline: rows 1–4 carry a
             solid #9999ff, the form name is set in blue on it, and the sheet
             is headed by the hospital crest on the left and the document
