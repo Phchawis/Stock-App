@@ -2153,3 +2153,91 @@ input:focus, select:focus, textarea:focus {
     animation: none !important;
   }
 }
+
+/* ── Tablet portrait: 769–1024px ───────────────────────────────────────────
+   An iPad held upright is 834px. The full sidebar is 264px of that — just
+   under a third of the screen — and it never collapsed, because the phone
+   rules stop at 768px and the iPad misses that by 66px. What was left was a
+   559px column doing a desktop layout: the four dashboard tiles came out
+   123px wide with their labels broken across three lines, and the reagent
+   cards dropped to one per row for 156 items.
+
+   This band gives the iPad the 72px icon rail instead, which hands ~190px
+   back to the content. It is written as its own block rather than by widening
+   the phone breakpoints: those blocks also carry table-to-card conversions and
+   safe-area insets that belong to phones, and a tablet given the phone layout
+   ends up with 800px-wide single-column cards, which is the same waste from
+   the other direction.
+
+   Below 769px the phone rules still win — .dark-theme is the more specific
+   selector — so the drawer behaviour there is untouched. */
+@media (min-width: 769px) and (max-width: 1024px) {
+  aside.main-sidebar,
+  .dark-theme aside.main-sidebar {
+    position: sticky !important;
+    inset: 0 auto auto 0 !important;
+    top: 0 !important;
+    width: 72px !important;
+    height: 100vh !important;
+    transform: none !important;
+    visibility: visible !important;
+    box-shadow: none !important;
+    flex-shrink: 0 !important;
+    z-index: 20 !important;
+    transition: none !important;
+  }
+
+  /* Labels off, glyphs centred. */
+  .dark-theme aside.main-sidebar .sidebar-logo-container > div:last-child,
+  .dark-theme aside.main-sidebar .sidebar-section-title,
+  .dark-theme aside.main-sidebar .sidebar-btn-item > span:last-child,
+  .dark-theme aside.main-sidebar .sidebar-btn-item > span:nth-child(2),
+  .dark-theme aside.main-sidebar > div:last-child > div,
+  .dark-theme .mobile-menu-close,
+  .dark-theme .mobile-menu-label,
+  /* The rail's own Receive/Withdraw pair goes too. They are wider than 72px
+     whatever is done to them, so their labels hang outside the rail and sit
+     over the page; the header carries both actions at this width anyway. */
+  .dark-theme aside.main-sidebar .sidebar-op-receive,
+  .dark-theme aside.main-sidebar .sidebar-op-withdraw {
+    display: none !important;
+  }
+  .dark-theme aside.main-sidebar .sidebar-logo-container {
+    padding: 16px 0 !important;
+    justify-content: center !important;
+  }
+  .dark-theme aside.main-sidebar .sidebar-btn-item {
+    justify-content: center !important;
+    padding: 12px 0 !important;
+    min-height: 48px;
+  }
+  .dark-theme aside.main-sidebar > div:last-child,
+  .dark-theme aside.main-sidebar .sidebar-footer {
+    flex-direction: column !important;
+    padding: 14px 0 !important;
+    justify-content: center !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* The rail is always on screen, so the drawer's opener and scrim have
+     nothing to do; leaving the scrim enabled would let a stale `open` state
+     grey out the whole page with no way to dismiss it. */
+  .hamburger-btn,
+  .dark-theme .hamburger-btn,
+  .sidebar-backdrop,
+  .dark-theme .sidebar-backdrop {
+    display: none !important;
+  }
+
+  /* Finger targets. Apple's minimum is 44pt and the date fields were 26px —
+     small enough to need a second attempt, which on a stock count is where
+     mis-keyed numbers come from. */
+  .dark-theme .app-workspace :is(input:not([type=checkbox]):not([type=radio]), select),
+  .dark-theme .stock-modal :is(input:not([type=checkbox]):not([type=radio]), select) {
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+  .dark-theme .app-workspace button:not(.sidebar-btn-item):not(.hamburger-btn) {
+    min-height: 40px;
+  }
+}

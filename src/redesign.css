@@ -28,7 +28,13 @@
 .dark-theme .sidebar-logo-img-wrapper { box-shadow:none; }
 .dark-theme .sidebar-logo-container:hover .sidebar-logo-img { transform:none; }
 .dark-theme :is(.header-btn-receive,.sidebar-op-receive,.mobile-action-btn.receive,.detail-btn-receive) { background:var(--brand-700) !important; color:#fff !important; border:1px solid #318c7e; box-shadow:none; }
-.dark-theme :is(.header-btn-withdraw,.sidebar-op-withdraw,.mobile-action-btn.withdraw,.detail-btn-issue) { background:var(--surface-card) !important; color:var(--text-primary) !important; border:1px solid var(--border-default); box-shadow:none; }
+/* Withdraw carries the same weight as Receive and has to read as a button at a
+   glance. On --surface-card it was the same colour as the panel behind it, so
+   it disappeared. Amber against the green of Receive also keeps the two apart
+   at speed: taking stock out and putting it in are opposite acts, and the
+   colour is the fastest thing the eye resolves. White on #805316 is 6.6:1. */
+.dark-theme :is(.header-btn-withdraw,.sidebar-op-withdraw,.mobile-action-btn.withdraw,.detail-btn-issue) { background:var(--amber-fill) !important; color:#fff !important; border:1px solid #9c6a25; box-shadow:none; }
+.dark-theme :is(.header-btn-withdraw,.sidebar-op-withdraw,.mobile-action-btn.withdraw,.detail-btn-issue) svg { color:#fff !important; }
 .dark-theme :is(.sidebar-op-receive,.sidebar-op-withdraw) { font-size:14px !important; padding:12px 14px; }
 .dark-theme :is(.header-btn-receive,.header-btn-withdraw,.sidebar-op-receive,.sidebar-op-withdraw):hover { transform:translateY(-1px); box-shadow:none; filter:brightness(1.12); }
 .dark-theme :is(.sidebar-op-receive,.sidebar-op-withdraw) svg { color:inherit; }
