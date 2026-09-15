@@ -289,7 +289,11 @@ export function ReagentLists({ v }) {
                     />
                     <div style={css(`position:absolute; inset:0; background:linear-gradient(to top, rgba(14,24,34,0.92) 0%, rgba(14,24,34,0.2) 60%, rgba(14,24,34,0) 100%);`)} />
                     <div style={css(`position:absolute; bottom:12px; left:14px; right:14px;`)}>
-                      <span style={css(`padding:2px 8px; border-radius:var(--radius-pill); background:rgba(43,166,198,.24); border:1px solid rgba(43,166,198,.4); color:var(--brand-800); font:var(--fw-semibold) var(--text-3xs)/1.2 var(--font-body); text-transform:uppercase;`)}>
+                      {/* Same as the card chip: this one sits on the photo's
+                          dark gradient too, so its ink cannot follow the
+                          theme — the light theme's deep green disappeared
+                          into the scrim. */}
+                      <span className="rl-cat-badge" style={css(`padding:2px 8px; border-radius:var(--radius-pill); background:rgba(8,26,32,.55); border:1px solid rgba(255,255,255,.35); color:#eef5f2; font:var(--fw-semibold) var(--text-3xs)/1.2 var(--font-body); text-transform:uppercase;`)}>
                         {getCategoryLabel(r.cat)}
                       </span>
                     </div>
