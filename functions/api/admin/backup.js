@@ -17,15 +17,30 @@ export async function onRequestGet(context) {
     const users = await env.DB
       .prepare('SELECT username, name, role, initials, color, signature FROM users').all();
     const permissions = await env.DB.prepare('SELECT * FROM permissions').all();
+    // The preparation record is the lab's ISO evidence for every label it has
+    // ever produced, and it was not in the backup at all — a restore would have
+    // come back with the catalogue intact and that history gone. alert_acks
+    // carries which alerts were acknowledged or marked ordered, which is what
+    // stops a reorder appearing twice; app_settings holds the SDS folder link.
+    const stickerLogs = await env.DB.prepare('SELECT * FROM sticker_logs').all();
+    const alertAcks = await env.DB.prepare('SELECT * FROM alert_acks').all();
+    const appSettings = await env.DB.prepare('SELECT * FROM app_settings').all();
 
+    // Not exported on purpose: `sessions` and `login_attempts` are live
+    // credentials and rate-limit state that must not leave the server, and
+    // `d1_migrations` describes the schema, which belongs to the deployment
+    // rather than to the data.
     const backupData = {
-      version: '1.0',
+      version: '1.1',
       exportedAt: new Date().toISOString(),
       reagents: reagents.results || [],
       lots: lots.results || [],
       transactions: transactions.results || [],
       users: users.results || [],
-      permissions: permissions.results || []
+      permissions: permissions.results || [],
+      sticker_logs: stickerLogs.results || [],
+      alert_acks: alertAcks.results || [],
+      app_settings: appSettings.results || []
     };
 
     // Leave a trace that a backup was taken, so the app can tell the lab when
@@ -34,7 +49,7 @@ export async function onRequestGet(context) {
       await env.DB.prepare(
         "INSERT INTO system_events (kind, detail, context, by, at) VALUES ('BACKUP', ?, 'admin/backup', ?, ?)"
       ).bind(
-        `reagents=${backupData.reagents.length} lots=${backupData.lots.length} txns=${backupData.transactions.length}`,
+        `reagents=${backupData.reagents.length} lots=${backupData.lots.length} txns=${backupData.transactions.length} prep=${backupData.sticker_logs.length}`,
         await actorName(context), nowStr()
       ).run();
     } catch { /* never let bookkeeping block the download itself */ }

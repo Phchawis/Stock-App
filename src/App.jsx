@@ -1075,7 +1075,15 @@ class App extends React.Component {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `tuh_inventory_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      // toISOString() is UTC, so a backup taken before 07:00 Bangkok time was
+      // filed under yesterday's date — which matters when the file's name is
+      // how anyone later answers "did we back up that week?". Built from local
+      // parts instead, with the time appended so two backups on the same day
+      // land as two named files rather than one and a "(1)".
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const stamp = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`;
+      a.download = `tuh_inventory_backup_${stamp}.json`;
       document.body.appendChild(a);
       a.click();
       a.remove();

@@ -165,33 +165,52 @@
    everything inside it stays dark. */
 .dark-theme.theme-light,
 .dark-theme.theme-light .theme-content-teal {
-  --surface-page:#eef2f0; --surface-card:#ffffff; --surface-sunken:#e7edea;
-  --white:#ffffff; --text-primary:#172c28; --text-secondary:#344e47;
-  --text-tertiary:#4a625b; --text-link:#0b7365; --text-disabled:#5c716b;
-  --border-subtle:#d3ded9; --border-default:#b3c5bd; --border-strong:#8aa79c;
-  --brand-900:#16473b; --brand-800:#125746; --brand-700:#0b7365;
-  --brand-600:#096556; --brand-500:#278f78; --brand-400:#71bba6;
-  --brand-100:#c8e2d7; --brand-50:#dcefe6; --brand-ink:#0b7365;
-  --focus-ring:#0b7365; --border-brand:#0b7365;
+  /* Sampled from the department's document register (ashtuhdoc), whose light
+     theme it calls "cream". Matching it exactly is the point: the two systems
+     sit in the same browser for the same people, and a near-miss reads as a
+     mistake where an exact match reads as one suite. These are that system's
+     own token values, not an approximation of them — so if it is ever
+     restyled, resample rather than nudge these by eye. */
+  --surface-page:#f4f1e8; --surface-card:#faf8f1; --surface-sunken:#efebdf;
+  /* --text-secondary is a shade darker than the register's #3d4a43: on the
+     tinted role-header cells of the permission matrix that value lands at
+     4.42:1, just under the line. Everywhere else the difference is invisible. */
+  --white:#ffffff; --text-primary:#171f1a; --text-secondary:#394640;
+  --text-tertiary:#5a675f; --text-link:#1e7a46; --text-disabled:#7e8a82;
+  --border-subtle:#e0dccf; --border-default:#cfcabb; --border-strong:#b4ad9c;
+  /* One step darker than the register's #1e7a46. That value is fine as a fill
+     under white, but the app also uses the brand green as ink on its own pale
+     tints, where it lands at 4.4:1 — and the same token feeds both. Darkening
+     it costs nothing visible and clears the line in every use. */
+  --brand-900:#0f4a29; --brand-800:#166337; --brand-700:#1a6b3d;
+  --brand-600:#166337; --brand-500:#2a8f58; --brand-400:#6cb891;
+  --brand-100:#cfe4d8; --brand-50:#e2ece4; --brand-ink:#1a6b3d;
+  --focus-ring:#1a6b3d; --border-brand:#1a6b3d;
   /* The count badge on a tab reads with this; left on the dark theme's mint it
-     came out at 1.4:1 on white. */
-  --teal-700:#0b7365;
-  --slate-50:#f1f5f3; --slate-100:#e2eae6; --slate-200:#cfdcd6;
-  --green-700:#226343; --green-600:#2e7a55; --green-100:#cfe8d9; --green-fill:#1f7a4d;
-  --amber-700:#734500; --amber-600:#8a5a10; --amber-100:#f6e6c2; --amber-fill:#8a5a10;
-  --red-700:#982e24; --red-600:#b0473c; --red-100:#f6d8d2; --red-fill:#b0362a;
-  --blue-700:#255775; --blue-600:#356d8d; --blue-100:#d5e6f0;
-  --content-glass-top:#f7faf8; --content-glass-bottom:#f7faf8;
+     came out at 1.4:1. */
+  --teal-700:#186338;
+  --slate-50:#f7f5ee; --slate-100:#efebdf; --slate-200:#e2dccb;
+  /* Ink and fill diverge again: #1e7a46 is the register's green and carries
+     white at 5.4:1 as a button, but as text on its own --green-100 tint it is
+     4.0:1. The badge ink therefore runs a shade darker than the fill. */
+  --green-700:#186338; --green-600:#166337; --green-100:#cfe4d8; --green-fill:#1e7a46;
+  /* Text and fill part company here. #9e7013 is the register's amber and reads
+     at 6:1 as ink on cream, but only 4.4:1 behind white on a button, so the
+     Withdraw fill goes a shade darker to clear 4.5. */
+  --amber-700:#7a5310; --amber-600:#9e7013; --amber-100:#f2e6c8; --amber-fill:#8a5f10;
+  --red-700:#a03f36; --red-600:#b04a40; --red-100:#f3d9d4; --red-fill:#a8433a;
+  --blue-700:#33628f; --blue-600:#4a789f; --blue-100:#d9e5ef;
+  --content-glass-top:#f4f1e8; --content-glass-bottom:#f4f1e8;
   --content-ambient:var(--surface-page);
-  --shadow-xs:0 1px 2px #0f291f14;
-  --shadow-sm:0 1px 3px #0f291f1f, 0 1px 2px #0f291f14;
+  --shadow-xs:0 1px 2px #1c242014;
+  --shadow-sm:0 1px 3px #1c24201f, 0 1px 2px #1c242014;
   --glow-brand-soft:none; --glow-brand:none;
   color-scheme: light;
 }
 
 /* Surfaces and text that were painted with literals. */
-.dark-theme.theme-light .main-sidebar { background:#f5f8f6 !important; }
-.dark-theme.theme-light .tuh-mhead { background:#e2eae6 !important; border-bottom:1px solid #cfdcd6 !important; }
+.dark-theme.theme-light .main-sidebar { background:#efebdf !important; }
+.dark-theme.theme-light .tuh-mhead { background:#efebdf !important; border-bottom:1px solid #e0dccf !important; }
 .dark-theme.theme-light .stock-overview p,
 .dark-theme.theme-light .expiry-value span,
 .dark-theme.theme-light .fefo-note { color:var(--text-secondary); }

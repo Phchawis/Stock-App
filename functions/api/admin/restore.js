@@ -46,9 +46,13 @@ export async function onRequestPost(context) {
       for (const r of backup.reagents) {
         queries.push(
           env.DB.prepare(
-            `INSERT INTO reagents (id, code, th, en, cat, unit, subUnit, testsPerUnit, storage, min_qty, reorder_qty, supplier, img)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-          ).bind(r.id, r.code, r.th, r.en, r.cat, r.unit, r.subUnit || null, r.testsPerUnit || null, r.storage, r.min_qty ?? 0, r.reorder_qty ?? 0, r.supplier, r.img)
+            // The SDS columns were missing here while the backup file has
+            // carried them all along, so a restore silently dropped every
+            // safety-sheet link — 152 of them — leaving the catalogue looking
+            // complete with no way to reach a hazard sheet from the bench.
+            `INSERT INTO reagents (id, code, th, en, cat, unit, subUnit, testsPerUnit, storage, min_qty, reorder_qty, supplier, img, sds_file, sds_url, sds_source)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          ).bind(r.id, r.code, r.th, r.en, r.cat, r.unit, r.subUnit || null, r.testsPerUnit || null, r.storage, r.min_qty ?? 0, r.reorder_qty ?? 0, r.supplier, r.img, r.sds_file ?? null, r.sds_url ?? null, r.sds_source ?? null)
         );
       }
     }
@@ -125,6 +129,53 @@ export async function onRequestPost(context) {
       }
     }
 
+    // Restore the preparation record, acknowledged alerts and settings.
+    //
+    // Each is wiped only when the backup actually carries it, for the same
+    // reason as the permission matrix above: a file written before these were
+    // exported has no such key, and clearing the table against it would delete
+    // the very history the restore was meant to bring back.
+    if (Array.isArray(backup.sticker_logs)) {
+      queries.push(env.DB.prepare('DELETE FROM sticker_logs'));
+      for (const s of backup.sticker_logs) {
+        queries.push(
+          env.DB.prepare(
+            `INSERT INTO sticker_logs (id, kind, action, reagent_name, reagent_id, lot, sub_type,
+               prep_date, exp_date, storage_temp, storage_duration, prepared_by, qty, by, at,
+               source, entered_by, entered_at, source_note)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          ).bind(
+            s.id, s.kind, s.action, s.reagent_name, s.reagent_id ?? null, s.lot ?? null,
+            s.sub_type ?? null, s.prep_date ?? null, s.exp_date ?? null, s.storage_temp ?? null,
+            s.storage_duration ?? null, s.prepared_by ?? null, s.qty ?? 1, s.by, s.at,
+            // Rows written before provenance existed are machine-recorded by
+            // definition; the insert guard rejects a NULL here.
+            s.source || 'AUTO', s.entered_by ?? null, s.entered_at ?? null, s.source_note ?? null
+          )
+        );
+      }
+    }
+
+    if (Array.isArray(backup.alert_acks)) {
+      queries.push(env.DB.prepare('DELETE FROM alert_acks'));
+      for (const a of backup.alert_acks) {
+        queries.push(
+          env.DB.prepare('INSERT INTO alert_acks (key, status, at, by) VALUES (?, ?, ?, ?)')
+            .bind(a.key, a.status, a.at, a.by)
+        );
+      }
+    }
+
+    if (Array.isArray(backup.app_settings)) {
+      queries.push(env.DB.prepare('DELETE FROM app_settings'));
+      for (const s of backup.app_settings) {
+        queries.push(
+          env.DB.prepare('INSERT INTO app_settings (key, value, updated_by, updated_at) VALUES (?, ?, ?, ?)')
+            .bind(s.key, s.value ?? null, s.updated_by ?? null, s.updated_at ?? null)
+        );
+      }
+    }
+
     // Execute everything in a single transactional batch
     if (queries.length > 0) {
       await env.DB.batch(queries);
@@ -133,7 +184,7 @@ export async function onRequestPost(context) {
     try {
       await env.DB.prepare(
         "INSERT INTO system_events (kind, detail, context, by, at) VALUES ('RESTORE', ?, 'admin/restore', ?, ?)"
-      ).bind(`lots=${(backup.lots||[]).length} txns=${(backup.transactions||[]).length}`, actorUsername, nowStr()).run();
+      ).bind(`lots=${(backup.lots||[]).length} txns=${(backup.transactions||[]).length} prep=${(backup.sticker_logs||[]).length}`, actorUsername, nowStr()).run();
     } catch { /* bookkeeping only */ }
 
     const message = needPasswordReset > 0
