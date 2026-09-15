@@ -612,10 +612,14 @@ export function StickerLog({ v }) {
           signature. Anyone comparing a printout against the workbook should
           find nothing to reconcile. */}
       <div className="prep-doc" style={css(`color:#000; font-family:var(--font-body);`)}>
-        <div style={css(`position:relative;`)}>
-          <div style={css(`position:absolute; top:0; right:0; font-size:8px; color:#333; text-align:right; line-height:1.5;`)}>
-            <div style={css(`font-weight:bold;`)}>FM-09-157-07-020</div>
-          </div>
+        {/* The workbook boxes rows 1–4 — the four title lines — in a thick
+            outline closed by a heavy rule under the form name. The เดือน/ปี
+            line sits below that box, unruled, and the document code sits above
+            it, the way a controlled form is headed. */}
+        <div style={css(`text-align:right; font-size:8px; color:#333; font-weight:bold; margin-bottom:2px;`)}>
+          FM-09-157-07-020
+        </div>
+        <div style={css(`border:1.6px solid #000; border-bottom:2px solid #000; padding:5px 8px 3px;`)}>
           <div className="pd-h1" style={css(`text-align:center; font-weight:bold; font-size:15px; line-height:1.5;`)}>
             ศูนย์ห้องปฏิบัติการทางการแพทย์&nbsp;&nbsp;โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ
           </div>
@@ -629,12 +633,12 @@ export function StickerLog({ v }) {
           <div className="pd-title" style={css(`text-align:center; font-weight:bold; font-size:15px; line-height:1.9;`)}>
             แบบฟอร์มบันทึกการจัดเตรียมน้ำยา
           </div>
-          <div className="pd-period" style={css(`text-align:center; font-size:13px; line-height:2.1;`)}>
-            <span>เดือน</span>
-            <span style={css(`display:inline-block; min-width:96px; border-bottom:1px dotted #000; margin:0 8px; font-weight:bold;`)}>{period.month}</span>
-            <span>ปี</span>
-            <span style={css(`display:inline-block; min-width:56px; border-bottom:1px dotted #000; margin:0 8px; font-weight:bold;`)}>{period.year}</span>
-          </div>
+        </div>
+        <div className="pd-period" style={css(`text-align:center; font-size:13px; line-height:2.4;`)}>
+          <span>เดือน</span>
+          <span style={css(`display:inline-block; min-width:96px; margin:0 10px; font-weight:bold;`)}>{period.month}</span>
+          <span>ปี</span>
+          <span style={css(`display:inline-block; min-width:56px; margin:0 10px; font-weight:bold;`)}>{period.year}</span>
         </div>
 
         <table className="prep-table">
@@ -676,8 +680,11 @@ export function StickerLog({ v }) {
         </table>
 
         {/* One signature, as on the form. */}
-        <div className="prep-signoff" style={css(`margin-top:30px; font-size:12px; color:#000; text-align:center;`)}>
-          <div style={css(`display:inline-block; text-align:left;`)}>
+        {/* The workbook rules a heavy line above the signature, spanning
+            columns C to F — the right-hand 76% of the sheet, not the whole
+            width. The signature hangs under that rule, not centred on it. */}
+        <div className="prep-signoff" style={css(`margin-top:26px; display:flex; justify-content:flex-end;`)}>
+          <div style={css(`width:76%; border-top:2px solid #000; padding-top:6px; font-size:12px; color:#000; text-align:center;`)}>
             ลงชื่อ …………………………………………..&nbsp;(ผู้ดูแล / ควบคุม)
           </div>
         </div>
