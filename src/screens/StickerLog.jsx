@@ -403,7 +403,8 @@ export function StickerLog({ v }) {
          pixels lands nowhere near. */
       .prep-doc .pd-h1 { font-size: 15pt !important; }
       .prep-doc .pd-h2 { font-size: 14pt !important; }
-      .prep-doc .pd-unit, .prep-doc .pd-period { font-size: 13pt !important; }
+      .prep-doc .pd-unit { font-size: 13pt !important; }
+      .prep-doc .pd-period td { font-size: 13pt !important; }
       .prep-doc .pd-title { font-size: 15pt !important; }
       .prep-doc .prep-signoff { font-size: 16pt !important; }
       .prep-table th { font-size: 12pt !important; }
@@ -468,8 +469,8 @@ export function StickerLog({ v }) {
     }
     .pd-ctrl-code { color: #0000ff; font-weight: bold; font-size: 11px; text-align: center; }
     .pd-ctrl span { color: #333; }
-    .pd-period { text-align: center; font-size: 13px; line-height: 2.4; }
-    .pd-period-val { display: inline-block; min-width: 92px; margin: 0 10px; font-weight: bold; }
+    .pd-period { width: 100%; table-layout: fixed; border-collapse: collapse; }
+    .pd-period td { font-size: 13px; line-height: 2.6; text-align: center; font-weight: bold; border: 0; }
 
     @media screen { .prep-doc { display: none; } }
   `;
@@ -687,12 +688,26 @@ export function StickerLog({ v }) {
           </div>
         </div>
 
-        <div className="pd-period">
-          <span>เดือน</span>
-          <span className="pd-period-val">{period.month}</span>
-          <span>ปี</span>
-          <span className="pd-period-val">{period.year}</span>
-        </div>
+        {/* Row 6 of the sheet: the labels and values sit in columns C, D, E
+            and F, lining up with the table beneath. Laid out on the same six
+            column widths so they land under the same headings they do in the
+            workbook, rather than floating centred as a group. */}
+        <table className="pd-period">
+          <colgroup>
+            <col style={{ width: '7.7%' }} /><col style={{ width: '16.4%' }} />
+            <col style={{ width: '37.9%' }} /><col style={{ width: '12.6%' }} />
+            <col style={{ width: '12.6%' }} /><col style={{ width: '12.8%' }} />
+          </colgroup>
+          <tbody>
+            <tr>
+              <td></td><td></td>
+              <td>เดือน</td>
+              <td>{period.month}</td>
+              <td>ปี</td>
+              <td>{period.year}</td>
+            </tr>
+          </tbody>
+        </table>
 
         <table className="prep-table">
           <thead>
