@@ -87,25 +87,56 @@ export async function onRequestDelete(context) {
     if (!id) return json({ error: 'Missing reagent id' }, 400);
 
     // Fetch reagent info before deletion to log it
-    const reagent = await env.DB.prepare('SELECT code, th FROM reagents WHERE id = ?').bind(id).first();
-    if (!reagent) return json({ error: 'Reagent not found' }, 404);
+    const reagent = await env.DB.prepare('SELECT code, th, unit FROM reagents WHERE id = ?').bind(id).first();
+    if (!reagent) return json({ error: 'ไม่พบน้ำยานี้ในระบบ' }, 404);
+
+    // Stock on the shelf outlives the catalogue row. Deleting a reagent that
+    // still has quantity leaves bottles in the fridge that the system no longer
+    // knows about — no expiry alert, no FEFO, nothing to count against. Summed
+    // over every lot regardless of status, because a positive quantity is stock
+    // whatever the row says about itself.
+    const stock = await env.DB.prepare(
+      'SELECT IFNULL(SUM(qty), 0) AS onHand FROM lots WHERE rid = ?'
+    ).bind(id).first();
+    if ((stock && stock.onHand) > 0) {
+      return json({
+        error: `${reagent.th} ยังมีคงเหลือ ${stock.onHand} ${reagent.unit} ในคลัง — ต้องเบิกจ่ายหรือตัดจำหน่ายให้หมดก่อนจึงจะลบได้`
+      }, 409);
+    }
+
+    // Counted before the delete so the record can say what went with it.
+    const counts = await env.DB.prepare(
+      `SELECT (SELECT COUNT(*) FROM lots WHERE rid = ?) AS lotCount,
+              (SELECT COUNT(*) FROM transactions WHERE rid = ?) AS txnCount`
+    ).bind(id, id).first();
 
     const actor = await actorName(context);
     const timestamp = nowStr();
-    const refString = `${reagent.code} - ${reagent.th}`;
 
     await env.DB.batch([
       env.DB.prepare('DELETE FROM transactions WHERE rid = ?').bind(id),
       env.DB.prepare('DELETE FROM lots WHERE rid = ?').bind(id),
       env.DB.prepare('DELETE FROM reagents WHERE id = ?').bind(id),
+      // Removing a catalogue entry is an administrative act, not a stock
+      // movement: no lot, no quantity. It used to be forced into `transactions`
+      // with lot_id = 0 and rid = 0, which violated both foreign keys and
+      // failed the whole batch every time. How much history went with it is
+      // part of the record — that is the number nobody can recover afterwards.
       env.DB.prepare(
-        `INSERT INTO transactions (lot_id, rid, type, qty, bal, ref, scan, by, at)
-         VALUES (0, 0, 'DELETE', 0, 0, ?, 'MANUAL', ?, ?)`
-      ).bind(refString, actor, timestamp)
+        `INSERT INTO system_events (kind, detail, context, by, at)
+         VALUES ('REAGENT_DELETED', ?, ?, ?, ?)`
+      ).bind(
+        `${reagent.code} · ${reagent.th}`,
+        `ลบพร้อมล็อต ${counts.lotCount} รายการ และประวัติการเคลื่อนไหว ${counts.txnCount} รายการ`,
+        actor, timestamp
+      )
     ]);
-    return json({ success: true, id: Number(id) });
+    return json({
+      success: true, id: Number(id),
+      removedLots: counts.lotCount, removedTxns: counts.txnCount,
+    });
   } catch (err) {
-    return json({ error: err.message }, 500);
+    return json({ error: 'ลบไม่สำเร็จ: ' + err.message }, 500);
   }
 }
 

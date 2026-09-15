@@ -234,7 +234,14 @@ class App extends React.Component {
       const res = await this.api(`/api/reagents?id=${encodeURIComponent(id)}`, {
         method: 'DELETE'
       });
-      if (!res.ok) throw new Error('ลบข้อมูลน้ำยาล้มเหลว');
+      // The server explains why it refused — "still 3 Box in stock", "not
+      // found". Throwing a fixed string instead threw that away, which is why
+      // a delete that had never once worked showed the same blank failure for
+      // months with nothing to act on.
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'ลบข้อมูลน้ำยาล้มเหลว');
+      }
 
       this.setState(s => ({
         reagents: s.reagents.filter(r => r.id !== id),
