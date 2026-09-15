@@ -146,7 +146,7 @@ export function Main({ v }) {
   `;
 
   return (
-    <div className="theme-content-teal" style={css(`flex:1; min-width:0; display:flex; flex-direction:column; background:var(--surface-page);`)}>
+    <div className="theme-content-teal app-workspace" style={css(`flex:1; min-width:0; display:flex; flex-direction:column; background:var(--surface-page);`)}>
       <style>{localStyle}</style>
       <header className="main-header" style={css(`height:var(--topbar-height,60px); flex-shrink:0; background:var(--content-glass-top); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--border-default); display:flex; align-items:center; gap:16px; padding:0 var(--page-gutter,28px); position:sticky; top:0; z-index:5;`)}>
         <button 
@@ -154,9 +154,10 @@ export function Main({ v }) {
           className="hamburger-btn"
           aria-label="เปิดหรือปิดเมนู"
           aria-expanded={v.sidebarOpen}
+          aria-controls="app-navigation"
           style={css(`display:grid; place-items:center; background:none; border:none; color:var(--text-primary); cursor:pointer; padding:6px; margin-left:-6px; border-radius:var(--radius-sm);`)}
         >
-          {ic.menu}
+          {ic.menu}<span className="mobile-menu-label">เมนู</span>
         </button>
         <div style={css(`min-width:0;`)}>
           <div className="title-text" style={css(`font:var(--fw-bold) var(--text-lg)/1.1 var(--font-display); color:var(--text-primary);`)}>{title}</div>

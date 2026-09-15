@@ -305,7 +305,7 @@ export function StockCount({ v }) {
       {/* Main Table Card */}
       <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); box-shadow:var(--shadow-md); overflow:hidden;`)}>
         <div className="perm-matrix-scroll" style={css(`overflow-x:auto;`)}>
-          <table style={css(`width:100%; border-collapse:collapse; text-align:left;`)}>
+          <table className="stock-count-table" style={css(`width:100%; border-collapse:collapse; text-align:left;`)}>
             <thead>
               <tr style={css(`border-bottom:2px solid var(--border-subtle); background:rgba(23,36,46,0.3); font:var(--fw-semibold) var(--text-2xs)/1.4 var(--font-body); color:var(--text-tertiary);`)}>
                 <th style={css(`padding:14px 18px;`)}>ชื่อน้ำยาเคมี</th>
@@ -336,21 +336,22 @@ export function StockCount({ v }) {
                     key={idx} 
                     style={css(`border-bottom:1px solid var(--border-subtle); background:${isHighlighted ? 'rgba(43,166,198,0.15)' : diff !== 0 ? 'rgba(91,192,217,0.03)' : 'transparent'}; transition:all 0.3s ease;`)}
                   >
-                    <td style={css(`padding:12px 18px; font:var(--fw-semibold) var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>
+                    <td data-label="ชื่อน้ำยา" style={css(`padding:12px 18px; font:var(--fw-semibold) var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>
                       {item.reagentName}
                     </td>
-                    <td style={css(`padding:12px 18px; font:var(--font-mono) var(--text-xs)/1.2 var(--font-body); color:var(--text-secondary);`)}>
+                    <td data-label="Lot" style={css(`padding:12px 18px; font:var(--font-mono) var(--text-xs)/1.2 var(--font-body); color:var(--text-secondary);`)}>
                       {item.lot}
                     </td>
-                    <td style={css(`padding:12px 18px; font:var(--font-mono) var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary);`)}>
+                    <td data-label="วันหมดอายุ" style={css(`padding:12px 18px; font:var(--font-mono) var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary);`)}>
                       {item.expiry}
                     </td>
-                    <td style={css(`padding:12px 18px; text-align:right; font:var(--fw-semibold) var(--text-xs) var(--font-mono); color:var(--text-secondary);`)}>
+                    <td data-label="จำนวนในระบบ" style={css(`padding:12px 18px; text-align:right; font:var(--fw-semibold) var(--text-xs) var(--font-mono); color:var(--text-secondary);`)}>
                       {item.systemQty} <span style={css(`font:var(--text-2xs) var(--font-body); color:var(--text-tertiary);`)}>{item.unit}</span>
                     </td>
-                    <td style={css(`padding:8px 18px; text-align:center;`)}>
+                    <td data-label="นับได้จริง" style={css(`padding:8px 18px; text-align:center;`)}>
                       <input 
                         type="number"
+                        aria-label={`จำนวนนับจริง Lot ${item.lot}`}
                         min="0"
                         value={row.qty}
                         ref={el => { inputRefs.current[item.lotId] = el; }}
@@ -358,12 +359,13 @@ export function StockCount({ v }) {
                         style={css(`width:80px; padding:6px 8px; border:1px solid ${isHighlighted ? 'var(--brand-700)' : diff !== 0 ? 'var(--brand-700)' : 'var(--border-default)'}; border-radius:var(--radius-sm); background:var(--white); color:var(--text-primary); font:var(--fw-bold) var(--text-xs) var(--font-mono); text-align:center; outline:none; transition:all 0.2s;`)}
                       />
                     </td>
-                    <td style={css(`padding:12px 18px; text-align:center;`)}>
+                    <td data-label="ส่วนต่าง" style={css(`padding:12px 18px; text-align:center;`)}>
                       {diffBadge}
                     </td>
-                    <td style={css(`padding:8px 18px;`)}>
+                    <td data-label="หมายเหตุ" style={css(`padding:8px 18px;`)}>
                       <input 
                         type="text"
+                        aria-label={`หมายเหตุ Lot ${item.lot}`}
                         placeholder="เช่น นับคลาดเคลื่อน / คีย์ผิด"
                         value={row.reason}
                         disabled={diff === 0}

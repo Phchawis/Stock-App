@@ -67,7 +67,8 @@ export function Perms({ v }) {
           horizontally rather than being restructured into cards (that would lose
           the at-a-glance comparison across roles that a matrix is for). */}
       <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); overflow:hidden;`)}>
-        <div className="perm-matrix-scroll">
+        <p className="mobile-scroll-hint">เลื่อนตารางซ้าย–ขวาเพื่อดูสิทธิ์ของทุกบทบาท →</p>
+        <div className="perm-matrix-scroll" tabIndex={0} role="region" aria-label="ตารางสิทธิ์ แสดงได้โดยเลื่อนแนวนอน">
           <div className="perm-matrix-grid" style={css(`display:grid; grid-template-columns:2fr repeat(4,1fr); background:var(--slate-50); border-bottom:1px solid var(--border-subtle);`)}>
             <div style={css(`padding:13px 18px; font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em;`)}>สิทธิ์การใช้งาน</div>
             {permRoles.map((r, rI) => (

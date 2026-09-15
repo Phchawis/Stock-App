@@ -148,7 +148,7 @@ export function ReagentLists({ v }) {
 
         {/* Reagent Grid */}
         {filtered.length > 0 ? (
-          <div style={css(`display:grid; grid-template-columns:repeat(auto-fill, minmax(270px, 1fr)); gap:18px;`)}>
+          <div style={css(`display:grid; grid-template-columns:repeat(auto-fill, minmax(min(270px, 100%), 1fr)); gap:18px;`)}>
             {filtered.map(r => {
               const lots = activeLotsList.filter(l => l.rid === r.id && l.qty > 0 && l.status === 'ACTIVE');
               const totalStock = lots.reduce((sum, l) => sum + l.qty, 0);
@@ -273,7 +273,7 @@ export function ReagentLists({ v }) {
               <div className="reagent-detail-body" style={css(`padding:20px; overflow-y:auto; display:flex; gap:24px; flex-direction:row; flex-wrap:wrap; box-sizing:border-box;`)}>
                 
                 {/* Left Column: Reagent details & Lots */}
-                <div style={css(`flex:1; min-width:300px; display:flex; flex-direction:column; gap:16px;`)}>
+                <div style={css(`flex:1; min-width:min(300px,100%); display:flex; flex-direction:column; gap:16px;`)}>
                   
                   {/* Image hero banner */}
                   <div style={css(`position:relative; height:150px; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border-subtle); flex-shrink:0;`)}>

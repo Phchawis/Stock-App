@@ -7,6 +7,47 @@ export function Sidebar({ v }) {
     openReceive, openIssue, kpi, sidebarOpen, canManage,
   } = v;
 
+  const menuRef = React.useRef(null);
+  const closeRef = React.useRef(v.closeSidebar);
+  closeRef.current = v.closeSidebar;
+  const [mobile, setMobile] = React.useState(() => window.matchMedia('(max-width: 768px)').matches);
+  React.useEffect(() => {
+    const media = window.matchMedia('(max-width: 768px)');
+    const update = () => setMobile(media.matches);
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+  React.useEffect(() => {
+    if (!mobile || !sidebarOpen) return;
+    const previous = document.activeElement;
+    const workspace = document.querySelector('.app-workspace');
+    const wasInert = workspace?.inert;
+    if (workspace) workspace.inert = true;
+    const menu = menuRef.current;
+    const focusable = () => [...menu.querySelectorAll('button, [tabindex="0"]')].filter(el => el.getClientRects().length);
+    const focusFrame = requestAnimationFrame(() => focusable()[0]?.focus());
+    // Visibility transitions can make the first focus attempt too early.
+    const focusTimer = setTimeout(() => {
+      if (!menu.contains(document.activeElement)) focusable()[0]?.focus();
+    }, 220);
+    const handleKey = e => {
+      if (e.key === 'Escape') { e.preventDefault(); closeRef.current(); }
+      if (e.key !== 'Tab') return;
+      const nodes = focusable();
+      if (!menu.contains(document.activeElement)) { e.preventDefault(); nodes[0]?.focus(); return; }
+      if (e.shiftKey && document.activeElement === nodes[0]) { e.preventDefault(); nodes.at(-1)?.focus(); }
+      else if (!e.shiftKey && document.activeElement === nodes.at(-1)) { e.preventDefault(); nodes[0]?.focus(); }
+    };
+    document.addEventListener('keydown', handleKey, true);
+    return () => {
+      cancelAnimationFrame(focusFrame);
+      clearTimeout(focusTimer);
+      document.removeEventListener('keydown', handleKey, true);
+      if (workspace) workspace.inert = wasInert;
+      previous?.focus?.();
+    };
+  }, [mobile, sidebarOpen]);
+
   const localStyle = `
     .sidebar-logo-container {
       display: flex;
@@ -216,7 +257,8 @@ export function Sidebar({ v }) {
     <>
       <style>{localStyle}</style>
 
-      <aside className={`main-sidebar ${sidebarOpen ? 'open' : ''}`} style={css(`width:var(--sidebar-width,264px); flex-shrink:0; background:var(--white); border-right:1px solid var(--border-subtle); display:flex; flex-direction:column; position:sticky; top:0; height:100vh;`)}>
+      <aside ref={menuRef} id="app-navigation" role={mobile ? "dialog" : undefined} aria-modal={mobile && sidebarOpen ? true : undefined} aria-label="เมนูหลัก" className={`main-sidebar ${sidebarOpen ? 'open' : ''}`} style={css(`width:var(--sidebar-width,264px); flex-shrink:0; background:var(--white); border-right:1px solid var(--border-subtle); display:flex; flex-direction:column; position:sticky; top:0; height:100vh;`)}>
+        <button className="mobile-menu-close" onClick={v.closeSidebar} aria-label="ปิดเมนู">{ic.close}<span>ปิดเมนู</span></button>
         <div onClick={go.dashboard} className="sidebar-logo-container">
           <div className="sidebar-logo-img-wrapper">
             <img 
@@ -293,13 +335,13 @@ export function Sidebar({ v }) {
 
           <div className="sidebar-section-title" style={css(`margin-top:10px;`)}>การทำงาน</div>
           
-          <button onClick={openReceive} className="sidebar-op-receive">
+          <button onClick={() => { v.closeSidebar(); openReceive(); }} className="sidebar-op-receive">
             <span style={css(`width:22px; height:22px; display:grid; place-items:center;`)}>{ic.receive}</span>
             <span style={css(`flex:1;`)}>รับเข้า (Receive)</span>
             <span style={css(`font-size:10px; color:var(--text-secondary); border:1px solid rgba(16,185,129,.25); padding:1px 4px; border-radius:var(--radius-sm); font-family:var(--font-mono); transition:all 0.2s;`)} className="sc-tag">Alt+R</span>
           </button>
           
-          <button onClick={openIssue} className="sidebar-op-withdraw">
+          <button onClick={() => { v.closeSidebar(); openIssue(); }} className="sidebar-op-withdraw">
             <span style={css(`width:22px; height:22px; display:grid; place-items:center;`)}>{ic.issue}</span>
             <span style={css(`flex:1;`)}>เบิกจ่าย (Withdraw)</span>
             <span style={css(`font-size:10px; color:var(--text-secondary); border:1px solid rgba(245,158,11,.25); padding:1px 4px; border-radius:var(--radius-sm); font-family:var(--font-mono); transition:all 0.2s;`)} className="sc-tag">Alt+I</span>

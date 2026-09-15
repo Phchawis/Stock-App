@@ -375,7 +375,7 @@ export function CreateStickerForm({ v }) {
       <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px 24px; box-shadow:var(--shadow-sm); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;`)}>
         <div>
           <h2 style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary); margin:0; display:flex; align-items:center; gap:8px;`)}>
-            <span>🏷️</span> สร้างสติกเกอร์ (Sticker Generator)
+            <span>🏷️</span> สร้างสติกเกอร์
           </h2>
           <p style={css(`font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-tertiary); margin:4px 0 0 0;`)}>
             สร้างสติกเกอร์สำหรับขวดทดสอบน้ำยาแบ่งส่วน (Aliquot) และขวดเปิดใช้งาน (Opened) พร้อมดาวน์โหลดไฟล์ PNG
@@ -398,7 +398,7 @@ export function CreateStickerForm({ v }) {
               }
             }}
           >
-            Aliquot Sticker Form (3x2 cm)
+            แบ่งบรรจุ · 3×2 ซม.
           </button>
           <button 
             onClick={() => setActiveTab('opened')}
@@ -416,17 +416,17 @@ export function CreateStickerForm({ v }) {
               }
             }}
           >
-            Opened Sticker Form (4.5x2 cm)
+            เปิดใช้ · 4.5×2 ซม.
           </button>
         </div>
       </div>
 
       {/* Main Form & Preview Grid */}
-      <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(360px, 1fr)); gap:20px; align-items:start;`)}>
+      <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap:20px; align-items:start;`)}>
         {/* Form Inputs Column */}
         <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; display:flex; flex-direction:column; gap:16px; box-shadow:var(--shadow-sm);`)}>
           <h3 style={css(`font:var(--fw-bold) var(--text-base)/1.2 var(--font-display); color:var(--text-primary); border-bottom:1px solid var(--border-subtle); padding-bottom:10px; margin:0;`)}>
-            {activeTab === 'aliquot' ? 'ข้อมูลขวดแบ่งส่วน (Aliquot Details)' : 'ข้อมูลการเปิดขวดใช้งาน (Opened Reagent Details)'}
+            {activeTab === 'aliquot' ? 'ข้อมูลขวดแบ่งบรรจุ' : 'ข้อมูลการเปิดขวดใช้งาน (Opened Reagent Details)'}
           </h3>
 
           {activeTab === 'aliquot' ? (
@@ -646,7 +646,7 @@ export function CreateStickerForm({ v }) {
         {/* Live Preview & Actions Column */}
         <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; display:flex; flex-direction:column; gap:20px; box-shadow:var(--shadow-sm); align-items:center;`)}>
           <h3 style={css(`font:var(--fw-bold) var(--text-base)/1.2 var(--font-display); color:var(--text-primary); border-bottom:1px solid var(--border-subtle); padding-bottom:10px; margin:0; width:100%; text-align:left;`)}>
-            ตัวอย่างสติกเกอร์ (Live Preview)
+            ตัวอย่างสติกเกอร์
           </h3>
 
           {/* Canvas Wrapper */}

@@ -463,7 +463,7 @@ export function StickerLog({ v }) {
       {/* ── On-screen table ───────────────────────────────────────────── */}
       <div className="no-print" style={css(`${cardStyle} overflow:hidden;`)}>
         <div style={css(`overflow-x:auto;`)}>
-          <table style={css(`width:100%; border-collapse:collapse; min-width:920px;`)}>
+          <table className="sticker-log-table" style={css(`width:100%; border-collapse:collapse; min-width:920px;`)}>
             <thead>
               <tr>
                 {['วันที่ / เวลา', 'ประเภทฉลาก', 'ชื่อน้ำยา', 'Lot', 'รายละเอียดบนฉลาก', 'ผู้เตรียม', 'ผู้ทำรายการ', ''].map((h, i) => (
@@ -480,8 +480,8 @@ export function StickerLog({ v }) {
                 </td></tr>
               ) : rows.map(r => (
                 <tr key={r.id} className="qrow" style={css(`border-bottom:1px solid var(--border-subtle);`)}>
-                  <td style={css(`padding:11px 14px; font:var(--text-2xs)/1.4 var(--font-mono); color:var(--text-secondary); white-space:nowrap;`)}>{thaiDateTime(r.at)}</td>
-                  <td style={css(`padding:11px 14px;`)}>
+                  <td data-label="วันที่ / เวลา" style={css(`padding:11px 14px; font:var(--text-2xs)/1.4 var(--font-mono); color:var(--text-secondary); white-space:nowrap;`)}>{thaiDateTime(r.at)}</td>
+                  <td data-label="ประเภทฉลาก" style={css(`padding:11px 14px;`)}>
                     <span style={css(`display:inline-block; padding:3px 9px; border-radius:999px; font:var(--fw-semibold) var(--text-3xs)/1.4 var(--font-body); background:var(--accent-50); color:var(--accent-700); white-space:nowrap;`)}>{r.kindLabel}</span>
                     <div style={css(`margin-top:4px; font:var(--text-3xs)/1 var(--font-body); color:var(--text-tertiary);`)}>{r.actionLabel}{r.qty > 1 ? ` · ${r.qty} ดวง` : ''}</div>
                     {r.isManual && (
@@ -494,12 +494,12 @@ export function StickerLog({ v }) {
                       </div>
                     )}
                   </td>
-                  <td style={css(`padding:11px 14px; font:var(--fw-semibold) var(--text-xs)/1.4 var(--font-body); color:var(--text-primary);`)}>{r.reagentName}</td>
-                  <td style={css(`padding:11px 14px; font:var(--text-2xs)/1.4 var(--font-mono); color:var(--text-secondary);`)}>{r.lot || '—'}</td>
-                  <td style={css(`padding:11px 14px; font:var(--text-2xs)/1.5 var(--font-body); color:var(--text-secondary);`)}>{detailOf(r)}</td>
-                  <td style={css(`padding:11px 14px; font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>{r.preparedBy || '—'}</td>
-                  <td style={css(`padding:11px 14px; font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>{r.by}</td>
-                  <td style={css(`padding:11px 14px; text-align:right;`)}>
+                  <td data-label="ชื่อน้ำยา" style={css(`padding:11px 14px; font:var(--fw-semibold) var(--text-xs)/1.4 var(--font-body); color:var(--text-primary);`)}>{r.reagentName}</td>
+                  <td data-label="Lot" style={css(`padding:11px 14px; font:var(--text-2xs)/1.4 var(--font-mono); color:var(--text-secondary);`)}>{r.lot || '—'}</td>
+                  <td data-label="รายละเอียด" style={css(`padding:11px 14px; font:var(--text-2xs)/1.5 var(--font-body); color:var(--text-secondary);`)}>{detailOf(r)}</td>
+                  <td data-label="ผู้เตรียม" style={css(`padding:11px 14px; font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>{r.preparedBy || '—'}</td>
+                  <td data-label="ผู้ทำรายการ" style={css(`padding:11px 14px; font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>{r.by}</td>
+                  <td data-label="จัดการ" style={css(`padding:11px 14px; text-align:right;`)}>
                     {isAdmin && (
                       <button onClick={() => deleteStickerLog(r.id)} title="ลบบันทึกนี้ (เฉพาะผู้ดูแลระบบ)"
                         style={css(`padding:5px 10px; border-radius:var(--radius-sm); border:1px solid var(--red-fill); background:transparent; color:var(--red-700); cursor:pointer; font:var(--text-3xs)/1 var(--font-body); white-space:nowrap;`)}>

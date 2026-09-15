@@ -153,7 +153,7 @@ export function Inventory({ v }) {
       padding: 10px 18px;
       border-radius: var(--radius-md);
       border: none;
-      background: linear-gradient(135deg, var(--brand-700), var(--brand-800));
+      background: var(--brand-700);
       color: var(--text-on-brand);
       cursor: pointer;
       font: var(--fw-semibold) var(--text-xs)/1 var(--font-body);
@@ -206,7 +206,7 @@ export function Inventory({ v }) {
       <div className="qms-rise page-shell" style={css(`gap:16px;`)}>
         
         {/* Search, Tabs, and Optional Action button */}
-        <div style={css(`display:flex; align-items:center; gap:14px; flex-wrap:wrap; width:100%;`)}>
+        <div className="inventory-toolbar" style={css(`display:flex; align-items:center; gap:14px; flex-wrap:wrap; width:100%;`)}>
           <div className="inv-search-wrapper">
             <input 
               value={search} 
@@ -301,7 +301,7 @@ export function Inventory({ v }) {
             /* Mobile card — same data as the desktop row above, stacked for narrow screens */
           ))}
           {invRows.map((r, rI) => (
-            <div key={'m' + rI} onClick={r.onOpen} className="inv-row-mobile">
+            <div key={'m' + rI} onClick={r.onOpen} className="inv-row-mobile" role="button" tabIndex={0} aria-label={`ดูรายละเอียด ${r.th}`} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); r.onOpen(); } }}>
               <div className="inv-row-mobile-top">
                 <img src={r.img || '/reagent_placeholder.png'} alt="" className="inv-thumb" />
                 <div className="inv-row-mobile-info">

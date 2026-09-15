@@ -57,7 +57,7 @@ export function Dashboard({ v }) {
   const expiringSoonCount = activeLots.filter(l => filteredReagentIds.includes(l.rid) && getDaysLeft(l.expiry) <= 60).length;
   
   const kpis = [
-    { value: filteredReagents.length, label: 'ชนิดน้ำยาทั้งหมด', color: 'var(--brand-700)', bg: 'var(--brand-50)', icon: ic.boxes },
+    { value: filteredReagents.length, label: 'ชนิดน้ำยาทั้งหมด', color: 'var(--brand-ink)', bg: 'var(--brand-50)', icon: ic.boxes },
     { value: expiringSoonCount, label: 'Lot ใกล้หมดอายุ', color: 'var(--amber-700)', bg: 'var(--amber-100)', icon: ic.cal },
     { value: lowCount, label: 'ต่ำกว่าจุดสั่งซื้อ', color: 'var(--red-700)', bg: 'var(--red-100)', icon: ic.bell },
     { value: activeLots.filter(l => filteredReagentIds.includes(l.rid)).length, label: 'Lot คงคลัง', color: 'var(--green-700)', bg: 'var(--green-100)', icon: ic.dashboard },
@@ -296,9 +296,10 @@ export function Dashboard({ v }) {
             </div>
 
             {/* Date range filters */}
-            <div style={css(`display:flex; align-items:center; gap:8px; background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:4px 10px; height:34px; box-sizing:border-box;`)}>
+            <div className="report-date-range" style={css(`display:flex; align-items:center; gap:8px; background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:4px 10px; height:34px; box-sizing:border-box;`)}>
               <input
                 type="date"
+                aria-label="วันที่เริ่มต้นรายงาน"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 style={css(`border:none; background:transparent; font:var(--text-3xs)/1 var(--font-body); color:var(--text-primary); outline:none; cursor:pointer;`)}
@@ -306,6 +307,7 @@ export function Dashboard({ v }) {
               <span style={css(`font:var(--text-3xs)/1 var(--font-body); color:var(--text-tertiary);`)}>ถึง</span>
               <input
                 type="date"
+                aria-label="วันที่สิ้นสุดรายงาน"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 style={css(`border:none; background:transparent; font:var(--text-3xs)/1 var(--font-body); color:var(--text-primary); outline:none; cursor:pointer;`)}
@@ -314,7 +316,7 @@ export function Dashboard({ v }) {
 
             <button 
               onClick={() => window.print()}
-              style={css(`display:inline-flex; align-items:center; gap:8px; padding:8px 16px; border-radius:var(--radius-md); border:none; background:linear-gradient(135deg, var(--brand-700), var(--brand-800)); color:#ffffff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); box-shadow:0 4px 12px rgba(19,135,166,0.25); transition:all var(--dur-fast);`)}
+              style={css(`display:inline-flex; align-items:center; gap:8px; padding:8px 16px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#ffffff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); box-shadow:0 4px 12px rgba(19,135,166,0.25); transition:all var(--dur-fast);`)}
               onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(19,135,166,0.35)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(19,135,166,0.25)'; }}
             >

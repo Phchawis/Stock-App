@@ -64,7 +64,7 @@ export function Audit({ v }) {
         {/* Controls Grid */}
         <div style={css(`display:flex; flex-direction:column; gap:12px;`)}>
           <div style={css(`display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:14px;`)}>
-            <div style={css(`display:flex; gap:12px; flex:1; min-width:320px;`)}>
+            <div className="audit-filters" style={css(`display:flex; gap:12px; flex:1; min-width:320px;`)}>
               {/* Search Box */}
               <div style={{ position: 'relative', flex: 1 }}>
                 <input
@@ -120,7 +120,7 @@ export function Audit({ v }) {
           <div style={css(`display:flex; flex-wrap:wrap; gap:12px; align-items:center; background:var(--surface-card); padding:10px 14px; border-radius:var(--radius-md); border:1px solid var(--border-subtle);`)}>
             <div style={css(`font:var(--fw-medium) var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary);`)}>ช่วงเวลาทำรายการ:</div>
             
-            <div style={css(`display:flex; align-items:center; gap:8px;`)}>
+            <div className="audit-date-range" style={css(`display:flex; align-items:center; gap:8px;`)}>
               <input
                 type="date"
                 value={startDate}

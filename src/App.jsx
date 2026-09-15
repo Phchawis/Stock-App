@@ -1228,7 +1228,7 @@ class App extends React.Component {
   dayLabel(d) { return fmtDayLabel(d); }
   txnMeta(type) { return ({
     RECEIVE: { label: 'รับเข้า', fg: 'var(--green-700)', bg: 'var(--green-100)' },
-    ISSUE: { label: 'เบิกจ่าย', fg: 'var(--accent-700)', bg: 'var(--accent-50)' },
+    ISSUE: { label: 'เบิกจ่าย', fg: 'var(--blue-700)', bg: 'var(--blue-100)' },
     ADJUST: { label: 'ปรับปรุง', fg: 'var(--blue-700)', bg: 'var(--blue-100)' },
     DISPOSE: { label: 'ทำลาย', fg: 'var(--red-700)', bg: 'var(--red-100)' },
     DELETE: { label: 'ลบน้ำยา', fg: 'var(--red-700)', bg: 'var(--red-100)' },
@@ -1243,7 +1243,7 @@ class App extends React.Component {
           const key = 'E' + l.id;
           out.push({ key, kind: 'EXPIRY', rid: r.id, sev: 'critical', order: -1,
             title: '⚠️ หมดอายุคาคลัง · ' + r.th + ' · Lot ' + l.lot, sub: 'หมดอายุไปแล้วเมื่อ ' + l.expiry + ' · คงเหลือ ' + l.qty + ' ' + r.unit + ' (โปรดดำเนินการตัดจำหน่าย)',
-            tag: 'หมดอายุแล้ว', fg: '#fff', bg: 'var(--red-600)' });
+            tag: 'หมดอายุแล้ว', fg: '#fff', bg: 'var(--red-fill)' });
         } else if (d <= 60) {
           const s = this.sev(d, crit); const c = this.sevCol(s);
           const key = 'E' + l.id;
@@ -1562,7 +1562,7 @@ class App extends React.Component {
 
   navStyle(v) {
     const a = this.state.view === v;
-    return { bg: a ? 'var(--brand-50)' : 'transparent', fg: a ? 'var(--brand-800)' : 'var(--text-secondary)', ic: a ? 'var(--brand-700)' : 'var(--text-tertiary)' };
+    return { bg: a ? 'var(--brand-50)' : 'transparent', fg: a ? 'var(--brand-800)' : 'var(--text-secondary)', ic: a ? 'var(--brand-ink)' : 'var(--text-tertiary)' };
   }
 
   renderVals() {

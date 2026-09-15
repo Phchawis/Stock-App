@@ -4,6 +4,7 @@ import { icons } from './icons.js';
 import App from './App.jsx';
 import './styles.css';
 import './redesign.css';
+import './mobile.css';
 
 // The app's icon() helper expects window.lucide.icons[name] to be the icon's
 // child-node array ([[tag, attrs], ...]). The lucide npm package exports each

@@ -106,7 +106,7 @@ export function Help({ v }) {
               <div style={css(`font:var(--fw-semibold) var(--text-xs)/1.2 var(--font-body); color:var(--text-secondary); display:flex; align-items:center; gap:6px;`)}>
                 <span>🖥️</span> <strong>แผนผังภาพรวมหน้าหลักแอปพลิเคชัน (Dashboard Overview)</strong>
               </div>
-              <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;`)}>
+              <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap:12px;`)}>
                 <div style={css(`background:var(--white); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:12px; display:flex; gap:10px; align-items:center;`)}>
                   <span style={css(`font-size:24px;`)}>📦</span>
                   <div>
@@ -139,7 +139,7 @@ export function Help({ v }) {
                 ระบบจะตรวจสอบอายุการใช้งานของน้ำยาเคมีวิเคราะห์คลังหลักและระดับปริมาณเพื่อจัดทำประเภทสีการแจ้งเตือนตามเงื่อนไขดังนี้:
               </p>
 
-              <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px;`)}>
+              <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap:20px;`)}>
                 {/* 1. Expiry alerts table card */}
                 <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:16px; display:flex; flex-direction:column; gap:10px;`)}>
                   <div style={css(`font:var(--fw-bold) var(--text-xs)/1.2 var(--font-body); color:var(--text-primary); display:flex; align-items:center; gap:6px;`)}>
@@ -199,7 +199,7 @@ export function Help({ v }) {
               <h3 style={css(`font:var(--fw-semibold) var(--text-md)/1.3 var(--font-display); color:var(--text-primary); margin:0 0 14px 0;`)}>
                 สิทธิ์การเข้าใช้งานแบ่งตามบทบาท (Roles & Permissions)
               </h3>
-              <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px;`)}>
+              <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap:14px;`)}>
                 
                 <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:8px;`)}>
                   <div style={css(`display:flex; align-items:center; gap:8px;`)}>
@@ -260,7 +260,7 @@ export function Help({ v }) {
 
             <div style={css(`display:flex; gap:24px; flex-wrap:wrap; align-items:flex-start;`)}>
               {/* Steps Text */}
-              <div style={css(`flex:1; min-width:280px; display:flex; flex-direction:column; gap:14px;`)}>
+              <div style={css(`flex:1; min-width:min(280px,100%); display:flex; flex-direction:column; gap:14px;`)}>
                 <h3 style={css(`font:var(--fw-semibold) var(--text-sm)/1.3 var(--font-display); color:var(--text-primary); margin:0;`)}>
                   ขั้นตอนการปฏิบัติงาน:
                 </h3>
@@ -289,7 +289,7 @@ export function Help({ v }) {
               </div>
 
               {/* Visual Interface Simulator */}
-              <div style={css(`position:relative; overflow:hidden; flex:1; min-width:320px; background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+              <div style={css(`position:relative; overflow:hidden; flex:1; min-width:min(320px,100%); background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
                 <div style={css(`font:var(--fw-bold) var(--text-xs)/1.2 var(--font-display); color:var(--brand-800); margin-bottom:12px; display:flex; align-items:center; gap:6px;`)}>
                   <span>📥</span> จำลองหน้าต่างฟอร์มการรับเข้าคลัง (Form Simulation)
                 </div>
@@ -349,7 +349,7 @@ export function Help({ v }) {
 
             <div style={css(`display:flex; gap:24px; flex-wrap:wrap; align-items:flex-start;`)}>
               {/* Process Steps */}
-              <div style={css(`flex:1; min-width:280px; display:flex; flex-direction:column; gap:14px;`)}>
+              <div style={css(`flex:1; min-width:min(280px,100%); display:flex; flex-direction:column; gap:14px;`)}>
                 <h3 style={css(`font:var(--fw-semibold) var(--text-sm)/1.3 var(--font-display); color:var(--text-primary); margin:0;`)}>
                   ขั้นตอนการเบิกจ่าย (2 ขั้นตอน):
                 </h3>
@@ -366,7 +366,7 @@ export function Help({ v }) {
               </div>
 
               {/* Visual Queue Simulator */}
-              <div style={css(`flex:1; min-width:320px; background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+              <div style={css(`flex:1; min-width:min(320px,100%); background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
                 <div style={css(`font:var(--fw-bold) var(--text-xs)/1.2 var(--font-display); color:var(--accent-700); margin-bottom:12px; display:flex; align-items:center; gap:6px;`)}>
                   <span>📊</span> แบบจำลองระบบเรียงลำดับคิวเบิกจ่าย (หมดอายุก่อน–เบิกก่อน)
                 </div>
@@ -416,7 +416,7 @@ export function Help({ v }) {
 
             <div style={css(`display:flex; gap:24px; flex-wrap:wrap; align-items:flex-start;`)}>
               {/* Form guidelines */}
-              <div style={css(`flex:1; min-width:280px; display:flex; flex-direction:column; gap:14px;`)}>
+              <div style={css(`flex:1; min-width:min(280px,100%); display:flex; flex-direction:column; gap:14px;`)}>
                 <h3 style={css(`font:var(--fw-semibold) var(--text-sm)/1.3 var(--font-display); color:var(--text-primary); margin:0;`)}>
                   หลักการกำหนดค่าหน่วยนับสินค้าที่ถูกต้อง:
                 </h3>
@@ -433,7 +433,7 @@ export function Help({ v }) {
               </div>
 
               {/* Visual Form Simulation */}
-              <div style={css(`flex:1; min-width:320px; background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+              <div style={css(`flex:1; min-width:min(320px,100%); background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
                 <div style={css(`font:var(--fw-bold) var(--text-xs)/1.2 var(--font-display); color:var(--brand-800); margin-bottom:12px; display:flex; align-items:center; gap:6px;`)}>
                   <span>📦</span> ตัวอย่างการตั้งค่าหน่วยย่อยในระบบ (Unit Setup Demo)
                 </div>
@@ -477,7 +477,7 @@ export function Help({ v }) {
 
             <div style={css(`display:flex; gap:24px; flex-wrap:wrap; align-items:flex-start;`)}>
               {/* Text instructions */}
-              <div style={css(`flex:1; min-width:280px; display:flex; flex-direction:column; gap:14px;`)}>
+              <div style={css(`flex:1; min-width:min(280px,100%); display:flex; flex-direction:column; gap:14px;`)}>
                 <h3 style={css(`font:var(--fw-semibold) var(--text-sm)/1.3 var(--font-display); color:var(--text-primary); margin:0;`)}>
                   การตั้งค่าเครื่องพิมพ์บราวเซอร์เพื่อให้ได้ผลลัพธ์ที่ดีที่สุด:
                 </h3>
@@ -498,7 +498,7 @@ export function Help({ v }) {
               </div>
 
               {/* Visual Setup Simulation */}
-              <div style={css(`flex:1; min-width:320px; background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+              <div style={css(`flex:1; min-width:min(320px,100%); background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
                 <div style={css(`font:var(--fw-bold) var(--text-xs)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:6px;`)}>
                   <span>🖨️</span> แบบจำลองการพิมพ์และการตั้งค่า (Print Setup Preview)
                 </div>
@@ -544,7 +544,7 @@ export function Help({ v }) {
               </p>
             </div>
 
-            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; align-items:flex-start;`)}>
+            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap:24px; align-items:flex-start;`)}>
               {/* Section 1: Disposal */}
               <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
                 <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
@@ -598,7 +598,7 @@ export function Help({ v }) {
               </p>
             </div>
 
-            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; align-items:flex-start;`)}>
+            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap:24px; align-items:flex-start;`)}>
               {/* Aliquot Sticker Guide */}
               <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
                 <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
@@ -661,7 +661,7 @@ export function Help({ v }) {
               </p>
             </div>
 
-            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; align-items:flex-start;`)}>
+            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap:24px; align-items:flex-start;`)}>
               {/* Section 1: In-App Alerts */}
               <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
                 <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
@@ -721,7 +721,7 @@ export function Help({ v }) {
               </p>
             </div>
 
-            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; align-items:flex-start;`)}>
+            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap:24px; align-items:flex-start;`)}>
               
               {/* Section 1: Auto Logout & Security */}
               <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
@@ -787,7 +787,7 @@ export function Help({ v }) {
               </p>
             </div>
 
-            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; align-items:flex-start;`)}>
+            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap:24px; align-items:flex-start;`)}>
               <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
                 <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
                   <span>🏷️</span> 1. ระบบเก็บอะไรบ้าง
@@ -893,7 +893,7 @@ export function Help({ v }) {
               </button>
             </div>
 
-            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; align-items:flex-start;`)}>
+            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap:24px; align-items:flex-start;`)}>
 
               {/* Step 1 — triage */}
               <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>

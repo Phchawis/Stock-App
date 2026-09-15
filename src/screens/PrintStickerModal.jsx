@@ -307,7 +307,7 @@ export function PrintStickerModal({ v }) {
       padding: 12px 18px;
       border: none;
       border-radius: var(--radius-md);
-      background: linear-gradient(135deg, var(--brand-600) 0%, var(--brand-800) 100%);
+      background: var(--brand-700);
       color: #ffffff;
       cursor: pointer;
       font: var(--fw-bold) var(--text-sm)/1 var(--font-body);

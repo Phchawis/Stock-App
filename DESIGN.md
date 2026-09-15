@@ -163,3 +163,37 @@ Validation: production build and 36 domain tests passed. Local visual review
 used a temporary sample-data harness for desktop 1440×1000 and narrow mobile
 layouts, including dashboard, inventory, sticker form and receive modal.
 Live D1 transactions and printed output were not exercised in this design pass.
+
+### Semantic color roles
+
+The screen refinement now separates teal actions from status. Primary actions
+use #0b7365 with white text (5.75:1); issue launchers are neutral outlined
+controls and issue confirmation uses the same primary teal. Amber indicates
+warnings, coral indicates critical/expired states, and blue indicates information
+or recorded issues/orders. The underlying severity thresholds are unchanged.
+The expiry infographic reuses the status tokens. Light form scopes use muted
+teal-gray surfaces and dark ink instead of the old purple brand overrides.
+Checked key text/background pairs exceed 4.5:1. Receive modal and dashboard
+were visually checked in the local browser using temporary sample UI.
+
+### Mobile task layouts
+
+`src/mobile.css` applies below 769px. The icon rail becomes an on-demand,
+labelled navigation drawer with a backdrop, Escape handling, focus containment
+and focus return. Receive/issue remain in the bottom action bar; the main canvas
+uses the full width. Dynamic viewport height and safe-area padding accommodate
+phone browser chrome and landscape layouts.
+
+Receive/issue/register forms size to their content and scroll within the screen.
+Issue summaries stack the reagent, lot and balances; FEFO allocation rows keep
+quantity and expiry readable. Stock count and preparation records become labelled
+vertical records on phones; the permissions matrix retains horizontal scrolling
+with an explicit hint. Desktop tables remain intact. Search/date filters and
+sticker/help grids fit narrow widths; form controls use 16px text on phones.
+
+Verified with temporary sample data at 320, 360 and 390px: navigation, inventory
+with long names, receive form, issue lookup and allocation preview, stock-count
+quantity/reason entry, audit filters, sticker creation and preparation records.
+Checked landscape form scrolling at 740×360 and desktop sidebar at 1280px.
+No live transactions were submitted. Physical iOS/Android keyboard and camera
+behavior require device testing; browser viewport checks do not cover those.

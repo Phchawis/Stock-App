@@ -224,8 +224,8 @@ export function IssueModal({ v }) {
   return (
     <>
       <style>{localStyle}</style>
-      <div className="ov-in" onClick={closeModal} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.46); z-index:50; display:grid; place-items:center; padding:24px; --brand-700:#006884; --brand-800:#008276; --brand-600:#004F4B; --brand-500:#33A593; --brand-400:#70C4B4; --brand-100:rgba(0,104,132,0.18); --brand-50:rgba(0,104,132,0.10); --glow-brand-soft:0 6px 18px -8px rgba(0,104,132,0.30); --accent-700:#C2422A; --accent-800:#A31621; --accent-600:#C2422A; --accent-500:#DD5236; --accent-400:#EC6647; --accent-100:rgba(236,102,71,0.18); --accent-50:rgba(236,102,71,0.10); --glow-accent:0 6px 18px -8px rgba(236,102,71,0.30);`)}>
-        <div className="tt-in theme-light-scope" onClick={stop} style={css(`width:min(720px,96vw); max-height:92vh; overflow-y:auto; background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:2px solid #b2d1da; --surface-card:#e0ecf0; --text-primary:#10222a; --text-secondary:#2d444e; --text-tertiary:#526d79; --border-subtle:#b2d1da; --border-default:#b2d1da; --border-strong:#b2d1da; --slate-50:#d1e2e6; --slate-100:#b2d1da; --slate-200:#9abdc6;`)}>
+      <div className="ov-in stock-modal-overlay" onClick={closeModal} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.46); z-index:50; display:grid; place-items:center; padding:24px; --brand-700:#006884; --brand-800:#008276; --brand-600:#004F4B; --brand-500:#33A593; --brand-400:#70C4B4; --brand-100:rgba(0,104,132,0.18); --brand-50:rgba(0,104,132,0.10); --glow-brand-soft:0 6px 18px -8px rgba(0,104,132,0.30); --accent-700:#C2422A; --accent-800:#A31621; --accent-600:#C2422A; --accent-500:#DD5236; --accent-400:#EC6647; --accent-100:rgba(236,102,71,0.18); --accent-50:rgba(236,102,71,0.10); --glow-accent:0 6px 18px -8px rgba(236,102,71,0.30);`)}>
+        <div className="tt-in theme-light-scope stock-modal" onClick={stop} style={css(`width:min(720px,96vw); max-height:92vh; overflow-y:auto; background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:2px solid #b2d1da; --surface-card:#e0ecf0; --text-primary:#10222a; --text-secondary:#2d444e; --text-tertiary:#526d79; --border-subtle:#b2d1da; --border-default:#b2d1da; --border-strong:#b2d1da; --slate-50:#d1e2e6; --slate-100:#b2d1da; --slate-200:#9abdc6;`)}>
           
           {/* Header */}
           <style>{modalHeaderResponsiveCSS}</style>
@@ -239,6 +239,7 @@ export function IssueModal({ v }) {
             </div>
             <button
               onClick={closeModal}
+              aria-label="ปิดหน้าต่าง"
               style={css(modalHeaderCloseStyle)}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,.55)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,.32)'; }}
@@ -359,11 +360,11 @@ export function IssueModal({ v }) {
             {currentStep === 2 && selectedReagentObj && (
               <div style={css(`display:flex; flex-direction:column; gap:14px;`)}>
                 <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:12px 14px; display:flex; flex-direction:column; gap:6px; font:var(--text-xs)/1.3 var(--font-body);`)}>
-                  <div style={css(`display:flex; justify-content:space-between;`)}>
+                  <div className="issue-summary-line" style={css(`display:flex; justify-content:space-between;`)}>
                     <div>น้ำยาที่เบิก: <strong style={css(`color:var(--text-primary);`)}>{selectedReagentObj.th}</strong></div>
                     <div style={css(`font-family:var(--font-mono);`)}>คงเหลือในคลัง: {issueOnHand} {selectedReagentObj.unit}</div>
                   </div>
-                  <div style={css(`display:flex; justify-content:space-between; border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
+                  <div className="issue-summary-line" style={css(`display:flex; justify-content:space-between; border-top:1px dashed var(--border-subtle); padding-top:6px;`)}>
                     <div>ล็อตเบิกจ่าย: <strong style={css(`color:${linkedLotObj ? 'var(--green-700)' : 'var(--text-primary)'};`)}>{linkedLotObj ? `Lot ${linkedLotObj.lot}` : 'จัดสรรล็อตหมดอายุก่อนอัตโนมัติ (FEFO)'}</strong></div>
                     {linkedLotObj && <div style={css(`font-family:var(--font-mono);`)}>คงเหลือในล็อต: {linkedLotObj.qty} {selectedReagentObj.unit}</div>}
                   </div>
@@ -389,11 +390,11 @@ export function IssueModal({ v }) {
                     </div>
                     <div style={css(`display:flex; flex-direction:column; gap:4px;`)}>
                       {issuePlanRows.map((p, pI) => (
-                        <div key={pI} style={css(`display:flex; align-items:center; gap:8px; font:var(--text-2xs)/1.3 var(--font-body); border-bottom: 1px dashed rgba(0,0,0,0.04); padding-bottom:3px;`)}>
+                        <div key={pI} className="issue-plan-line" style={css(`display:flex; align-items:center; gap:8px; font:var(--text-2xs)/1.3 var(--font-body); border-bottom: 1px dashed rgba(0,0,0,0.04); padding-bottom:3px;`)}>
                           <span style={css(`font-weight:600; color:var(--text-primary); font-family:var(--font-mono);`)}>Lot {p.lot}</span>
                           <span style={css(`font-size:10px; color:${p.col}; font-weight:600;`)}>หมดอายุ {p.expiry} ({p.dayLabel})</span>
                           <span style={css(`flex:1;`)} />
-                          <span style={css(`font:var(--fw-bold) var(--text-xs)/1 var(--font-mono); color:var(--accent-700);`)}>-{p.take} {selectedReagentObj.unit}</span>
+                          <span style={css(`font:var(--fw-bold) var(--text-xs)/1 var(--font-mono); color:var(--text-primary);`)}>-{p.take} {selectedReagentObj.unit}</span>
                         </div>
                       ))}
                     </div>
@@ -442,7 +443,7 @@ export function IssueModal({ v }) {
                 <button 
                   onClick={submitIssue} 
                   disabled={!iform.qty || +iform.qty <= 0 || !!issueShort}
-                  style={css(`padding:8px 16px; border-radius:var(--radius-md); border:none; background:${(!iform.qty || +iform.qty <= 0 || !!issueShort) ? 'var(--slate-200)' : 'var(--accent-600)'}; color:${(!iform.qty || +iform.qty <= 0 || !!issueShort) ? 'var(--text-disabled)' : '#fff'}; cursor:${(!iform.qty || +iform.qty <= 0 || !!issueShort) ? 'not-allowed' : 'pointer'}; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); box-shadow:${(!iform.qty || +iform.qty <= 0 || !!issueShort) ? 'none' : 'var(--glow-accent)'}; transition:all var(--dur-fast);`)}
+                  style={css(`padding:8px 16px; border-radius:var(--radius-md); border:none; background:${(!iform.qty || +iform.qty <= 0 || !!issueShort) ? 'var(--slate-200)' : 'var(--brand-700)'}; color:${(!iform.qty || +iform.qty <= 0 || !!issueShort) ? 'var(--text-disabled)' : '#fff'}; cursor:${(!iform.qty || +iform.qty <= 0 || !!issueShort) ? 'not-allowed' : 'pointer'}; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); box-shadow:${(!iform.qty || +iform.qty <= 0 || !!issueShort) ? 'none' : 'var(--glow-brand-soft)'}; transition:all var(--dur-fast);`)}
                 >
                   ยืนยันเบิกจ่าย
                 </button>
