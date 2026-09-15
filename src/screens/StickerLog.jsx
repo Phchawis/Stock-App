@@ -326,8 +326,6 @@ export function StickerLog({ v }) {
     r.sourceNote ? `อ้างอิงจาก: ${r.sourceNote}` : '',
   ].filter(Boolean).join('\n');
 
-  const manualCount = rows.filter(r => r.isManual).length;
-
   // ── FM-09-157-07-020 ────────────────────────────────────────────────────
   // The department's own preparation form. Its columns are not the ones the
   // screen shows, so the print view maps onto them rather than the other way
@@ -346,22 +344,13 @@ export function StickerLog({ v }) {
     return `${+d}/${+m}/${String(+y + 543).slice(-2)}`;
   };
 
-  // The form is filled in a month at a time. When the selection sits inside one
-  // month the header states it the way the form does; when it spans several,
-  // saying so is better than printing one month's name over another's rows.
-  const period = (() => {
-    const months = [...new Set(rows.map(r => (r.at || '').slice(0, 7)).filter(Boolean))].sort();
-    if (months.length === 1) {
-      const [y, m] = months[0].split('-');
-      return { month: THAI_MONTHS[+m - 1], year: String(+y + 543) };
-    }
-    if (months.length === 0) return { month: '—', year: '—' };
-    const f = months[0].split('-'), l = months[months.length - 1].split('-');
-    return {
-      month: `${THAI_MONTHS[+f[1] - 1]} – ${THAI_MONTHS[+l[1] - 1]}`,
-      year: f[0] === l[0] ? String(+f[0] + 543) : `${+f[0] + 543}–${+l[0] + 543}`,
-    };
-  })();
+  // The form is filled in a month at a time — one sheet, one month, and
+  // ครั้งที่ counted from the first of it. A selection spanning several months
+  // used to print as a single sheet headed "สิงหาคม – กันยายน", which is not a
+  // thing the form says: the name of one month was stated over another month's
+  // rows, the numbering ran straight through the boundary, and the range itself
+  // wrapped onto three lines because the cell is only as wide as one month's
+  // name. Each month gets its own sheet instead, starting on its own page.
 
   // Column "น้ำยาที่จัดเตรียม" is a classification, and the form has only ever
   // used four values. Nothing in the system records it, so it is inferred from
@@ -386,6 +375,31 @@ export function StickerLog({ v }) {
   // The form counts ครั้งที่ from the start of the month, so the printed copy
   // runs the other way — otherwise entry 1 is the last thing that happened.
   const printRows = [...rows].sort((a, b) => (a.at || '').localeCompare(b.at || ''));
+
+  // One sheet per calendar month, in order. A row is filed under the month it
+  // was prepared in, which is the date the form records — not the date the
+  // sticker happened to be printed, for a row entered after the fact.
+  const printSheets = (() => {
+    const byMonth = new Map();
+    for (const r of printRows) {
+      const key = String(r.prepDate || r.at || '').slice(0, 7);
+      if (!key) continue;
+      if (!byMonth.has(key)) byMonth.set(key, []);
+      byMonth.get(key).push(r);
+    }
+    const sheets = [...byMonth.keys()].sort().map((key) => {
+      const [y, m] = key.split('-');
+      return {
+        key,
+        month: THAI_MONTHS[+m - 1] || '—',
+        year: String(+y + 543),
+        rows: byMonth.get(key),
+      };
+    });
+    // Printing with nothing selected still has to produce the blank form —
+    // that is how a fresh sheet gets onto the bench.
+    return sheets.length ? sheets : [{ key: 'blank', month: '—', year: '—', rows: [] }];
+  })();
 
   const exportCSV = () => {
     if (!rows.length) { showToast('ไม่มีรายการให้ส่งออก', 'warn'); return; }
@@ -525,6 +539,10 @@ export function StickerLog({ v }) {
       .prep-table tr { page-break-inside: avoid !important; break-inside: avoid !important; }
       .prep-table thead { display: table-header-group !important; }
       .prep-signoff { page-break-inside: avoid !important; break-inside: avoid !important; margin-top: 18px !important; }
+      /* One month, one sheet. Each month's form starts a fresh page, and the
+         last one does not push a blank page out after it. */
+      .prep-doc { page-break-after: always !important; break-after: page !important; }
+      .prep-doc:last-of-type { page-break-after: auto !important; break-after: auto !important; }
     }
     /* Header block. The fills, the blue of the form name and the control
        box are all taken from the workbook's own cells and objects. */
@@ -748,7 +766,14 @@ export function StickerLog({ v }) {
           in the same order and wording, and the single ผู้ดูแล / ควบคุม
           signature. Anyone comparing a printout against the workbook should
           find nothing to reconcile. */}
-      <div className="prep-doc" style={css(`color:#000; font-family:var(--font-body); --pd-condense:${headCondense};`)}>
+      {printSheets.map((sheet) => {
+      const sheetManualCount = sheet.rows.filter(r => r.isManual).length;
+      return (
+      <div
+        key={sheet.key}
+        className="prep-doc"
+        style={css(`color:#000; font-family:var(--font-body); --pd-condense:${headCondense};`)}
+      >
         {/* The header is a filled block, not an outline: rows 1–4 carry a
             solid #9999ff, the form name is set in blue on it, and the sheet
             is headed by the hospital crest on the left and the document
@@ -794,9 +819,9 @@ export function StickerLog({ v }) {
             <tr>
               <td></td><td></td>
               <td>เดือน</td>
-              <td>{period.month}</td>
+              <td>{sheet.month}</td>
               <td>ปี</td>
-              <td>{period.year}</td>
+              <td>{sheet.year}</td>
             </tr>
           </tbody>
         </table>
@@ -815,7 +840,7 @@ export function StickerLog({ v }) {
             </tr>
           </thead>
           <tbody>
-            {printRows.length > 0 ? printRows.map((r, idx) => (
+            {sheet.rows.map((r, idx) => (
               <tr key={r.id}>
                 <td>
                   {idx + 1}{r.isManual ? <span title="กรอกย้อนหลัง"> *</span> : null}
@@ -826,12 +851,12 @@ export function StickerLog({ v }) {
                 <td>{thaiShortDate(r.expDate) || '—'}</td>
                 <td>{r.preparedBy || r.by || '—'}</td>
               </tr>
-            )) : null}
+            ))}
             {/* The workbook rules its grid down to row 39 whether or not there
                 is anything in it, so a printed sheet always has somewhere to
                 write by hand. Padding to the same 31 rows keeps a light month
                 looking like the form rather than like a short table. */}
-            {Array.from({ length: Math.max(0, 31 - printRows.length) }).map((_, i) => (
+            {Array.from({ length: Math.max(0, 31 - sheet.rows.length) }).map((_, i) => (
               <tr key={`pad-${i}`}>
                 <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td>
               </tr>
@@ -860,14 +885,16 @@ export function StickerLog({ v }) {
         {/* The form has no column for provenance, so the guarantee moves here.
             Printed only when there is something to declare: on a month with no
             hand-entered rows the sheet stays exactly as the department's own. */}
-        {manualCount > 0 && (
+        {sheetManualCount > 0 && (
           <p style={css(`margin-top:14px; font-size:8px; color:#444; line-height:1.6;`)}>
-            * รายการที่มีเครื่องหมายนี้ ({manualCount} รายการ) คัดลอกเข้าระบบย้อนหลังจากบันทึกเดิมของหน่วยงาน
+            * รายการที่มีเครื่องหมายนี้ ({sheetManualCount} รายการ) คัดลอกเข้าระบบย้อนหลังจากบันทึกเดิมของหน่วยงาน
             ส่วนรายการอื่นระบบบันทึกเองขณะจัดทำฉลาก โดยวันที่และผู้ทำรายการมาจากบัญชีผู้ใช้ที่เข้าสู่ระบบขณะนั้น
             รายละเอียดผู้กรอกและแหล่งอ้างอิงดูได้จากหน้าจอระบบ
           </p>
         )}
       </div>
+      );
+      })}
     </div>
   );
 }
