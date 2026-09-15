@@ -379,13 +379,45 @@ export function StickerLog({ v }) {
       .prep-doc {
         display: block !important; width: 17.8cm !important; max-width: 17.8cm !important;
         margin: 0 auto !important; padding: 0 !important; box-sizing: border-box;
+        /* The workbook is set in CordiaUPC for its headings and TH SarabunPSK
+           for the table. Both ship with Thai Windows and Office, so on the
+           machines this is printed from the sheet comes out in the same type it
+           has always been in; Sarabun is the app's own fallback elsewhere. */
+        font-family: 'TH SarabunPSK', 'Sarabun', 'Cordia New', 'CordiaUPC', sans-serif !important;
       }
-      .prep-table { width: 100% !important; border-collapse: collapse !important; margin-top: 8px !important; }
+      /* Point sizes taken from the workbook's own cells rather than converted
+         by eye — Thai faces run small for their point size, so guessing in
+         pixels lands nowhere near. */
+      .prep-doc .pd-h1 { font-size: 18pt !important; }
+      .prep-doc .pd-h2 { font-size: 17pt !important; }
+      .prep-doc .pd-unit, .prep-doc .pd-period { font-size: 16pt !important; }
+      .prep-doc .pd-title { font-size: 18pt !important; }
+      .prep-doc .prep-signoff { font-size: 16pt !important; }
+      .prep-table th { font-size: 12pt !important; }
+      .prep-table td { font-size: 14pt !important; }
+      /* Ruled like the workbook: every cell boxed, the header row and the
+         table's outer edge in the heavier weight Excel calls "medium", and
+         everything centred — the form centres all six columns, data rows
+         included. Cells are middle-aligned, not top, so a wrapped reagent name
+         sits level with the dates beside it. */
+      .prep-table { width: 100% !important; border-collapse: collapse !important; margin-top: 10px !important; table-layout: fixed !important; border: 1.6px solid #000 !important; }
       .prep-table th, .prep-table td {
-        border: 1px solid #9a9a9a !important; padding: 4px 6px !important;
-        font-size: 8.5px !important; color: #000 !important; vertical-align: top !important;
+        border: 1px solid #000 !important; padding: 3px 5px !important;
+        font-size: 9px !important; color: #000 !important;
+        vertical-align: middle !important; text-align: center !important;
+        word-wrap: break-word !important; overflow-wrap: anywhere !important;
       }
-      .prep-table th { background: #ececec !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-weight: bold !important; }
+      .prep-table th {
+        border-top: 1.6px solid #000 !important; border-bottom: 1.6px solid #000 !important;
+        font-weight: bold !important; font-size: 8.5px !important;
+        background: transparent !important;
+      }
+      /* The reagent column is the one the form left-aligns in practice, because
+         its entries are sentences rather than values. */
+      .prep-table td:nth-child(3) { text-align: left !important; }
+      /* An empty form is a form people can still write on. The workbook keeps
+         its grid ruled to row 39 whether or not anything is in it. */
+      .prep-table tr { height: 21px !important; }
       /* Keep a row intact across the page break — a half-printed record is
          worse than pushing it to the next page. */
       .prep-table tr { page-break-inside: avoid !important; break-inside: avoid !important; }
@@ -584,20 +616,20 @@ export function StickerLog({ v }) {
           <div style={css(`position:absolute; top:0; right:0; font-size:8px; color:#333; text-align:right; line-height:1.5;`)}>
             <div style={css(`font-weight:bold;`)}>FM-09-157-07-020</div>
           </div>
-          <div style={css(`text-align:center; font-weight:bold; font-size:13px; line-height:1.5;`)}>
+          <div className="pd-h1" style={css(`text-align:center; font-weight:bold; font-size:15px; line-height:1.5;`)}>
             ศูนย์ห้องปฏิบัติการทางการแพทย์&nbsp;&nbsp;โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ
           </div>
-          <div style={css(`text-align:center; font-weight:bold; font-size:13px; line-height:1.5;`)}>
+          <div className="pd-h2" style={css(`text-align:center; font-weight:bold; font-size:14px; line-height:1.5;`)}>
             งานห้องปฏิบัติการเทคนิคการแพทย์
           </div>
-          <div style={css(`font-size:12px; line-height:1.9; margin-top:2px;`)}>
+          <div className="pd-unit" style={css(`font-size:13px; line-height:1.9; margin-top:2px;`)}>
             <span style={css(`margin-left:36px;`)}>หน่วย</span>
             <span style={css(`margin-left:14px;`)}>ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์</span>
           </div>
-          <div style={css(`text-align:center; font-weight:bold; font-size:13px; line-height:1.9;`)}>
+          <div className="pd-title" style={css(`text-align:center; font-weight:bold; font-size:15px; line-height:1.9;`)}>
             แบบฟอร์มบันทึกการจัดเตรียมน้ำยา
           </div>
-          <div style={css(`text-align:center; font-size:12px; line-height:2.1;`)}>
+          <div className="pd-period" style={css(`text-align:center; font-size:13px; line-height:2.1;`)}>
             <span>เดือน</span>
             <span style={css(`display:inline-block; min-width:96px; border-bottom:1px dotted #000; margin:0 8px; font-weight:bold;`)}>{period.month}</span>
             <span>ปี</span>
@@ -608,29 +640,38 @@ export function StickerLog({ v }) {
         <table className="prep-table">
           <thead>
             <tr>
-              <th style={{ width: '8%', textAlign: 'center' }}>ครั้งที่</th>
-              <th style={{ width: '18%' }}>น้ำยาที่จัดเตรียม</th>
-              <th style={{ width: '34%' }}>รายการน้ำยาตรวจวิเคราะห์, รายการน้ำยาอื่นๆ</th>
-              <th style={{ width: '13%', textAlign: 'center' }}>วันที่จัดเตรียม</th>
-              <th style={{ width: '13%', textAlign: 'center' }}>วันหมดอายุ</th>
-              <th style={{ width: '14%' }}>ผู้จัดเตรียม</th>
+              {/* Widths taken from the workbook's own columns, to the tenth
+                  of a percent: A 7.7 · B 16.4 · C 37.9 · D/E/F 12.6 each. */}
+              <th style={{ width: '7.7%' }}>ครั้งที่</th>
+              <th style={{ width: '16.4%' }}>น้ำยาที่จัดเตรียม</th>
+              <th style={{ width: '37.9%' }}>รายการน้ำยาตรวจวิเคราะห์, รายการน้ำยาอื่นๆ</th>
+              <th style={{ width: '12.6%' }}>วันที่จัดเตรียม</th>
+              <th style={{ width: '12.6%' }}>วันหมดอายุ</th>
+              <th style={{ width: '12.8%' }}>ผู้จัดเตรียม</th>
             </tr>
           </thead>
           <tbody>
             {printRows.length > 0 ? printRows.map((r, idx) => (
               <tr key={r.id}>
-                <td style={{ textAlign: 'center' }}>
+                <td>
                   {idx + 1}{r.isManual ? <span title="กรอกย้อนหลัง"> *</span> : null}
                 </td>
                 <td>{prepCategory(r)}</td>
                 <td>{r.reagentName}{r.lot ? <span style={{ color: '#444' }}> · Lot {r.lot}</span> : null}</td>
-                <td style={{ textAlign: 'center' }}>{prepDateOf(r)}</td>
-                <td style={{ textAlign: 'center' }}>{thaiShortDate(r.expDate) || '—'}</td>
+                <td>{prepDateOf(r)}</td>
+                <td>{thaiShortDate(r.expDate) || '—'}</td>
                 <td>{r.preparedBy || r.by || '—'}</td>
               </tr>
-            )) : (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: '#666', padding: '14px' }}>ไม่มีบันทึกในช่วงเวลาที่เลือก</td></tr>
-            )}
+            )) : null}
+            {/* The workbook rules its grid down to row 39 whether or not there
+                is anything in it, so a printed sheet always has somewhere to
+                write by hand. Padding to the same 31 rows keeps a light month
+                looking like the form rather than like a short table. */}
+            {Array.from({ length: Math.max(0, 31 - printRows.length) }).map((_, i) => (
+              <tr key={`pad-${i}`}>
+                <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td>
+              </tr>
+            ))}
           </tbody>
         </table>
 

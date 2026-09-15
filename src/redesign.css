@@ -175,7 +175,13 @@
   /* --text-secondary is a shade darker than the register's #3d4a43: on the
      tinted role-header cells of the permission matrix that value lands at
      4.42:1, just under the line. Everywhere else the difference is invisible. */
-  --white:#ffffff; --text-primary:#171f1a; --text-secondary:#394640;
+  /* Warm, not pure. --white backs 75 surfaces across the app — table rows,
+     inputs, chips — and #ffffff next to a cream page reads as a hole in it
+     rather than part of it. Kept a step lighter than --surface-card so a row
+     still lifts off the panel it sits in: page #f4f1e8 → card #faf8f1 → row
+     #fdfcf7. Genuinely white things stay white: a signature image and the
+     sticker preview are printed on white paper and say so in their own code. */
+  --white:#fdfcf7; --text-primary:#171f1a; --text-secondary:#394640;
   --text-tertiary:#5a675f; --text-link:#1e7a46; --text-disabled:#7e8a82;
   --border-subtle:#e0dccf; --border-default:#cfcabb; --border-strong:#b4ad9c;
   /* One step darker than the register's #1e7a46. That value is fine as a fill
@@ -240,7 +246,12 @@
    grey-green palette then sits in the room like furniture from another house.
    It inherits instead — one set of surfaces everywhere. */
 .dark-theme.theme-light .theme-light-scope {
-  --surface-card:var(--surface-page) !important;
+  /* Concrete values, not var(--surface-page): styles.css gives .theme-light-scope
+     its own --surface-page (#F6F7FB, a cool near-white), so indirection here
+     resolved straight back to the palette this rule exists to replace — the
+     modal came out blue-white inside a cream header and footer. */
+  --surface-page:#f4f1e8 !important;
+  --surface-card:#f4f1e8 !important;
   --surface-sunken:#e7e3d6 !important;
   --white:#ffffff;
   --text-primary:#171f1a !important; --text-secondary:#394640 !important;
@@ -251,8 +262,12 @@
   background:var(--surface-card) !important; border-color:var(--border-subtle) !important;
 }
 .dark-theme.theme-light .stock-modal :is(input,select,textarea) {
-  background:#ffffff !important;
+  background:var(--white) !important;
 }
+/* Modals carry a 2px blue-grey border inline, which is the one edge of the old
+   palette that survives repainting the inside. */
+.dark-theme.theme-light .stock-modal,
+.dark-theme.theme-light .tt-in.theme-light-scope { border-color:var(--border-default) !important; }
 
 /* The reagent drawer paints #04303C inline, so only !important reaches it. */
 .dark-theme.theme-light .dr-in { background:var(--surface-card) !important; }
