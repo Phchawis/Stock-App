@@ -221,6 +221,43 @@
 .dark-theme.theme-light .fefo-note { border-top-color:var(--border-subtle); }
 .dark-theme.theme-light .fefo-mark { color:var(--brand-700); border-color:var(--brand-100); }
 
+/* ── Overlays ──────────────────────────────────────────────────────────────
+   Everything below lives in a modal or a drawer, which is why none of it was
+   caught by the first sweep: the audit walked the page, and these are not on
+   the page until somebody opens them.
+
+   The accent ramp is the dark theme's pale blue (#A9C7EE ink on a 12% tint).
+   That is legible over a dark panel and invisible over a light one, which is
+   what the aliquot and category chips were doing. */
+.dark-theme.theme-light {
+  --accent-700:#2f5d85; --accent-600:#3f6f99; --accent-500:#5c88ad;
+  --accent-100:#2f5d8529; --accent-50:#2f5d851a;
+  --brand-300:#7fb39a;
+}
+
+/* .theme-light-scope paints a modal's interior light so it reads against a
+   dark page. In light mode that job is already done by the page, and its own
+   grey-green palette then sits in the room like furniture from another house.
+   It inherits instead — one set of surfaces everywhere. */
+.dark-theme.theme-light .theme-light-scope {
+  --surface-card:var(--surface-page) !important;
+  --surface-sunken:#e7e3d6 !important;
+  --white:#ffffff;
+  --text-primary:#171f1a !important; --text-secondary:#394640 !important;
+  --text-tertiary:#5a675f !important;
+  --border-subtle:#e0dccf !important; --border-default:#cfcabb !important;
+  --border-strong:#b4ad9c !important;
+  --slate-50:#f7f5ee !important; --slate-100:#efebdf !important; --slate-200:#e2dccb !important;
+  background:var(--surface-card) !important; border-color:var(--border-subtle) !important;
+}
+.dark-theme.theme-light .stock-modal :is(input,select,textarea) {
+  background:#ffffff !important;
+}
+
+/* The reagent drawer paints #04303C inline, so only !important reaches it. */
+.dark-theme.theme-light .dr-in { background:var(--surface-card) !important; }
+
+
 /* The Alt+R / Alt+I hints sit on the filled Receive and Withdraw buttons. They
    were painted with --text-secondary: 1.5:1 against the fill in light mode and
    3.6:1 in dark, so neither passed. Both now take the button's own white ink,

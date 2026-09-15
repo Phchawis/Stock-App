@@ -232,13 +232,18 @@ export function StickerLog({ v }) {
   }));
   const hiddenCount = inPeriod.length - rows.length;
 
-  const kindFilterLabel = ({
+  const kindScopeLabel = ({
     all: 'ทุกประเภท (รวมฉลาก QR ประจำ Lot)',
     PREP: 'เฉพาะการเตรียมและเปิดใช้ (ไม่รวมฉลาก QR ประจำ Lot)',
     ALIQUOT: 'ฉลากแบ่งบรรจุ (Aliquot)',
     OPENED: 'ฉลากเปิดใช้ (Opened)',
     LOT_QR: 'ฉลาก QR ประจำ Lot',
   })[kindFilter] || kindFilter;
+
+  // A form that silently omits half the month's preparations is worse than one
+  // that admits its scope. Printed only when the filter is narrower than the
+  // default, so an ordinary print stays identical to the department's sheet.
+  const scopeIsNarrowed = kindFilter !== 'PREP' || !!search || !!startDate || !!endDate;
 
   // Thai Buddhist-era date, matching the rest of the app.
   const thaiDateTime = (at) => {
@@ -272,6 +277,64 @@ export function StickerLog({ v }) {
 
   const manualCount = rows.filter(r => r.isManual).length;
 
+  // ── FM-09-157-07-020 ────────────────────────────────────────────────────
+  // The department's own preparation form. Its columns are not the ones the
+  // screen shows, so the print view maps onto them rather than the other way
+  // round: the screen is a working view, the form is what gets signed.
+
+  const THAI_MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+
+  // d/m/พ.ศ. — the form's own cells are m/d/yy, which reads as either order.
+  // A four-digit Buddhist year removes the ambiguity without taking more room.
+  const thaiShortDate = (ymd) => {
+    if (!ymd) return '';
+    const [y, m, d] = String(ymd).slice(0, 10).split('-');
+    if (!y || !m || !d) return ymd;
+    return `${+d}/${+m}/${+y + 543}`;
+  };
+
+  // The form is filled in a month at a time. When the selection sits inside one
+  // month the header states it the way the form does; when it spans several,
+  // saying so is better than printing one month's name over another's rows.
+  const period = (() => {
+    const months = [...new Set(rows.map(r => (r.at || '').slice(0, 7)).filter(Boolean))].sort();
+    if (months.length === 1) {
+      const [y, m] = months[0].split('-');
+      return { month: THAI_MONTHS[+m - 1], year: String(+y + 543) };
+    }
+    if (months.length === 0) return { month: '—', year: '—' };
+    const f = months[0].split('-'), l = months[months.length - 1].split('-');
+    return {
+      month: `${THAI_MONTHS[+f[1] - 1]} – ${THAI_MONTHS[+l[1] - 1]}`,
+      year: f[0] === l[0] ? String(+f[0] + 543) : `${+f[0] + 543}–${+l[0] + 543}`,
+    };
+  })();
+
+  // Column "น้ำยาที่จัดเตรียม" is a classification, and the form has only ever
+  // used four values. Nothing in the system records it, so it is inferred from
+  // what the label itself says — the sticker's own sub-type first, since that
+  // is the one field where somebody actually chose "Control" or "Calibrator".
+  // Matching on whole words: "Calcium" contains "cal" and is neither.
+  const prepCategory = (r) => {
+    const hay = `${r.subType || ''} ${r.reagentName || ''}`.toLowerCase();
+    if (/\beqa\b/.test(hay)) return 'สารตรวจสอบ EQA';
+    if (/control|ควบคุม/.test(hay)) return 'สารควบคุมคุณภาพ';
+    if (/calibrator|\bcal\b|standard|มาตรฐาน/.test(hay)) return 'สารมาตรฐาน';
+    return 'น้ำยาตรวจวิเคราะห์';
+  };
+
+  // The form has no column for where a row came from, but a hand-entered row
+  // must not leave the building looking machine-recorded. A mark against the
+  // number, explained in the footnote, keeps that true without adding a column
+  // the form does not have.
+  const prepDateOf = (r) => thaiShortDate(r.prepDate || (r.at || '').slice(0, 10));
+
+  // The screen lists newest first, which is right for looking something up.
+  // The form counts ครั้งที่ from the start of the month, so the printed copy
+  // runs the other way — otherwise entry 1 is the last thing that happened.
+  const printRows = [...rows].sort((a, b) => (a.at || '').localeCompare(b.at || ''));
+
   const exportCSV = () => {
     if (!rows.length) { showToast('ไม่มีรายการให้ส่งออก', 'warn'); return; }
     const head = ['ลำดับ', 'วันที่-เวลา', 'ประเภทฉลาก', 'การทำรายการ', 'ชื่อน้ำยา', 'Lot', 'รายละเอียดบนฉลาก', 'จำนวน', 'ผู้เตรียม (บนฉลาก)', 'ผู้ทำรายการ', 'ที่มาของบันทึก', 'ผู้กรอกย้อนหลัง', 'กรอกเมื่อ', 'อ้างอิงจาก'];
@@ -290,10 +353,6 @@ export function StickerLog({ v }) {
     document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(a.href);
   };
-
-  const rangeLabel = startDate || endDate
-    ? `${startDate ? thaiDateTime(startDate) : 'เริ่มต้น'} ถึง ${endDate ? thaiDateTime(endDate) : 'ปัจจุบัน'}`
-    : 'ทั้งหมดเท่าที่มีบันทึก';
 
   const printStyle = `
     @page { size: A4 portrait; margin: 1.6cm; }
@@ -514,118 +573,92 @@ export function StickerLog({ v }) {
         </div>
       </div>
 
-      {/* ── Printed A4 document (screen-hidden) ───────────────────────── */}
+      {/* ── FM-09-157-07-020, printed (screen-hidden) ─────────────────── */}
+      {/* Laid out to match the department's own Excel form line for line: the
+          same four header lines, the same เดือน/ปี block, the same six columns
+          in the same order and wording, and the single ผู้ดูแล / ควบคุม
+          signature. Anyone comparing a printout against the workbook should
+          find nothing to reconcile. */}
       <div className="prep-doc" style={css(`color:#000; font-family:var(--font-body);`)}>
-        <div style={css(`display:flex; align-items:center; gap:12px; border-bottom:2px solid #000; padding-bottom:8px;`)}>
-          <div style={css(`width:52px; height:52px; border-radius:50%; overflow:hidden; flex-shrink:0;`)}>
-            <img src="/assets/tuh_lab_logo.jpg" alt="TUH Logo" style={{ width: '102%', height: '102%', objectFit: 'cover', borderRadius: '50%' }} />
+        <div style={css(`position:relative;`)}>
+          <div style={css(`position:absolute; top:0; right:0; font-size:8px; color:#333; text-align:right; line-height:1.5;`)}>
+            <div style={css(`font-weight:bold;`)}>FM-09-157-07-020</div>
           </div>
-          <div style={css(`flex:1; text-align:left;`)}>
-            {/* Unit → department → institution, the order an official Thai
-                form is read in. Stacked rather than run together on one line so
-                the issuing unit stays the most prominent name on the page. */}
-            <h1 style={css(`margin:0; font-size:13px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>หมวดงานปฏิบัติการตรวจวินิจฉัยทางการแพทย์</h1>
-            <div style={css(`margin:0; font-size:12px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>ห้องปฏิบัติการเทคนิคการแพทย์</div>
-            <div style={css(`margin:0; font-size:12px; font-weight:bold; color:#000; font-family:var(--font-display); line-height:1.35;`)}>โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ</div>
-            <h2 style={css(`margin:2px 0 0; font-size:9px; font-weight:normal; color:#444;`)}>Thammasat University Hospital Laboratory Center</h2>
-            <h3 style={css(`margin:6px 0 0; font-size:12px; font-weight:bold; color:#111;`)}>บันทึกการเตรียมและติดฉลากน้ำยา (Reagent Preparation &amp; Labelling Record)</h3>
+          <div style={css(`text-align:center; font-weight:bold; font-size:13px; line-height:1.5;`)}>
+            ศูนย์ห้องปฏิบัติการทางการแพทย์&nbsp;&nbsp;โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ
           </div>
-          <div style={css(`text-align:right; font-size:8px; color:#333; line-height:1.5; flex-shrink:0;`)}>
-            <div style={css(`font-weight:bold;`)}>FM-LAB-PREP-01</div>
-            <div>แก้ไขครั้งที่ 00</div>
-            <div>หน้า 1 / 1</div>
+          <div style={css(`text-align:center; font-weight:bold; font-size:13px; line-height:1.5;`)}>
+            งานห้องปฏิบัติการเทคนิคการแพทย์
           </div>
-        </div>
-
-        <div style={css(`display:flex; justify-content:space-between; gap:16px; font-size:9px; color:#222; margin-top:8px; line-height:1.6;`)}>
-          <div>
-            <div><strong>ช่วงเวลาของบันทึก:</strong> {rangeLabel}</div>
-            <div><strong>ประเภทฉลากที่แสดง:</strong> {kindFilterLabel}</div>
+          <div style={css(`font-size:12px; line-height:1.9; margin-top:2px;`)}>
+            <span style={css(`margin-left:36px;`)}>หน่วย</span>
+            <span style={css(`margin-left:14px;`)}>ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์</span>
           </div>
-          <div style={css(`text-align:right;`)}>
-            <div><strong>จำนวนรายการ:</strong> {rows.length} รายการ (รวม {totalLabels} ดวง)</div>
-            {/* Stated on the form itself, not only in the footnote: an
-                inspector reading the summary block should learn the mix before
-                they start reading rows. */}
-            <div>
-              <strong>ที่มา:</strong> ระบบบันทึกอัตโนมัติ {rows.length - manualCount} รายการ
-              {manualCount > 0 ? ` · กรอกย้อนหลัง ${manualCount} รายการ` : ''}
-            </div>
-            <div><strong>พิมพ์เอกสารเมื่อ:</strong> {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} น.</div>
-            <div><strong>ผู้พิมพ์:</strong> {user ? user.name : '—'}</div>
+          <div style={css(`text-align:center; font-weight:bold; font-size:13px; line-height:1.9;`)}>
+            แบบฟอร์มบันทึกการจัดเตรียมน้ำยา
+          </div>
+          <div style={css(`text-align:center; font-size:12px; line-height:2.1;`)}>
+            <span>เดือน</span>
+            <span style={css(`display:inline-block; min-width:96px; border-bottom:1px dotted #000; margin:0 8px; font-weight:bold;`)}>{period.month}</span>
+            <span>ปี</span>
+            <span style={css(`display:inline-block; min-width:56px; border-bottom:1px dotted #000; margin:0 8px; font-weight:bold;`)}>{period.year}</span>
           </div>
         </div>
 
         <table className="prep-table">
           <thead>
             <tr>
-              <th style={{ width: '4%' }}>ลำดับ</th>
-              <th style={{ width: '13%' }}>วันที่ / เวลา</th>
-              <th style={{ width: '13%' }}>ประเภทฉลาก</th>
-              <th style={{ width: '19%' }}>ชื่อน้ำยา</th>
-              <th style={{ width: '10%' }}>Lot</th>
-              <th style={{ width: '21%' }}>รายละเอียดบนฉลาก</th>
-              <th style={{ width: '10%' }}>ผู้เตรียม</th>
-              <th style={{ width: '10%' }}>ผู้ทำรายการ</th>
+              <th style={{ width: '8%', textAlign: 'center' }}>ครั้งที่</th>
+              <th style={{ width: '18%' }}>น้ำยาที่จัดเตรียม</th>
+              <th style={{ width: '34%' }}>รายการน้ำยาตรวจวิเคราะห์, รายการน้ำยาอื่นๆ</th>
+              <th style={{ width: '13%', textAlign: 'center' }}>วันที่จัดเตรียม</th>
+              <th style={{ width: '13%', textAlign: 'center' }}>วันหมดอายุ</th>
+              <th style={{ width: '14%' }}>ผู้จัดเตรียม</th>
             </tr>
           </thead>
           <tbody>
-            {rows.length > 0 ? rows.map((r, idx) => (
+            {printRows.length > 0 ? printRows.map((r, idx) => (
               <tr key={r.id}>
-                <td style={{ textAlign: 'center' }}>{idx + 1}</td>
-                {/* Thai era here too — the header above already reads พ.ศ., and
-                    two calendars on one official form invites a misread. */}
-                <td>{thaiDateTime(r.at)}</td>
-                <td>{r.kindLabel}<br /><span style={{ color: '#555' }}>{r.actionLabel}{r.qty > 1 ? ` · ${r.qty} ดวง` : ''}</span></td>
-                <td><strong>{r.reagentName}</strong></td>
-                <td>{r.lot || '—'}</td>
-                <td>{detailOf(r)}</td>
-                <td>{r.preparedBy || '—'}</td>
-                {/* Provenance is printed inside the row, since the printed
-                    form is the artefact the inspector actually keeps. Marking
-                    only the screen would let a hand-entered row leave the
-                    building looking machine-recorded. */}
-                <td>
-                  {r.by}
-                  {r.isManual && (
-                    <><br /><span style={{ color: '#555' }}>
-                      ✎ กรอกย้อนหลัง{r.enteredBy ? ` โดย ${r.enteredBy}` : ''}
-                      {r.sourceNote ? <><br />อ้างอิง: {r.sourceNote}</> : null}
-                    </span></>
-                  )}
+                <td style={{ textAlign: 'center' }}>
+                  {idx + 1}{r.isManual ? <span title="กรอกย้อนหลัง"> *</span> : null}
                 </td>
+                <td>{prepCategory(r)}</td>
+                <td>{r.reagentName}{r.lot ? <span style={{ color: '#444' }}> · Lot {r.lot}</span> : null}</td>
+                <td style={{ textAlign: 'center' }}>{prepDateOf(r)}</td>
+                <td style={{ textAlign: 'center' }}>{thaiShortDate(r.expDate) || '—'}</td>
+                <td>{r.preparedBy || r.by || '—'}</td>
               </tr>
             )) : (
-              <tr><td colSpan="8" style={{ textAlign: 'center', color: '#666', padding: '14px' }}>ไม่มีบันทึกในช่วงเวลาที่เลือก</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: '#666', padding: '14px' }}>ไม่มีบันทึกในช่วงเวลาที่เลือก</td></tr>
             )}
           </tbody>
         </table>
 
-        <div className="prep-signoff" style={css(`display:flex; justify-content:space-around; gap:24px; margin-top:26px; font-size:9px; color:#000;`)}>
-          <div style={css(`text-align:center; width:220px;`)}>
-            <p style={css(`margin:0 0 26px;`)}>ลงชื่อ.......................................................</p>
-            <p style={css(`margin:0; font-weight:bold;`)}>( {user ? user.name : '.....................................'} )</p>
-            <p style={css(`margin:2px 0 0; color:#666;`)}>ผู้บันทึก / ผู้จัดทำเอกสาร</p>
-          </div>
-          <div style={css(`text-align:center; width:220px;`)}>
-            <p style={css(`margin:0 0 26px;`)}>ลงชื่อ.......................................................</p>
-            <p style={css(`margin:0; font-weight:bold;`)}>( ..................................................... )</p>
-            <p style={css(`margin:2px 0 0; color:#666;`)}>หัวหน้าห้องปฏิบัติการ / ผู้ตรวจสอบ</p>
+        {/* One signature, as on the form. */}
+        <div className="prep-signoff" style={css(`margin-top:30px; font-size:12px; color:#000; text-align:center;`)}>
+          <div style={css(`display:inline-block; text-align:left;`)}>
+            ลงชื่อ …………………………………………..&nbsp;(ผู้ดูแล / ควบคุม)
           </div>
         </div>
 
-        {/* The old wording claimed every row was machine-witnessed and
-            unalterable. That is still true of the automatic rows and must not
-            be watered down — but it is not true of a backfilled one, so the
-            two are stated separately rather than blurred into one sentence. */}
-        <p style={css(`margin-top:16px; font-size:7.5px; color:#555; border-top:1px solid #ccc; padding-top:5px; line-height:1.6;`)}>
-          เอกสารนี้สร้างอัตโนมัติจากระบบ CMTL Reagent Inventory · รายการที่ไม่ได้ทำเครื่องหมายใด ๆ คือรายการที่ระบบบันทึกเองขณะดาวน์โหลด/สั่งพิมพ์ฉลาก
-          โดย “วันที่/เวลา” และ “ผู้ทำรายการ” มาจากบัญชีผู้ใช้ที่เข้าสู่ระบบขณะนั้น ไม่สามารถแก้ไขย้อนหลังได้
-          {manualCount > 0 ? (
-            <> · รายการที่ทำเครื่องหมาย <strong>“✎ กรอกย้อนหลัง”</strong> เป็นฉลากที่ทำขึ้นก่อนระบบจะเริ่มบันทึกอัตโนมัติ (ก่อน 7 ส.ค. 2569)
-              และคัดลอกเข้าระบบภายหลังจากบันทึกเดิมของหน่วยงาน โดยระบุผู้กรอกและแหล่งอ้างอิงกำกับไว้ทุกรายการ</>
-          ) : null}
-        </p>
+        {scopeIsNarrowed && (
+          <p style={css(`margin-top:14px; font-size:8px; color:#444; line-height:1.6;`)}>
+            เอกสารฉบับนี้พิมพ์จากรายการที่กรองไว้ · ประเภทฉลาก: {kindScopeLabel}
+            {startDate || endDate ? ` · ช่วงวันที่: ${startDate || 'เริ่มต้น'} ถึง ${endDate || 'ปัจจุบัน'}` : ''}
+            {search ? ` · คำค้น: "${search}"` : ''} — จึงอาจไม่ครบทุกรายการในเดือนที่ระบุ
+          </p>
+        )}
+
+        {/* The form has no column for provenance, so the guarantee moves here.
+            Printed only when there is something to declare: on a month with no
+            hand-entered rows the sheet stays exactly as the department's own. */}
+        {manualCount > 0 && (
+          <p style={css(`margin-top:14px; font-size:8px; color:#444; line-height:1.6;`)}>
+            * รายการที่มีเครื่องหมายนี้ ({manualCount} รายการ) คัดลอกเข้าระบบย้อนหลังจากบันทึกเดิมของหน่วยงาน
+            ส่วนรายการอื่นระบบบันทึกเองขณะจัดทำฉลาก โดยวันที่และผู้ทำรายการมาจากบัญชีผู้ใช้ที่เข้าสู่ระบบขณะนั้น
+            รายละเอียดผู้กรอกและแหล่งอ้างอิงดูได้จากหน้าจอระบบ
+          </p>
+        )}
       </div>
     </div>
   );
