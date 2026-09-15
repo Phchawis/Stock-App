@@ -357,12 +357,25 @@ export function StickerLog({ v }) {
   const printStyle = `
     @page { size: A4 portrait; margin: 1.6cm; }
     @media print {
+      /* The blanket reset exists so the dark UI does not print as dark ink.
+         The form's own fills are the exception — they are part of the
+         controlled document, not app chrome — so they are re-stated after it
+         with print-color-adjust, which is what stops the browser dropping
+         backgrounds in print. */
       *, *::before, *::after {
         background-color: transparent !important;
         color: #000000 !important;
         box-shadow: none !important;
         text-shadow: none !important;
       }
+      .pd-head, .prep-table th, .pd-ctrl {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .pd-head { background: #9999ff !important; }
+      .prep-table th { background: #cc99ff !important; }
+      .pd-ctrl { background: #d8d8f5 !important; }
+      .pd-title, .pd-ctrl-code { color: #0000ff !important; }
       html, body, #root, main, .qms-rise, .prep-doc, .prep-doc * {
         background: #ffffff !important;
         color: #000000 !important;
@@ -388,10 +401,10 @@ export function StickerLog({ v }) {
       /* Point sizes taken from the workbook's own cells rather than converted
          by eye — Thai faces run small for their point size, so guessing in
          pixels lands nowhere near. */
-      .prep-doc .pd-h1 { font-size: 18pt !important; }
-      .prep-doc .pd-h2 { font-size: 17pt !important; }
-      .prep-doc .pd-unit, .prep-doc .pd-period { font-size: 16pt !important; }
-      .prep-doc .pd-title { font-size: 18pt !important; }
+      .prep-doc .pd-h1 { font-size: 15pt !important; }
+      .prep-doc .pd-h2 { font-size: 14pt !important; }
+      .prep-doc .pd-unit, .prep-doc .pd-period { font-size: 13pt !important; }
+      .prep-doc .pd-title { font-size: 15pt !important; }
       .prep-doc .prep-signoff { font-size: 16pt !important; }
       .prep-table th { font-size: 12pt !important; }
       .prep-table td { font-size: 14pt !important; }
@@ -410,7 +423,6 @@ export function StickerLog({ v }) {
       .prep-table th {
         border-top: 1.6px solid #000 !important; border-bottom: 1.6px solid #000 !important;
         font-weight: bold !important; font-size: 8.5px !important;
-        background: transparent !important;
       }
       /* The reagent column is the one the form left-aligns in practice, because
          its entries are sentences rather than values. */
@@ -424,6 +436,41 @@ export function StickerLog({ v }) {
       .prep-table thead { display: table-header-group !important; }
       .prep-signoff { page-break-inside: avoid !important; break-inside: avoid !important; margin-top: 18px !important; }
     }
+    /* Header block. The fills, the blue of the form name and the control
+       box are all taken from the workbook's own cells and objects. */
+    /* The crest and the control box float over the block in the workbook
+       rather than sitting in the flow, so the title lines are centred on the
+       full width and are not squeezed by them. Laid out the same way here —
+       in flow they pushed the first line onto two. */
+    .pd-head {
+      background: #9999ff; border: 1px solid #000;
+      padding: 6px 10px; position: relative; min-height: 74px;
+    }
+    .pd-logo {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      width: 62px; height: 62px; border-radius: 50%; object-fit: cover;
+    }
+    /* Centred between the crest and the control box, not across the whole
+       block: the lines are narrower than the gap between them, but centring
+       on the full width pushed the end of the first line under the box. */
+    .pd-headtext { text-align: center; padding-left: 74px; padding-right: 124px; }
+    /* One line, as on the form. Thai has no inter-word spaces and the
+       browser will break inside a word to fit; nowrap keeps the institution's
+       name whole, which is how it is read. */
+    .pd-h1 { font-weight: bold; font-size: 12.5px; line-height: 1.5; white-space: nowrap; }
+    .pd-h2 { font-weight: bold; font-size: 12px; line-height: 1.5; }
+    .pd-unit { font-size: 11.5px; line-height: 1.8; }
+    .pd-title { font-weight: bold; font-size: 13px; line-height: 1.8; color: #0000ff; }
+    .pd-ctrl {
+      position: absolute; right: 8px; top: 8px;
+      background: #d8d8f5; border: 1px solid #7b68c8;
+      padding: 3px 7px; font-size: 8.5px; line-height: 1.7; text-align: right; min-width: 112px;
+    }
+    .pd-ctrl-code { color: #0000ff; font-weight: bold; font-size: 11px; text-align: center; }
+    .pd-ctrl span { color: #333; }
+    .pd-period { text-align: center; font-size: 13px; line-height: 2.4; }
+    .pd-period-val { display: inline-block; min-width: 92px; margin: 0 10px; font-weight: bold; }
+
     @media screen { .prep-doc { display: none; } }
   `;
 
@@ -612,33 +659,39 @@ export function StickerLog({ v }) {
           signature. Anyone comparing a printout against the workbook should
           find nothing to reconcile. */}
       <div className="prep-doc" style={css(`color:#000; font-family:var(--font-body);`)}>
-        {/* The workbook boxes rows 1–4 — the four title lines — in a thick
-            outline closed by a heavy rule under the form name. The เดือน/ปี
-            line sits below that box, unruled, and the document code sits above
-            it, the way a controlled form is headed. */}
-        <div style={css(`text-align:right; font-size:8px; color:#333; font-weight:bold; margin-bottom:2px;`)}>
-          FM-09-157-07-020
+        {/* The header is a filled block, not an outline: rows 1–4 carry a
+            solid #9999ff, the form name is set in blue on it, and the sheet
+            is headed by the hospital crest on the left and the document
+            control box on the right. Both of those are floating objects in
+            the workbook rather than cells, which is why the first pass — which
+            read cells — reproduced the words and none of the furniture. */}
+        <div className="pd-head">
+          <img className="pd-logo" src="/assets/tuh_lab_logo.jpg" alt="" />
+          <div className="pd-headtext">
+            <div className="pd-h1">ศูนย์ห้องปฏิบัติการทางการแพทย์&nbsp;&nbsp;โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ</div>
+            <div className="pd-h2">งานห้องปฏิบัติการเทคนิคการแพทย์</div>
+            <div className="pd-unit">
+              <span>หน่วย</span>
+              <span style={css(`margin-left:28px;`)}>ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์</span>
+            </div>
+            <div className="pd-title">แบบฟอร์มบันทึกการจัดเตรียมน้ำยา</div>
+          </div>
+          {/* Verbatim from the form. The page number is the form's own "1/1",
+              not a running count — it is part of the document's identity in
+              the quality system, not a description of this printout. */}
+          <div className="pd-ctrl">
+            <div className="pd-ctrl-code">FM-09-157-07-020</div>
+            <div><span>ฉบับที่ :</span> R07E01</div>
+            <div><span>หน้าที่ :</span> 1/1</div>
+            <div><span>เริ่มใช้ :</span> 1 เมษายน 2568</div>
+          </div>
         </div>
-        <div style={css(`border:1.6px solid #000; border-bottom:2px solid #000; padding:5px 8px 3px;`)}>
-          <div className="pd-h1" style={css(`text-align:center; font-weight:bold; font-size:15px; line-height:1.5;`)}>
-            ศูนย์ห้องปฏิบัติการทางการแพทย์&nbsp;&nbsp;โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ
-          </div>
-          <div className="pd-h2" style={css(`text-align:center; font-weight:bold; font-size:14px; line-height:1.5;`)}>
-            งานห้องปฏิบัติการเทคนิคการแพทย์
-          </div>
-          <div className="pd-unit" style={css(`font-size:13px; line-height:1.9; margin-top:2px;`)}>
-            <span style={css(`margin-left:36px;`)}>หน่วย</span>
-            <span style={css(`margin-left:14px;`)}>ศูนย์ปฏิบัติการตรวจวินิจฉัยทางการแพทย์</span>
-          </div>
-          <div className="pd-title" style={css(`text-align:center; font-weight:bold; font-size:15px; line-height:1.9;`)}>
-            แบบฟอร์มบันทึกการจัดเตรียมน้ำยา
-          </div>
-        </div>
-        <div className="pd-period" style={css(`text-align:center; font-size:13px; line-height:2.4;`)}>
+
+        <div className="pd-period">
           <span>เดือน</span>
-          <span style={css(`display:inline-block; min-width:96px; margin:0 10px; font-weight:bold;`)}>{period.month}</span>
+          <span className="pd-period-val">{period.month}</span>
           <span>ปี</span>
-          <span style={css(`display:inline-block; min-width:56px; margin:0 10px; font-weight:bold;`)}>{period.year}</span>
+          <span className="pd-period-val">{period.year}</span>
         </div>
 
         <table className="prep-table">
