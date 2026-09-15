@@ -166,6 +166,25 @@ export async function onRequestPost(context) {
       }
     }
 
+    // The audit trail is the one table a restore merges into rather than
+    // replaces. Every other table is inventory: the backup is the truth and
+    // overwriting is the point. system_events is evidence about the system
+    // itself — which reagents were deleted, and that backups have been taken —
+    // and the DELETE endpoint deliberately refuses to clear the backup history
+    // for that reason. A restore that wiped it would erase the record of every
+    // backup and deletion made since the file was written, which is the
+    // opposite of what an audit trail is for. INSERT OR IGNORE keeps both
+    // sides: rows already here stay, rows only in the file come back.
+    if (Array.isArray(backup.system_events)) {
+      for (const e of backup.system_events) {
+        queries.push(
+          env.DB.prepare(
+            'INSERT OR IGNORE INTO system_events (id, kind, detail, context, by, at) VALUES (?, ?, ?, ?, ?, ?)'
+          ).bind(e.id, e.kind, e.detail ?? null, e.context ?? null, e.by, e.at)
+        );
+      }
+    }
+
     if (Array.isArray(backup.app_settings)) {
       queries.push(env.DB.prepare('DELETE FROM app_settings'));
       for (const s of backup.app_settings) {

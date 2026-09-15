@@ -25,13 +25,20 @@ export async function onRequestGet(context) {
     const stickerLogs = await env.DB.prepare('SELECT * FROM sticker_logs').all();
     const alertAcks = await env.DB.prepare('SELECT * FROM alert_acks').all();
     const appSettings = await env.DB.prepare('SELECT * FROM app_settings').all();
+    // system_events is the audit trail: which reagents were deleted and why,
+    // and when backups were taken. The app records a deletion there precisely
+    // so a catalogue entry cannot silently stop existing — and leaving the
+    // table out of the backup meant a recovery came back with no record that
+    // anything had ever been deleted. Client error reports ride along; they are
+    // small and they are the history of what has been failing.
+    const systemEvents = await env.DB.prepare('SELECT * FROM system_events').all();
 
     // Not exported on purpose: `sessions` and `login_attempts` are live
     // credentials and rate-limit state that must not leave the server, and
     // `d1_migrations` describes the schema, which belongs to the deployment
     // rather than to the data.
     const backupData = {
-      version: '1.1',
+      version: '1.2',
       exportedAt: new Date().toISOString(),
       reagents: reagents.results || [],
       lots: lots.results || [],
@@ -40,7 +47,8 @@ export async function onRequestGet(context) {
       permissions: permissions.results || [],
       sticker_logs: stickerLogs.results || [],
       alert_acks: alertAcks.results || [],
-      app_settings: appSettings.results || []
+      app_settings: appSettings.results || [],
+      system_events: systemEvents.results || []
     };
 
     // Leave a trace that a backup was taken, so the app can tell the lab when

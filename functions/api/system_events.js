@@ -1,6 +1,18 @@
 import { requirePerm, actorName, nowStr, json } from './_lib.js';
 
-const KINDS = new Set(['BACKUP', 'RESTORE', 'CLIENT_ERROR']);
+// The table's vocabulary is BACKUP, RESTORE, REAGENT_DELETED and CLIENT_ERROR.
+// Only the last of those may be posted by a browser.
+//
+// BACKUP and RESTORE are the
+// system's evidence that backups are actually being taken — the dashboard reads
+// the newest BACKUP row as "last backed up" and stops warning once it is recent
+// enough. They are written by admin/backup.js and admin/restore.js themselves,
+// after the work is done, so there is no reason for the open endpoint to accept
+// them and every reason not to: any signed-in account, including a view-only
+// one, could otherwise post a BACKUP row and make the system report a backup
+// that never happened. REAGENT_DELETED is written by reagents.js for the same
+// reason. The client only ever sends CLIENT_ERROR.
+const POSTABLE_KINDS = new Set(['CLIENT_ERROR']);
 
 // GET — the app asks for two things on load: when the last backup happened, and
 // whether anything has been failing. Returns a small summary plus the most
@@ -37,7 +49,7 @@ export async function onRequestPost(context) {
   try {
     const b = await context.request.json();
     const kind = String(b.kind || '').toUpperCase();
-    if (!KINDS.has(kind)) return json({ error: 'ชนิดเหตุการณ์ไม่ถูกต้อง' }, 400);
+    if (!POSTABLE_KINDS.has(kind)) return json({ error: 'ชนิดเหตุการณ์ไม่ถูกต้อง' }, 400);
 
     // Cap the stored text. A runaway stack trace should not be able to bloat
     // the database, and the first few lines are the useful part anyway.
