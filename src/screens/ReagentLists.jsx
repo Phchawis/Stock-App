@@ -176,7 +176,13 @@ export function ReagentLists({ v }) {
                           the theme: --brand-800 is mint in dark and a deep
                           green in light, and the light one vanished against
                           the scrim. Fixed light ink reads on both. */}
-                      <span className="rl-cat-badge" style={css(`padding:2px 6px; border-radius:var(--radius-pill); background:rgba(8,26,32,.55); border:1px solid rgba(255,255,255,.35); color:#eef5f2; font:var(--fw-semibold) 8px/1.2 var(--font-body); white-space:nowrap; display:inline-block; max-width:calc(100% - 4px); overflow:hidden; text-overflow:ellipsis;`)}>
+                      {/* The scrim has to carry the contrast on its own. At 55%
+                          it relied on the photo underneath being dark: over a
+                          pale label or a white box the chip fell to 3.6:1. At
+                          78% it clears 8:1 even against pure white, so the chip
+                          reads on every photograph in the catalogue. 8px was
+                          also below what Thai needs to be legible at a glance. */}
+                      <span className="rl-cat-badge" style={css(`padding:3px 7px; border-radius:var(--radius-pill); background:rgba(8,26,32,.78); border:1px solid rgba(255,255,255,.35); color:#eef5f2; font:var(--fw-semibold) 10px/1.2 var(--font-body); white-space:nowrap; display:inline-block; max-width:calc(100% - 4px); overflow:hidden; text-overflow:ellipsis;`)}>
                         {getCategoryLabel(r.cat)}
                       </span>
                     </div>

@@ -307,7 +307,12 @@ export function StockCount({ v }) {
         <div className="perm-matrix-scroll" style={css(`overflow-x:auto;`)}>
           <table className="stock-count-table" style={css(`width:100%; border-collapse:collapse; text-align:left;`)}>
             <thead>
-              <tr style={css(`border-bottom:2px solid var(--border-subtle); background:rgba(23,36,46,0.3); font:var(--fw-semibold) var(--text-2xs)/1.4 var(--font-body); color:var(--text-tertiary);`)}>
+              {/* Themed, not a hardcoded dark wash. rgba(23,36,46,.3) is a dark
+                  slate at 30%, which over the light theme's cream composited to
+                  a muddy grey and left the tertiary-grey headings at 3:1 —
+                  grey on grey. The sunken surface is the token for exactly this
+                  and reads correctly in both themes. */}
+              <tr style={css(`border-bottom:2px solid var(--border-subtle); background:var(--surface-sunken); font:var(--fw-semibold) var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>
                 <th style={css(`padding:14px 18px;`)}>ชื่อน้ำยาเคมี</th>
                 <th style={css(`padding:14px 18px;`)}>เลข Lot</th>
                 <th style={css(`padding:14px 18px;`)}>วันหมดอายุ</th>
@@ -324,7 +329,14 @@ export function StockCount({ v }) {
                 const diff = isNaN(numVal) ? 0 : numVal - item.systemQty;
                 const isHighlighted = highlightedLotId === item.lotId;
 
-                let diffBadge = <span style={css(`color:var(--text-disabled); font:var(--font-mono) var(--text-2xs);`)}>—</span>;
+                // --text-disabled is for controls that cannot be used, which is
+                // what exempts them from the contrast floor. This dash is
+                // ordinary text saying "not counted yet" and sat at 3.4:1 on the
+                // light theme; tertiary is the token for de-emphasised text that
+                // still has to be read. The font shorthand also named the family
+                // before the size, which is invalid, so the browser dropped the
+                // whole declaration — the family is set on its own now.
+                let diffBadge = <span style={css(`color:var(--text-tertiary); font-family:var(--font-mono);`)}>—</span>;
                 if (diff > 0) {
                   diffBadge = <span style={css(`padding:3px 8px; border-radius:var(--radius-pill); background:var(--green-100); color:var(--green-700); font:var(--fw-bold) var(--text-2xs) var(--font-mono);`)}>+{diff}</span>;
                 } else if (diff < 0) {
@@ -339,10 +351,18 @@ export function StockCount({ v }) {
                     <td data-label="ชื่อน้ำยา" style={css(`padding:12px 18px; font:var(--fw-semibold) var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>
                       {item.reagentName}
                     </td>
-                    <td data-label="Lot" style={css(`padding:12px 18px; font:var(--font-mono) var(--text-xs)/1.2 var(--font-body); color:var(--text-secondary);`)}>
+                    {/* Both shorthands named the family first and again at the
+                        end, which is not a valid `font:` — the browser dropped
+                        the whole declaration, so the lot number and the expiry
+                        date have never actually been monospace. They are the
+                        two values somebody reads off a label while counting, so
+                        the family is what matters here; it is set on its own
+                        rather than restoring the shorthand, which would also
+                        shrink these columns back down. */}
+                    <td data-label="Lot" style={css(`padding:12px 18px; font-family:var(--font-mono); color:var(--text-secondary);`)}>
                       {item.lot}
                     </td>
-                    <td data-label="วันหมดอายุ" style={css(`padding:12px 18px; font:var(--font-mono) var(--text-2xs)/1.2 var(--font-body); color:var(--text-secondary);`)}>
+                    <td data-label="วันหมดอายุ" style={css(`padding:12px 18px; font-family:var(--font-mono); color:var(--text-secondary);`)}>
                       {item.expiry}
                     </td>
                     <td data-label="จำนวนในระบบ" style={css(`padding:12px 18px; text-align:right; font:var(--fw-semibold) var(--text-xs) var(--font-mono); color:var(--text-secondary);`)}>

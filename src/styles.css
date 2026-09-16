@@ -1923,7 +1923,10 @@ input:focus, select:focus, textarea:focus {
   --amber-600: #C28400;
   --amber-100: #FBEFD0;
   --red-700: #A31621;
-  --red-600: #C42330;
+  /* Carries the required-field asterisk on the light panels, where #C42330 sat
+     at 4.1:1 — under the floor for a mark that tells you the field cannot be
+     left blank. Darkened to clear 4.8:1; still the same red. */
+  --red-600: #B01E2A;
   --red-100: #F9E0E2;
   --violet-700: #5B3FA6;
   --violet-600: #6E4FC4;
@@ -2013,7 +2016,12 @@ input:focus, select:focus, textarea:focus {
      far too dark to read as type here; see the note in theme.js. */
   --brand-ink: #8FD8C8;
   --accent-700: #A9C7EE;
-  --accent-600: #4E7CB0;
+  /* The fill role, and the only accent step that carries white type. #4E7CB0
+     put that at 4.34:1, just under the floor; two percent darker clears it at
+     4.7:1 and reads as the same blue. It cannot borrow --accent-700 the way a
+     light theme would — on the dark surface the ramp runs the other way and
+     700 is the lighter step. */
+  --accent-600: #4A76A8;
   --accent-500: #7AA2C4;
   --accent-400: #93B9E1;
   --accent-100: rgba(122,162,196,.20);

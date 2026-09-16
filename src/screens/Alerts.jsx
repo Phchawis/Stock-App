@@ -279,16 +279,21 @@ export function Alerts({ v }) {
               <span style={css(`display:grid; place-items:center;`)}>{ic.list}</span>
               คัดลอกด่วน (Copy)
             </button>
-            <button 
-              className="alert-action-btn" 
+            {/* LINE's own green, kept — it is how the button is recognised —
+                but labelled in near-black rather than white. White on #06C755
+                is 2.3:1, which is the brand's own styling and not a readable
+                one; the dark label on the same green is 6.7:1 and the button
+                still reads as the LINE button. */}
+            <button
+              className="alert-action-btn"
               onClick={handleSendLineAlert}
               disabled={isSendingLine}
               title="ส่งแจ้งเตือนน้ำยาวิกฤต (สีแดง) เข้ากลุ่ม LINE"
-              style={css(`background:#06C755; border-color:#05b04b; color:#fff; display:flex; align-items:center; gap:6px;`)}
+              style={css(`background:#06C755; border-color:#05a344; color:#062E14; display:flex; align-items:center; gap:6px;`)}
               onMouseEnter={(e) => { e.currentTarget.style.background = '#05b04b'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = '#06C755'; }}
             >
-              <span style={css(`display:grid; place-items:center; color:#fff;`)}>{ic.qr}</span>
+              <span style={css(`display:grid; place-items:center; color:#062E14;`)}>{ic.qr}</span>
               {isSendingLine ? 'กำลังส่ง...' : 'ส่งแจ้งเตือนน้ำยาใกล้หมดอายุเข้า LINE'}
             </button>
             <button className="alert-print-btn" onClick={() => window.print()}>

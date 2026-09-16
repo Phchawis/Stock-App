@@ -509,17 +509,23 @@ export function Dashboard({ v }) {
               <div style={css(`font:var(--type-card-title); color:var(--text-primary); margin-bottom:14px;`)}>
                 สรุปผลวิเคราะห์ & ข้อเสนอแนะเชิงบริหารคลังน้ำยา (Executive Insights)
               </div>
+              {/* These bullets were --brand-700, which is the fill role: the
+                  token that paints a button, not one that can be read as type
+                  on the dark surface — styles.css says so where it defines
+                  --brand-ink for exactly this. At 2.4:1 they were all but
+                  invisible and the three findings ran together as one block of
+                  text. The ink step is the same colour's readable weight. */}
               <div style={css(`display:flex; flex-direction:column; gap:12px; font:var(--text-xs)/1.5 var(--font-body); color:var(--text-secondary); justify-content:center; flex:1;`)}>
                 <div style={css(`display:flex; align-items:flex-start; gap:8px;`)}>
-                  <span style={{ color: 'var(--brand-700)', fontWeight: 'bold', marginTop: '2px' }}>•</span>
+                  <span style={{ color: 'var(--brand-ink)', fontWeight: 'bold', marginTop: '2px' }}>•</span>
                   <span>หมวดหมู่ที่มีอัตราจ่ายใช้งานสะสมสูงสุดในขณะนี้ คือ <strong>กลุ่ม{insights.topCatLabel}</strong></span>
                 </div>
                 <div style={css(`display:flex; align-items:flex-start; gap:8px;`)}>
-                  <span style={{ color: 'var(--brand-700)', fontWeight: 'bold', marginTop: '2px' }}>•</span>
+                  <span style={{ color: 'var(--brand-ink)', fontWeight: 'bold', marginTop: '2px' }}>•</span>
                   <span>ในช่วงเวลาที่วิเคราะห์นี้ มีจำนวนยอดรับเข้ารวม <strong>{insights.totalRecInRange.toLocaleString()} ชิ้น</strong> และมียอดเบิกจ่ายใช้งานสะสม <strong>{insights.totalIssueInRange.toLocaleString()} ชิ้น</strong></span>
                 </div>
                 <div style={css(`display:flex; align-items:flex-start; gap:8px;`)}>
-                  <span style={{ color: 'var(--brand-700)', fontWeight: 'bold', marginTop: '2px' }}>•</span>
+                  <span style={{ color: 'var(--brand-ink)', fontWeight: 'bold', marginTop: '2px' }}>•</span>
                   <span>ปัจจุบันตรวจพบรายการน้ำยาต่ำกว่าจุดสั่งซื้อซ้ำสะสม <strong>{insights.lowStockCount} รายการ</strong> ควรออกเอกสารสั่งจัดหาตามเกณฑ์จัดจัดซื้อด่วน</span>
                 </div>
                 <div style={css(`display:flex; align-items:flex-start; gap:8px; padding-top:6px; border-top:1px dashed var(--border-subtle);`)}>
