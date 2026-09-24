@@ -13,10 +13,18 @@ export function IssueModal({ v }) {
   } = v;
 
   const [currentStep, setCurrentStep] = React.useState(1);
+  // Which way the last step change went, so the content slides forward into
+  // step 2 and back into step 1. Empty on open: the modal has its own entrance.
+  const [stepDir, setStepDir] = React.useState('');
+  const goStep = (n) => {
+    setStepDir(n > currentStep ? 'step-fwd' : n < currentStep ? 'step-back' : '');
+    setCurrentStep(n);
+  };
 
   React.useEffect(() => {
     if (!modalIssue) {
       setCurrentStep(1);
+      setStepDir('');
     }
   }, [modalIssue]);
 
@@ -88,7 +96,7 @@ export function IssueModal({ v }) {
               setTimeout(() => { 
                 if (active) {
                   setShowCamera(false);
-                  setCurrentStep(2);
+                  goStep(2);
                 }
               }, 550);
             }
@@ -266,7 +274,7 @@ export function IssueModal({ v }) {
             
             {/* STEP 1: SCAN LOT OR SEARCH BY REAGENT NAME */}
             {currentStep === 1 && (
-              <div style={css(`display:flex; flex-direction:column; gap:14px;`)}>
+              <div className={stepDir || undefined} style={css(`display:flex; flex-direction:column; gap:14px;`)}>
                 <div style={css(`font:var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary); text-align:center; padding:0 8px;`)}>
                   กรุณาสแกน QR Code หรือระบุรหัส Lot ของน้ำยาเคมีเพื่อทำรายการเบิกจ่าย
                 </div>
@@ -317,7 +325,7 @@ export function IssueModal({ v }) {
                           const linked = scanQRCode(manualCode);
                           if (linked) {
                             setManualCode('');
-                            setCurrentStep(2);
+                            goStep(2);
                           }
                         }
                       }}
@@ -341,7 +349,7 @@ export function IssueModal({ v }) {
                           const linked = scanQRCode(manualCode);
                           if (linked) {
                             setManualCode('');
-                            setCurrentStep(2);
+                            goStep(2);
                           }
                         }
                       }}
@@ -358,7 +366,7 @@ export function IssueModal({ v }) {
             {/* STEP 2: SELECT LOT / SCAN */}
             {/* STEP 2: QUANTITY & CONFIRMATION */}
             {currentStep === 2 && selectedReagentObj && (
-              <div style={css(`display:flex; flex-direction:column; gap:14px;`)}>
+              <div className={stepDir || undefined} style={css(`display:flex; flex-direction:column; gap:14px;`)}>
                 <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:12px 14px; display:flex; flex-direction:column; gap:6px; font:var(--text-xs)/1.3 var(--font-body);`)}>
                   <div className="issue-summary-line" style={css(`display:flex; justify-content:space-between;`)}>
                     <div>น้ำยาที่เบิก: <strong style={css(`color:var(--text-primary);`)}>{selectedReagentObj.th}</strong></div>
@@ -424,7 +432,7 @@ export function IssueModal({ v }) {
                 </button>
                 <button 
                   disabled={!selectedReagentObj}
-                  onClick={() => setCurrentStep(2)}
+                  onClick={() => goStep(2)}
                   style={css(`padding:8px 16px; border-radius:var(--radius-md); border:none; background:${selectedReagentObj ? 'var(--brand-700)' : 'var(--slate-200)'}; color:${selectedReagentObj ? '#fff' : 'var(--text-disabled)'}; cursor:${selectedReagentObj ? 'pointer' : 'not-allowed'}; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
                 >
                   ถัดไป (ระบุจำนวน) &rarr;
@@ -435,7 +443,7 @@ export function IssueModal({ v }) {
             {currentStep === 2 && (
               <>
                 <button 
-                  onClick={() => setCurrentStep(1)} 
+                  onClick={() => goStep(1)} 
                   style={css(`padding:8px 16px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
                 >
                   &larr; ย้อนกลับ

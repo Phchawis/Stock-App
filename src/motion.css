@@ -1,0 +1,112 @@
+/* ── Motion layer ─────────────────────────────────────────────────────────────
+   Movement for state changes the app already has. Nothing in this file
+   changes a colour, size, spacing or position at rest: remove it and every
+   screen looks exactly as before, it just changes state without moving.
+
+   Loaded last so its keyframes replace the older ones of the same name.
+   Everything here stops under prefers-reduced-motion — the kill switch in
+   redesign.css covers the CSS, and motion.js checks the same query for the
+   parts driven from script. */
+
+:root {
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --flash-tint: rgba(43, 166, 198, 0.30);
+}
+.dark-theme.theme-light { --flash-tint: rgba(26, 107, 61, 0.16); }
+
+/* ── Entrances that no longer fight inline transforms ──────────────────────
+   These animated `transform`, which replaces any transform an element sets
+   for itself while the animation runs. The toast is centred with
+   translateX(-50%), so for its whole entrance it sat 100px right of centre
+   and then snapped across when the animation ended — every toast, every
+   time. The individual `translate` property composes with an element's own
+   transform instead of replacing it. */
+@keyframes ttIn { from { translate: 0 16px; opacity: 0; } to { translate: 0 0; opacity: 1; } }
+@keyframes drIn { from { translate: 28px 0; opacity: .4; } to { translate: 0 0; opacity: 1; } }
+
+/* ── Exit ghosts (see motion.js) ───────────────────────────────────────────
+   The copy of a closing modal must not replay the entrance classes it was
+   cloned with, and must never catch a click meant for what is underneath. */
+.exit-ghost.exit-ghost, .exit-ghost * {
+  animation: none !important;
+  transition: none !important;
+  pointer-events: none !important;
+}
+
+/* Press feedback lives with the existing button press in styles.css, as one
+   rule rather than two competing ones. */
+
+/* ── What just changed ─────────────────────────────────────────────────────
+   After a receipt or a withdrawal the modal closes and the new quantity lands
+   in a list of 150 reagents. A brief tint on the row — and on the on-hand
+   figure in the reagent drawer — answers "which one did that change?" without
+   anyone reading the list again. Drawn as an inset shadow so it tints over
+   whatever background the row already has and hands it back untouched. */
+@keyframes changed-flash {
+  0%, 18% { box-shadow: inset 0 0 0 999px var(--flash-tint); }
+  100%    { box-shadow: inset 0 0 0 999px transparent; }
+}
+.just-changed { animation: changed-flash 1600ms ease-out; }
+@keyframes changed-figure {
+  0%   { scale: 1; }
+  30%  { scale: 1.06; }
+  100% { scale: 1; }
+}
+.just-changed-figure { animation: changed-figure 520ms var(--ease-out-quart); transform-origin: left center; }
+
+/* ── Tabs: the underline moves to the new tab ──────────────────────────────
+   A single indicator that travels, instead of one underline fading out while
+   another fades in, shows where the selection went. It is a 1px bar scaled to
+   the tab's width so only transform animates. */
+.qms-tablist { position: relative; }
+.qms-tab-ind {
+  /* bottom:-1px puts it exactly where the tab's own border sat: the tab has
+     margin-bottom:-1px, so its underline covered the list's 1px rule. */
+  position: absolute; left: 0; bottom: -1px; height: 2px; width: 1px;
+  background: var(--teal-700); transform-origin: 0 0; pointer-events: none;
+  transition: transform 260ms var(--ease-out-quart);
+}
+
+/* ── Withdrawal steps ──────────────────────────────────────────────────────
+   Step 1 → 2 slides forward, 2 → 1 slides back, so the direction of travel
+   through the flow is visible, not just the fact that the content changed. */
+@keyframes step-fwd  { from { opacity: 0; translate: 16px 0; } to { opacity: 1; translate: 0 0; } }
+@keyframes step-back { from { opacity: 0; translate: -16px 0; } to { opacity: 1; translate: 0 0; } }
+.step-fwd  { animation: step-fwd 220ms var(--ease-out-quart); }
+.step-back { animation: step-back 220ms var(--ease-out-quart); }
+
+/* ── Dropdowns ─────────────────────────────────────────────────────────────
+   The options list drops a few pixels from its field as it appears, which
+   ties it to the field it belongs to. */
+@keyframes pop-in { from { opacity: 0; translate: 0 -4px; } to { opacity: 1; translate: 0 0; } }
+.pop-in { animation: pop-in 140ms var(--ease-out-quart); }
+
+/* ── Mobile navigation backdrop ────────────────────────────────────────────
+   The drawer already slides in; its backdrop appeared at full strength in one
+   frame, a heavy flash under a 200ms slide. */
+@keyframes backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+@media screen and (max-width: 768px) {
+  .dark-theme .sidebar-backdrop { animation: backdrop-in 200ms ease-out; }
+}
+
+/* ── Theme reveal (see switchTheme in motion.js) ───────────────────────────
+   The new palette spreads out from the toggle. plus-lighter is the default
+   blend between the two snapshots, which is right for a crossfade and wrong
+   for a reveal — it would add the palettes together inside the circle. */
+html.vt-theme *, html.vt-theme *::before, html.vt-theme *::after { transition: none !important; }
+html.vt-theme::view-transition-old(root),
+html.vt-theme::view-transition-new(root) { mix-blend-mode: normal; animation: none; }
+html.vt-theme::view-transition-new(root) {
+  animation: theme-reveal 420ms var(--ease-out-quart) both;
+}
+@keyframes theme-reveal {
+  from { clip-path: circle(0 at var(--vt-x, 100%) var(--vt-y, 0)); }
+  to   { clip-path: circle(var(--vt-r, 150vmax) at var(--vt-x, 100%) var(--vt-y, 0)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .just-changed, .just-changed-figure, .step-fwd, .step-back, .pop-in,
+  .dark-theme .sidebar-backdrop { animation: none !important; }
+  .qms-tab-ind { transition: none; }
+}

@@ -121,6 +121,7 @@ export function SearchableSelect({ label, required = false, options = [], placeh
         <div 
           id="select-options-list"
           role="listbox"
+          className="pop-in"
           style={css(`
             position:absolute;
             top:calc(100% + 4px);

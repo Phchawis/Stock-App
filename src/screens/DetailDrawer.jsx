@@ -80,7 +80,7 @@ export function DetailDrawer({ v }) {
           <div className="detail-kpi-grid">
             <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:11px 13px;`)}>
               <div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>คงเหลือรวม</div>
-              <div style={css(`font:var(--fw-bold) var(--text-sm)/1.1 var(--font-mono); color:${detail.onHandColor}; margin-top:2px;`)}>
+              <div className={detail.justChanged ? 'just-changed-figure' : undefined} style={css(`font:var(--fw-bold) var(--text-sm)/1.1 var(--font-mono); color:${detail.onHandColor}; margin-top:2px;`)}>
                 {detail.subUnit && detail.subUnitQty 
                   ? `${(detail.onHand * detail.subUnitQty).toLocaleString()} ${detail.subUnit} (${detail.onHand} ${detail.unit})` 
                   : `${detail.onHand} ${detail.unit}`}

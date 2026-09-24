@@ -40,7 +40,7 @@
 .dark-theme :is(.sidebar-op-receive,.sidebar-op-withdraw) svg { color:inherit; }
 .dark-theme .page-shell { gap:22px; }
 .dark-theme h1, .dark-theme h2, .dark-theme h3 { text-wrap:balance; line-height:1.45 !important; }
-.dark-theme :is(button,input,select,textarea) { transition:background-color 160ms ease,border-color 160ms ease,box-shadow 160ms ease,transform 160ms ease; }
+.dark-theme :is(button,input,select,textarea) { transition:background-color 160ms ease,border-color 160ms ease,box-shadow 160ms ease,transform 160ms ease,scale 160ms ease; }
 .dark-theme button:focus-visible, .dark-theme [tabindex]:focus-visible { outline:2px solid #95dfca; outline-offset:3px; }
 .dark-theme :is(input,select,textarea):focus-visible { outline:2px solid #319b86; outline-offset:2px; }
 .dark-theme button:disabled { opacity:.5; cursor:not-allowed; transform:none !important; }

@@ -1834,10 +1834,15 @@ button {
     box-shadow      var(--dur-base) var(--ease-out),
     transform       var(--dur-fast) var(--ease-out),
     opacity         var(--dur-fast) var(--ease-out),
-    filter          var(--dur-fast) var(--ease-out);
+    filter          var(--dur-fast) var(--ease-out),
+    scale           var(--dur-fast) var(--ease-out);
 }
-/* Tactile press: every enabled button dips 1px while held */
-button:not(:disabled):active { transform: translateY(1px); }
+/* Tactile press: every enabled button dips 1px while held, and gives very
+   slightly under the finger. The dip is a transform, so any button that lifts
+   itself with an inline transform on hover lost it — held under the pointer,
+   it gave no sign of being pressed at all. `scale` is a separate property and
+   composes with whatever transform the button sets for itself. */
+button:not(:disabled):active { transform: translateY(1px); scale: 0.98; }
 button:disabled { cursor: not-allowed; }
 
 /* Inputs: calm focus ring via box-shadow so inline borders stay intact */

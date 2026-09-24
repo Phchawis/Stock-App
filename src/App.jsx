@@ -1,6 +1,8 @@
 import React from 'react';
 // Trigger Cloudflare Pages rebuild
 import { css } from './css.js';
+import { captureExits, playExits, setViewTransitionActive, switchTheme, collapseRow } from './motion.js';
+import { flushSync } from 'react-dom';
 import { categoryLabel, CATEGORY_CODES, DEFAULT_CATEGORY } from './categories.js';
 import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity } from './domain/stock.js';
 
@@ -662,9 +664,17 @@ class App extends React.Component {
     this.logout();
   }
 
+  // Exits. A dozen handlers close modals, the drawer and the toast by clearing
+  // state, and React removes them in the same commit. The exit layer is told
+  // what was on screen just before each commit and fades out whatever is gone
+  // after it — one place, instead of a delay threaded through every handler.
+  getSnapshotBeforeUpdate() { return captureExits(); }
+  componentDidUpdate(prevProps, prevState, snapshot) { playExits(snapshot); }
+
   componentWillUnmount() {
     if (this._t) clearInterval(this._t);
     if (this._toastT) clearTimeout(this._toastT);
+    if (this._chgT) clearTimeout(this._chgT);
     if (this._handleKeyDown) {
       window.removeEventListener('keydown', this._handleKeyDown);
     }
@@ -911,6 +921,7 @@ class App extends React.Component {
         txns: data.txn ? [...s.txns, data.txn] : s.txns,
         modal: null, editingLotId: null
       }));
+      this.markChanged((this.state.lots.find(l => l.id === id) || {}).rid);
       this.showToast('แก้ไขข้อมูล Lot เรียบร้อยแล้ว');
     } catch (err) {
       this.showToast(err.message, 'warn');
@@ -965,6 +976,7 @@ class App extends React.Component {
         txns: data.txn ? [...s.txns, data.txn] : s.txns,
         modal: null, disposalLotId: null, dispForm: this.blankDispForm()
       }));
+      this.markChanged((this.state.lots.find(l => l.id === id) || {}).rid);
       this.showToast('บันทึกการตัดจำหน่ายเรียบร้อยแล้ว');
     } catch (err) {
       this.showToast(err.message, 'warn');
@@ -1282,9 +1294,17 @@ class App extends React.Component {
   // ── handlers ──
   transitionState(updater, callback) {
     if (document.startViewTransition) {
+      // flushSync: the browser captures the "after" picture as soon as this
+      // callback returns. A plain setState is only scheduled by then, so the
+      // transition could capture the old screen twice and then pop to the new
+      // one after it ended. Committing inside the callback is what makes the
+      // crossfade actually run between the two screens.
+      setViewTransitionActive(true);
       const t = document.startViewTransition(() => {
-        this.setState(updater, callback);
+        flushSync(() => this.setState(updater, callback));
       });
+      if (t && t.finished) t.finished.then(() => setViewTransitionActive(false), () => setViewTransitionActive(false));
+      else setViewTransitionActive(false);
       // Starting a second transition before the first settles aborts the first,
       // and EACH of its three promises rejects independently — `ready` is the
       // one that fires on an abort. The navigation itself still happens, so this
@@ -1310,9 +1330,21 @@ class App extends React.Component {
     }
     this.transitionState(nextState);
   }
+  // Marks a reagent as just changed so its row and on-hand figure flash once.
+  // Called after the new figures are in state, so the tint lands on the new
+  // quantity rather than on the old one just before it is replaced.
+  markChanged(rid) {
+    if (!rid) return;
+    if (this._chgT) clearTimeout(this._chgT);
+    this.setState({ changed: { rid: +rid, at: Date.now() } });
+    this._chgT = setTimeout(() => this.setState({ changed: null }), 1700);
+  }
   showToast(msg, kind) { if (this._toastT) clearTimeout(this._toastT); this.setState({ toast: { msg, kind: kind || 'ok' } }); this._toastT = setTimeout(() => this.setState({ toast: null }), 2800); }
   openDetail(id) { this.transitionState({ detailId: id }); }
-  closeDetail() { this.transitionState({ detailId: null }); }
+  // Plain setState, not a view transition: the exit layer slides the drawer
+  // back out to the right, the reverse of how it came in, where a crossfade
+  // would only dissolve it.
+  closeDetail() { this.setState({ detailId: null }); }
   openReceive(rid) { if (!this.can('receive')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์รับเข้า', 'warn'); return; } this.transitionState({ modal: 'receive', rf: { ...this.blankRf(), rid: rid ? String(rid) : '' } }); }
   openIssue(rid) {
     if (!this.can('issue')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์เบิกจ่าย', 'warn'); return; }
@@ -1404,7 +1436,7 @@ class App extends React.Component {
     }));
   }
   closeModal() { this.setState({ modal: null }); }
-  async setAlertStatus(key, status) {
+  async setAlertStatus(key, status, rowEl) {
     if (!this.can('ack')) {
       this.showToast('บทบาทนี้ไม่มีสิทธิ์จัดการการแจ้งเตือน', 'warn');
       return;
@@ -1425,9 +1457,14 @@ class App extends React.Component {
           body: JSON.stringify({ key, status })
         });
         if (!res.ok) throw new Error();
-        this.setState(s => ({
+        // An acknowledged alert leaves the list. It collapses first — only now
+        // the server has accepted it, so it never has to spring back — and the
+        // removal is committed in the same frame the collapse is released.
+        const release = status === 'acked' && rowEl ? await collapseRow(rowEl) : null;
+        const apply = () => this.setState(s => ({
           acked: { ...s.acked, [key]: status }
         }));
+        if (release) { flushSync(apply); release(); } else apply();
         this.showToast(status === 'ordered' ? 'บันทึกสถานะสั่งซื้อเรียบร้อยแล้ว' : 'รับทราบการแจ้งเตือนแล้ว');
       }
     } catch (err) {
@@ -1529,7 +1566,7 @@ class App extends React.Component {
       }
 
       this.setState({ modal: null });
-      this.fetchData();
+      Promise.resolve(this.fetchData()).then(() => this.markChanged(rid), () => {});
       const r = this.state.reagents.find(x => x.id === rid);
       this.showToast('รับเข้า ' + qty + ' ' + (r ? r.unit : '') + ' · Lot ' + f.lot + ' สำเร็จ');
       triggerSuccessPop();
@@ -1566,7 +1603,7 @@ class App extends React.Component {
       }
       
       this.setState({ modal: null });
-      this.fetchData();
+      Promise.resolve(this.fetchData()).then(() => this.markChanged(rid), () => {});
       const r = this.state.reagents.find(x => x.id === rid);
       this.showToast('เบิกจ่าย ' + qty + ' ' + (r ? r.unit : '') + ' สำเร็จ');
       triggerSuccessPop();
@@ -1654,7 +1691,8 @@ class App extends React.Component {
         unit: r.unit, subUnit: subUnitName, subUnitQty, testsPerSubUnit, onHand: oh, min: r.min, low, lotCount, storageLabel: this.STORAGE_LABEL(r.storage), onHandColor: low ? 'var(--red-700)' : 'var(--text-primary)',
         expDays: d, expLabel: d != null ? this.dayLabel(d) : '—', expColor: d != null ? sc.fg : 'var(--text-tertiary)',
         expiring: d != null && d <= 60, sev: s, img: r.img || '/reagent_placeholder.png', onOpen: () => this.openDetail(r.id),
-        testsPerUnit: r.testsPerUnit, testsTotal: r.testsPerUnit ? oh * r.testsPerUnit : null };
+        testsPerUnit: r.testsPerUnit, testsTotal: r.testsPerUnit ? oh * r.testsPerUnit : null,
+        justChanged: !!(this.state.changed && this.state.changed.rid === r.id) };
     };
 
     // Optimization Calculations (60-day Dead Stock & 90-day Dynamic Min suggestions)
@@ -1749,7 +1787,7 @@ class App extends React.Component {
     // alerts screen rows
     const alertRows = alerts.map(a => ({ ...a, icon: I(a.kind === 'EXPIRY' ? 'CalendarClock' : 'TriangleAlert', a.fg, 18),
       kindLabel: a.kind === 'EXPIRY' ? 'ใกล้หมดอายุ' : 'จุดสั่งซื้อซ้ำ', sevLabel: this.sevCol(a.sev).th,
-      onAck: () => this.setAlertStatus(a.key, 'acked'), onOpen: () => this.openDetail(a.rid) }));
+      onAck: (rowEl) => this.setAlertStatus(a.key, 'acked', rowEl), onOpen: () => this.openDetail(a.rid) }));
 
     // audit rows
     const txnRows = S.txns.slice().sort((a, b) => b.at.localeCompare(a.at)).map(t => {
@@ -2053,14 +2091,14 @@ class App extends React.Component {
       api: (path, opts) => this.api(path, opts),
       sidebarOpen: S.sidebarOpen,
       theme: S.theme,
-      toggleTheme: () => this.setState(s => {
+      toggleTheme: (e) => switchTheme(e, () => this.setState(s => {
         const theme = s.theme === 'light' ? 'dark' : 'light';
         // Private to this browser and this device on purpose — two people
         // sharing a bench terminal should not be changing each other's screen,
         // and it is a comfort setting, not lab data.
         try { localStorage.setItem('uiTheme', theme); } catch { /* private mode */ }
         return { theme };
-      }),
+      })),
       toggleSidebar: () => this.setState(s => ({ sidebarOpen: !s.sidebarOpen })),
       closeSidebar: () => this.setState({ sidebarOpen: false }),
     };
@@ -2073,7 +2111,7 @@ class App extends React.Component {
     return (
 <div ref={setRoot} className={`dark-theme${S.theme === 'light' ? ' theme-light' : ''}`} style={css(`display:flex; height:100vh; overflow:hidden; background:var(--surface-page); font-family:var(--font-body); color:var(--text-primary);`)}>
       {v.sidebarOpen && (
-        <div className="sidebar-backdrop" onClick={v.closeSidebar} />
+        <div className="sidebar-backdrop" data-exit="backdrop" onClick={v.closeSidebar} />
       )}
       <Sidebar v={v} />
       <Main v={v} />

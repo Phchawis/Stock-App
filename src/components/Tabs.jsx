@@ -2,8 +2,29 @@ import React from 'react';
 
 /** Tabs — underline-style navigation for switching register views / doc-detail panels. */
 export function Tabs({ tabs = [], value, onChange, style }) {
+  // One underline that travels to the selected tab, instead of one fading out
+  // while another fades in. Until it has measured itself, each tab keeps its
+  // own border — so the active tab is never shown without an underline, even
+  // for the first frame or where layout cannot be read.
+  const listRef = React.useRef(null);
+  const [ind, setInd] = React.useState(null);
+  React.useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!list) return undefined;
+    const measure = () => {
+      const active = list.querySelector('[role="tab"][aria-selected="true"]');
+      if (!active || !active.offsetWidth) { setInd(null); return; }
+      setInd({ x: active.offsetLeft, w: active.offsetWidth });
+    };
+    measure();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(measure);
+    ro.observe(list);
+    return () => ro.disconnect();
+  }, [value, tabs.length]);
+
   return (
-    <div role="tablist" className="qms-tablist" style={{
+    <div ref={listRef} role="tablist" className="qms-tablist" style={{
       display: 'flex', gap: 4, borderBottom: '1px solid var(--border-subtle)', ...style,
     }}>
       {tabs.map((t) => {
@@ -18,7 +39,7 @@ export function Tabs({ tabs = [], value, onChange, style }) {
               display: 'inline-flex', alignItems: 'center', gap: 7,
               background: 'transparent', border: 'none', cursor: 'pointer',
               padding: '10px 14px', marginBottom: -1, whiteSpace: 'nowrap', flexShrink: 0,
-              borderBottom: '2px solid ' + (active ? 'var(--teal-700)' : 'transparent'),
+              borderBottom: '2px solid ' + (active && !ind ? 'var(--teal-700)' : 'transparent'),
               color: active ? 'var(--teal-700)' : 'var(--text-secondary)',
               font: (active ? 'var(--fw-semibold) ' : 'var(--fw-medium) ') + 'var(--text-base)/1 var(--font-body)',
               transition: 'color var(--dur-fast), border-color var(--dur-fast)',
@@ -38,6 +59,10 @@ export function Tabs({ tabs = [], value, onChange, style }) {
           </button>
         );
       })}
+      {ind && (
+        <span aria-hidden="true" className="qms-tab-ind"
+          style={{ transform: `translateX(${ind.x}px) scaleX(${ind.w})` }} />
+      )}
     </div>
   );
 }

@@ -380,7 +380,7 @@ export function Alerts({ v }) {
                       สั่งซื้อแล้ว / รอของ
                     </button>
                     <button 
-                      onClick={a.onAck} 
+                      onClick={(e) => a.onAck(e.currentTarget.closest('.alert-row'))} 
                       style={css(`padding:7px 12px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); white-space:nowrap;`)}
                     >
                       รับทราบ

@@ -246,7 +246,7 @@ export function Inventory({ v }) {
             <div 
               key={rI} 
               onClick={r.onOpen} 
-              className="qrow inv-row"
+              className={`qrow inv-row${r.justChanged ? ' just-changed' : ''}`}
             >
               <div className="inv-row-content">
                 <img 
