@@ -15,6 +15,11 @@ export function Inventory({ v }) {
   const [printOpen, setPrintOpen] = React.useState(false);
   const [excl, setExcl] = React.useState({ kind: [], instrument: [], supplier: [] });
   const [includeOut, setIncludeOut] = React.useState(true);
+  // Wash solutions, diluents and consumables register no test count and do
+  // not belong in a summary of tests on hand. Controls and calibrators carry
+  // none either — they are used per run — so the rule is limited to reagents,
+  // or it would drop every one of them.
+  const [skipNoTests, setSkipNoTests] = React.useState(true);
   React.useEffect(() => {
     if (!printOpen) return undefined;
     const onKey = (e) => { if (e.key === 'Escape') setPrintOpen(false); };
@@ -49,21 +54,30 @@ export function Inventory({ v }) {
       .sort((a, b) => (a.value === NONE) - (b.value === NONE) || String(a.label).localeCompare(String(b.label)));
   };
   const KIND_LABEL = { REAGENT: 'Reagent', CONTROL: 'Control', CALIBRATOR: 'Calibrator' };
+  const isNoTestReagent = (r) => r.kind === 'REAGENT' && !r.testsPerMain;
+  const skippedCount = skipNoTests ? all.filter(isNoTestReagent).length : 0;
+  // The machine group only appears once some reagent has been given one.
+  // Until then it would be a single button reading "not assigned" for the
+  // whole catalogue, which selects nothing.
+  const hasInstruments = all.some(r => r.instrument);
   const groups = [
     { field: 'kind', title: 'ประเภท', opts: groupOpts('kind', (v) => KIND_LABEL[v] || v)
         .sort((a, b) => (KIND_ORDER[a.value] ?? 9) - (KIND_ORDER[b.value] ?? 9)) },
-    { field: 'instrument', title: 'เครื่อง', opts: groupOpts('instrument', (v) => v || 'ยังไม่ระบุเครื่อง') },
+    ...(hasInstruments ? [{ field: 'instrument', title: 'เครื่อง', opts: groupOpts('instrument', (v) => v || 'ยังไม่ระบุเครื่อง') }] : []),
     { field: 'supplier', title: 'บริษัท', opts: groupOpts('supplier', (v) => v || 'ไม่ระบุ') },
   ];
-  const picked = all.filter(r => groups.every(g => !excl[g.field].includes(r[g.field])));
+  const picked = all.filter(r => groups.every(g => !excl[g.field].includes(r[g.field])))
+    .filter(r => !(skipNoTests && isNoTestReagent(r)));
   const printIn = picked.filter(r => r.onHand > 0).slice().sort(byCatKindName);
   const printOut = includeOut ? picked.filter(r => !(r.onHand > 0)).slice().sort(byCatKindName) : [];
   // Named on the sheet whenever a group is narrowed, so a printout for one
   // machine cannot be mistaken for the whole store.
-  const scopeNote = groups
-    .filter(g => excl[g.field].length > 0)
-    .map(g => `${g.title}: ${g.opts.filter(o => !excl[g.field].includes(o.value)).map(o => o.label).join(', ') || '—'}`)
-    .join(' · ');
+  const scopeNote = [
+    ...groups
+      .filter(g => excl[g.field].length > 0)
+      .map(g => `${g.title}: ${g.opts.filter(o => !excl[g.field].includes(o.value)).map(o => o.label).join(', ') || '—'}`),
+    skippedCount ? `ไม่รวม Reagent ที่ไม่มีจำนวน test ${skippedCount} รายการ` : '',
+  ].filter(Boolean).join(' · ');
   const toggle = (field, value) => setExcl(e => ({
     ...e, [field]: e[field].includes(value) ? e[field].filter(x => x !== value) : [...e[field], value],
   }));
@@ -576,6 +590,10 @@ export function Inventory({ v }) {
               ))}
 
               <label style={css(`display:flex; align-items:center; gap:9px; font:var(--text-xs)/1.4 var(--font-body); color:var(--text-primary); cursor:pointer;`)}>
+                <input type="checkbox" checked={skipNoTests} onChange={(e) => setSkipNoTests(e.target.checked)} style={css(`width:18px; height:18px; accent-color:var(--brand-700);`)} />
+                ไม่รวม Reagent ที่ไม่มีจำนวน test (น้ำยาล้าง สารเจือจาง วัสดุสิ้นเปลือง)
+              </label>
+              <label style={css(`display:flex; align-items:center; gap:9px; font:var(--text-xs)/1.4 var(--font-body); color:var(--text-primary); cursor:pointer;`)}>
                 <input type="checkbox" checked={includeOut} onChange={(e) => setIncludeOut(e.target.checked)} style={css(`width:18px; height:18px; accent-color:var(--brand-700);`)} />
                 รวมรายการที่ไม่มีคงเหลือ (พิมพ์เป็นตารางแยกท้ายเอกสาร)
               </label>
@@ -673,7 +691,7 @@ export function Inventory({ v }) {
 
         <div style={css(`margin-top:4px; font-size:8.5px; color:#444; line-height:1.6; page-break-inside:avoid;`)}>
           คงเหลือ = รวมทุก Lot ที่ยังใช้งานได้ตามที่บันทึกในระบบ ณ เวลาที่พิมพ์ · test คงเหลือ = คงเหลือ × test ต่อหน่วยหลัก
-          · “—” คือยังไม่ได้ลงทะเบียนจำนวน test ไว้ในระบบ เช่น น้ำยาล้าง สารเจือจาง สารควบคุม (บรรทัดใต้ชื่อแสดงจำนวนหน่วยย่อยแทน)
+          · Control และ Calibrator แสดงเป็นจำนวนหน่วย ช่อง test เป็น “—” เพราะสารกลุ่มนี้ไม่ได้นับเป็นจำนวน test
         </div>
       </div>
     </>

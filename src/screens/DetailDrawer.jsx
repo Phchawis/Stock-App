@@ -108,7 +108,7 @@ export function DetailDrawer({ v }) {
             <div style={css(`display:flex; align-items:center; gap:9px; font:var(--text-sm)/1.4 var(--font-body); color:var(--text-secondary); flex-wrap:wrap;`)}>
               <span style={css(`display:grid; place-items:center;`)}>{ic.machine}</span>
               ประเภท <strong style={css(`color:var(--text-primary); font-weight:600;`)}>{detail.kindLabel}</strong>
-              &nbsp;· เครื่อง <strong style={css(`color:var(--text-primary); font-weight:600;`)}>{detail.instrument || 'ยังไม่ระบุ'}</strong>
+              {detail.instrument ? <>&nbsp;· เครื่อง <strong style={css(`color:var(--text-primary); font-weight:600;`)}>{detail.instrument}</strong></> : null}
             </div>
           </div>
 
