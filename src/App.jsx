@@ -6,6 +6,14 @@ import { flushSync } from 'react-dom';
 import { categoryLabel, CATEGORY_CODES, DEFAULT_CATEGORY } from './categories.js';
 import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity, testsPerMainUnit } from './domain/stock.js';
 
+// What kind of material a catalogue entry is. Set from the product name when
+// the column was added (migration 0018) and editable per reagent.
+const KIND_OPTS = [
+  { value: 'REAGENT', label: 'Reagent' },
+  { value: 'CONTROL', label: 'Control' },
+  { value: 'CALIBRATOR', label: 'Calibrator' },
+];
+
 // Sticker types recorded in the preparation log.
 const STICKER_KIND_LABEL = {
   ALIQUOT: 'ฉลากแบ่งบรรจุ (Aliquot)',
@@ -123,7 +131,7 @@ class App extends React.Component {
   blankIf() { return { rid: '', qty: '', scan: 'MANUAL', ref: '', lotId: '', qrInput: '', searchInput: '' }; }
   blankElf() { return { expiry: '', qty: '', loc: '' }; }
   blankEtf() { return { qty: '', ref: '', lot: '', expiry: '' }; }
-  blankMf() { return { code: '', th: '', en: '', cat: DEFAULT_CATEGORY, unit: 'vial', subUnit: '', subUnitQty: '', testsPerSubUnit: '', testsPerUnit: '', storage: 'REFRIGERATED_2_8', min: '', reorder: '', supplier: 'i-med', img: '/reagent_placeholder.png' }; }
+  blankMf() { return { code: '', th: '', en: '', cat: DEFAULT_CATEGORY, unit: 'vial', subUnit: '', subUnitQty: '', testsPerSubUnit: '', testsPerUnit: '', storage: 'REFRIGERATED_2_8', min: '', reorder: '', supplier: 'i-med', instrument: '', kind: 'REAGENT', img: '/reagent_placeholder.png' }; }
   blankDispForm() { return { qty: '', reason: 'หมดอายุ', customReason: '' }; }
   defaultPerms() { const o = {}; this.ROLES().forEach(r => { o[r.id] = { ...r.perms }; }); return o; }
   USERNAMES() { return { admin: 'admin', supervisor: 'supervisor', technician: 'technician', viewer: 'viewer' }; }
@@ -729,6 +737,8 @@ class App extends React.Component {
         min: r.min,
         reorder: r.reorder || r.min,
         supplier: r.supplier,
+        instrument: r.instrument || '',
+        kind: r.kind || 'REAGENT',
         img: r.img
       }
     });
@@ -777,6 +787,8 @@ class App extends React.Component {
       min,
       reorder,
       supplier: f.supplier || 'i-med',
+      instrument: (f.instrument || '').trim(),
+      kind: f.kind || 'REAGENT',
       img: f.img || '/reagent_placeholder.png'
     };
 
@@ -844,6 +856,8 @@ class App extends React.Component {
       min,
       reorder,
       supplier: f.supplier,
+      instrument: (f.instrument || '').trim(),
+      kind: f.kind || 'REAGENT',
       img: f.img || '/reagent_placeholder.png'
     };
 
@@ -1630,7 +1644,7 @@ class App extends React.Component {
       qr: I('QrCode', 'currentColor', 16), close: I('X', 'currentColor', 18),
       thermo: I('Thermometer', 'var(--text-tertiary)', 15), pkg: I('Package', 'var(--text-tertiary)', 15),
       cal: I('CalendarClock', 'var(--text-tertiary)', 15), check: I('Check', '#fff', 16), shield: I('ShieldCheck'),
-      help: I('BookOpen'), menu: I('Menu', 'currentColor', 20), printer: I('Printer', 'currentColor', 16),
+      help: I('BookOpen'), menu: I('Menu', 'currentColor', 20), printer: I('Printer', 'currentColor', 16), machine: I('Microscope', 'var(--text-tertiary)', 15),
       eye: I('Eye', 'var(--text-tertiary)', 16), eyeOff: I('EyeOff', 'var(--text-tertiary)', 16),
     };
     const recvDateOf = (lotId) => {
@@ -1689,6 +1703,8 @@ class App extends React.Component {
 
       const tpm = testsPerMainUnit(r);
       return { id: r.id, code: r.code, th: r.th, en: showEn ? r.en : '', cat: r.cat, catLabel: this.CAT_LABEL(r.cat),
+        supplier: r.supplier || '', instrument: (r.instrument || '').trim(), kind: r.kind || 'REAGENT',
+        kindLabel: (KIND_OPTS.find(k => k.value === (r.kind || 'REAGENT')) || KIND_OPTS[0]).label,
         unit: r.unit, subUnit: subUnitName, subUnitQty, testsPerSubUnit, onHand: oh, min: r.min, low, lotCount, storageLabel: this.STORAGE_LABEL(r.storage), onHandColor: low ? 'var(--red-700)' : 'var(--text-primary)',
         expDays: d, expLabel: d != null ? this.dayLabel(d) : '—', expColor: d != null ? sc.fg : 'var(--text-tertiary)',
         expiring: d != null && d <= 60, sev: s, img: r.img || '/reagent_placeholder.png', onOpen: () => this.openDetail(r.id),
@@ -1976,6 +1992,7 @@ class App extends React.Component {
       onSaveSignature: (sig) => this.onSaveSignature(sig),
       kpi: { total: S.reagents.length }, kpis, dashAlerts, dashLow, recent, usageList, catStats, insights, deadStockReagents, dynamicMinSuggestions,
       invRows, invTabs, invTab: S.invTab, setInvTab: (v) => this.setState({ invTab: v }),
+      invAllRows: S.view === 'inventory' ? S.reagents.map(rvm) : [],
       search: S.search, onSearch: (e) => this.setState({ search: e.target.value }),
       hasInvRows: invRows.length > 0,
       detailOpen: detail != null, detail, closeDetail: () => this.closeDetail(),
@@ -2044,6 +2061,11 @@ class App extends React.Component {
       mfMin: this.bindMf('min'),
       mfReorder: this.bindMf('reorder'),
       mfSupplier: this.bindMf('supplier'),
+      mfInstrument: this.bindMf('instrument'), mfKind: this.bindMf('kind'),
+      kindOpts: KIND_OPTS,
+      // Analyzer names already in use, offered as suggestions so one machine is
+      // not entered three ways ("Alinity c", "alinity C", "Alinity-c").
+      instrumentOpts: [...new Set(S.reagents.map(r => (r.instrument || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b)),
       mfImg: this.bindMf('img'),
       submitRegister: () => this.submitRegister(),
       submitEditReagent: () => this.submitEditReagent(),

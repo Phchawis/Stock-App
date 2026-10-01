@@ -12,6 +12,7 @@ export function RegisterModal({ v }) {
     mfMin, mfReorder, mfSupplier, mfImg,
     submitRegister, submitEditReagent, editReagentId, supplierOpts,
     mfSubUnitQty, mfTestsPerSubUnit, showToast,
+    mfInstrument, mfKind, kindOpts, instrumentOpts,
   } = v;
 
   if (!modalRegister) return null;
@@ -254,7 +255,17 @@ export function RegisterModal({ v }) {
 
             <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px;`)}>
               <Select label="ผู้จัดจำหน่าย / Supplier" options={supplierOpts} value={mform.supplier} onChange={mfSupplier} />
-              <div />
+              <Select label="ประเภท" options={kindOpts} value={mform.kind || 'REAGENT'} onChange={mfKind} />
+            </div>
+
+            <div style={css(`display:grid; grid-template-columns:1fr; gap:14px;`)}>
+              {/* Free text with the names already in use offered as suggestions,
+                  so a machine is entered the same way every time. */}
+              <Input label="เครื่องที่ใช้ (ถ้ามี)" placeholder="เช่น Alinity c, Alinity i, Mindray BC-6800"
+                value={mform.instrument || ''} onChange={mfInstrument} list="instrument-opts" maxLength={80} />
+              <datalist id="instrument-opts">
+                {(instrumentOpts || []).map(n => <option key={n} value={n} />)}
+              </datalist>
             </div>
 
             <div style={css(`display:grid; grid-template-columns:1fr; gap:14px;`)}>

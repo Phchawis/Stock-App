@@ -15,13 +15,24 @@ export async function onRequestGet(context) {
       id: r.id, code: r.code, th: r.th, en: r.en, cat: r.cat, unit: r.unit,
       subUnit: r.subUnit || '', testsPerUnit: r.testsPerUnit, storage: r.storage,
       min: r.min_qty, reorder: r.reorder_qty, supplier: r.supplier, img: r.img,
-      sdsFile: r.sds_file || '', sdsUrl: r.sds_url || '', sdsSource: r.sds_source || ''
+      sdsFile: r.sds_file || '', sdsUrl: r.sds_url || '', sdsSource: r.sds_source || '',
+      instrument: r.instrument || '', kind: r.kind || 'REAGENT'
     }));
     return json(mapped);
   } catch (err) {
     return json({ error: err.message }, 500);
   }
 }
+
+// Analyzer name: trimmed, capped, and stored as NULL when blank so "not
+// assigned" is one value rather than '', ' ' and NULL.
+const cleanInstrument = (v) => {
+  const s = String(v == null ? '' : v).trim().slice(0, 80);
+  return s || null;
+};
+
+const KINDS = new Set(['REAGENT', 'CONTROL', 'CALIBRATOR']);
+const cleanKind = (v) => (KINDS.has(String(v || '').toUpperCase()) ? String(v).toUpperCase() : 'REAGENT');
 
 // POST — register a reagent (perm: manage)
 export async function onRequestPost(context) {
@@ -34,18 +45,21 @@ export async function onRequestPost(context) {
     if (!th || !cat || !unit || !storage || min === undefined) {
       return json({ error: 'Missing required fields' }, 400);
     }
+    const instrument = cleanInstrument(b.instrument);
+    const kind = cleanKind(b.kind);
     const result = await env.DB.prepare(
-      `INSERT INTO reagents (code, th, en, cat, unit, subUnit, testsPerUnit, storage, min_qty, reorder_qty, supplier, img)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO reagents (code, th, en, cat, unit, subUnit, testsPerUnit, storage, min_qty, reorder_qty, supplier, img, instrument, kind)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       code, th, en || th, cat, unit, subUnit || '', testsPerUnit || null, storage,
-      min, reorder !== undefined ? reorder : min, supplier || 'i-med', img || '/reagent_placeholder.png'
+      min, reorder !== undefined ? reorder : min, supplier || 'i-med', img || '/reagent_placeholder.png', instrument, kind
     ).run();
 
     return json({
       id: result.meta.last_row_id,
       code, th, en: en || th, cat, unit, subUnit: subUnit || '', testsPerUnit: testsPerUnit || null,
-      storage, min, reorder: reorder !== undefined ? reorder : min, supplier: supplier || 'i-med', img: img || '/reagent_placeholder.png'
+      storage, min, reorder: reorder !== undefined ? reorder : min, supplier: supplier || 'i-med', img: img || '/reagent_placeholder.png',
+      instrument: instrument || '', kind
     }, 201);
   } catch (err) {
     return json({ error: err.message }, 500);
@@ -63,13 +77,24 @@ export async function onRequestPut(context) {
     if (!id || !th || !cat || !unit || !storage || min === undefined) {
       return json({ error: 'Missing required fields' }, 400);
     }
+    // The analyzer is only written when the request carries it. Other callers
+    // PUT the whole reagent without it — changing a reagent's category from the
+    // list does — and treating its absence as "none" would quietly unassign the
+    // reagent from its machine every time.
+    // Same for the kind.
+    const has = (k) => Object.prototype.hasOwnProperty.call(b, k);
+    const extra = [
+      ...(has('instrument') ? [['instrument', cleanInstrument(b.instrument)]] : []),
+      ...(has('kind') ? [['kind', cleanKind(b.kind)]] : []),
+    ];
     await env.DB.prepare(
       `UPDATE reagents
-       SET th = ?, en = ?, cat = ?, unit = ?, subUnit = ?, testsPerUnit = ?, storage = ?, min_qty = ?, reorder_qty = ?, supplier = ?, img = ?
+       SET th = ?, en = ?, cat = ?, unit = ?, subUnit = ?, testsPerUnit = ?, storage = ?, min_qty = ?, reorder_qty = ?, supplier = ?, img = ?${extra.map(([c]) => `, ${c} = ?`).join('')}
        WHERE id = ?`
     ).bind(
       th, en || th, cat, unit, subUnit || '', testsPerUnit || null, storage,
-      min, reorder !== undefined ? reorder : min, supplier, img || '/reagent_placeholder.png', id
+      min, reorder !== undefined ? reorder : min, supplier, img || '/reagent_placeholder.png',
+      ...extra.map(([, v]) => v), id
     ).run();
     return json({ success: true, id });
   } catch (err) {

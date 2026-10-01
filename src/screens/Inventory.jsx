@@ -5,8 +5,22 @@ import { Tabs } from '../components/Tabs.jsx';
 export function Inventory({ v }) {
   const {
     ic, isInv, invRows, invTabs, invTab, setInvTab,
-    search, onSearch, hasInvRows, canManage, openRegister, user,
+    search, onSearch, hasInvRows, canManage, openRegister, user, invAllRows, stop,
   } = v;
+
+  // Print options. Held as exclusions rather than selections, so "everything"
+  // is the default and a machine or supplier added later is included without
+  // anyone having to tick it. Hooks sit above the early return so their order
+  // never changes between renders.
+  const [printOpen, setPrintOpen] = React.useState(false);
+  const [excl, setExcl] = React.useState({ kind: [], instrument: [], supplier: [] });
+  const [includeOut, setIncludeOut] = React.useState(true);
+  React.useEffect(() => {
+    if (!printOpen) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') setPrintOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [printOpen]);
 
   if (!isInv) return null;
 
@@ -21,12 +35,47 @@ export function Inventory({ v }) {
     const [y, m, d] = String(ymd).slice(0, 10).split('-').map(Number);
     return y && m && d ? `${d} ${TH_MON[m - 1]} ${y + 543}` : ymd;
   };
-  const byCatName = (a, b) => (a.cat || '').localeCompare(b.cat || '') || a.th.localeCompare(b.th, 'th');
-  const printIn = invRows.filter(r => r.onHand > 0).slice().sort(byCatName);
-  const printOut = invRows.filter(r => !(r.onHand > 0)).slice().sort(byCatName);
-  const tabLabel = (invTabs.find(t => t.value === invTab) || {}).label || '';
-  const scopeNote = [invTab !== 'all' ? `แสดงเฉพาะ: ${tabLabel}` : '', search ? `คำค้น: “${search}”` : '']
-    .filter(Boolean).join(' · ');
+  const KIND_ORDER = { REAGENT: 0, CONTROL: 1, CALIBRATOR: 2 };
+  const byCatKindName = (a, b) => (a.cat || '').localeCompare(b.cat || '')
+    || (KIND_ORDER[a.kind] ?? 9) - (KIND_ORDER[b.kind] ?? 9)
+    || a.th.localeCompare(b.th, 'th');
+  const all = invAllRows || [];
+  const NONE = '';                                   // "machine not assigned"
+  const groupOpts = (field, labelOf) => {
+    const counts = new Map();
+    for (const r of all) counts.set(r[field], (counts.get(r[field]) || 0) + 1);
+    return [...counts.entries()]
+      .map(([value, count]) => ({ value, count, label: labelOf ? labelOf(value) : value }))
+      .sort((a, b) => (a.value === NONE) - (b.value === NONE) || String(a.label).localeCompare(String(b.label)));
+  };
+  const KIND_LABEL = { REAGENT: 'Reagent', CONTROL: 'Control', CALIBRATOR: 'Calibrator' };
+  const groups = [
+    { field: 'kind', title: 'ประเภท', opts: groupOpts('kind', (v) => KIND_LABEL[v] || v)
+        .sort((a, b) => (KIND_ORDER[a.value] ?? 9) - (KIND_ORDER[b.value] ?? 9)) },
+    { field: 'instrument', title: 'เครื่อง', opts: groupOpts('instrument', (v) => v || 'ยังไม่ระบุเครื่อง') },
+    { field: 'supplier', title: 'บริษัท', opts: groupOpts('supplier', (v) => v || 'ไม่ระบุ') },
+  ];
+  const picked = all.filter(r => groups.every(g => !excl[g.field].includes(r[g.field])));
+  const printIn = picked.filter(r => r.onHand > 0).slice().sort(byCatKindName);
+  const printOut = includeOut ? picked.filter(r => !(r.onHand > 0)).slice().sort(byCatKindName) : [];
+  // Named on the sheet whenever a group is narrowed, so a printout for one
+  // machine cannot be mistaken for the whole store.
+  const scopeNote = groups
+    .filter(g => excl[g.field].length > 0)
+    .map(g => `${g.title}: ${g.opts.filter(o => !excl[g.field].includes(o.value)).map(o => o.label).join(', ') || '—'}`)
+    .join(' · ');
+  const toggle = (field, value) => setExcl(e => ({
+    ...e, [field]: e[field].includes(value) ? e[field].filter(x => x !== value) : [...e[field], value],
+  }));
+  const setGroup = (field, on) => setExcl(e => ({
+    ...e, [field]: on ? [] : groups.find(g => g.field === field).opts.map(o => o.value),
+  }));
+  const doPrint = () => {
+    setPrintOpen(false);
+    // After the dialog has gone: the print snapshot is taken from the page as
+    // it is when print() is called.
+    setTimeout(() => window.print(), 250);
+  };
   const printedAt = (() => {
     const d = new Date();
     return `${d.getDate()} ${TH_MON[d.getMonth()]} ${d.getFullYear() + 543} เวลา ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} น.`;
@@ -244,6 +293,25 @@ export function Inventory({ v }) {
     }
     .inv-btn-secondary:hover { background: var(--surface-sunken); border-color: var(--border-strong, var(--border-default)); }
 
+    /* Print options: one toggle per value, on = included. */
+    .pf-group { display: flex; flex-direction: column; gap: 8px; }
+    .pf-group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+    .pf-group-title { font: var(--fw-semibold) var(--text-xs)/1.2 var(--font-body); color: var(--text-primary); }
+    .pf-group-links { display: flex; gap: 10px; }
+    .pf-link { border: none; background: none; padding: 2px 0; cursor: pointer; color: var(--brand-ink, var(--brand-700)); font: var(--text-2xs)/1.2 var(--font-body); text-decoration: underline; text-underline-offset: 2px; }
+    .pf-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pf-chip {
+      display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; min-height: 36px;
+      border-radius: var(--radius-pill); border: 1px solid var(--border-default);
+      background: var(--surface-card); color: var(--text-secondary); cursor: pointer;
+      font: var(--fw-medium) var(--text-xs)/1 var(--font-body);
+      transition: background-color var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+    }
+    .pf-chip[aria-pressed="true"] { background: var(--brand-100); border-color: var(--brand-700); color: var(--text-primary); }
+    .pf-chip .pf-tick { width: 14px; display: inline-grid; place-items: center; font-weight: 700; color: var(--brand-ink, var(--brand-700)); }
+    /* Secondary, not tertiary: on a selected chip's tint tertiary measured 4.49:1. */
+    .pf-chip .pf-count { font: var(--text-2xs)/1 var(--font-mono); color: var(--text-secondary); }
+
     /* Mobile card layout — the desktop 5-column grid is unusable at phone widths
        (columns squeeze until text wraps mid-word / overlaps), so below 768px each
        reagent renders as a stacked card instead. Desktop stays the grid above. */
@@ -296,19 +364,23 @@ export function Inventory({ v }) {
           
           <Tabs tabs={invTabs} value={invTab} onChange={setInvTab} />
 
-          <button onClick={() => window.print()} className="inv-btn-secondary"
-            title="พิมพ์สรุปน้ำยาคงเหลือตามรายการที่แสดงอยู่ (หน่วยหลัก และจำนวน test)">
-            {ic.printer} พิมพ์สรุปคงคลัง
-          </button>
-
-          {canManage && (
-            <button
-              onClick={openRegister}
-              className="inv-btn-primary"
-            >
-              {ic.boxes} ลงทะเบียนน้ำยาใหม่
+          {/* The actions wrap together onto their own line, as the register
+              button always did on its own, so the search keeps its full width
+              beside the tabs. */}
+          <div className="inv-actions" style={css(`display:flex; align-items:center; gap:10px; flex-wrap:wrap;`)}>
+            {canManage && (
+              <button
+                onClick={openRegister}
+                className="inv-btn-primary"
+              >
+                {ic.boxes} ลงทะเบียนน้ำยาใหม่
+              </button>
+            )}
+            <button onClick={() => setPrintOpen(true)} className="inv-btn-secondary"
+              title="พิมพ์สรุปน้ำยาคงเหลือ (หน่วยหลัก และจำนวน test) เลือกได้ตามประเภท เครื่อง หรือบริษัท">
+              {ic.printer} พิมพ์สรุปคงคลัง
             </button>
-          )}
+          </div>
         </div>
 
         {/* Table list view */}
@@ -465,6 +537,65 @@ export function Inventory({ v }) {
         </div>
       </div>
 
+      {printOpen && (
+        <div className="ov-in no-print" onClick={() => setPrintOpen(false)} style={css(`position:fixed; inset:0; background:rgba(24,27,42,.46); z-index:50; display:grid; place-items:center; padding:24px;`)}>
+          <div className="tt-in" role="dialog" aria-modal="true" aria-labelledby="pf-title" onClick={stop}
+            style={css(`width:min(560px,96vw); max-height:calc(100dvh - 48px); display:flex; flex-direction:column; background:var(--surface-card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); border:1px solid var(--border-subtle);`)}>
+            <div style={css(`padding:18px 22px; border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; gap:11px;`)}>
+              <span style={css(`width:34px; height:34px; border-radius:var(--radius-md); background:var(--brand-100); color:var(--brand-ink, var(--brand-700)); display:grid; place-items:center;`)}>{ic.printer}</span>
+              <div style={css(`flex:1; min-width:0;`)}>
+                <div id="pf-title" style={css(`font:var(--fw-bold) var(--text-lg)/1.2 var(--font-display); color:var(--text-primary);`)}>พิมพ์สรุปคงคลัง</div>
+                <div style={css(`font:var(--text-2xs)/1.3 var(--font-body); color:var(--text-tertiary);`)}>เลือกรายการที่จะพิมพ์ — ค่าเริ่มต้นคือทั้งหมด</div>
+              </div>
+              <button onClick={() => setPrintOpen(false)} aria-label="ปิด" style={css(`border:none; background:var(--slate-100); cursor:pointer; padding:6px; border-radius:var(--radius-sm); color:var(--text-secondary); display:grid; place-items:center;`)}>{ic.close}</button>
+            </div>
+
+            <div style={css(`padding:18px 22px; display:flex; flex-direction:column; gap:18px; overflow:auto;`)}>
+              {groups.map(g => (
+                <div key={g.field} className="pf-group">
+                  <div className="pf-group-head">
+                    <span className="pf-group-title">{g.title}</span>
+                    <span className="pf-group-links">
+                      <button type="button" className="pf-link" onClick={() => setGroup(g.field, true)}>ทั้งหมด</button>
+                      <button type="button" className="pf-link" onClick={() => setGroup(g.field, false)}>ไม่เลือก</button>
+                    </span>
+                  </div>
+                  <div className="pf-chips">
+                    {g.opts.map(o => {
+                      const on = !excl[g.field].includes(o.value);
+                      return (
+                        <button key={o.value || '_none'} type="button" className="pf-chip" aria-pressed={on} onClick={() => toggle(g.field, o.value)}>
+                          <span className="pf-tick" aria-hidden="true">{on ? '✓' : ''}</span>
+                          {o.label}
+                          <span className="pf-count">{o.count}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              <label style={css(`display:flex; align-items:center; gap:9px; font:var(--text-xs)/1.4 var(--font-body); color:var(--text-primary); cursor:pointer;`)}>
+                <input type="checkbox" checked={includeOut} onChange={(e) => setIncludeOut(e.target.checked)} style={css(`width:18px; height:18px; accent-color:var(--brand-700);`)} />
+                รวมรายการที่ไม่มีคงเหลือ (พิมพ์เป็นตารางแยกท้ายเอกสาร)
+              </label>
+            </div>
+
+            <div style={css(`padding:14px 22px; border-top:1px solid var(--border-subtle); display:flex; align-items:center; gap:12px; flex-wrap:wrap;`)}>
+              <div style={css(`flex:1; min-width:180px; font:var(--text-xs)/1.4 var(--font-body); color:var(--text-secondary);`)} aria-live="polite">
+                จะพิมพ์ <strong style={css(`color:var(--text-primary);`)}>{printIn.length}</strong> รายการที่มีคงเหลือ
+                {includeOut ? <> · <strong style={css(`color:var(--text-primary);`)}>{printOut.length}</strong> รายการที่ไม่มี</> : null}
+              </div>
+              <button type="button" onClick={() => setPrintOpen(false)} className="inv-btn-secondary">ยกเลิก</button>
+              <button type="button" onClick={doPrint} disabled={printIn.length + printOut.length === 0} className="inv-btn-primary"
+                style={printIn.length + printOut.length === 0 ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}>
+                {ic.printer} พิมพ์
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Printable stock summary, A4. Hidden on screen. */}
       <div className="print-report-container" style={{ display: 'none' }}>
         <div className="report-header" style={{ display: 'flex', alignItems: 'center', gap: '14px', textAlign: 'left' }}>
@@ -500,7 +631,9 @@ export function Inventory({ v }) {
                 <td className="mid">{i + 1}</td>
                 <td>
                   <strong>{r.th}</strong>{r.en && r.en.toLowerCase() !== r.th.toLowerCase() ? <span style={{ color: '#555' }}> · {r.en}</span> : null}
-                  {r.packLabel ? <div style={{ fontSize: '8.5px', color: '#555' }}>{r.packLabel}</div> : null}
+                  <div style={{ fontSize: '8.5px', color: '#555' }}>
+                    {[r.kindLabel, r.instrument, r.packLabel].filter(Boolean).join(' · ')}
+                  </div>
                 </td>
                 <td>{r.catLabel}</td>
                 <td className="num"><strong>{r.onHand.toLocaleString()}</strong> {r.unit}</td>
@@ -509,7 +642,7 @@ export function Inventory({ v }) {
                 <td className="mid">{thDate(r.earliestDate)}</td>
               </tr>
             )) : (
-              <tr><td colSpan="7" style={{ textAlign: 'center', color: '#666', padding: '12px' }}>ไม่มีรายการที่มีคงเหลือในมุมมองนี้</td></tr>
+              <tr><td colSpan="7" style={{ textAlign: 'center', color: '#666', padding: '12px' }}>ไม่มีรายการที่มีคงเหลือตามที่เลือก</td></tr>
             )}
           </tbody>
         </table>

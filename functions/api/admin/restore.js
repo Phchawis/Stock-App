@@ -1,5 +1,18 @@
 import { requirePerm, nowStr, json } from '../_lib.js';
 
+// Backups written before the kind column existed carry no kind. The column
+// is NOT NULL, so those rows get the same name rule migration 0018 used,
+// rather than every control and calibrator coming back as a reagent.
+function kindForRestore(r) {
+  const k = String(r.kind || '').toUpperCase();
+  if (k === 'REAGENT' || k === 'CONTROL' || k === 'CALIBRATOR') return k;
+  const n = `${r.th || ''} ${r.en || ''}`.toLowerCase();
+  // Control first: the migration applies it second, so it wins there too.
+  if (n.includes('control') || /(^|\s)multichem/.test(n)) return 'CONTROL';
+  if (n.includes('calibrator')) return 'CALIBRATOR';
+  return 'REAGENT';
+}
+
 export async function onRequestPost(context) {
   const denied = await requirePerm(context, { adminOnly: true });
   if (denied) return denied;
@@ -50,9 +63,9 @@ export async function onRequestPost(context) {
             // carried them all along, so a restore silently dropped every
             // safety-sheet link — 152 of them — leaving the catalogue looking
             // complete with no way to reach a hazard sheet from the bench.
-            `INSERT INTO reagents (id, code, th, en, cat, unit, subUnit, testsPerUnit, storage, min_qty, reorder_qty, supplier, img, sds_file, sds_url, sds_source)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-          ).bind(r.id, r.code, r.th, r.en, r.cat, r.unit, r.subUnit || null, r.testsPerUnit || null, r.storage, r.min_qty ?? 0, r.reorder_qty ?? 0, r.supplier, r.img, r.sds_file ?? null, r.sds_url ?? null, r.sds_source ?? null)
+            `INSERT INTO reagents (id, code, th, en, cat, unit, subUnit, testsPerUnit, storage, min_qty, reorder_qty, supplier, img, sds_file, sds_url, sds_source, instrument, kind)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          ).bind(r.id, r.code, r.th, r.en, r.cat, r.unit, r.subUnit || null, r.testsPerUnit || null, r.storage, r.min_qty ?? 0, r.reorder_qty ?? 0, r.supplier, r.img, r.sds_file ?? null, r.sds_url ?? null, r.sds_source ?? null, r.instrument ?? null, kindForRestore(r))
         );
       }
     }

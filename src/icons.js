@@ -10,10 +10,12 @@ import {
   LayoutDashboard, Boxes, List, Bell, History, ArrowDownToLine, ArrowUpFromLine,
   LogOut, Search, QrCode, X, Thermometer, Package, CalendarClock, Check,
   ShieldCheck, BookOpen, Menu, TriangleAlert, FlaskConical, Eye, EyeOff,
+  Printer, Microscope,
 } from 'lucide';
 
 export const icons = {
   LayoutDashboard, Boxes, List, Bell, History, ArrowDownToLine, ArrowUpFromLine,
   LogOut, Search, QrCode, X, Thermometer, Package, CalendarClock, Check,
   ShieldCheck, BookOpen, Menu, TriangleAlert, FlaskConical, Eye, EyeOff,
+  Printer, Microscope,
 };
