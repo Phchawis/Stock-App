@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   daysUntil, severityOf, dayLabel, activeLots, onHand, earliestExpiry,
-  planFefo, signedQuantity, lotViolations, statusFor, SEVERITY,
+  planFefo, signedQuantity, lotViolations, statusFor, SEVERITY, testsPerMainUnit,
 } from './stock.js';
 
 // Fixed reference date so these assertions mean the same thing next year.
@@ -205,5 +205,25 @@ describe('statusFor', () => {
   it('marks an empty lot depleted and a stocked lot active', () => {
     expect(statusFor(0)).toBe('DEPLETED');
     expect(statusFor(3)).toBe('ACTIVE');
+  });
+});
+
+describe('testsPerMainUnit', () => {
+  it('multiplies sub-units by tests per sub-unit', () => {
+    expect(testsPerMainUnit({ subUnit: 'Cassette:2:100', testsPerUnit: 200 })).toBe(200);
+    expect(testsPerMainUnit({ subUnit: 'Cassette:1:400', testsPerUnit: 400 })).toBe(400);
+  });
+  it('does not read a sub-unit count as tests', () => {
+    // How the form saves a box of two wash bottles: the 2 in testsPerUnit is bottles.
+    expect(testsPerMainUnit({ subUnit: 'Bottle:2:', testsPerUnit: 2 })).toBeNull();
+  });
+  it('uses testsPerUnit when there is no sub-unit', () => {
+    expect(testsPerMainUnit({ subUnit: '', testsPerUnit: 100 })).toBe(100);
+    expect(testsPerMainUnit({ subUnit: null, testsPerUnit: '50' })).toBe(50);
+  });
+  it('is null when nothing is known', () => {
+    expect(testsPerMainUnit({ subUnit: '', testsPerUnit: null })).toBeNull();
+    expect(testsPerMainUnit({ subUnit: 'Vial', testsPerUnit: 10 })).toBeNull();
+    expect(testsPerMainUnit({})).toBeNull();
   });
 });

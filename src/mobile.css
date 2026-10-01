@@ -36,7 +36,7 @@
  .inventory-toolbar { gap:12px !important; }
  .inventory-toolbar > * { min-width:0 !important; max-width:100%; }
  .inventory-toolbar .inv-search-wrapper { flex:1 1 100%; }
- .inventory-toolbar .inv-btn-primary { width:100%; justify-content:center; min-height:44px; }
+ .inventory-toolbar :is(.inv-btn-primary,.inv-btn-secondary) { width:100%; justify-content:center; min-height:44px; }
  .dark-theme .inv-row-mobile { padding:18px 16px; gap:14px; }
  .dark-theme .inv-row-mobile-top { flex-wrap:wrap; }
  .dark-theme .inv-row-mobile-badges { flex-direction:row; flex-wrap:wrap; }

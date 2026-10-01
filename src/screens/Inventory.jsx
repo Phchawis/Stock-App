@@ -5,10 +5,70 @@ import { Tabs } from '../components/Tabs.jsx';
 export function Inventory({ v }) {
   const {
     ic, isInv, invRows, invTabs, invTab, setInvTab,
-    search, onSearch, hasInvRows, canManage, openRegister,
+    search, onSearch, hasInvRows, canManage, openRegister, user,
   } = v;
 
   if (!isInv) return null;
+
+  // ── Stock summary for print ───────────────────────────────────────────────
+  // Prints what the list is showing (tab and search included), split into what
+  // is in stock and what is not, in category then name order. Tests come from
+  // testsPerMainUnit — only where the registration actually carries a test
+  // count; a box of wash bottles has none, and says so rather than guessing.
+  const TH_MON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  const thDate = (ymd) => {
+    if (!ymd) return '—';
+    const [y, m, d] = String(ymd).slice(0, 10).split('-').map(Number);
+    return y && m && d ? `${d} ${TH_MON[m - 1]} ${y + 543}` : ymd;
+  };
+  const byCatName = (a, b) => (a.cat || '').localeCompare(b.cat || '') || a.th.localeCompare(b.th, 'th');
+  const printIn = invRows.filter(r => r.onHand > 0).slice().sort(byCatName);
+  const printOut = invRows.filter(r => !(r.onHand > 0)).slice().sort(byCatName);
+  const tabLabel = (invTabs.find(t => t.value === invTab) || {}).label || '';
+  const scopeNote = [invTab !== 'all' ? `แสดงเฉพาะ: ${tabLabel}` : '', search ? `คำค้น: “${search}”` : '']
+    .filter(Boolean).join(' · ');
+  const printedAt = (() => {
+    const d = new Date();
+    return `${d.getDate()} ${TH_MON[d.getMonth()]} ${d.getFullYear() + 543} เวลา ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} น.`;
+  })();
+
+  const printStyle = `
+    @page { size: A4 portrait; margin: 1.6cm 1.4cm; }
+    @media print {
+      *, *::before, *::after {
+        background-color: transparent !important; color: #000000 !important;
+        box-shadow: none !important; text-shadow: none !important;
+      }
+      html, body, #root, main, .qms-rise, .print-report-container, .print-report-container * {
+        background: #ffffff !important; background-color: #ffffff !important; color: #000000 !important;
+      }
+      html, body, #root, #root > div, main, .qms-rise {
+        height: auto !important; min-height: auto !important; overflow: visible !important;
+        display: block !important; position: static !important;
+      }
+      aside, header, button, .no-print, nav, .qms-rise > *:not(.print-report-container),
+      [class*="Sidebar"], [class*="Header"] { display: none !important; }
+      main, .qms-rise { padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+      .print-report-container {
+        display: block !important; width: 18cm !important; max-width: 18cm !important;
+        margin: 0 auto !important; box-sizing: border-box; padding: 0 !important;
+      }
+      .report-table { width: 100% !important; border-collapse: collapse !important; margin-top: 8px !important; margin-bottom: 14px !important; }
+      .report-table th, .report-table td {
+        border: 1px solid #bcbcbc !important; padding: 4px 6px !important;
+        font-size: 10px !important; color: #000000 !important; vertical-align: middle !important;
+      }
+      .report-table th {
+        background-color: #f2f2f2 !important; font-weight: bold !important; text-align: center !important;
+        -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+      }
+      .report-table thead { display: table-header-group !important; }
+      .report-table tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+      .report-table .num { text-align: right !important; white-space: nowrap; }
+      .report-table .mid { text-align: center !important; white-space: nowrap; }
+      .report-header { border-bottom: 2px solid #000000 !important; padding-bottom: 10px !important; margin-bottom: 12px !important; }
+    }
+  `;
 
   const localStyle = `
     /* Search input animations */
@@ -167,6 +227,22 @@ export function Inventory({ v }) {
     .inv-btn-primary:active {
       transform: translateY(1px);
     }
+    /* Same shape as the primary action, without its fill: printing is a
+       secondary task next to registering a reagent. */
+    .inv-btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+      background: var(--surface-card);
+      color: var(--text-primary);
+      cursor: pointer;
+      font: var(--fw-semibold) var(--text-xs)/1 var(--font-body);
+      transition: background-color var(--dur-fast), border-color var(--dur-fast);
+    }
+    .inv-btn-secondary:hover { background: var(--surface-sunken); border-color: var(--border-strong, var(--border-default)); }
 
     /* Mobile card layout — the desktop 5-column grid is unusable at phone widths
        (columns squeeze until text wraps mid-word / overlaps), so below 768px each
@@ -202,8 +278,9 @@ export function Inventory({ v }) {
   return (
     <>
       <style>{localStyle}</style>
+      <style>{printStyle}</style>
 
-      <div className="qms-rise page-shell" style={css(`gap:16px;`)}>
+      <div className="qms-rise no-print page-shell" style={css(`gap:16px;`)}>
         
         {/* Search, Tabs, and Optional Action button */}
         <div className="inventory-toolbar" style={css(`display:flex; align-items:center; gap:14px; flex-wrap:wrap; width:100%;`)}>
@@ -218,6 +295,11 @@ export function Inventory({ v }) {
           </div>
           
           <Tabs tabs={invTabs} value={invTab} onChange={setInvTab} />
+
+          <button onClick={() => window.print()} className="inv-btn-secondary"
+            title="พิมพ์สรุปน้ำยาคงเหลือตามรายการที่แสดงอยู่ (หน่วยหลัก และจำนวน test)">
+            {ic.printer} พิมพ์สรุปคงคลัง
+          </button>
 
           {canManage && (
             <button
@@ -380,6 +462,85 @@ export function Inventory({ v }) {
             </div>
           )}
 
+        </div>
+      </div>
+
+      {/* Printable stock summary, A4. Hidden on screen. */}
+      <div className="print-report-container" style={{ display: 'none' }}>
+        <div className="report-header" style={{ display: 'flex', alignItems: 'center', gap: '14px', textAlign: 'left' }}>
+          <div style={{ width: '52px', height: '52px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid #000000', flexShrink: 0 }}>
+            <img src="/assets/tuh_lab_logo.jpg" alt="" style={{ width: '102%', height: '102%', objectFit: 'cover', borderRadius: '50%' }} />
+          </div>
+          <div style={css(`flex:1;`)}>
+            <div style={css(`font-size:13px; font-weight:bold; font-family:var(--font-display); line-height:1.35;`)}>หมวดงานปฏิบัติการตรวจวินิจฉัยทางการแพทย์</div>
+            <div style={css(`font-size:12px; font-weight:bold; font-family:var(--font-display); line-height:1.35;`)}>ห้องปฏิบัติการเทคนิคการแพทย์ · โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ</div>
+            <div style={css(`margin-top:6px; font-size:13px; font-weight:bold;`)}>สรุปน้ำยาคงเหลือในคลัง</div>
+            <div style={css(`margin-top:3px; font-size:9px; color:#444;`)}>
+              ข้อมูล ณ {printedAt} · ผู้พิมพ์: {user ? user.name : '—'} · มีคงเหลือ {printIn.length} รายการ · ไม่มีคงเหลือ {printOut.length} รายการ
+              {scopeNote ? ` · ${scopeNote}` : ''}
+            </div>
+          </div>
+        </div>
+
+        <table className="report-table">
+          <thead>
+            <tr>
+              <th style={{ width: '6%' }}>ลำดับ</th>
+              <th style={{ width: '30%' }}>รายการน้ำยา</th>
+              <th style={{ width: '15%' }}>หมวดงาน</th>
+              <th style={{ width: '12%' }}>คงเหลือ</th>
+              <th style={{ width: '10%' }}>test / หน่วย</th>
+              <th style={{ width: '12%' }}>test คงเหลือ</th>
+              <th style={{ width: '15%' }}>หมดอายุเร็วสุด</th>
+            </tr>
+          </thead>
+          <tbody>
+            {printIn.length > 0 ? printIn.map((r, i) => (
+              <tr key={r.id}>
+                <td className="mid">{i + 1}</td>
+                <td>
+                  <strong>{r.th}</strong>{r.en && r.en.toLowerCase() !== r.th.toLowerCase() ? <span style={{ color: '#555' }}> · {r.en}</span> : null}
+                  {r.packLabel ? <div style={{ fontSize: '8.5px', color: '#555' }}>{r.packLabel}</div> : null}
+                </td>
+                <td>{r.catLabel}</td>
+                <td className="num"><strong>{r.onHand.toLocaleString()}</strong> {r.unit}</td>
+                <td className="num">{r.testsPerMain ? r.testsPerMain.toLocaleString() : '—'}</td>
+                <td className="num"><strong>{r.testsTotal ? r.testsTotal.toLocaleString() : '—'}</strong></td>
+                <td className="mid">{thDate(r.earliestDate)}</td>
+              </tr>
+            )) : (
+              <tr><td colSpan="7" style={{ textAlign: 'center', color: '#666', padding: '12px' }}>ไม่มีรายการที่มีคงเหลือในมุมมองนี้</td></tr>
+            )}
+          </tbody>
+        </table>
+
+        {printOut.length > 0 && (<>
+          <div style={css(`margin-top:6px; font-size:11px; font-weight:bold; page-break-after:avoid;`)}>ไม่มีคงเหลือ ({printOut.length} รายการ)</div>
+          <table className="report-table">
+            <thead>
+              <tr>
+                <th style={{ width: '6%' }}>ลำดับ</th>
+                <th style={{ width: '49%' }}>รายการน้ำยา</th>
+                <th style={{ width: '25%' }}>หมวดงาน</th>
+                <th style={{ width: '20%' }}>จุดสั่งซื้อ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {printOut.map((r, i) => (
+                <tr key={r.id}>
+                  <td className="mid">{i + 1}</td>
+                  <td><strong>{r.th}</strong>{r.en && r.en.toLowerCase() !== r.th.toLowerCase() ? <span style={{ color: '#555' }}> · {r.en}</span> : null}</td>
+                  <td>{r.catLabel}</td>
+                  <td className="num">{r.min} {r.unit}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>)}
+
+        <div style={css(`margin-top:4px; font-size:8.5px; color:#444; line-height:1.6; page-break-inside:avoid;`)}>
+          คงเหลือ = รวมทุก Lot ที่ยังใช้งานได้ตามที่บันทึกในระบบ ณ เวลาที่พิมพ์ · test คงเหลือ = คงเหลือ × test ต่อหน่วยหลัก
+          · “—” คือยังไม่ได้ลงทะเบียนจำนวน test ไว้ในระบบ เช่น น้ำยาล้าง สารเจือจาง สารควบคุม (บรรทัดใต้ชื่อแสดงจำนวนหน่วยย่อยแทน)
         </div>
       </div>
     </>

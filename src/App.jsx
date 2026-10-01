@@ -4,7 +4,7 @@ import { css } from './css.js';
 import { captureExits, playExits, setViewTransitionActive, switchTheme, collapseRow } from './motion.js';
 import { flushSync } from 'react-dom';
 import { categoryLabel, CATEGORY_CODES, DEFAULT_CATEGORY } from './categories.js';
-import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity } from './domain/stock.js';
+import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity, testsPerMainUnit } from './domain/stock.js';
 
 // Sticker types recorded in the preparation log.
 const STICKER_KIND_LABEL = {
@@ -1630,7 +1630,7 @@ class App extends React.Component {
       qr: I('QrCode', 'currentColor', 16), close: I('X', 'currentColor', 18),
       thermo: I('Thermometer', 'var(--text-tertiary)', 15), pkg: I('Package', 'var(--text-tertiary)', 15),
       cal: I('CalendarClock', 'var(--text-tertiary)', 15), check: I('Check', '#fff', 16), shield: I('ShieldCheck'),
-      help: I('BookOpen'), menu: I('Menu', 'currentColor', 20),
+      help: I('BookOpen'), menu: I('Menu', 'currentColor', 20), printer: I('Printer', 'currentColor', 16),
       eye: I('Eye', 'var(--text-tertiary)', 16), eyeOff: I('EyeOff', 'var(--text-tertiary)', 16),
     };
     const recvDateOf = (lotId) => {
@@ -1687,11 +1687,19 @@ class App extends React.Component {
         subUnitName = r.subUnit || '';
       }
 
+      const tpm = testsPerMainUnit(r);
       return { id: r.id, code: r.code, th: r.th, en: showEn ? r.en : '', cat: r.cat, catLabel: this.CAT_LABEL(r.cat),
         unit: r.unit, subUnit: subUnitName, subUnitQty, testsPerSubUnit, onHand: oh, min: r.min, low, lotCount, storageLabel: this.STORAGE_LABEL(r.storage), onHandColor: low ? 'var(--red-700)' : 'var(--text-primary)',
         expDays: d, expLabel: d != null ? this.dayLabel(d) : '—', expColor: d != null ? sc.fg : 'var(--text-tertiary)',
         expiring: d != null && d <= 60, sev: s, img: r.img || '/reagent_placeholder.png', onOpen: () => this.openDetail(r.id),
-        testsPerUnit: r.testsPerUnit, testsTotal: r.testsPerUnit ? oh * r.testsPerUnit : null,
+        // testsTotal read testsPerUnit directly, which for a sub-unit registered
+        // without tests ("Bottle:2:") holds the bottle count — see
+        // testsPerMainUnit. Nothing displayed it yet; the stock print does.
+        testsPerUnit: r.testsPerUnit, testsPerMain: tpm, testsTotal: tpm ? oh * tpm : null,
+        earliestDate: earl || null,
+        packLabel: subUnitName && subUnitQty
+          ? `1 ${r.unit} = ${subUnitQty} ${subUnitName}${testsPerSubUnit ? ` × ${testsPerSubUnit.toLocaleString()} test` : ''}`
+          : (tpm ? `1 ${r.unit} = ${tpm.toLocaleString()} test` : ''),
         justChanged: !!(this.state.changed && this.state.changed.rid === r.id) };
     };
 

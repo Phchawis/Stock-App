@@ -117,3 +117,28 @@ export function lotViolations(lot) {
 export function statusFor(qty) {
   return qty <= 0 ? 'DEPLETED' : 'ACTIVE';
 }
+
+/**
+ * Tests in one main unit (one Box, one Kit), or null when the system does not
+ * know.
+ *
+ * Only two shapes of registration carry a real test count:
+ *   subUnit "Cassette:2:100"  → 2 × 100 = 200 tests per main unit
+ *   no sub-unit, testsPerUnit → that figure
+ *
+ * A sub-unit registered without tests ("Bottle:2:") is the trap. The
+ * registration form stores the sub-unit COUNT in testsPerUnit for those, so
+ * reading that field as tests would report a box of two wash bottles as
+ * "2 tests" — wash solutions, diluents and controls all register this way.
+ */
+export function testsPerMainUnit(reagent) {
+  const sub = String((reagent && reagent.subUnit) || '').trim();
+  if (sub.includes(':')) {
+    const [, qty, tps] = sub.split(':');
+    const q = parseInt(qty, 10), t = parseInt(tps, 10);
+    return q > 0 && t > 0 ? q * t : null;
+  }
+  if (sub) return null; // legacy free-text sub-unit: no count to multiply by
+  const n = Number(reagent && reagent.testsPerUnit);
+  return n > 0 ? n : null;
+}
