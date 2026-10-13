@@ -645,8 +645,8 @@ export function Help({ v }) {
                   <div><strong>ดาวน์โหลดหลาย Lot พร้อมกัน:</strong>
                     <ul style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
                       <li>เปิดหน้า <strong>ประวัติการเคลื่อนไหว</strong> ติ๊กช่องหน้ารายการ <strong>รับเข้า</strong> ที่ต้องการ หรือกด <strong>เลือกรับเข้าทั้งวัน</strong> ที่หัววันที่</li>
-                      <li>กด <strong>ดาวน์โหลด</strong> ที่แถบด้านล่าง จะได้ไฟล์ Word ไฟล์เดียว หน้าละ 1 ดวง ขนาด 40x20 mm เปิดแล้วสั่งพิมพ์ได้ทันที</li>
-                      <li><strong>จำนวนดวง</strong> นับตามหน่วยย่อย เช่น รับ 2 Box ที่มี 10 Bottle ต่อ Box ได้ 20 ดวง · น้ำยาที่ไม่มีหน่วยย่อยนับตามหน่วยหลัก</li>
+                      <li>กด <strong>ดาวน์โหลด</strong> ที่แถบด้านล่าง จะได้ไฟล์รูป PNG 1 ไฟล์ต่อ 1 ดวง ขนาด 40x20 mm · ครั้งแรก Chrome จะถามว่าอนุญาตให้ดาวน์โหลดหลายไฟล์ไหม ให้กด <strong>อนุญาต</strong></li>
+                      <li><strong>จำนวนดวง</strong> นับตามหน่วยใหญ่ที่รับเข้า เช่น รับ 2 Box ได้ 2 ดวง</li>
                       <li>ดาวน์โหลดทีละ Lot ได้จากปุ่ม <strong>Sticker</strong> ซึ่งแก้จำนวนดวงก่อนดาวน์โหลดได้</li>
                     </ul>
                   </div>

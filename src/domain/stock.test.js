@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   daysUntil, severityOf, dayLabel, activeLots, onHand, earliestExpiry,
-  planFefo, signedQuantity, lotViolations, statusFor, SEVERITY, testsPerMainUnit, subUnitOf, stickerCount,
+  planFefo, signedQuantity, lotViolations, statusFor, SEVERITY, testsPerMainUnit, stickerCount,
 } from './stock.js';
 
 // Fixed reference date so these assertions mean the same thing next year.
@@ -229,23 +229,15 @@ describe('testsPerMainUnit', () => {
 });
 
 describe('stickerCount', () => {
-  it('gives one sticker per bottle or cassette', () => {
-    expect(stickerCount({ subUnit: 'Bottle:10:' }, 2)).toBe(20);
-    expect(stickerCount({ subUnit: 'Cassette:2:100' }, 3)).toBe(6);
-    expect(stickerCount({ subUnit: 'Cassette:1:400' }, 4)).toBe(4);
-  });
-  it('falls back to one per main unit when there is no countable sub-unit', () => {
-    expect(stickerCount({ subUnit: '' }, 3)).toBe(3);
-    expect(stickerCount({ subUnit: 'Vial' }, 2)).toBe(2);
-    expect(stickerCount({ subUnit: 'Bottle::' }, 5)).toBe(5);
-    expect(stickerCount({}, 1)).toBe(1);
+  it('gives one sticker per main unit, whatever is inside it', () => {
+    expect(stickerCount(2)).toBe(2);
+    expect(stickerCount('3')).toBe(3);
+    expect(stickerCount(2.7)).toBe(2);
   });
   it('is 0 for nothing received', () => {
-    expect(stickerCount({ subUnit: 'Bottle:10:' }, 0)).toBe(0);
-    expect(stickerCount({ subUnit: 'Bottle:10:' }, -2)).toBe(0);
-  });
-  it('names the sub-unit', () => {
-    expect(subUnitOf({ subUnit: 'Cassette:2:100' })).toEqual({ name: 'Cassette', per: 2 });
-    expect(subUnitOf({ subUnit: 'Bottle:0:' })).toBeNull();
+    expect(stickerCount(0)).toBe(0);
+    expect(stickerCount(-2)).toBe(0);
+    expect(stickerCount(undefined)).toBe(0);
   });
 });
+

@@ -5,7 +5,7 @@ export function Audit({ v }) {
   const {
     isAudit, txnRows, user, clearTxns, canManage,
     txnsFullyLoaded, loadingFullTxnHistory, loadFullTxnHistory,
-    canReceive, downloadStickers, stickerBusy, stickerFileName,
+    canReceive, downloadStickers, stickerBusy,
   } = v;
 
   const [search, setSearch] = React.useState('');
@@ -35,7 +35,7 @@ export function Audit({ v }) {
   const pickedTotal = pickedJobs.reduce((n, j) => n + j.count, 0);
   const downloadPicked = async () => {
     if (!pickedJobs.length) return;
-    const ok = await downloadStickers(pickedJobs, stickerFileName(pickedJobs));
+    const ok = await downloadStickers(pickedJobs);
     if (ok) setPicked(new Set());
   };
   const checkbox = (t, label) => (
@@ -372,7 +372,7 @@ export function Audit({ v }) {
           <div className="audit-pick-bar pop-in" role="region" aria-label="สติกเกอร์ที่เลือก" style={css(`display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; padding:12px 16px; background:var(--surface-card); border:1px solid var(--border-brand); border-radius:var(--radius-md); box-shadow:var(--shadow-lg);`)}>
             <div className="pick-count" style={css(`min-width:0; font:var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>
               เลือก <strong>{pickedJobs.length}</strong> Lot · รวม <strong>{pickedTotal}</strong> ดวง
-              <span style={css(`display:block; font:var(--text-3xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>นับตามหน่วยย่อย (ขวด / Cassette) · ได้ไฟล์ Word หน้าละ 1 ดวง ขนาด 40 x 20 mm</span>
+              <span style={css(`display:block; font:var(--text-3xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>นับตามหน่วยใหญ่ (Box) · ได้ไฟล์ PNG 1 ไฟล์ต่อ 1 ดวง</span>
             </div>
             <button
               type="button"

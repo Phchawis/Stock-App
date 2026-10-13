@@ -1,12 +1,12 @@
 import React from 'react';
 import QRCode from 'qrcode';
 import { css } from '../css.js';
-import { renderLotSticker, formatStickerDate, storageLabelOf, safeName } from '../stickers/lotSticker.js';
+import { formatStickerDate, storageLabelOf } from '../stickers/lotSticker.js';
 
 export function PrintStickerModal({ v }) {
   const {
-    stop, modalPrintSticker, closePrintSticker, printLotData, ic, logSticker, user,
-    downloadStickers, stickerBusy, stickerFileName,
+    stop, modalPrintSticker, closePrintSticker, printLotData, ic,
+    downloadStickers, stickerBusy,
   } = v;
 
   const [qrUrl, setQrUrl] = React.useState('');
@@ -28,7 +28,6 @@ export function PrintStickerModal({ v }) {
     }
   }, [modalPrintSticker, printLotData]);
 
-  const [downloading, setDownloading] = React.useState(false);
   const [count, setCount] = React.useState('');
   // Reset the sticker count to the receipt's whenever another lot opens.
   React.useEffect(() => {
@@ -37,7 +36,7 @@ export function PrintStickerModal({ v }) {
 
   if (!modalPrintSticker || !printLotData) return null;
 
-  const { lot, reagent, qty, unit, subUnit } = printLotData;
+  const { lot, reagent, qty, unit } = printLotData;
   const storageLabel = storageLabelOf(reagent);
   // Date the lot was received into stock (from its RECEIVE transaction). Older
   // lots created before this field existed won't have one — fall back to '—'.
@@ -46,49 +45,13 @@ export function PrintStickerModal({ v }) {
 
   const n = Math.floor(Number(count));
   const countOk = n >= 1 && n <= 500;
-  // How the suggested count was reached, so a reader can see why it is 20 and not 2.
-  const basis = qty > 0
-    ? (subUnit ? `ค่าแนะนำ: รับ ${qty} ${unit || ''} × ${subUnit.per} ${subUnit.name} = ${qty * subUnit.per} ดวง` : `ค่าแนะนำ: รับ ${qty} ${unit || ''} = ${qty} ดวง`)
-    : '';
+  // How the suggested count was reached.
+  const basis = qty > 0 ? `ค่าแนะนำ: รับ ${qty} ${unit || ''} = ${qty} ดวง` : '';
 
-  // Every copy in one Word file: page 40 x 20 mm, one sticker per page.
-  const downloadWord = async () => {
-    if (!countOk || stickerBusy) return;
-    const job = { lot, reagent, count: n };
-    await downloadStickers([job], stickerFileName([job]));
-  };
-
-  // A single PNG, for printing through the label printer's own software.
-  const downloadSticker = async () => {
-    if (!qrUrl || downloading) return;
-    setDownloading(true);
-    try {
-      const canvas = await renderLotSticker(lot, reagent);
-      const url = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Sticker_${lot.lot}_${safeName(reagent)}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // File the same preparation record the Aliquot/Opened stickers write, so
-      // every label the lab produces is traceable from one screen.
-      if (logSticker) {
-        logSticker({
-          kind: 'LOT_QR', action: 'DOWNLOAD',
-          reagentName: reagent.th || reagent.en || '',
-          reagentId: reagent.id ?? null,
-          lot: lot.lot, expDate: lot.expiry,
-          // A lot sticker records where the bottle lives rather than a storage
-          // temperature; label it so the printed record can't be misread.
-          storageTemp: lot.loc ? `ตำแหน่งเก็บ ${lot.loc}` : '',
-          preparedBy: (user && user.name) || '',
-        });
-      }
-    } finally {
-      setDownloading(false);
-    }
+  // One PNG file per sticker, through the label printer's own software.
+  const download = async () => {
+    if (!countOk || !qrUrl || stickerBusy) return;
+    await downloadStickers([{ lot, reagent, count: n }]);
   };
 
   const printStyle = `
@@ -328,7 +291,7 @@ export function PrintStickerModal({ v }) {
                   type="number" inputMode="numeric" min="1" max="500"
                   value={count}
                   onChange={(e) => setCount(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') downloadWord(); }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') download(); }}
                   style={css(`width:84px; height:38px; box-sizing:border-box; padding:0 10px; text-align:center; background:var(--white); border:1px solid ${countOk ? 'var(--border-default)' : 'var(--red-600)'}; border-radius:var(--radius-md); font:var(--fw-bold) var(--text-md)/1 var(--font-mono); color:var(--text-primary); outline:none;`)}
                 />
                 ดวง
@@ -338,14 +301,8 @@ export function PrintStickerModal({ v }) {
               </div>
             </div>
 
-            <div style={css(`font:var(--text-3xs)/1.5 var(--font-body); color:var(--text-secondary); text-align:center; max-width:320px;`)}>
-              💡 ได้ไฟล์ <strong>Word</strong> ไฟล์เดียว หน้าละ 1 ดวง ขนาด <strong>40 x 20 mm</strong> เปิดแล้วสั่งพิมพ์ไปที่เครื่องพิมพ์ฉลากได้ทันที
-              <br />
-              ใช้โปรแกรมฉลากของเครื่องพิมพ์?{' '}
-              <button type="button" onClick={downloadSticker} disabled={!qrUrl || downloading}
-                style={css(`border:none; background:transparent; padding:0; color:var(--brand-ink); cursor:pointer; font:var(--fw-semibold) var(--text-3xs)/1.5 var(--font-body); text-decoration:underline;`)}>
-                {downloading ? 'กำลังสร้างไฟล์…' : 'ดาวน์โหลดเป็นรูป PNG (1 ดวง)'}
-              </button>
+            <div style={css(`font:var(--text-3xs)/1.5 var(--font-body); color:var(--text-secondary); text-align:center; max-width:300px;`)}>
+              💡 ได้ไฟล์รูป PNG <strong>1 ไฟล์ต่อ 1 ดวง</strong> แล้วนำไปสั่งพิมพ์ผ่านโปรแกรมฉลากของเครื่องพิมพ์ (หรือ Windows Photos) โดยเลือกกระดาษ <strong>40 x 20 mm</strong>
             </div>
           </div>
 
@@ -354,9 +311,9 @@ export function PrintStickerModal({ v }) {
             <button onClick={closePrintSticker} style={css(`padding:11px 16px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body);`)}>
               ยกเลิก
             </button>
-            <button className="sticker-dl-btn" onClick={downloadWord} disabled={!countOk || stickerBusy}>
+            <button className="sticker-dl-btn" onClick={download} disabled={!countOk || !qrUrl || stickerBusy}>
               <span className="sticker-dl-ic" style={{ display: 'grid', placeItems: 'center' }}>{ic.receive}</span>
-              {stickerBusy ? 'กำลังสร้างไฟล์…' : `ดาวน์โหลด ${countOk ? n : '–'} ดวง`}
+              {stickerBusy ? 'กำลังสร้างไฟล์…' : `ดาวน์โหลด PNG ${countOk ? n : '–'} ดวง`}
             </button>
           </div>
         </div>

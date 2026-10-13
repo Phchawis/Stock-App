@@ -4,9 +4,8 @@ import { css } from './css.js';
 import { captureExits, playExits, setViewTransitionActive, switchTheme, collapseRow } from './motion.js';
 import { flushSync } from 'react-dom';
 import { categoryLabel, CATEGORY_CODES, DEFAULT_CATEGORY } from './categories.js';
-import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity, testsPerMainUnit, stickerCount, subUnitOf } from './domain/stock.js';
-import { stickerDocxBlob } from './stickers/batch.js';
-import { downloadBlob, safeName } from './stickers/lotSticker.js';
+import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity, testsPerMainUnit, stickerCount } from './domain/stock.js';
+import { renderLotSticker, canvasToPngBytes, downloadBlob, safeName } from './stickers/lotSticker.js';
 
 // What kind of material a catalogue entry is. Set from the product name when
 // the column was added (migration 0018) and editable per reagent.
@@ -323,23 +322,30 @@ class App extends React.Component {
   // `qty` is the receipt the stickers are for, in main units. Without one (the
   // drawer, the reagent list) it is everything the lot has received.
   openPrintSticker(lot, reagent, qty) {
-    // The caller may pass a view-model; the raw record carries subUnit.
+    // The caller may pass a view-model; the raw record carries the unit.
     const raw = this.state.reagents.find(x => x.id === reagent.id) || {};
     const full = { ...raw, ...reagent };
     const q = qty ?? lot.recv ?? lot.qty;
-    const su = subUnitOf(full);
-    this.setState({ printLotData: { lot, reagent: full, count: stickerCount(full, q) || 1, qty: q, unit: full.unit, subUnit: su }, modal: 'printSticker' });
+    this.setState({ printLotData: { lot, reagent: full, count: stickerCount(q) || 1, qty: q, unit: full.unit }, modal: 'printSticker' });
   }
 
-  // Every sticker for `jobs` ({ lot, reagent, count }) in one Word file, then
-  // one preparation record per lot carrying its sticker count.
-  async downloadStickers(jobs, filename) {
+  // Every sticker for `jobs` ({ lot, reagent, count }) as PNG files, one file
+  // per sticker, then one preparation record per lot carrying its count.
+  async downloadStickers(jobs) {
     const list = jobs.filter(j => j && j.count > 0);
     if (!list.length || this.state.stickerBusy) return false;
     this.setState({ stickerBusy: true });
     try {
-      const blob = await stickerDocxBlob(list);
-      downloadBlob(blob, filename);
+      for (const j of list) {
+        // Drawn once per lot; the copies are the same image.
+        const png = new Blob([await canvasToPngBytes(await renderLotSticker(j.lot, j.reagent))], { type: 'image/png' });
+        const base = `Sticker_${j.lot.lot}_${safeName(j.reagent)}`;
+        for (let i = 1; i <= j.count; i++) {
+          downloadBlob(png, j.count > 1 ? `${base}_${i}.png` : `${base}.png`);
+          // Back-to-back downloads get dropped by Chrome; space them out.
+          await new Promise(res => setTimeout(res, 250));
+        }
+      }
       const total = list.reduce((n, j) => n + j.count, 0);
       await Promise.all(list.map(j =>
         this.logSticker({
@@ -1875,7 +1881,7 @@ class App extends React.Component {
           : () => this.openPrintSticker({ ...l, recvDate: recvDateOf(l.id) }, r)) : null,
         // What this receipt's stickers are, for picking several at once.
         stickerJob: (l && r && t.type === 'RECEIVE' && t.qty > 0)
-          ? { lot: { ...l, recvDate: t.at.slice(0, 10) }, reagent: r, count: stickerCount(r, t.qty) } : null };
+          ? { lot: { ...l, recvDate: t.at.slice(0, 10) }, reagent: r, count: stickerCount(t.qty) } : null };
     });
 
     // usage stats list
@@ -2011,12 +2017,7 @@ class App extends React.Component {
       printLotData: S.printLotData,
       stickerBusy: !!S.stickerBusy,
       canReceive: this.can('receive'),
-      downloadStickers: (jobs, filename) => this.downloadStickers(jobs, filename),
-      stickerFileName: (jobs) => {
-        if (jobs.length === 1) return `Sticker_${jobs[0].lot.lot}_${safeName(jobs[0].reagent)}.docx`;
-        const total = jobs.reduce((n, j) => n + j.count, 0);
-        return `Stickers_${this.nowStr().slice(0, 10)}_${jobs.length}Lot_${total}.docx`;
-      },
+      downloadStickers: (jobs) => this.downloadStickers(jobs),
       roleCards: this.ROLES().map(r => ({ id: r.id, th: r.th, en: r.en, initials: r.initials, color: r.color, onLogin: () => this.login(r.id),
         permCount: this.PERM_LABELS().filter(p => this.state.perms[r.id][p.key]).length,
         summary: ({ admin: 'เข้าถึงและจัดการได้ทุกส่วนของระบบ รวมถึงการจัดการผู้ใช้และการตั้งค่า', supervisor: 'รับเข้า–เบิกจ่าย จัดการข้อมูลน้ำยา และรับทราบการแจ้งเตือน', technician: 'เบิกจ่ายแบบหมดอายุก่อน–เบิกก่อน ดูคลัง และรับทราบการแจ้งเตือน', viewer: 'ดูข้อมูลคลังน้ำยาและประวัติได้อย่างเดียว' })[r.id] })),
