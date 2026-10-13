@@ -1,10 +1,12 @@
 import React from 'react';
 import QRCode from 'qrcode';
 import { css } from '../css.js';
+import { renderLotSticker, formatStickerDate, storageLabelOf, safeName } from '../stickers/lotSticker.js';
 
 export function PrintStickerModal({ v }) {
   const {
     stop, modalPrintSticker, closePrintSticker, printLotData, ic, logSticker, user,
+    downloadStickers, stickerBusy, stickerFileName,
   } = v;
 
   const [qrUrl, setQrUrl] = React.useState('');
@@ -27,147 +29,45 @@ export function PrintStickerModal({ v }) {
   }, [modalPrintSticker, printLotData]);
 
   const [downloading, setDownloading] = React.useState(false);
+  const [count, setCount] = React.useState('');
+  // Reset the sticker count to the receipt's whenever another lot opens.
+  React.useEffect(() => {
+    if (modalPrintSticker && printLotData) setCount(String(printLotData.count || 1));
+  }, [modalPrintSticker, printLotData]);
 
   if (!modalPrintSticker || !printLotData) return null;
 
-  const { lot, reagent } = printLotData;
-
-  // Storage condition (temperature) shown on the sticker. The reagent may arrive
-  // as a raw record (has .storage) or as a view-model (has .storageLabel), so accept both.
-  const storageLabel = reagent.storageLabel || ({
-    REFRIGERATED_2_8: '2–8°C',
-    FROZEN_40: '−40°C',
-    ROOM_TEMP: 'อุณหภูมิห้อง'
-  })[reagent.storage] || reagent.storage || '—';
-
-  // "YYYY-MM-DD" -> "3 Jul 2026" (day, English abbreviated month, year) for the sticker.
-  const formatStickerDate = (isoDate) => {
-    if (!isoDate) return null;
-    const [y, m, d] = isoDate.split('-');
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const mi = parseInt(m, 10) - 1;
-    if (!y || !d || mi < 0 || mi > 11) return isoDate;
-    return `${parseInt(d, 10)} ${months[mi]} ${y}`;
-  };
-
+  const { lot, reagent, qty, unit, subUnit } = printLotData;
+  const storageLabel = storageLabelOf(reagent);
   // Date the lot was received into stock (from its RECEIVE transaction). Older
   // lots created before this field existed won't have one — fall back to '—'.
   const recvLabel = formatStickerDate(lot.recvDate) || '—';
   const expLabel = formatStickerDate(lot.expiry) || lot.expiry;
 
-  // Render the WHOLE sticker (QR + all text) to a single 40x20mm PNG and download it.
-  // Printing one image via the printer's own label utility is far more reliable than
-  // browser HTML/CSS printing on ZPL thermal label printers.
+  const n = Math.floor(Number(count));
+  const countOk = n >= 1 && n <= 500;
+  // How the suggested count was reached, so a reader can see why it is 20 and not 2.
+  const basis = qty > 0
+    ? (subUnit ? `ค่าแนะนำ: รับ ${qty} ${unit || ''} × ${subUnit.per} ${subUnit.name} = ${qty * subUnit.per} ดวง` : `ค่าแนะนำ: รับ ${qty} ${unit || ''} = ${qty} ดวง`)
+    : '';
+
+  // Every copy in one Word file: page 40 x 20 mm, one sticker per page.
+  const downloadWord = async () => {
+    if (!countOk || stickerBusy) return;
+    const job = { lot, reagent, count: n };
+    await downloadStickers([job], stickerFileName([job]));
+  };
+
+  // A single PNG, for printing through the label printer's own software.
   const downloadSticker = async () => {
     if (!qrUrl || downloading) return;
     setDownloading(true);
     try {
-      try { await document.fonts.ready; } catch (e) { /* fonts best-effort */ }
-      const scale = 20;                 // px per mm → 40x20mm label at ~500dpi
-      const W = 40 * scale, H = 20 * scale; // 800 x 400
-      const canvas = document.createElement('canvas');
-      canvas.width = W;
-      canvas.height = H;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, W, H);
-
-      // QR on the left — drawn module-by-module from the raw QR matrix instead of
-      // scaling a pre-rendered PNG. Scaling a bitmap QR down/up onto the canvas
-      // resamples its finite black/white modules, which is what most often shows
-      // up as "fuzzy" or moiré detail once printed on a thermal label printer.
-      // Drawing each module as its own rect keeps every edge pixel-crisp at any
-      // final print resolution.
-      const pad = 26;
-      // Full label height — matches the width of the info column next to it
-      // rather than leaving the QR looking small in comparison.
-      const qrSize = H - pad * 2;
-      const qrY = pad;
-      const qrMatrix = QRCode.create(lot.qr, { errorCorrectionLevel: 'H' }).modules;
-      const moduleCount = qrMatrix.size;
-      const marginModules = 3; // matches the on-screen QR's quiet-zone margin
-      const totalModules = moduleCount + marginModules * 2;
-      const cellSize = qrSize / totalModules;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(pad, qrY, qrSize, qrSize);
-      ctx.fillStyle = '#000000';
-      for (let row = 0; row < moduleCount; row++) {
-        for (let col = 0; col < moduleCount; col++) {
-          if (!qrMatrix.get(row, col)) continue;
-          // Round each cell's edges (not its width) so adjacent modules never
-          // leave a hairline gap or overlap regardless of final pixel scale.
-          const x0 = Math.round(pad + (marginModules + col) * cellSize);
-          const x1 = Math.round(pad + (marginModules + col + 1) * cellSize);
-          const y0 = Math.round(qrY + (marginModules + row) * cellSize);
-          const y1 = Math.round(qrY + (marginModules + row + 1) * cellSize);
-          ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
-        }
-      }
-
-      // Text on the right
-      const tx = pad + qrSize + 22;
-      const tw = W - tx - pad;
-      ctx.fillStyle = '#000000';
-      ctx.textBaseline = 'alphabetic';
-      const clip = (text, font) => {
-        ctx.font = font;
-        if (ctx.measureText(text).width <= tw) return text;
-        let t = text;
-        while (t.length > 1 && ctx.measureText(t + '…').width > tw) t = t.slice(0, -1);
-        return t + '…';
-      };
-      // Baselines start lower than a Latin-metrics estimate would suggest — Thai
-      // stacked tone marks/vowels on a bold face render noticeably taller above
-      // the baseline than the nominal font size implies, confirmed by checking
-      // actual rendered pixel bounds (a naive ascent estimate left only 6px of
-      // margin above the label's physical top edge).
-      // expFont is capped at 38px (not bumped alongside the others) — measured
-      // against the actual available width once the QR went back to full label
-      // height: 42px clipped a realistic "EXP: 20 Jul 2026" down to "20 Jul 20…",
-      // which is not acceptable for the one safety-critical field on the label.
-      let nameFontSize = 48;
-      ctx.font = `bold ${nameFontSize}px 'Sarabun', sans-serif`;
-      while (ctx.measureText(reagent.th).width > tw && nameFontSize > 22) {
-        nameFontSize -= 2;
-        ctx.font = `bold ${nameFontSize}px 'Sarabun', sans-serif`;
-      }
-      const dataFont = "700 40px 'IBM Plex Mono', monospace";
-      const recvFont = "700 38px 'Sarabun', sans-serif";
-      const expFont = "bold 38px 'IBM Plex Mono', monospace";
-      const locFont = "600 32px 'Sarabun', sans-serif";
-      ctx.fillText(clip(reagent.th, ctx.font), tx, 86);
-      ctx.font = dataFont;
-      ctx.fillText(clip('Lot: ' + lot.lot, dataFont), tx, 156);
-      ctx.font = recvFont;
-      ctx.fillText(clip('รับเข้า: ' + recvLabel, recvFont), tx, 226);
-      ctx.font = expFont;
-      ctx.fillText(clip('EXP: ' + expLabel, expFont), tx, 296);
-      ctx.font = locFont;
-      ctx.fillText(clip('สภาวะจัดเก็บ: ' + storageLabel, locFont), tx, 366);
-
-      // Force every pixel to pure black or pure white — canvas text (even with a
-      // solid black fillStyle) is anti-aliased, leaving grey pixels along every
-      // edge. Many label/photo print pipelines run a dithering pass on any
-      // greyscale content, which turns those soft anti-aliased edges into the
-      // speckled halftone pattern that shows up on the printed label. Thresholding
-      // here removes all grey from the source, so there's nothing left to dither —
-      // biased toward black so thin Thai tone marks and QR modules don't get eaten
-      // away by the cutoff — thermal printheads under-render thin strokes, so
-      // erring toward bolder source text holds up better once actually printed.
-      const imageData = ctx.getImageData(0, 0, W, H);
-      const data = imageData.data;
-      for (let i = 0; i < data.length; i += 4) {
-        const luminance = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-        const v = luminance < 210 ? 0 : 255;
-        data[i] = data[i + 1] = data[i + 2] = v;
-      }
-      ctx.putImageData(imageData, 0, 0);
-
+      const canvas = await renderLotSticker(lot, reagent);
       const url = canvas.toDataURL('image/png');
-      const safe = (reagent.en || reagent.th).replace(/[^a-zA-Z0-9ก-๙]/g, '_');
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Sticker_${lot.lot}_${safe}.png`;
+      link.download = `Sticker_${lot.lot}_${safeName(reagent)}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -311,9 +211,13 @@ export function PrintStickerModal({ v }) {
       color: #ffffff;
       cursor: pointer;
       font: var(--fw-bold) var(--text-sm)/1 var(--font-body);
+      white-space: nowrap;
       box-shadow: 0 6px 18px rgba(26,147,179,0.35);
       transition: transform .18s cubic-bezier(.25,.8,.25,1), box-shadow .18s ease, filter .18s ease;
       -webkit-tap-highlight-color: transparent;
+    }
+    @media (max-width: 480px) {
+      .sticker-dl-btn { padding: 12px; gap: 6px; }
     }
     .sticker-dl-btn:hover:not(:disabled) {
       transform: translateY(-2px);
@@ -416,8 +320,32 @@ export function PrintStickerModal({ v }) {
               {stickerBody}
             </div>
 
-            <div style={css(`font:var(--text-3xs)/1.5 var(--font-body); color:var(--text-secondary); text-align:center; max-width:300px;`)}>
-              💡 กด <strong>ดาวน์โหลดสติกเกอร์</strong> เพื่อบันทึกเป็นไฟล์รูป PNG แล้วนำไปสั่งพิมพ์ผ่านโปรแกรมฉลากของเครื่องพิมพ์ (หรือ Windows Photos) โดยเลือกกระดาษ <strong>40 x 20 mm</strong>
+            <div style={css(`width:100%; display:flex; flex-direction:column; align-items:center; gap:6px;`)}>
+              <label htmlFor="sticker-count" style={css(`display:flex; align-items:center; gap:10px; font:var(--fw-semibold) var(--text-sm)/1.2 var(--font-body); color:var(--text-primary);`)}>
+                จำนวนสติกเกอร์
+                <input
+                  id="sticker-count"
+                  type="number" inputMode="numeric" min="1" max="500"
+                  value={count}
+                  onChange={(e) => setCount(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') downloadWord(); }}
+                  style={css(`width:84px; height:38px; box-sizing:border-box; padding:0 10px; text-align:center; background:var(--white); border:1px solid ${countOk ? 'var(--border-default)' : 'var(--red-600)'}; border-radius:var(--radius-md); font:var(--fw-bold) var(--text-md)/1 var(--font-mono); color:var(--text-primary); outline:none;`)}
+                />
+                ดวง
+              </label>
+              <div style={css(`font:var(--text-3xs)/1.4 var(--font-body); color:${countOk ? 'var(--text-secondary)' : 'var(--red-700)'}; text-align:center; min-height:1.4em; text-wrap:balance;`)}>
+                {countOk ? basis : 'ใส่จำนวน 1–500 ดวง'}
+              </div>
+            </div>
+
+            <div style={css(`font:var(--text-3xs)/1.5 var(--font-body); color:var(--text-secondary); text-align:center; max-width:320px;`)}>
+              💡 ได้ไฟล์ <strong>Word</strong> ไฟล์เดียว หน้าละ 1 ดวง ขนาด <strong>40 x 20 mm</strong> เปิดแล้วสั่งพิมพ์ไปที่เครื่องพิมพ์ฉลากได้ทันที
+              <br />
+              ใช้โปรแกรมฉลากของเครื่องพิมพ์?{' '}
+              <button type="button" onClick={downloadSticker} disabled={!qrUrl || downloading}
+                style={css(`border:none; background:transparent; padding:0; color:var(--brand-ink); cursor:pointer; font:var(--fw-semibold) var(--text-3xs)/1.5 var(--font-body); text-decoration:underline;`)}>
+                {downloading ? 'กำลังสร้างไฟล์…' : 'ดาวน์โหลดเป็นรูป PNG (1 ดวง)'}
+              </button>
             </div>
           </div>
 
@@ -426,9 +354,9 @@ export function PrintStickerModal({ v }) {
             <button onClick={closePrintSticker} style={css(`padding:11px 16px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body);`)}>
               ยกเลิก
             </button>
-            <button className="sticker-dl-btn" onClick={downloadSticker} disabled={!qrUrl || downloading}>
+            <button className="sticker-dl-btn" onClick={downloadWord} disabled={!countOk || stickerBusy}>
               <span className="sticker-dl-ic" style={{ display: 'grid', placeItems: 'center' }}>{ic.receive}</span>
-              {downloading ? 'กำลังสร้างไฟล์…' : 'ดาวน์โหลดสติกเกอร์ (PNG)'}
+              {stickerBusy ? 'กำลังสร้างไฟล์…' : `ดาวน์โหลด ${countOk ? n : '–'} ดวง`}
             </button>
           </div>
         </div>

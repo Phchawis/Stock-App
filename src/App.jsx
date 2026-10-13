@@ -4,7 +4,9 @@ import { css } from './css.js';
 import { captureExits, playExits, setViewTransitionActive, switchTheme, collapseRow } from './motion.js';
 import { flushSync } from 'react-dom';
 import { categoryLabel, CATEGORY_CODES, DEFAULT_CATEGORY } from './categories.js';
-import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity, testsPerMainUnit } from './domain/stock.js';
+import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity, testsPerMainUnit, stickerCount, subUnitOf } from './domain/stock.js';
+import { stickerDocxBlob } from './stickers/batch.js';
+import { downloadBlob, safeName } from './stickers/lotSticker.js';
 
 // What kind of material a catalogue entry is. Set from the product name when
 // the column was added (migration 0018) and editable per reagent.
@@ -109,7 +111,7 @@ class App extends React.Component {
       perms: this.defaultPerms(), loginForm: { username: '', password: '', error: '' },
       rf: this.blankRf(), iform: this.blankIf(), mform: this.blankMf(),
       users: [], uform: { name: '', username: '', role: 'technician', password: '' },
-      printLotData: null,
+      printLotData: null, stickerBusy: false,
       sidebarOpen: false,
       // Read straight from storage on the first render so the page never
       // paints dark and then flips — a flash of the wrong theme on every load
@@ -318,8 +320,46 @@ class App extends React.Component {
   }
   closeSds() { this.setState({ modal: null, sdsData: null }); }
 
-  openPrintSticker(lot, reagent) {
-    this.setState({ printLotData: { lot, reagent }, modal: 'printSticker' });
+  // `qty` is the receipt the stickers are for, in main units. Without one (the
+  // drawer, the reagent list) it is everything the lot has received.
+  openPrintSticker(lot, reagent, qty) {
+    // The caller may pass a view-model; the raw record carries subUnit.
+    const raw = this.state.reagents.find(x => x.id === reagent.id) || {};
+    const full = { ...raw, ...reagent };
+    const q = qty ?? lot.recv ?? lot.qty;
+    const su = subUnitOf(full);
+    this.setState({ printLotData: { lot, reagent: full, count: stickerCount(full, q) || 1, qty: q, unit: full.unit, subUnit: su }, modal: 'printSticker' });
+  }
+
+  // Every sticker for `jobs` ({ lot, reagent, count }) in one Word file, then
+  // one preparation record per lot carrying its sticker count.
+  async downloadStickers(jobs, filename) {
+    const list = jobs.filter(j => j && j.count > 0);
+    if (!list.length || this.state.stickerBusy) return false;
+    this.setState({ stickerBusy: true });
+    try {
+      const blob = await stickerDocxBlob(list);
+      downloadBlob(blob, filename);
+      const total = list.reduce((n, j) => n + j.count, 0);
+      await Promise.all(list.map(j =>
+        this.logSticker({
+          kind: 'LOT_QR', action: 'DOWNLOAD', qty: j.count,
+          reagentName: j.reagent.th || j.reagent.en || '',
+          reagentId: j.reagent.id ?? null,
+          lot: j.lot.lot, expDate: j.lot.expiry,
+          // A lot sticker records where the bottle lives rather than a storage
+          // temperature; label it so the printed record can't be misread.
+          storageTemp: j.lot.loc ? `ตำแหน่งเก็บ ${j.lot.loc}` : '',
+          preparedBy: (this.user && this.user.name) || '',
+        })));
+      this.showToast(`ดาวน์โหลดสติกเกอร์ ${total} ดวง` + (list.length > 1 ? ` (${list.length} Lot)` : ''));
+      return true;
+    } catch (err) {
+      this.showToast('สร้างไฟล์สติกเกอร์ไม่สำเร็จ: ' + err.message, 'warn');
+      return false;
+    } finally {
+      this.setState({ stickerBusy: false });
+    }
   }
   closePrintSticker() {
     this.setState({ printLotData: null, modal: null });
@@ -1830,7 +1870,12 @@ class App extends React.Component {
         qtyLabel, qtyColor,
         scanLabel: isDelete ? '—' : scanLabel, ref, by: t.by, at: t.at, qty: t.qty, type: t.type, unit: r ? r.unit : '',
         onEdit: isDelete ? null : () => this.openEditTxn(t.id), onDelete: isDelete ? null : () => this.deleteTxn(t.id),
-        onPrintSticker: (l && r) ? () => this.openPrintSticker({ ...l, recvDate: recvDateOf(l.id) }, r) : null };
+        onPrintSticker: (l && r) ? (t.type === 'RECEIVE' && t.qty > 0
+          ? () => this.openPrintSticker({ ...l, recvDate: t.at.slice(0, 10) }, r, t.qty)
+          : () => this.openPrintSticker({ ...l, recvDate: recvDateOf(l.id) }, r)) : null,
+        // What this receipt's stickers are, for picking several at once.
+        stickerJob: (l && r && t.type === 'RECEIVE' && t.qty > 0)
+          ? { lot: { ...l, recvDate: t.at.slice(0, 10) }, reagent: r, count: stickerCount(r, t.qty) } : null };
     });
 
     // usage stats list
@@ -1964,6 +2009,14 @@ class App extends React.Component {
       closePrintSticker: () => this.closePrintSticker(),
       modalPrintSticker: S.modal === 'printSticker',
       printLotData: S.printLotData,
+      stickerBusy: !!S.stickerBusy,
+      canReceive: this.can('receive'),
+      downloadStickers: (jobs, filename) => this.downloadStickers(jobs, filename),
+      stickerFileName: (jobs) => {
+        if (jobs.length === 1) return `Sticker_${jobs[0].lot.lot}_${safeName(jobs[0].reagent)}.docx`;
+        const total = jobs.reduce((n, j) => n + j.count, 0);
+        return `Stickers_${this.nowStr().slice(0, 10)}_${jobs.length}Lot_${total}.docx`;
+      },
       roleCards: this.ROLES().map(r => ({ id: r.id, th: r.th, en: r.en, initials: r.initials, color: r.color, onLogin: () => this.login(r.id),
         permCount: this.PERM_LABELS().filter(p => this.state.perms[r.id][p.key]).length,
         summary: ({ admin: 'เข้าถึงและจัดการได้ทุกส่วนของระบบ รวมถึงการจัดการผู้ใช้และการตั้งค่า', supervisor: 'รับเข้า–เบิกจ่าย จัดการข้อมูลน้ำยา และรับทราบการแจ้งเตือน', technician: 'เบิกจ่ายแบบหมดอายุก่อน–เบิกก่อน ดูคลัง และรับทราบการแจ้งเตือน', viewer: 'ดูข้อมูลคลังน้ำยาและประวัติได้อย่างเดียว' })[r.id] })),

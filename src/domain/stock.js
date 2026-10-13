@@ -142,3 +142,27 @@ export function testsPerMainUnit(reagent) {
   const n = Number(reagent && reagent.testsPerUnit);
   return n > 0 ? n : null;
 }
+
+/**
+ * The sub-unit packed in one main unit ("Cassette:2:100" → { name: 'Cassette',
+ * per: 2 }), or null when the reagent has none or its count is unknown.
+ */
+export function subUnitOf(reagent) {
+  const sub = String((reagent && reagent.subUnit) || '').trim();
+  if (!sub.includes(':')) return null;
+  const [name, qty] = sub.split(':');
+  const per = parseInt(qty, 10);
+  return per > 0 ? { name: name.trim(), per } : null;
+}
+
+/**
+ * How many lot stickers a receipt of `mainQty` main units needs: one per
+ * bottle or cassette, since each is used apart from its box. A reagent with
+ * no countable sub-unit gets one per main unit.
+ */
+export function stickerCount(reagent, mainQty) {
+  const q = Math.floor(Number(mainQty));
+  if (!(q > 0)) return 0;
+  const su = subUnitOf(reagent);
+  return q * (su ? su.per : 1);
+}

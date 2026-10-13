@@ -634,6 +634,24 @@ export function Help({ v }) {
                   </div>
                 </div>
               </div>
+
+              {/* Lot QR Sticker Guide */}
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span>🔳</span> 3. สติกเกอร์ QR ประจำ Lot (4x2 cm)
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
+                  <div><strong>จุดประสงค์:</strong> ติดขวดหรือ Cassette ทุกชิ้นหลังรับเข้า เพื่อสแกนตอนเบิกจ่าย</div>
+                  <div><strong>ดาวน์โหลดหลาย Lot พร้อมกัน:</strong>
+                    <ul style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
+                      <li>เปิดหน้า <strong>ประวัติการเคลื่อนไหว</strong> ติ๊กช่องหน้ารายการ <strong>รับเข้า</strong> ที่ต้องการ หรือกด <strong>เลือกรับเข้าทั้งวัน</strong> ที่หัววันที่</li>
+                      <li>กด <strong>ดาวน์โหลด</strong> ที่แถบด้านล่าง จะได้ไฟล์ Word ไฟล์เดียว หน้าละ 1 ดวง ขนาด 40x20 mm เปิดแล้วสั่งพิมพ์ได้ทันที</li>
+                      <li><strong>จำนวนดวง</strong> นับตามหน่วยย่อย เช่น รับ 2 Box ที่มี 10 Bottle ต่อ Box ได้ 20 ดวง · น้ำยาที่ไม่มีหน่วยย่อยนับตามหน่วยหลัก</li>
+                      <li>ดาวน์โหลดทีละ Lot ได้จากปุ่ม <strong>Sticker</strong> ซึ่งแก้จำนวนดวงก่อนดาวน์โหลดได้</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Printing Guidelines */}

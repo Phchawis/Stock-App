@@ -5,14 +5,48 @@ export function Audit({ v }) {
   const {
     isAudit, txnRows, user, clearTxns, canManage,
     txnsFullyLoaded, loadingFullTxnHistory, loadFullTxnHistory,
+    canReceive, downloadStickers, stickerBusy, stickerFileName,
   } = v;
 
   const [search, setSearch] = React.useState('');
   const [typeFilter, setTypeFilter] = React.useState('ALL');
   const [startDate, setStartDate] = React.useState('');
   const [endDate, setEndDate] = React.useState('');
+  // Receipts picked for one combined sticker download, by transaction id.
+  const [picked, setPicked] = React.useState(() => new Set());
 
   if (!isAudit) return null;
+
+  const canPick = !!canReceive;
+  const pickable = (t) => canPick && !!t.stickerJob;
+  const toggle = (id) => setPicked(prev => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+  const setMany = (ids, on) => setPicked(prev => {
+    const next = new Set(prev);
+    ids.forEach(id => (on ? next.add(id) : next.delete(id)));
+    return next;
+  });
+  // Built from every loaded row, not just the filtered ones, so changing the
+  // search does not quietly drop receipts already ticked.
+  const pickedJobs = txnRows.filter(t => picked.has(t.id) && t.stickerJob).map(t => t.stickerJob);
+  const pickedTotal = pickedJobs.reduce((n, j) => n + j.count, 0);
+  const downloadPicked = async () => {
+    if (!pickedJobs.length) return;
+    const ok = await downloadStickers(pickedJobs, stickerFileName(pickedJobs));
+    if (ok) setPicked(new Set());
+  };
+  const checkbox = (t, label) => (
+    <input
+      type="checkbox"
+      className="audit-pick"
+      checked={picked.has(t.id)}
+      onChange={() => toggle(t.id)}
+      aria-label={label}
+    />
+  );
 
   const isAdmin = user && user.roleId === 'admin';
   const isSupervisorOrAdmin = user && (user.roleId === 'supervisor' || user.roleId === 'admin');
@@ -53,6 +87,14 @@ export function Audit({ v }) {
   return (
     <>
       <style>{`
+        .audit-pick { width:18px; height:18px; margin:0; flex-shrink:0; accent-color:var(--brand-700); cursor:pointer; }
+        .audit-pick-bar { position:sticky; bottom:16px; z-index:4; }
+        .audit-pick-bar .pick-count { flex:1 1 240px; }
+        @media (max-width: 768px) {
+          .audit-pick-bar { bottom:calc(var(--mobile-bar-height, 54px) + 10px); }
+          .audit-pick-bar .pick-count { flex:1 1 100%; }
+          .audit-pick-bar button { flex:1; white-space:nowrap; }
+        }
         .audit-row-mobile { display: none; }
         @media (max-width: 768px) {
           .audit-thead { display: none !important; }
@@ -188,12 +230,23 @@ export function Audit({ v }) {
               const dObj = new Date(dateStr + 'T00:00:00');
               const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
               const formattedDate = `${dObj.getDate()} ${thaiMonths[dObj.getMonth()]} ${dObj.getFullYear() + 543}`;
+              const dayPick = groupedRows[dateStr].filter(pickable).map(t => t.id);
+              const dayAll = dayPick.length > 0 && dayPick.every(id => picked.has(id));
 
               return (
                 <div key={dateStr} style={css(`display:flex; flex-direction:column; border-bottom:1px solid var(--border-subtle);`)}>
                   {/* Sticky Date Header */}
                   <div style={css(`background:var(--slate-100); padding:8px 18px; font:var(--fw-semibold) var(--text-3xs)/1.2 var(--font-body); color:var(--text-secondary); border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; gap:6px;`)}>
                     📅 วันที่ {formattedDate}
+                    {dayPick.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setMany(dayPick, !dayAll)}
+                        style={css(`margin-left:auto; border:none; background:transparent; padding:2px 0; color:var(--brand-ink); cursor:pointer; font:var(--fw-semibold) var(--text-3xs)/1.2 var(--font-body); text-decoration:underline;`)}
+                      >
+                        {dayAll ? 'ยกเลิกที่เลือกของวันนี้' : `เลือกรับเข้าทั้งวันเพื่อพิมพ์สติกเกอร์ (${dayPick.length})`}
+                      </button>
+                    )}
                   </div>
 
                   {/* Transactions of this day */}
@@ -201,7 +254,10 @@ export function Audit({ v }) {
                     <React.Fragment key={tI}>
                     {/* Desktop table row */}
                     <div className="audit-row-desktop" style={css(`display:grid; grid-template-columns:0.85fr 1.6fr 0.8fr 0.8fr 0.9fr 1.2fr${isSupervisorOrAdmin ? ' 1fr' : ''}; gap:12px; align-items:center; padding:11px 18px; border-bottom:${tI === groupedRows[dateStr].length - 1 ? 'none' : '1px solid var(--border-subtle)'};`)}>
-                      <div><span style={css(`padding:3px 9px; border-radius:var(--radius-sm); background:${t.bg}; color:${t.fg}; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); white-space:nowrap;`)}>{t.typeLabel}</span></div>
+                      <div style={css(`display:flex; align-items:center; gap:8px;`)}>
+                        {pickable(t) && checkbox(t, `เลือกพิมพ์สติกเกอร์ ${t.name} Lot ${t.lot}`)}
+                        <span style={css(`padding:3px 9px; border-radius:var(--radius-sm); background:${t.bg}; color:${t.fg}; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); white-space:nowrap;`)}>{t.typeLabel}</span>
+                      </div>
                       <div style={css(`min-width:0;`)}>
                         <div style={css(`font:var(--fw-medium) var(--text-sm)/1.3 var(--font-body); color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>{t.name}</div>
                         <div style={css(`font:var(--text-2xs)/1.3 var(--font-mono); color:var(--text-tertiary);`)}>Lot {t.lot}</div>
@@ -245,7 +301,10 @@ export function Audit({ v }) {
                     {/* Mobile card row */}
                     <div className="audit-row-mobile" style={css(`flex-direction:column; gap:11px; padding:15px 16px; border-bottom:${tI === groupedRows[dateStr].length - 1 ? 'none' : '1px solid var(--border-subtle)'};`)}>
                       <div style={css(`display:flex; align-items:center; justify-content:space-between; gap:10px;`)}>
-                        <span style={css(`padding:4px 11px; border-radius:var(--radius-sm); background:${t.bg}; color:${t.fg}; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); white-space:nowrap;`)}>{t.typeLabel}</span>
+                        <span style={css(`display:flex; align-items:center; gap:10px;`)}>
+                          {pickable(t) && checkbox(t, `เลือกพิมพ์สติกเกอร์ ${t.name} Lot ${t.lot}`)}
+                          <span style={css(`padding:4px 11px; border-radius:var(--radius-sm); background:${t.bg}; color:${t.fg}; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); white-space:nowrap;`)}>{t.typeLabel}</span>
+                        </span>
                         <span style={css(`font:var(--fw-bold) var(--text-lg)/1 var(--font-mono); color:${t.qtyColor}; white-space:nowrap;`)}>{t.qtyLabel}</span>
                       </div>
 
@@ -308,6 +367,30 @@ export function Audit({ v }) {
             </div>
           )}
         </div>
+
+        {pickedJobs.length > 0 && (
+          <div className="audit-pick-bar pop-in" role="region" aria-label="สติกเกอร์ที่เลือก" style={css(`display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; padding:12px 16px; background:var(--surface-card); border:1px solid var(--border-brand); border-radius:var(--radius-md); box-shadow:var(--shadow-lg);`)}>
+            <div className="pick-count" style={css(`min-width:0; font:var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>
+              เลือก <strong>{pickedJobs.length}</strong> Lot · รวม <strong>{pickedTotal}</strong> ดวง
+              <span style={css(`display:block; font:var(--text-3xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>นับตามหน่วยย่อย (ขวด / Cassette) · ได้ไฟล์ Word หน้าละ 1 ดวง ขนาด 40 x 20 mm</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPicked(new Set())}
+              style={css(`padding:10px 16px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body);`)}
+            >
+              ล้างที่เลือก
+            </button>
+            <button
+              type="button"
+              onClick={downloadPicked}
+              disabled={stickerBusy}
+              style={css(`display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 18px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:${stickerBusy ? 'default' : 'pointer'}; opacity:${stickerBusy ? 0.7 : 1}; font:var(--fw-bold) var(--text-sm)/1 var(--font-body);`)}
+            >
+              🏷️ {stickerBusy ? 'กำลังสร้างไฟล์…' : `ดาวน์โหลด ${pickedTotal} ดวง`}
+            </button>
+          </div>
+        )}
       </div>
     </>
   );
