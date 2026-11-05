@@ -1,7 +1,8 @@
 import { requirePerm, actorName, nowStr, json } from './_lib.js';
 
-// The table's vocabulary is BACKUP, RESTORE, REAGENT_DELETED and CLIENT_ERROR.
-// Only the last of those may be posted by a browser.
+// The table's vocabulary is BACKUP, RESTORE, REAGENT_DELETED, DATA_FIX and
+// CLIENT_ERROR. Only CLIENT_ERROR may be posted by a browser; DATA_FIX is
+// written by migrations that correct stored records (see 0019).
 //
 // BACKUP and RESTORE are the
 // system's evidence that backups are actually being taken — the dashboard reads
