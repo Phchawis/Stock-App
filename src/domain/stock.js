@@ -179,7 +179,7 @@ export function buddhistYearFix(isoDate) {
  *   the 12 it would have queried were typos (6941UQ12 beside 69414UQ12,
  *   202641942 beside 2026010638); the other two were deliberate suffixes.
  */
-export function receiveWarnings({ lot, expiry }, lots = [], { today = new Date(), critDays = 30 } = {}) {
+export function receiveWarnings({ lot, expiry }, lots = [], { today = new Date(), critDays = 30, checkLotShape = true } = {}) {
   const warnings = [];
   const d = daysUntil(expiry, today);
   if (d !== null && d < 0) {
@@ -193,11 +193,39 @@ export function receiveWarnings({ lot, expiry }, lots = [], { today = new Date()
     warnings.push(`Lot ${name} มีอยู่แล้ว วันหมดอายุเดิม ${same.expiry} จะถูกเปลี่ยนเป็น ${expiry}`);
   }
   const others = lots.filter(l => l.lot !== name).map(l => String(l.lot).length);
-  if (!same && others.length >= 2) {
+  if (checkLotShape && !same && others.length >= 2) {
     const lo = Math.min(...others), hi = Math.max(...others);
     if (name.length < lo || name.length > hi) {
       warnings.push(`เลข Lot ${name} ยาว ${name.length} ตัว แต่ Lot ก่อนหน้าของน้ำยานี้ยาว ${lo === hi ? lo : `${lo}–${hi}`} ตัว`);
     }
   }
   return { block: null, warnings };
+}
+
+// Edit distance, capped: anything over `max` comes back as max + 1.
+function editDistance(a, b, max = 1) {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) {
+      cur.push(Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)));
+    }
+    prev = cur;
+  }
+  return prev[b.length];
+}
+
+/**
+ * An existing lot of the reagent that the typed lot number is probably meant
+ * to be: same expiry, and a lot number one character away (one dropped,
+ * added or changed). A receipt typed as 8441UD00 beside 84441UD00 with the
+ * same expiry otherwise creates a second lot for one manufacturer batch; 24
+ * pairs like that were on record when this was added. Some pairs are real
+ * consecutive lots (2026030854 / 2026030856), so this asks, never decides.
+ */
+export function similarLot({ lot, expiry }, lots = []) {
+  const name = String(lot || '').trim().toUpperCase();
+  if (!name || lots.some(l => String(l.lot).toUpperCase() === name)) return null;
+  return lots.find(l => l.expiry === expiry && editDistance(String(l.lot).toUpperCase(), name) <= 1) || null;
 }

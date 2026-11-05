@@ -4,7 +4,7 @@ import { css } from './css.js';
 import { captureExits, playExits, setViewTransitionActive, switchTheme, collapseRow } from './motion.js';
 import { flushSync } from 'react-dom';
 import { categoryLabel, CATEGORY_CODES, DEFAULT_CATEGORY } from './categories.js';
-import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity, testsPerMainUnit, stickerCount, buddhistYearFix, receiveWarnings } from './domain/stock.js';
+import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity, testsPerMainUnit, stickerCount, buddhistYearFix, receiveWarnings, similarLot } from './domain/stock.js';
 import { renderLotSticker, canvasToPngBytes, downloadBlob, safeName } from './stickers/lotSticker.js';
 
 // What kind of material a catalogue entry is. Set from the product name when
@@ -307,14 +307,21 @@ class App extends React.Component {
     return true;
   }
 
-  askConfirm(title, message, onConfirm) {
+  // `opts`: confirmLabel renames the main button; altLabel + onAlt add a
+  // second way forward beside it.
+  askConfirm(title, message, onConfirm, opts = {}) {
     this.setState({
       confirmData: {
         title,
         message,
+        confirmLabel: opts.confirmLabel || null,
+        altLabel: opts.onAlt ? opts.altLabel : null,
+        // Close first, then act: an action that asks a follow-up question
+        // opens a new dialog, which closing afterwards would wipe.
+        onAlt: opts.onAlt ? () => { this.setState({ confirmData: null }); opts.onAlt(); } : null,
         onConfirm: () => {
-          onConfirm();
           this.setState({ confirmData: null });
+          onConfirm();
         },
         onCancel: () => {
           this.setState({ confirmData: null });
@@ -1631,20 +1638,35 @@ class App extends React.Component {
   }
 
   // `confirmed`: the person has already answered the receipt's warnings.
-  submitReceive(confirmed = false) { return this.guardSave(() => this.doSubmitReceive(confirmed)); }
+  // `keepLot`: they were asked whether the lot number meant an existing lot,
+  // and kept the one they typed.
+  submitReceive(confirmed = false, keepLot = false) { return this.guardSave(() => this.doSubmitReceive(confirmed, keepLot)); }
   submitIssue() { return this.guardSave(() => this.doSubmitIssue()); }
 
-  async doSubmitReceive(confirmed) {
+  async doSubmitReceive(confirmed, keepLot) {
     const f = this.state.rf; const rid = +f.rid; const qty = +f.qty;
     if (!rid || !f.lot || !f.expiry || !(qty > 0)) { this.showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warn'); return; }
     if (this.askBuddhistYear(f.expiry, (fixed) => this.setState(s => ({ rf: { ...s.rf, expiry: fixed } }), () => this.submitReceive()))) return;
     if (!confirmed) {
+      const reagentLots = this.state.lots.filter(l => l.rid === rid);
       const { block, warnings } = receiveWarnings(
-        { lot: f.lot, expiry: f.expiry },
-        this.state.lots.filter(l => l.rid === rid),
-        { today: this.today, critDays: this.props.criticalDays ?? 30 }
+        { lot: f.lot, expiry: f.expiry }, reagentLots,
+        { today: this.today, critDays: this.props.criticalDays ?? 30, checkLotShape: !keepLot }
       );
       if (block) { this.showToast(block, 'warn'); return; }
+      // One character from an existing lot with the same expiry: most likely
+      // that lot, typed wrong. Offer it, but let a genuinely new lot through.
+      const near = keepLot ? null : similarLot({ lot: f.lot, expiry: f.expiry }, reagentLots);
+      if (near) {
+        const typed = f.lot.trim();
+        this.askConfirm(
+          `เป็น Lot ${near.lot} หรือเปล่า`,
+          `เลข Lot ${typed} ต่างจาก Lot ${near.lot} ที่มีอยู่แล้วแค่ 1 ตัวอักษร และวันหมดอายุตรงกัน (${near.expiry}) มักเป็น Lot เดียวกันที่พิมพ์ผิด\n\nตรวจเลข Lot บนฉลากอีกครั้ง แล้วเลือกว่าจะรับเข้า Lot ไหน`,
+          () => this.setState(s => ({ rf: { ...s.rf, lot: near.lot } }), () => this.submitReceive(false, true)),
+          { confirmLabel: `รับเข้า Lot ${near.lot}`, altLabel: `เป็น Lot ใหม่ ${typed}`, onAlt: () => this.submitReceive(false, true) }
+        );
+        return;
+      }
       if (warnings.length) {
         this.askConfirm('ตรวจสอบก่อนบันทึกรับเข้า',
           warnings.map(w => '• ' + w).join('\n') + '\n\nถ้าข้อมูลถูกต้องแล้ว กดยืนยันเพื่อบันทึก',
@@ -2287,7 +2309,7 @@ class App extends React.Component {
                 </p>
               </div>
             </div>
-            <div style={css(`display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #b2d1da; padding-top:14px;`)}>
+            <div style={css(`display:flex; justify-content:flex-end; flex-wrap:wrap; gap:10px; border-top:1px solid #b2d1da; padding-top:14px;`)}>
               <button 
                 onClick={v.confirmData.onCancel}
                 style={css(`padding:8px 16px; border-radius:var(--radius-md); border:1px solid #b2d1da; background:#fff; color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); transition:all var(--dur-fast);`)}
@@ -2296,13 +2318,21 @@ class App extends React.Component {
               >
                 ยกเลิก
               </button>
+              {v.confirmData.onAlt && (
+                <button
+                  onClick={v.confirmData.onAlt}
+                  style={css(`padding:8px 16px; border-radius:var(--radius-md); border:1px solid #2d444e; background:#fff; color:#10222a; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body);`)}
+                >
+                  {v.confirmData.altLabel}
+                </button>
+              )}
               <button 
                 onClick={v.confirmData.onConfirm}
                 style={css(`padding:8px 16px; border-radius:var(--radius-md); border:none; background:#C2422A; color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); box-shadow:0 4px 12px rgba(194,66,42,0.3); transition:all var(--dur-fast);`)}
                 onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(194,66,42,0.45)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(194,66,42,0.3)'; }}
               >
-                ยืนยันทำรายการ
+                {v.confirmData.confirmLabel || 'ยืนยันทำรายการ'}
               </button>
             </div>
           </div>

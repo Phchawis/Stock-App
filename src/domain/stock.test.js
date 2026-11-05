@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   daysUntil, severityOf, dayLabel, activeLots, onHand, earliestExpiry,
-  planFefo, signedQuantity, lotViolations, statusFor, SEVERITY, testsPerMainUnit, stickerCount, buddhistYearFix, receiveWarnings,
+  planFefo, signedQuantity, lotViolations, statusFor, SEVERITY, testsPerMainUnit, stickerCount, buddhistYearFix, receiveWarnings, similarLot,
 } from './stock.js';
 
 // Fixed reference date so these assertions mean the same thing next year.
@@ -283,5 +283,26 @@ describe('receiveWarnings', () => {
   });
   it('does not judge length with fewer than two earlier lots', () => {
     expect(receiveWarnings({ lot: 'AB', expiry: '2027-04-18' }, lots.slice(0, 1), { today }).warnings).toEqual([]);
+  });
+});
+
+describe('similarLot', () => {
+  const lots = [
+    { lot: '84441UD00', expiry: '2027-07-05' },
+    { lot: '80223UD00', expiry: '2027-04-03' },
+  ];
+  it('finds the lot a dropped character was meant to be', () => {
+    expect(similarLot({ lot: '8441UD00', expiry: '2027-07-05' }, lots)).toEqual(lots[0]);
+  });
+  it('finds a changed or added character, whatever the case', () => {
+    expect(similarLot({ lot: '84442ud00', expiry: '2027-07-05' }, lots)).toEqual(lots[0]);
+    expect(similarLot({ lot: '844419UD00', expiry: '2027-07-05' }, lots)).toEqual(lots[0]);
+  });
+  it('needs the same expiry', () => {
+    expect(similarLot({ lot: '8441UD00', expiry: '2027-07-06' }, lots)).toBeNull();
+  });
+  it('ignores two characters apart, and the lot itself', () => {
+    expect(similarLot({ lot: '841UD00', expiry: '2027-07-05' }, lots)).toBeNull();
+    expect(similarLot({ lot: '84441UD00', expiry: '2027-07-05' }, lots)).toBeNull();
   });
 });
