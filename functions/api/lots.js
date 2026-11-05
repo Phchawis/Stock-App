@@ -28,48 +28,47 @@ export async function onRequestPost(context) {
 
     // Same reagent + same lot number = the same manufacturer batch (identical
     // expiry), so receiving it again merges into the existing lot record rather
-    // than creating a second row. This is both the correct FEFO behavior AND
-    // what avoids the `qr` UNIQUE-constraint failure that previously made
-    // receiving an already-known lot number fail outright. Merging also revives
-    // a fully-issued (DEPLETED) lot back to ACTIVE when its number is re-received.
-    const existing = await env.DB.prepare(
-      'SELECT * FROM lots WHERE rid = ? AND lot = ?'
-    ).bind(rid, lot).first();
+    // than creating a second row. That is the correct FEFO behaviour, and it
+    // revives a fully-issued (DEPLETED) lot when its number is re-received.
+    //
+    // The receipt is one batch, and D1 runs a batch as one transaction with no
+    // other request in between:
+    //   1. create the lot, empty, only if this reagent has no such lot yet;
+    //   2. add the quantity to it relatively (qty = qty + ?);
+    //   3. log the movement with `bal` read from the row just written.
+    // The previous version read the lot, worked out the new total in the
+    // Worker, and wrote that total back. Two submits of one receipt (a double
+    // click on บันทึกรับเข้า) both read the same starting quantity, so the
+    // second write erased the first: two RECEIVE rows in the log, one in the
+    // stock. That happened to Methanol lot 36090526 on 2026-07-28.
+    //
+    // The QR code is normally QR-{lot}, but the `qr` column is unique across
+    // all reagents; when another reagent already holds that string the new lot
+    // gets a suffix. Scanning by the lot number still finds it (the scanner
+    // matches qr OR lot). The check runs inside step 1, so it sees any lot a
+    // just-finished request created.
+    const at = nowStr();
+    const baseQr = `QR-${lot}`;
+    const altQr = `${baseQr}-${Date.now().toString(36)}`;
+    const [created] = await env.DB.batch([
+      env.DB.prepare(
+        `INSERT INTO lots (rid, lot, expiry, recv, qty, loc, qr, status)
+         SELECT ?, ?, ?, 0, 0, ?, CASE WHEN EXISTS (SELECT 1 FROM lots WHERE qr = ?) THEN ? ELSE ? END, 'DEPLETED'
+          WHERE NOT EXISTS (SELECT 1 FROM lots WHERE rid = ? AND lot = ?)`
+      ).bind(rid, lot, expiry, loc, baseQr, altQr, baseQr, rid, lot),
+      env.DB.prepare(
+        `UPDATE lots SET qty = qty + ?, recv = recv + ?, expiry = ?, loc = ?, status = 'ACTIVE'
+          WHERE rid = ? AND lot = ?`
+      ).bind(numQty, numQty, expiry, loc, rid, lot),
+      env.DB.prepare(
+        `INSERT INTO transactions (lot_id, rid, type, qty, bal, ref, scan, by, at)
+         SELECT id, rid, 'RECEIVE', ?, qty, ?, 'MANUAL', ?, ? FROM lots WHERE rid = ? AND lot = ?`
+      ).bind(numQty, supplierRef, by, at, rid, lot),
+    ]);
 
-    if (existing) {
-      const mergedQty = existing.qty + numQty;
-      const mergedRecv = existing.recv + numQty;
-      await env.DB.batch([
-        env.DB.prepare("UPDATE lots SET qty = ?, recv = ?, expiry = ?, loc = ?, status = 'ACTIVE' WHERE id = ?")
-          .bind(mergedQty, mergedRecv, expiry, loc, existing.id),
-        env.DB.prepare(
-          `INSERT INTO transactions (lot_id, rid, type, qty, bal, ref, scan, by, at)
-           VALUES (?, ?, 'RECEIVE', ?, ?, ?, 'MANUAL', ?, ?)`
-        ).bind(existing.id, rid, numQty, mergedQty, supplierRef, by, nowStr())
-      ]);
-      return json({ id: existing.id, rid, lot, expiry, recv: mergedRecv, qty: mergedQty, loc, qr: existing.qr, status: 'ACTIVE', merged: true }, 200);
-    }
-
-    // Brand-new lot. QR is normally QR-{lot}, but the `qr` column is globally
-    // unique — if a DIFFERENT reagent already uses the same lot-number string,
-    // fall back to a unique suffix so the receive still succeeds. Scanning by
-    // the lot number itself still resolves it (scanQRCode matches qr OR lot).
-    let qrCode = `QR-${lot}`;
-    const qrTaken = await env.DB.prepare('SELECT 1 FROM lots WHERE qr = ?').bind(qrCode).first();
-    if (qrTaken) qrCode = `QR-${lot}-${Date.now().toString(36)}`;
-
-    const lotResult = await env.DB.prepare(
-      `INSERT INTO lots (rid, lot, expiry, recv, qty, loc, qr, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'ACTIVE')`
-    ).bind(rid, lot, expiry, numQty, numQty, loc, qrCode).run();
-
-    const lotId = lotResult.meta.last_row_id;
-    await env.DB.prepare(
-      `INSERT INTO transactions (lot_id, rid, type, qty, bal, ref, scan, by, at)
-       VALUES (?, ?, 'RECEIVE', ?, ?, ?, 'MANUAL', ?, ?)`
-    ).bind(lotId, rid, numQty, numQty, supplierRef, by, nowStr()).run();
-
-    return json({ id: lotId, rid, lot, expiry, recv: numQty, qty: numQty, loc, qr: qrCode, status: 'ACTIVE' }, 201);
+    const row = await env.DB.prepare('SELECT * FROM lots WHERE rid = ? AND lot = ?').bind(rid, lot).first();
+    const merged = !(created.meta && created.meta.changes > 0);
+    return json({ ...row, merged }, merged ? 200 : 201);
   } catch (err) {
     return json({ error: err.message }, 500);
   }

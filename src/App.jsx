@@ -1601,7 +1601,23 @@ class App extends React.Component {
     };
   }
 
-  async submitReceive() {
+  // One save at a time. A second click on บันทึกรับเข้า / ยืนยันเบิก while
+  // the first request is still out used to send a second request: on 28 Jul
+  // 2026 that logged one Methanol receipt twice. The flag is an instance
+  // field rather than state because setState lands too late to stop a fast
+  // double click; `saving` in state only drives the button.
+  async guardSave(fn) {
+    if (this._saving) return;
+    this._saving = true;
+    this.setState({ saving: true });
+    try { await fn(); }
+    finally { this._saving = false; this.setState({ saving: false }); }
+  }
+
+  submitReceive() { return this.guardSave(() => this.doSubmitReceive()); }
+  submitIssue() { return this.guardSave(() => this.doSubmitIssue()); }
+
+  async doSubmitReceive() {
     const f = this.state.rf; const rid = +f.rid; const qty = +f.qty;
     if (!rid || !f.lot || !f.expiry || !(qty > 0)) { this.showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warn'); return; }
     
@@ -1635,7 +1651,7 @@ class App extends React.Component {
     }
   }
 
-  async submitIssue() {
+  async doSubmitIssue() {
     const crit = this.props.criticalDays ?? 30;
     const f = this.state.iform; const rid = +f.rid; const qty = +f.qty;
     const plan = this.issuePlan();
@@ -2053,7 +2069,7 @@ class App extends React.Component {
       alertRows, hasAlerts: alertRows.length > 0, txnRows, reorderReportRows, acked: S.acked, setAlertStatus: (key, status) => this.setAlertStatus(key, status),
       modalReceive: S.modal === 'receive', modalIssue: S.modal === 'issue', closeModal: () => this.closeModal(),
       rf: S.rf, rfRid: this.bindRf('rid'), rfLot: this.bindRf('lot'), rfExpiry: this.bindRf('expiry'), rfQty: this.bindRf('qty'), rfSupplier: this.bindRf('supplier'), rfLoc: this.bindRf('loc'),
-      reagentOpts, locOpts, supplierOpts, scanOpts, submitReceive: () => this.submitReceive(),
+      reagentOpts, locOpts, supplierOpts, scanOpts, submitReceive: () => this.submitReceive(), saving: !!S.saving,
       iform: S.iform, ifRid: this.bindIf('rid'), ifQty: this.bindIf('qty'), ifScan: this.bindIf('scan'), ifRef: this.bindIf('ref'), ifSearchInput: this.bindIf('searchInput'), ifQrInput: this.bindIf('qrInput'), submitIssue: () => this.submitIssue(),
       scanQRCode: (code) => this.scanQRCode(code), unlinkLot: () => this.unlinkLot(), selectReagentForIssue: (rid) => this.selectReagentForIssue(rid),
       expiryOverview: [

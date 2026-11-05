@@ -8,7 +8,7 @@ export function ReceiveModal({ v }) {
   const {
     stop, ic, modalReceive, closeModal, rf, rfRid,
     rfLot, rfExpiry, rfQty, reagentOpts,
-    submitReceive, user,
+    submitReceive, user, saving,
   } = v;
 
   if (!modalReceive) return null;
@@ -90,11 +90,13 @@ export function ReceiveModal({ v }) {
             </button>
             <button 
               onClick={submitReceive} 
-              style={css(`padding:9px 18px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body); box-shadow:var(--glow-brand-soft); transition:all var(--dur-fast);`)}
+              disabled={saving}
+              aria-busy={saving}
+              style={css(`padding:9px 18px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:${saving ? 'progress' : 'pointer'}; opacity:${saving ? 0.7 : 1}; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body); box-shadow:var(--glow-brand-soft); transition:all var(--dur-fast);`)}
               onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(19,135,166,0.35)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'var(--glow-brand-soft)'; }}
             >
-              บันทึกรับเข้า
+              {saving ? 'กำลังบันทึก…' : 'บันทึกรับเข้า'}
             </button>
           </div>
         </div>

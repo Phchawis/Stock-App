@@ -6,7 +6,7 @@ import { modalHeaderStyle, modalHeaderBadgeStyle, modalHeaderTitleStyle, modalHe
 export function IssueModal({ v }) {
   const {
     stop, ic, modalIssue, closeModal,
-    iform, ifQty, submitIssue,
+    iform, ifQty, submitIssue, saving,
     issuePlanRows, issueShort, issueHasPlan, issueUnit,
     scanQRCode, unlinkLot,
     activeLotsList, reagentsList, issueOnHand,
@@ -450,10 +450,11 @@ export function IssueModal({ v }) {
                 </button>
                 <button 
                   onClick={submitIssue} 
-                  disabled={!iform.qty || +iform.qty <= 0 || !!issueShort}
+                  disabled={!iform.qty || +iform.qty <= 0 || !!issueShort || saving}
+                  aria-busy={saving}
                   style={css(`padding:8px 16px; border-radius:var(--radius-md); border:none; background:${(!iform.qty || +iform.qty <= 0 || !!issueShort) ? 'var(--slate-200)' : 'var(--brand-700)'}; color:${(!iform.qty || +iform.qty <= 0 || !!issueShort) ? 'var(--text-disabled)' : '#fff'}; cursor:${(!iform.qty || +iform.qty <= 0 || !!issueShort) ? 'not-allowed' : 'pointer'}; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); box-shadow:${(!iform.qty || +iform.qty <= 0 || !!issueShort) ? 'none' : 'var(--glow-brand-soft)'}; transition:all var(--dur-fast);`)}
                 >
-                  ยืนยันเบิกจ่าย
+                  {saving ? 'กำลังบันทึก…' : 'ยืนยันเบิกจ่าย'}
                 </button>
               </>
             )}
