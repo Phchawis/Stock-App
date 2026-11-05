@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   daysUntil, severityOf, dayLabel, activeLots, onHand, earliestExpiry,
-  planFefo, signedQuantity, lotViolations, statusFor, SEVERITY, testsPerMainUnit, stickerCount,
+  planFefo, signedQuantity, lotViolations, statusFor, SEVERITY, testsPerMainUnit, stickerCount, buddhistYearFix,
 } from './stock.js';
 
 // Fixed reference date so these assertions mean the same thing next year.
@@ -241,3 +241,19 @@ describe('stickerCount', () => {
   });
 });
 
+
+describe('buddhistYearFix', () => {
+  it('turns a Buddhist-era year into the Common Era date', () => {
+    expect(buddhistYearFix('2570-04-18')).toBe('2027-04-18');
+    expect(buddhistYearFix('2571-09-14')).toBe('2028-09-14');
+  });
+  it('leaves a Common Era date alone', () => {
+    expect(buddhistYearFix('2027-04-18')).toBeNull();
+    expect(buddhistYearFix('2399-12-31')).toBeNull();
+  });
+  it('ignores anything that is not a date', () => {
+    expect(buddhistYearFix('')).toBeNull();
+    expect(buddhistYearFix(undefined)).toBeNull();
+    expect(buddhistYearFix('18/04/2570')).toBeNull();
+  });
+});

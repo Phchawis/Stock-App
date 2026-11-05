@@ -151,3 +151,16 @@ export function stickerCount(mainQty) {
   const q = Math.floor(Number(mainQty));
   return q > 0 ? q : 0;
 }
+
+/**
+ * The Common Era date a Buddhist-era expiry was meant to be, or null when the
+ * date is fine. Chrome in Thai shows date fields in พ.ศ., so 2570-04-18 gets
+ * typed for 2027-04-18; stored as is, the lot never nears expiry, FEFO puts it
+ * last, and its sticker prints EXP 2570. No reagent expires after 2400 CE.
+ */
+export function buddhistYearFix(isoDate) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(isoDate || ''));
+  if (!m) return null;
+  const y = +m[1];
+  return y >= 2400 ? `${y - 543}-${m[2]}-${m[3]}` : null;
+}

@@ -4,7 +4,7 @@ import { css } from './css.js';
 import { captureExits, playExits, setViewTransitionActive, switchTheme, collapseRow } from './motion.js';
 import { flushSync } from 'react-dom';
 import { categoryLabel, CATEGORY_CODES, DEFAULT_CATEGORY } from './categories.js';
-import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity, testsPerMainUnit, stickerCount } from './domain/stock.js';
+import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity, testsPerMainUnit, stickerCount, buddhistYearFix } from './domain/stock.js';
 import { renderLotSticker, canvasToPngBytes, downloadBlob, safeName } from './stickers/lotSticker.js';
 
 // What kind of material a catalogue entry is. Set from the product name when
@@ -292,6 +292,20 @@ class App extends React.Component {
       }
     );
   }
+  // True, after asking, when `expiry` carries a Buddhist-era year (2570 for
+  // 2027). Chrome in Thai shows date fields in พ.ศ., and four lots were saved
+  // that way before this check. `retry` gets the corrected date and saves again.
+  askBuddhistYear(expiry, retry) {
+    const fixed = buddhistYearFix(expiry);
+    if (!fixed) return false;
+    this.askConfirm(
+      'วันหมดอายุเป็นปี พ.ศ. หรือเปล่า',
+      `ปี ${expiry.slice(0, 4)} ดูเป็นปี พ.ศ. ระบบเก็บวันหมดอายุเป็นปี ค.ศ. กดยืนยันเพื่อแก้เป็น ${fixed} แล้วบันทึกต่อ หรือยกเลิกเพื่อกลับไปแก้เอง`,
+      () => retry(fixed)
+    );
+    return true;
+  }
+
   askConfirm(title, message, onConfirm) {
     this.setState({
       confirmData: {
@@ -968,6 +982,7 @@ class App extends React.Component {
     const f = this.state.elForm;
     const qty = +f.qty;
     if (!f.expiry || !f.loc || isNaN(qty) || qty < 0) { this.showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warn'); return; }
+    if (this.askBuddhistYear(f.expiry, (fixed) => this.setState(s => ({ elForm: { ...s.elForm, expiry: fixed } }), () => this.submitEditLot()))) return;
     try {
       const res = await this.api('/api/lots', {
         method: 'PUT',
@@ -1620,7 +1635,8 @@ class App extends React.Component {
   async doSubmitReceive() {
     const f = this.state.rf; const rid = +f.rid; const qty = +f.qty;
     if (!rid || !f.lot || !f.expiry || !(qty > 0)) { this.showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warn'); return; }
-    
+    if (this.askBuddhistYear(f.expiry, (fixed) => this.setState(s => ({ rf: { ...s.rf, expiry: fixed } }), () => this.submitReceive()))) return;
+
     const payload = {
       rid,
       lot: f.lot,
@@ -2089,11 +2105,16 @@ class App extends React.Component {
           qr: l.qr || '',
           expiry: l.expiry,
           systemQty: l.qty,
+          rid: l.rid,
           reagentName: r ? r.th : '—',
           unit: r ? r.unit : '',
           category: r ? r.cat : ''
         };
-      }),
+      // One reagent's lots together, soonest expiry first. In lot-id order a
+      // reagent's four lots sat far apart, so a shelf count of every packet got
+      // typed against whichever single row was found first.
+      }).sort((a, b) => a.reagentName.localeCompare(b.reagentName, 'th', { numeric: true })
+        || a.rid - b.rid || a.expiry.localeCompare(b.expiry) || a.lot.localeCompare(b.lot)),
       stockCountForm: S.stockCountForm || {},
       updateStockCountRow: (lotId, qty, reason) => this.updateStockCountRow(lotId, qty, reason),
       submitStockCount: () => this.submitStockCount(),

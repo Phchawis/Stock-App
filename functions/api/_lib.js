@@ -156,6 +156,18 @@ export async function actorName(context) {
 export function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
 }
+// Why an expiry date can't be stored, or null when it can. A year from 2400 up
+// is a Buddhist-era year typed into a field Chrome shows in พ.ศ. (2570 for
+// 2027): stored as is, the lot never nears expiry and FEFO issues it last.
+export function expiryProblem(expiry) {
+  const m = /^(\d{4})-\d{2}-\d{2}$/.exec(String(expiry || ''));
+  if (!m) return 'วันหมดอายุต้องอยู่ในรูปแบบ YYYY-MM-DD';
+  const y = +m[1];
+  if (y >= 2400) return `วันหมดอายุปี ${y} เป็นปี พ.ศ. กรุณากรอกเป็นปี ค.ศ. (${y - 543})`;
+  if (y < 2000) return `วันหมดอายุปี ${y} ไม่ถูกต้อง`;
+  return null;
+}
+
 // 'YYYY-MM-DD HH:MM' in Asia/Bangkok (UTC+7). Workers run in UTC.
 export function nowStr() {
   return new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 16).replace('T', ' ');

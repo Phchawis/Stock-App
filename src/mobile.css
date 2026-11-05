@@ -99,6 +99,11 @@
  .stock-count-table td[data-label]::before, .sticker-log-table td[data-label]::before { content:attr(data-label); display:block; font:400 12px/1.5 var(--font-body); color:var(--text-tertiary); margin-bottom:4px; }
  .stock-count-table td:first-child { font-size:16px !important; }
  .stock-count-table input { width:100% !important; text-align:left !important; }
+ /* A reagent's total row: one line of label and figures, not another card. */
+ .stock-count-table tbody tr.sc-subtotal { flex-direction:row; flex-wrap:wrap; align-items:baseline; gap:4px 16px; padding:12px 16px; }
+ .stock-count-table tr.sc-subtotal td:first-child { flex-basis:100%; font-size:14px !important; }
+ .stock-count-table tr.sc-subtotal td[data-label]::before { display:inline; margin:0 6px 0 0; }
+ .stock-count-table tr.sc-subtotal td:empty { display:none; }
  .sticker-log-table td:nth-child(3) { order:-1; font-size:16px !important; }
  .sticker-log-table button { min-height:44px; }
 }

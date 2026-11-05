@@ -1,4 +1,4 @@
-import { requirePerm, actorName, nowStr, json } from './_lib.js';
+import { requirePerm, actorName, nowStr, json, expiryProblem } from './_lib.js';
 
 export async function onRequestGet(context) {
   try {
@@ -21,6 +21,8 @@ export async function onRequestPost(context) {
     }
     const numQty = +qty;
     if (isNaN(numQty) || numQty <= 0) return json({ error: 'Quantity must be a positive number' }, 400);
+    const badExpiry = expiryProblem(expiry);
+    if (badExpiry) return json({ error: badExpiry }, 400);
 
     const reagent = await env.DB.prepare('SELECT supplier FROM reagents WHERE id = ?').bind(rid).first();
     const supplierRef = reagent && reagent.supplier ? `รับจาก ${reagent.supplier}` : 'รับเข้าใหม่';
@@ -87,6 +89,8 @@ export async function onRequestPut(context) {
     }
     const numQty = +qty;
     if (isNaN(numQty) || numQty < 0) return json({ error: 'Quantity must be zero or a positive number' }, 400);
+    const badExpiry = expiryProblem(expiry);
+    if (badExpiry) return json({ error: badExpiry }, 400);
 
     const existing = await env.DB.prepare('SELECT * FROM lots WHERE id = ?').bind(id).first();
     if (!existing) return json({ error: 'ไม่พบ Lot นี้' }, 404);

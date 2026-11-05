@@ -243,6 +243,17 @@ export function StockCount({ v }) {
     }
   };
 
+  // Per-reagent totals of what the system holds and what has been counted so
+  // far, for the total row under a reagent with several lots.
+  const groups = new Map();
+  for (const it of stockCountList) {
+    const g = groups.get(it.rid) || { lots: 0, system: 0, counted: 0 };
+    const row = stockCountForm[it.lotId];
+    const n = row && row.qty !== '' && !isNaN(+row.qty) ? +row.qty : it.systemQty;
+    g.lots += 1; g.system += it.systemQty; g.counted += n;
+    groups.set(it.rid, g);
+  }
+
   return (
     <div className="qms-rise page-shell" style={css(`gap:20px;`)}>
       {/* Header Actions */}
@@ -328,6 +339,13 @@ export function StockCount({ v }) {
                 const numVal = row.qty === '' ? item.systemQty : +row.qty;
                 const diff = isNaN(numVal) ? 0 : numVal - item.systemQty;
                 const isHighlighted = highlightedLotId === item.lotId;
+                // The list arrives grouped by reagent. A reagent with several
+                // lots names its lot count on the first row and closes with a
+                // total, since a shelf is usually counted per reagent, not per lot.
+                const group = groups.get(item.rid);
+                const firstOfGroup = idx === 0 || stockCountList[idx - 1].rid !== item.rid;
+                const lastOfGroup = idx === stockCountList.length - 1 || stockCountList[idx + 1].rid !== item.rid;
+                const multi = group.lots > 1;
 
                 // --text-disabled is for controls that cannot be used, which is
                 // what exempts them from the contrast floor. This dash is
@@ -343,13 +361,17 @@ export function StockCount({ v }) {
                   diffBadge = <span style={css(`padding:3px 8px; border-radius:var(--radius-pill); background:var(--red-100); color:var(--red-700); font:var(--fw-bold) var(--text-2xs) var(--font-mono);`)}>{diff}</span>;
                 }
 
+                const groupDiff = group.counted - group.system;
                 return (
+                  <React.Fragment key={item.lotId}>
                   <tr 
-                    key={idx} 
                     style={css(`border-bottom:1px solid var(--border-subtle); background:${isHighlighted ? 'rgba(43,166,198,0.15)' : diff !== 0 ? 'rgba(91,192,217,0.03)' : 'transparent'}; transition:all 0.3s ease;`)}
                   >
-                    <td data-label="ชื่อน้ำยา" style={css(`padding:12px 18px; font:var(--fw-semibold) var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>
+                    <td data-label="ชื่อน้ำยา" style={css(`padding:12px 18px; font:var(--fw-semibold) var(--text-sm)/1.4 var(--font-body); color:${firstOfGroup ? 'var(--text-primary)' : 'var(--text-tertiary)'};`)}>
                       {item.reagentName}
+                      {multi && firstOfGroup && (
+                        <span style={css(`display:block; font:var(--fw-regular, 400) var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>{group.lots} Lot · ตรวจนับแยกตามเลข Lot บนฉลาก</span>
+                      )}
                     </td>
                     {/* Both shorthands named the family first and again at the
                         end, which is not a valid `font:` — the browser dropped
@@ -394,6 +416,24 @@ export function StockCount({ v }) {
                       />
                     </td>
                   </tr>
+                  {multi && lastOfGroup && (
+                    <tr className="sc-subtotal" style={css(`border-bottom:2px solid var(--border-default); background:var(--surface-sunken);`)}>
+                      <td colSpan="3" style={css(`padding:10px 18px; font:var(--fw-semibold) var(--text-xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>
+                        รวม {item.reagentName} · {group.lots} Lot
+                      </td>
+                      <td data-label="รวมในระบบ" style={css(`padding:10px 18px; text-align:right; font:var(--fw-bold) var(--text-xs) var(--font-mono); color:var(--text-primary);`)}>
+                        {group.system} <span style={css(`font:var(--text-2xs) var(--font-body); color:var(--text-tertiary);`)}>{item.unit}</span>
+                      </td>
+                      <td data-label="รวมนับได้" style={css(`padding:10px 18px; text-align:center; font:var(--fw-bold) var(--text-xs) var(--font-mono); color:var(--text-primary);`)}>
+                        {group.counted}
+                      </td>
+                      <td data-label="ส่วนต่างรวม" style={css(`padding:10px 18px; text-align:center; font:var(--fw-bold) var(--text-2xs) var(--font-mono); color:${groupDiff > 0 ? 'var(--green-700)' : groupDiff < 0 ? 'var(--red-700)' : 'var(--text-tertiary)'};`)}>
+                        {groupDiff > 0 ? `+${groupDiff}` : groupDiff < 0 ? groupDiff : '—'}
+                      </td>
+                      <td />
+                    </tr>
+                  )}
+                  </React.Fragment>
                 );
               }) : (
                 <tr>
