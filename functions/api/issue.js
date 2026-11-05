@@ -1,10 +1,11 @@
-import { requirePerm, actorName, nowStr, json } from './_lib.js';
+import { requirePerm, actorName, nowStr, json, claimSubmit, releaseSubmit, DUPLICATE_SUBMIT_ERROR } from './_lib.js';
 
 // POST — issue stock (FEFO or a specific lot). perm: issue
 export async function onRequestPost(context) {
   const denied = await requirePerm(context, { perm: 'issue' });
   if (denied) return denied;
   const { env, request } = context;
+  let fp = null;                                    // this request's claim, once made
   try {
     const { rid, qty, scan, ref, lotId } = await request.json();
     if (!rid || !qty || !scan) return json({ error: 'Missing required fields' }, 400);
@@ -12,6 +13,15 @@ export async function onRequestPost(context) {
     const numRid = +rid;
     const numQty = +qty;
     if (isNaN(numQty) || numQty <= 0) return json({ error: 'Quantity must be a positive number' }, 400);
+
+    // A second identical issue within seconds is a double submit, not a
+    // second bottle: answer it without saving. Two real scans of the same lot
+    // are seconds apart at least, since each goes through the issue form.
+    const by = await actorName(context);           // trust the session, not the client
+    fp = `ISSUE|${numRid}|${lotId || 'FEFO'}|${numQty}|${by}`;
+    if (!(await claimSubmit(env, fp))) {
+      return json({ error: DUPLICATE_SUBMIT_ERROR, duplicate: true }, 409);
+    }
 
     // 1. Fetch available lots (specific lot, or all in FEFO order)
     let query = "SELECT * FROM lots WHERE rid = ? AND qty > 0 AND status = 'ACTIVE'";
@@ -30,6 +40,7 @@ export async function onRequestPost(context) {
       remaining -= take;
     }
     if (remaining > 0) {
+      await releaseSubmit(env, fp);
       return json({ error: `สินค้าในคลังไม่เพียงพอสำหรับเบิกจ่าย (ขาดอีก ${remaining})` }, 400);
     }
 
@@ -47,7 +58,6 @@ export async function onRequestPost(context) {
     // overwriting; the guard means a lot that someone else already drained
     // updates zero rows rather than going negative. D1 runs a batch as one
     // transaction, so all lots move together or not at all.
-    const by = await actorName(context);           // trust the session, not the client
     const at = nowStr();
     const refLabel = ref || (lotId ? `เบิกตรง Lot ${allocation[0].lot}` : 'เบิกจ่าย (FEFO)');
 
@@ -73,6 +83,7 @@ export async function onRequestPost(context) {
             .bind(a.take, a.lotId)
         );
       if (rollback.length) await env.DB.batch(rollback);
+      await releaseSubmit(env, fp);
       return json({
         error: 'มีผู้ใช้อื่นเบิกน้ำยาตัวนี้ตัดหน้าไปพอดี ยอดคงเหลือเปลี่ยนแล้ว กรุณาตรวจสอบยอดและทำรายการใหม่อีกครั้ง'
       }, 409);
@@ -104,6 +115,7 @@ export async function onRequestPost(context) {
 
     return json({ success: true, updatedLots: freshLots, newTransactions: freshTxns });
   } catch (err) {
+    if (fp) await releaseSubmit(env, fp);
     return json({ error: err.message }, 500);
   }
 }

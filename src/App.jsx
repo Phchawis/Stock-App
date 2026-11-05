@@ -4,7 +4,7 @@ import { css } from './css.js';
 import { captureExits, playExits, setViewTransitionActive, switchTheme, collapseRow } from './motion.js';
 import { flushSync } from 'react-dom';
 import { categoryLabel, CATEGORY_CODES, DEFAULT_CATEGORY } from './categories.js';
-import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity, testsPerMainUnit, stickerCount, buddhistYearFix } from './domain/stock.js';
+import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity, testsPerMainUnit, stickerCount, buddhistYearFix, receiveWarnings } from './domain/stock.js';
 import { renderLotSticker, canvasToPngBytes, downloadBlob, safeName } from './stickers/lotSticker.js';
 
 // What kind of material a catalogue entry is. Set from the product name when
@@ -31,6 +31,7 @@ import { Login } from './screens/Login.jsx';
 import { RegisterModal } from './screens/RegisterModal.jsx';
 import { AddUserModal } from './screens/AddUserModal.jsx';
 import { PrintStickerModal } from './screens/PrintStickerModal.jsx';
+import { UpdateBanner } from './components/UpdateBanner.jsx';
 import { SdsModal } from './screens/SdsModal.jsx';
 import { EditLotModal } from './screens/EditLotModal.jsx';
 import { EditTransactionModal } from './screens/EditTransactionModal.jsx';
@@ -1629,13 +1630,28 @@ class App extends React.Component {
     finally { this._saving = false; this.setState({ saving: false }); }
   }
 
-  submitReceive() { return this.guardSave(() => this.doSubmitReceive()); }
+  // `confirmed`: the person has already answered the receipt's warnings.
+  submitReceive(confirmed = false) { return this.guardSave(() => this.doSubmitReceive(confirmed)); }
   submitIssue() { return this.guardSave(() => this.doSubmitIssue()); }
 
-  async doSubmitReceive() {
+  async doSubmitReceive(confirmed) {
     const f = this.state.rf; const rid = +f.rid; const qty = +f.qty;
     if (!rid || !f.lot || !f.expiry || !(qty > 0)) { this.showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warn'); return; }
     if (this.askBuddhistYear(f.expiry, (fixed) => this.setState(s => ({ rf: { ...s.rf, expiry: fixed } }), () => this.submitReceive()))) return;
+    if (!confirmed) {
+      const { block, warnings } = receiveWarnings(
+        { lot: f.lot, expiry: f.expiry },
+        this.state.lots.filter(l => l.rid === rid),
+        { today: this.today, critDays: this.props.criticalDays ?? 30 }
+      );
+      if (block) { this.showToast(block, 'warn'); return; }
+      if (warnings.length) {
+        this.askConfirm('ตรวจสอบก่อนบันทึกรับเข้า',
+          warnings.map(w => '• ' + w).join('\n') + '\n\nถ้าข้อมูลถูกต้องแล้ว กดยืนยันเพื่อบันทึก',
+          () => this.submitReceive(true));
+        return;
+      }
+    }
 
     const payload = {
       rid,
@@ -2029,6 +2045,9 @@ class App extends React.Component {
         return { level: 'ok', text: `สำรองข้อมูลล่าสุด ${h.lastBackupAt} โดย ${h.lastBackupBy || '—'}` };
       })(),
       errorsLast7Days: (S.health && S.role === 'admin') ? S.health.errorsLast7Days : 0,
+      // Lots whose stored figures disagree with their own history (see
+      // lotIntegrity in functions/api/system_events.js). Admins only.
+      lotIntegrity: (S.health && S.role === 'admin' && Array.isArray(S.health.integrity)) ? S.health.integrity : [],
       modalSds: S.modal === 'sds',
       sdsData: S.sdsData || null,
       closeSds: () => this.closeSds(),
@@ -2248,6 +2267,7 @@ class App extends React.Component {
       <DisposeLotModal v={v} />
       <SignatureModal v={v} />
       <Toast v={v} />
+      <UpdateBanner />
       <Login v={v} />
 
       {/* Custom Confirm Dialog Overlay */}
@@ -2262,7 +2282,7 @@ class App extends React.Component {
                 <h3 style={css(`font:var(--fw-bold) var(--text-base)/1.3 var(--font-body); color:var(--text-primary); margin:0;`)}>
                   {v.confirmData.title}
                 </h3>
-                <p style={css(`font:var(--text-xs)/1.5 var(--font-body); color:var(--text-secondary); margin:8px 0 0;`)}>
+                <p style={css(`font:var(--text-xs)/1.5 var(--font-body); color:var(--text-secondary); margin:8px 0 0; white-space:pre-line;`)}>
                   {v.confirmData.message}
                 </p>
               </div>

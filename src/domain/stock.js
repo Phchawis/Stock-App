@@ -164,3 +164,40 @@ export function buddhistYearFix(isoDate) {
   const y = +m[1];
   return y >= 2400 ? `${y - 543}-${m[2]}-${m[3]}` : null;
 }
+
+/**
+ * What to stop or question before a receipt is saved. `lots` are the
+ * reagent's existing lots. Returns { block, warnings }: `block` is a reason
+ * the receipt must not go in; `warnings` need a person to confirm.
+ *
+ * - Expired on arrival is refused (WI-09-157-07-006 §7.2.2).
+ * - Expiring within `critDays` is allowed, with a question.
+ * - A lot number the reagent already has merges into that lot and moves its
+ *   expiry to the one typed; when the two differ, one of them is a typo.
+ * - A lot number shorter or longer than every earlier lot of the reagent is
+ *   usually a digit dropped or doubled: replaying the receipts on record, 10 of
+ *   the 12 it would have queried were typos (6941UQ12 beside 69414UQ12,
+ *   202641942 beside 2026010638); the other two were deliberate suffixes.
+ */
+export function receiveWarnings({ lot, expiry }, lots = [], { today = new Date(), critDays = 30 } = {}) {
+  const warnings = [];
+  const d = daysUntil(expiry, today);
+  if (d !== null && d < 0) {
+    return { block: `น้ำยาหมดอายุแล้ว (${expiry}) ไม่รับเข้าคลังตามเกณฑ์การปฏิเสธการรับน้ำยา`, warnings };
+  }
+  if (d !== null && d <= critDays) warnings.push(`วันหมดอายุ ${expiry} เหลืออีก ${d} วัน`);
+
+  const name = String(lot || '').trim();
+  const same = lots.find(l => l.lot === name);
+  if (same && same.expiry !== expiry) {
+    warnings.push(`Lot ${name} มีอยู่แล้ว วันหมดอายุเดิม ${same.expiry} จะถูกเปลี่ยนเป็น ${expiry}`);
+  }
+  const others = lots.filter(l => l.lot !== name).map(l => String(l.lot).length);
+  if (!same && others.length >= 2) {
+    const lo = Math.min(...others), hi = Math.max(...others);
+    if (name.length < lo || name.length > hi) {
+      warnings.push(`เลข Lot ${name} ยาว ${name.length} ตัว แต่ Lot ก่อนหน้าของน้ำยานี้ยาว ${lo === hi ? lo : `${lo}–${hi}`} ตัว`);
+    }
+  }
+  return { block: null, warnings };
+}

@@ -36,10 +36,53 @@ export async function onRequestGet(context) {
       lastBackupBy: lastBackup ? lastBackup.by : null,
       errorsLast7Days: errorCount ? errorCount.n : 0,
       recentErrors,
+      integrity: await lotIntegrity(env),
     });
   } catch (err) {
     return json({ error: err.message }, 500);
   }
+}
+
+// Lots whose stored figures disagree with their own movement history, or
+// whose expiry cannot be right. Each of these was found by hand once:
+//
+//   balance ≠ sum of movements   a double submit raced the old receive and
+//                                issue endpoints: two log rows, one change
+//   total received out of range  recv is every receipt, plus whatever a stock
+//                                count added (reconcile.js raises recv to the
+//                                counted qty when the count is higher), so it
+//                                sits between those two sums; outside them it
+//                                was edited or lost
+//   expiry year outside 2000–2399  a Buddhist-era year typed into a field
+//                                Chrome shows in พ.ศ.
+//
+// Checked on every load so a fault shows the day it happens rather than at the
+// next count. The dashboard shows it to admins.
+async function lotIntegrity(env) {
+  const { results } = await env.DB.prepare(
+    `SELECT l.id, r.th, l.lot, l.expiry, l.qty, l.recv,
+            COALESCE(t.net, 0) AS net, COALESCE(t.rcv, 0) AS rcv, COALESCE(t.adj_up, 0) AS adjUp
+       FROM lots l
+       JOIN reagents r ON r.id = l.rid
+       LEFT JOIN (SELECT lot_id,
+                         SUM(qty) AS net,
+                         SUM(CASE WHEN type = 'RECEIVE' THEN qty ELSE 0 END) AS rcv,
+                         SUM(CASE WHEN type = 'ADJUST' AND qty > 0 THEN qty ELSE 0 END) AS adj_up
+                    FROM transactions GROUP BY lot_id) t ON t.lot_id = l.id
+      WHERE l.qty <> COALESCE(t.net, 0)
+         OR l.recv < COALESCE(t.rcv, 0)
+         OR l.recv > COALESCE(t.rcv, 0) + COALESCE(t.adj_up, 0)
+         OR l.expiry >= '2400' OR l.expiry < '2000'
+      ORDER BY r.th, l.expiry
+      LIMIT 50`
+  ).all();
+  return results.map((x) => {
+    const problems = [];
+    if (x.qty !== x.net) problems.push(`คงเหลือในระบบ ${x.qty} แต่ประวัติการเคลื่อนไหวรวมได้ ${x.net}`);
+    if (x.recv < x.rcv || x.recv > x.rcv + x.adjUp) problems.push(`ยอดรับสะสม ${x.recv} แต่ประวัติรับเข้ารวม ${x.rcv}`);
+    if (x.expiry >= '2400' || x.expiry < '2000') problems.push(`วันหมดอายุ ${x.expiry} ปีไม่ถูกต้อง`);
+    return { lotId: x.id, reagent: x.th, lot: x.lot, qty: x.qty, problems };
+  });
 }
 
 // POST — record an event. Any signed-in user may report a client error: the

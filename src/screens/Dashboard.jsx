@@ -10,6 +10,7 @@ export function Dashboard({ v }) {
     go, isDash, title, dashAlerts, dashLow,
     recent, usageList, ic, user, usersList,
     deadStockReagents, dynamicMinSuggestions, backupHealth, errorsLast7Days,
+    lotIntegrity,
   } = v;
 
   const [period, setPeriod] = React.useState('6m');
@@ -263,6 +264,22 @@ export function Dashboard({ v }) {
           <div style={css(`background:var(--red-100); border:1px solid var(--red-fill); border-radius:var(--radius-md); padding:12px 16px; display:flex; align-items:center; gap:10px; font:var(--text-xs)/1.5 var(--font-body); color:var(--red-700);`)}>
             <span>⚠️</span><span style={css(`flex:1;`)}>ระบบพบข้อผิดพลาดฝั่งผู้ใช้ {errorsLast7Days} ครั้งในรอบ 7 วัน — หากเกิดซ้ำ กรุณาแจ้งผู้พัฒนาพร้อมบอกว่าทำอะไรอยู่ตอนนั้น</span>
           </div>
+        )}
+        {lotIntegrity && lotIntegrity.length > 0 && (
+          <details style={css(`background:var(--amber-100); border:1px solid var(--amber-fill); border-radius:var(--radius-md); padding:12px 16px; font:var(--text-xs)/1.5 var(--font-body); color:var(--amber-700);`)}>
+            <summary style={css(`cursor:pointer; display:flex; align-items:center; gap:10px; list-style:none;`)}>
+              <span>🔎</span>
+              <span style={css(`flex:1;`)}>ตรวจพบ {lotIntegrity.length} Lot ที่ข้อมูลไม่ตรงกับประวัติการเคลื่อนไหว — กดเพื่อดูรายการ</span>
+            </summary>
+            <ul style={css(`margin:10px 0 0; padding-left:20px; display:flex; flex-direction:column; gap:6px; color:var(--text-primary);`)}>
+              {lotIntegrity.map(x => (
+                <li key={x.lotId}>
+                  <strong>{x.reagent}</strong> · Lot <span style={css(`font-family:var(--font-mono);`)}>{x.lot}</span> — {x.problems.join(' · ')}
+                </li>
+              ))}
+            </ul>
+            <div style={css(`margin-top:10px; color:var(--text-secondary);`)}>แก้ด้วยการตรวจนับคลัง หรือแจ้งผู้ดูแลระบบให้ตรวจสอบประวัติของ Lot นั้น</div>
+          </details>
         )}
 
         {/* Dashboard Header & Filter action bar */}

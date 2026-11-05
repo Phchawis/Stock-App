@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   daysUntil, severityOf, dayLabel, activeLots, onHand, earliestExpiry,
-  planFefo, signedQuantity, lotViolations, statusFor, SEVERITY, testsPerMainUnit, stickerCount, buddhistYearFix,
+  planFefo, signedQuantity, lotViolations, statusFor, SEVERITY, testsPerMainUnit, stickerCount, buddhistYearFix, receiveWarnings,
 } from './stock.js';
 
 // Fixed reference date so these assertions mean the same thing next year.
@@ -255,5 +255,33 @@ describe('buddhistYearFix', () => {
     expect(buddhistYearFix('')).toBeNull();
     expect(buddhistYearFix(undefined)).toBeNull();
     expect(buddhistYearFix('18/04/2570')).toBeNull();
+  });
+});
+
+describe('receiveWarnings', () => {
+  const today = new Date('2026-11-05T09:00:00');
+  const lots = [{ lot: '2026010638', expiry: '2027-05-01' }, { lot: '2026030856', expiry: '2027-03-07' }];
+  it('refuses a lot that has already expired', () => {
+    expect(receiveWarnings({ lot: 'X1', expiry: '2026-11-04' }, [], { today }).block).toMatch('หมดอายุแล้ว');
+  });
+  it('asks about a short-dated lot', () => {
+    const r = receiveWarnings({ lot: 'X1', expiry: '2026-11-20' }, [], { today });
+    expect(r.block).toBeNull();
+    expect(r.warnings).toHaveLength(1);
+  });
+  it('asks when a known lot comes in with a different expiry', () => {
+    const r = receiveWarnings({ lot: '2026010638', expiry: '2027-06-01' }, lots, { today });
+    expect(r.warnings[0]).toMatch('2027-05-01');
+  });
+  it('says nothing for a known lot with the same expiry', () => {
+    expect(receiveWarnings({ lot: '2026010638', expiry: '2027-05-01' }, lots, { today }).warnings).toEqual([]);
+  });
+  it('asks about a lot number shorter or longer than every earlier one', () => {
+    expect(receiveWarnings({ lot: '202641942', expiry: '2027-04-18' }, lots, { today }).warnings).toHaveLength(1);
+    expect(receiveWarnings({ lot: '20260419421', expiry: '2027-04-18' }, lots, { today }).warnings).toHaveLength(1);
+    expect(receiveWarnings({ lot: '2026041942', expiry: '2027-04-18' }, lots, { today }).warnings).toEqual([]);
+  });
+  it('does not judge length with fewer than two earlier lots', () => {
+    expect(receiveWarnings({ lot: 'AB', expiry: '2027-04-18' }, lots.slice(0, 1), { today }).warnings).toEqual([]);
   });
 });

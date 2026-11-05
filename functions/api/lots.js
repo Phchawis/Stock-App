@@ -1,4 +1,4 @@
-import { requirePerm, actorName, nowStr, json, expiryProblem } from './_lib.js';
+import { requirePerm, actorName, nowStr, json, expiryProblem, claimSubmit, releaseSubmit, DUPLICATE_SUBMIT_ERROR } from './_lib.js';
 
 export async function onRequestGet(context) {
   try {
@@ -14,6 +14,7 @@ export async function onRequestPost(context) {
   const denied = await requirePerm(context, { perm: 'receive' });
   if (denied) return denied;
   const { env, request } = context;
+  let fp = null;                                    // this request's claim, once made
   try {
     const { rid, lot, expiry, qty, loc } = await request.json();
     if (!rid || !lot || !expiry || !qty || !loc) {
@@ -27,6 +28,14 @@ export async function onRequestPost(context) {
     const reagent = await env.DB.prepare('SELECT supplier FROM reagents WHERE id = ?').bind(rid).first();
     const supplierRef = reagent && reagent.supplier ? `รับจาก ${reagent.supplier}` : 'รับเข้าใหม่';
     const by = await actorName(context);           // trust the session, not the client
+
+    // A second identical receipt within seconds is a double submit, not a
+    // second delivery: answer it without saving. See claimSubmit().
+    fp = `RECEIVE|${rid}|${lot}|${numQty}|${by}`;
+    if (!(await claimSubmit(env, fp))) {
+      fp = null;                                    // not ours to release
+      return json({ error: DUPLICATE_SUBMIT_ERROR, duplicate: true }, 409);
+    }
 
     // Same reagent + same lot number = the same manufacturer batch (identical
     // expiry), so receiving it again merges into the existing lot record rather
@@ -72,6 +81,7 @@ export async function onRequestPost(context) {
     const merged = !(created.meta && created.meta.changes > 0);
     return json({ ...row, merged }, merged ? 200 : 201);
   } catch (err) {
+    if (fp) await releaseSubmit(env, fp);
     return json({ error: err.message }, 500);
   }
 }

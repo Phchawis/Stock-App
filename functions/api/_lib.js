@@ -168,6 +168,31 @@ export function expiryProblem(expiry) {
   return null;
 }
 
+// Claims a stock movement for this request, or returns false when the same
+// movement (same fingerprint) was claimed within the last `windowMs`. One
+// upsert, so two identical requests arriving together cannot both win: D1
+// runs statements one at a time, the first stores its time, and the second
+// finds a stored time inside the window and changes nothing.
+export const SUBMIT_WINDOW_MS = 3000;
+export async function claimSubmit(env, fp, windowMs = SUBMIT_WINDOW_MS) {
+  const now = Date.now();
+  const res = await env.DB.prepare(
+    `INSERT INTO recent_submits (fp, at_ms) VALUES (?, ?)
+     ON CONFLICT(fp) DO UPDATE SET at_ms = excluded.at_ms
+      WHERE recent_submits.at_ms <= excluded.at_ms - ?`
+  ).bind(fp, now, windowMs).run();
+  // Housekeeping: nothing older than a minute is needed.
+  await env.DB.prepare('DELETE FROM recent_submits WHERE at_ms < ?').bind(now - 60000).run();
+  return !!(res.meta && res.meta.changes > 0);
+}
+// Gives a claim back when the movement it was for did not happen (a refusal
+// or an error), so an immediate retry is not mistaken for a duplicate.
+export async function releaseSubmit(env, fp) {
+  try { await env.DB.prepare('DELETE FROM recent_submits WHERE fp = ?').bind(fp).run(); } catch (e) { /* best effort */ }
+}
+export const DUPLICATE_SUBMIT_ERROR =
+  'รายการเดียวกันนี้เพิ่งบันทึกไปเมื่อสักครู่ (กดซ้ำ) ระบบจึงไม่บันทึกซ้ำ กรุณาตรวจสอบในประวัติการเคลื่อนไหว';
+
 // 'YYYY-MM-DD HH:MM' in Asia/Bangkok (UTC+7). Workers run in UTC.
 export function nowStr() {
   return new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 16).replace('T', ' ');
