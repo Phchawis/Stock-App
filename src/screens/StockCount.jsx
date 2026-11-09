@@ -4,10 +4,31 @@ import { css } from '../css.js';
 export function StockCount({ v }) {
   const {
     isStockCount, stockCountList, stockCountForm, updateStockCountRow,
-    submitStockCount, go, ic
+    submitStockCount, go, ic, canReceive, openCountReceive, findLotByCode,
   } = v;
 
   const [scannerInput, setScannerInput] = React.useState('');
+  // Reagents whose lots are unfolded, by reagent id.
+  const [expanded, setExpanded] = React.useState(() => new Set());
+  // A scanned code that matched no lot in the count, offered as a receipt.
+  const [unknownScan, setUnknownScan] = React.useState(null);
+  const toggleGroup = (rid) => setExpanded(prev => {
+    const next = new Set(prev);
+    if (next.has(rid)) next.delete(rid); else next.add(rid);
+    return next;
+  });
+  // Unfold the lot's reagent, then focus its count. The row only exists once
+  // the reagent is unfolded, hence the wait.
+  const focusLot = (lot) => {
+    setUnknownScan(null);
+    setExpanded(prev => (prev.has(lot.rid) ? prev : new Set(prev).add(lot.rid)));
+    setHighlightedLotId(lot.lotId);
+    setTimeout(() => {
+      const el = inputRefs.current[lot.lotId];
+      if (el) { el.focus(); el.select(); }
+    }, 80);
+    setTimeout(() => setHighlightedLotId(prev => (prev === lot.lotId ? null : prev)), 3500);
+  };
   const [highlightedLotId, setHighlightedLotId] = React.useState(null);
   const inputRefs = React.useRef({});
   
@@ -51,64 +72,24 @@ export function StockCount({ v }) {
       },
       (msg) => {
         const code = msg.trim();
-        const matched = stockCountList.find(l => l.qr === code || l.lot === code);
-        if (matched) {
-          if (navigator.vibrate) navigator.vibrate([150]);
-          setJustScanned(true);
-          setHighlightedLotId(matched.lotId);
-          setScannerInput('');
-          
-          setTimeout(() => {
-            if (active) {
-              setShowCamera(false);
-              setJustScanned(false);
-              const inputEl = inputRefs.current[matched.lotId];
-              if (inputEl) {
-                inputEl.focus();
-                inputEl.select();
-              }
-            }
-          }, 550);
-
-          setTimeout(() => {
-            setHighlightedLotId(prev => prev === matched.lotId ? null : prev);
-          }, 3500);
-        } else {
-          const matchedSub = stockCountList.find(l => 
-            l.qr.toLowerCase().includes(code.toLowerCase()) || 
-            l.lot.toLowerCase().includes(code.toLowerCase())
-          );
-          if (matchedSub) {
-            if (navigator.vibrate) navigator.vibrate([150]);
-            setJustScanned(true);
-            setHighlightedLotId(matchedSub.lotId);
-            setScannerInput('');
-
-            setTimeout(() => {
-              if (active) {
-                setShowCamera(false);
-                setJustScanned(false);
-                const inputEl = inputRefs.current[matchedSub.lotId];
-                if (inputEl) {
-                  inputEl.focus();
-                  inputEl.select();
-                }
-              }
-            }, 550);
-
-            setTimeout(() => {
-              setHighlightedLotId(prev => prev === matchedSub.lotId ? null : prev);
-            }, 3500);
-          } else {
-            if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-            setCameraError('ไม่พบรายการน้ำยาหรือ Lot นี้ในคิวตรวจนับ');
-            setTimeout(() => {
-              if (active) {
-                setCameraError(null);
-              }
-            }, 3000);
-          }
-        }
+        const matched = stockCountList.find(l => l.qr === code || l.lot === code)
+          || stockCountList.find(l =>
+            l.qr.toLowerCase().includes(code.toLowerCase()) ||
+            l.lot.toLowerCase().includes(code.toLowerCase()));
+        if (navigator.vibrate) navigator.vibrate(matched ? [150] : [50, 50, 50]);
+        setScannerInput('');
+        if (matched) setJustScanned(true);
+        else setCameraError('Lot นี้ไม่อยู่ในรายการตรวจนับ');
+        // Close the camera either way: a match goes to its row, a code the
+        // count doesn't know becomes an offer to receive it.
+        setTimeout(() => {
+          if (!active) return;
+          setShowCamera(false);
+          setJustScanned(false);
+          setCameraError(null);
+          if (matched) focusLot(matched);
+          else setUnknownScan(code);
+        }, matched ? 550 : 900);
       },
       () => {}
     ).then(() => {
@@ -198,20 +179,8 @@ export function StockCount({ v }) {
     // Instant match on QR code or Lot number
     const matched = stockCountList.find(l => l.qr === val.trim() || l.lot === val.trim());
     if (matched) {
-      setHighlightedLotId(matched.lotId);
-      setScannerInput(''); // Reset field
-      setTimeout(() => {
-        const inputEl = inputRefs.current[matched.lotId];
-        if (inputEl) {
-          inputEl.focus();
-          inputEl.select();
-        }
-      }, 50);
-      
-      // Flash highlight
-      setTimeout(() => {
-        setHighlightedLotId(prev => prev === matched.lotId ? null : prev);
-      }, 3000);
+      setScannerInput('');
+      focusLot(matched);
     }
   };
 
@@ -221,30 +190,18 @@ export function StockCount({ v }) {
       const val = scannerInput.trim();
       if (!val) return;
 
-      const matched = stockCountList.find(l => 
-        l.qr.toLowerCase().includes(val.toLowerCase()) || 
+      const matched = stockCountList.find(l =>
+        l.qr.toLowerCase().includes(val.toLowerCase()) ||
         l.lot.toLowerCase().includes(val.toLowerCase())
       );
-
-      if (matched) {
-        setHighlightedLotId(matched.lotId);
-        setScannerInput('');
-        setTimeout(() => {
-          const inputEl = inputRefs.current[matched.lotId];
-          if (inputEl) {
-            inputEl.focus();
-            inputEl.select();
-          }
-        }, 50);
-        setTimeout(() => {
-          setHighlightedLotId(prev => prev === matched.lotId ? null : prev);
-        }, 3000);
-      }
+      setScannerInput('');
+      if (matched) focusLot(matched);
+      else setUnknownScan(val);
     }
   };
 
   // Per-reagent totals of what the system holds and what has been counted so
-  // far, for the total row under a reagent with several lots.
+  // far, for the header row of a reagent with several lots.
   const groups = new Map();
   for (const it of stockCountList) {
     const g = groups.get(it.rid) || { lots: 0, system: 0, counted: 0 };
@@ -253,6 +210,90 @@ export function StockCount({ v }) {
     g.lots += 1; g.system += it.systemQty; g.counted += n;
     groups.set(it.rid, g);
   }
+
+  // The list arrives sorted by reagent; consecutive items of one reagent
+  // make a section.
+  const sections = [];
+  for (const it of stockCountList) {
+    const last = sections[sections.length - 1];
+    if (last && last.rid === it.rid) last.items.push(it);
+    else sections.push({ rid: it.rid, name: it.reagentName, unit: it.unit, items: [it] });
+  }
+
+  // --text-disabled is for controls that cannot be used, which is what
+  // exempts them from the contrast floor. The dash is ordinary text saying
+  // "no difference" and sat at 3.4:1 in the light theme; tertiary is the token
+  // for de-emphasised text that still has to be read.
+  const diffBadgeFor = (diff) => {
+    let badge = <span style={css(`color:var(--text-tertiary); font-family:var(--font-mono);`)}>—</span>;
+    if (diff > 0) {
+      badge = <span style={css(`padding:3px 8px; border-radius:var(--radius-pill); background:var(--green-100); color:var(--green-700); font:var(--fw-bold) var(--text-2xs) var(--font-mono);`)}>+{diff}</span>;
+    } else if (diff < 0) {
+      badge = <span style={css(`padding:3px 8px; border-radius:var(--radius-pill); background:var(--red-100); color:var(--red-700); font:var(--fw-bold) var(--text-2xs) var(--font-mono);`)}>{diff}</span>;
+    }
+    return badge;
+  };
+
+  const renderLotRow = (item, inGroup) => {
+    const row = stockCountForm[item.lotId] || { qty: String(item.systemQty), reason: '' };
+    const numVal = row.qty === '' ? item.systemQty : +row.qty;
+    const diff = isNaN(numVal) ? 0 : numVal - item.systemQty;
+    const isHighlighted = highlightedLotId === item.lotId;
+    const diffBadge = diffBadgeFor(diff);
+    return (
+      <tr
+        key={item.lotId}
+        className={inGroup ? 'sc-in-group' : undefined}
+        style={css(`border-bottom:1px solid var(--border-subtle); background:${isHighlighted ? 'rgba(43,166,198,0.15)' : diff !== 0 ? 'rgba(91,192,217,0.03)' : 'transparent'}; transition:all 0.3s ease;`)}
+      >
+        <td data-label="ชื่อน้ำยา" style={css(`padding:12px 18px 12px ${inGroup ? 34 : 18}px; font:var(--fw-semibold) var(--text-sm)/1.4 var(--font-body); color:${inGroup ? 'var(--text-tertiary)' : 'var(--text-primary)'};`)}>
+          {item.reagentName}
+        </td>
+        {/* Both shorthands named the family first and again at the
+            end, which is not a valid `font:` — the browser dropped
+            the whole declaration, so the lot number and the expiry
+            date have never actually been monospace. They are the
+            two values somebody reads off a label while counting, so
+            the family is what matters here; it is set on its own
+            rather than restoring the shorthand, which would also
+            shrink these columns back down. */}
+        <td data-label="Lot" style={css(`padding:12px 18px; font-family:var(--font-mono); color:var(--text-secondary);`)}>
+          {item.lot}
+        </td>
+        <td data-label="วันหมดอายุ" style={css(`padding:12px 18px; font-family:var(--font-mono); color:var(--text-secondary);`)}>
+          {item.expiry}
+        </td>
+        <td data-label="จำนวนในระบบ" style={css(`padding:12px 18px; text-align:right; font:var(--fw-semibold) var(--text-xs) var(--font-mono); color:var(--text-secondary);`)}>
+          {item.systemQty} <span style={css(`font:var(--text-2xs) var(--font-body); color:var(--text-tertiary);`)}>{item.unit}</span>
+        </td>
+        <td data-label="นับได้จริง" style={css(`padding:8px 18px; text-align:center;`)}>
+          <input 
+            type="number"
+            aria-label={`จำนวนนับจริง Lot ${item.lot}`}
+            min="0"
+            value={row.qty}
+            ref={el => { inputRefs.current[item.lotId] = el; }}
+            onChange={(e) => updateStockCountRow(item.lotId, e.target.value, undefined)}
+            style={css(`width:80px; padding:6px 8px; border:1px solid ${isHighlighted ? 'var(--brand-700)' : diff !== 0 ? 'var(--brand-700)' : 'var(--border-default)'}; border-radius:var(--radius-sm); background:var(--white); color:var(--text-primary); font:var(--fw-bold) var(--text-xs) var(--font-mono); text-align:center; outline:none; transition:all 0.2s;`)}
+          />
+        </td>
+        <td data-label="ส่วนต่าง" style={css(`padding:12px 18px; text-align:center;`)}>
+          {diffBadge}
+        </td>
+        <td data-label="หมายเหตุ" style={css(`padding:8px 18px;`)}>
+          <input 
+            type="text"
+            aria-label={`หมายเหตุ Lot ${item.lot}`}
+            placeholder="เช่น นับคลาดเคลื่อน / คีย์ผิด"
+            value={row.reason}
+            disabled={diff === 0}
+            onChange={(e) => updateStockCountRow(item.lotId, undefined, e.target.value)}
+            style={css(`width:100%; padding:6px 10px; border:1px solid var(--border-default); border-radius:var(--radius-sm); background:${diff === 0 ? 'var(--surface-sunken)' : 'var(--white)'}; color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none;`)}
+          />
+        </td>
+      </tr>
+    );
+  };
 
   return (
     <div className="qms-rise page-shell" style={css(`gap:20px;`)}>
@@ -313,6 +354,60 @@ export function StockCount({ v }) {
         </button>
       </div>
 
+      {unknownScan && (
+        <div role="status" style={css(`display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; padding:12px 16px; background:var(--amber-100); border:1px solid var(--amber-fill); border-radius:var(--radius-md); font:var(--text-xs)/1.5 var(--font-body); color:var(--amber-700);`)}>
+          <span style={css(`flex:1; min-width:220px;`)}>
+            ไม่พบ <strong style={css(`font-family:var(--font-mono);`)}>{unknownScan}</strong> ในรายการตรวจนับ ถ้าเป็นของที่อยู่บนชั้นจริง ให้รับเข้าเป็นของที่พบตอนตรวจนับ
+          </span>
+          {canReceive && (
+            <button
+              type="button"
+              onClick={() => {
+                const known = findLotByCode(unknownScan);
+                const lot = known ? known.lot : unknownScan.replace(/^QR-/i, '');
+                setUnknownScan(null);
+                openCountReceive({ rid: known ? known.rid : null, lot });
+              }}
+              style={css(`padding:8px 14px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); white-space:nowrap;`)}
+            >
+              รับเข้า Lot นี้
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setUnknownScan(null)}
+            style={css(`padding:8px 14px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body);`)}
+          >
+            ปิด
+          </button>
+        </div>
+      )}
+
+      {/* What the list holds, and the controls that act on all of it */}
+      <div style={css(`display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px;`)}>
+        <span style={css(`flex:1; min-width:200px; font:var(--text-xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>
+          {sections.length} น้ำยา · {stockCountList.length} Lot{sections.filter(x => x.items.length > 1).length > 0 ? ` · ${sections.filter(x => x.items.length > 1).length} น้ำยามีหลาย Lot (พับไว้ กดแสดงเพื่อนับแยก)` : ''}
+        </span>
+        {sections.filter(x => x.items.length > 1).length > 0 && (
+          <button
+            type="button"
+            onClick={() => setExpanded(prev => (prev.size > 0 ? new Set() : new Set(sections.filter(x => x.items.length > 1).map(x => x.rid))))}
+            style={css(`padding:8px 14px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-primary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body);`)}
+          >
+            {expanded.size > 0 ? 'พับทุกน้ำยา' : 'แสดงทุก Lot'}
+          </button>
+        )}
+        {canReceive && (
+          <button
+            type="button"
+            onClick={() => openCountReceive({})}
+            style={css(`padding:8px 14px; border-radius:var(--radius-md); border:1px dashed var(--border-strong); background:transparent; color:var(--text-primary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body);`)}
+          >
+            + เพิ่ม Lot ที่ไม่มีในรายการ
+          </button>
+        )}
+      </div>
+
       {/* Main Table Card */}
       <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); box-shadow:var(--shadow-md); overflow:hidden;`)}>
         <div className="perm-matrix-scroll" style={css(`overflow-x:auto;`)}>
@@ -334,105 +429,55 @@ export function StockCount({ v }) {
               </tr>
             </thead>
             <tbody>
-              {stockCountList.length > 0 ? stockCountList.map((item, idx) => {
-                const row = stockCountForm[item.lotId] || { qty: String(item.systemQty), reason: '' };
-                const numVal = row.qty === '' ? item.systemQty : +row.qty;
-                const diff = isNaN(numVal) ? 0 : numVal - item.systemQty;
-                const isHighlighted = highlightedLotId === item.lotId;
-                // The list arrives grouped by reagent. A reagent with several
-                // lots names its lot count on the first row and closes with a
-                // total, since a shelf is usually counted per reagent, not per lot.
-                const group = groups.get(item.rid);
-                const firstOfGroup = idx === 0 || stockCountList[idx - 1].rid !== item.rid;
-                const lastOfGroup = idx === stockCountList.length - 1 || stockCountList[idx + 1].rid !== item.rid;
-                const multi = group.lots > 1;
-
-                // --text-disabled is for controls that cannot be used, which is
-                // what exempts them from the contrast floor. This dash is
-                // ordinary text saying "not counted yet" and sat at 3.4:1 on the
-                // light theme; tertiary is the token for de-emphasised text that
-                // still has to be read. The font shorthand also named the family
-                // before the size, which is invalid, so the browser dropped the
-                // whole declaration — the family is set on its own now.
-                let diffBadge = <span style={css(`color:var(--text-tertiary); font-family:var(--font-mono);`)}>—</span>;
-                if (diff > 0) {
-                  diffBadge = <span style={css(`padding:3px 8px; border-radius:var(--radius-pill); background:var(--green-100); color:var(--green-700); font:var(--fw-bold) var(--text-2xs) var(--font-mono);`)}>+{diff}</span>;
-                } else if (diff < 0) {
-                  diffBadge = <span style={css(`padding:3px 8px; border-radius:var(--radius-pill); background:var(--red-100); color:var(--red-700); font:var(--fw-bold) var(--text-2xs) var(--font-mono);`)}>{diff}</span>;
-                }
-
-                const groupDiff = group.counted - group.system;
+              {stockCountList.length > 0 ? sections.map((sec) => {
+                // A reagent with one lot is one row. A reagent with several
+                // gets a header row carrying its totals, folded by default so
+                // the page reads one line per reagent; unfolding shows a row
+                // per lot, which is where the counting is entered.
+                if (sec.items.length === 1) return renderLotRow(sec.items[0], false);
+                const g = groups.get(sec.rid);
+                const open = expanded.has(sec.rid);
+                const gd = g.counted - g.system;
                 return (
-                  <React.Fragment key={item.lotId}>
-                  <tr 
-                    style={css(`border-bottom:1px solid var(--border-subtle); background:${isHighlighted ? 'rgba(43,166,198,0.15)' : diff !== 0 ? 'rgba(91,192,217,0.03)' : 'transparent'}; transition:all 0.3s ease;`)}
-                  >
-                    <td data-label="ชื่อน้ำยา" style={css(`padding:12px 18px; font:var(--fw-semibold) var(--text-sm)/1.4 var(--font-body); color:${firstOfGroup ? 'var(--text-primary)' : 'var(--text-tertiary)'};`)}>
-                      {item.reagentName}
-                      {multi && firstOfGroup && (
-                        <span style={css(`display:block; font:var(--fw-regular, 400) var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>{group.lots} Lot · ตรวจนับแยกตามเลข Lot บนฉลาก</span>
-                      )}
-                    </td>
-                    {/* Both shorthands named the family first and again at the
-                        end, which is not a valid `font:` — the browser dropped
-                        the whole declaration, so the lot number and the expiry
-                        date have never actually been monospace. They are the
-                        two values somebody reads off a label while counting, so
-                        the family is what matters here; it is set on its own
-                        rather than restoring the shorthand, which would also
-                        shrink these columns back down. */}
-                    <td data-label="Lot" style={css(`padding:12px 18px; font-family:var(--font-mono); color:var(--text-secondary);`)}>
-                      {item.lot}
-                    </td>
-                    <td data-label="วันหมดอายุ" style={css(`padding:12px 18px; font-family:var(--font-mono); color:var(--text-secondary);`)}>
-                      {item.expiry}
-                    </td>
-                    <td data-label="จำนวนในระบบ" style={css(`padding:12px 18px; text-align:right; font:var(--fw-semibold) var(--text-xs) var(--font-mono); color:var(--text-secondary);`)}>
-                      {item.systemQty} <span style={css(`font:var(--text-2xs) var(--font-body); color:var(--text-tertiary);`)}>{item.unit}</span>
-                    </td>
-                    <td data-label="นับได้จริง" style={css(`padding:8px 18px; text-align:center;`)}>
-                      <input 
-                        type="number"
-                        aria-label={`จำนวนนับจริง Lot ${item.lot}`}
-                        min="0"
-                        value={row.qty}
-                        ref={el => { inputRefs.current[item.lotId] = el; }}
-                        onChange={(e) => updateStockCountRow(item.lotId, e.target.value, undefined)}
-                        style={css(`width:80px; padding:6px 8px; border:1px solid ${isHighlighted ? 'var(--brand-700)' : diff !== 0 ? 'var(--brand-700)' : 'var(--border-default)'}; border-radius:var(--radius-sm); background:var(--white); color:var(--text-primary); font:var(--fw-bold) var(--text-xs) var(--font-mono); text-align:center; outline:none; transition:all 0.2s;`)}
-                      />
-                    </td>
-                    <td data-label="ส่วนต่าง" style={css(`padding:12px 18px; text-align:center;`)}>
-                      {diffBadge}
-                    </td>
-                    <td data-label="หมายเหตุ" style={css(`padding:8px 18px;`)}>
-                      <input 
-                        type="text"
-                        aria-label={`หมายเหตุ Lot ${item.lot}`}
-                        placeholder="เช่น นับคลาดเคลื่อน / คีย์ผิด"
-                        value={row.reason}
-                        disabled={diff === 0}
-                        onChange={(e) => updateStockCountRow(item.lotId, undefined, e.target.value)}
-                        style={css(`width:100%; padding:6px 10px; border:1px solid var(--border-default); border-radius:var(--radius-sm); background:${diff === 0 ? 'var(--surface-sunken)' : 'var(--white)'}; color:var(--text-primary); font-size:var(--text-xs); font-family:var(--font-body); outline:none;`)}
-                      />
-                    </td>
-                  </tr>
-                  {multi && lastOfGroup && (
-                    <tr className="sc-subtotal" style={css(`border-bottom:2px solid var(--border-default); background:var(--surface-sunken);`)}>
-                      <td colSpan="3" style={css(`padding:10px 18px; font:var(--fw-semibold) var(--text-xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>
-                        รวม {item.reagentName} · {group.lots} Lot
+                  <React.Fragment key={'g' + sec.rid}>
+                    <tr className="sc-group" style={css(`border-bottom:1px solid var(--border-subtle); background:${gd !== 0 ? 'var(--surface-sunken)' : 'transparent'};`)}>
+                      <td style={css(`padding:12px 18px; font:var(--fw-semibold) var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>
+                        {sec.name}
+                        <span style={css(`display:block; font:var(--fw-regular) var(--text-2xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>{g.lots} Lot · นับแยกตามเลข Lot บนฉลาก</span>
                       </td>
-                      <td data-label="รวมในระบบ" style={css(`padding:10px 18px; text-align:right; font:var(--fw-bold) var(--text-xs) var(--font-mono); color:var(--text-primary);`)}>
-                        {group.system} <span style={css(`font:var(--text-2xs) var(--font-body); color:var(--text-tertiary);`)}>{item.unit}</span>
+                      <td colSpan="2" style={css(`padding:8px 18px;`)}>
+                        <div style={css(`display:flex; flex-wrap:wrap; gap:8px;`)}>
+                          <button
+                            type="button"
+                            aria-expanded={open}
+                            onClick={() => toggleGroup(sec.rid)}
+                            style={css(`padding:6px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-default); background:var(--white); color:var(--text-primary); cursor:pointer; font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); white-space:nowrap;`)}
+                          >
+                            {open ? `ซ่อน ${g.lots} Lot ▴` : `แสดง ${g.lots} Lot ▾`}
+                          </button>
+                          {canReceive && (
+                            <button
+                              type="button"
+                              onClick={() => openCountReceive({ rid: sec.rid })}
+                              style={css(`padding:6px 12px; border-radius:var(--radius-sm); border:1px dashed var(--border-strong); background:transparent; color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); white-space:nowrap;`)}
+                            >
+                              + Lot ที่ไม่มีในรายการ
+                            </button>
+                          )}
+                        </div>
                       </td>
-                      <td data-label="รวมนับได้" style={css(`padding:10px 18px; text-align:center; font:var(--fw-bold) var(--text-xs) var(--font-mono); color:var(--text-primary);`)}>
-                        {group.counted}
+                      <td data-label="รวมในระบบ" style={css(`padding:12px 18px; text-align:right; font:var(--fw-bold) var(--text-xs) var(--font-mono); color:var(--text-primary);`)}>
+                        {g.system} <span style={css(`font:var(--text-2xs) var(--font-body); color:var(--text-tertiary);`)}>{sec.unit}</span>
                       </td>
-                      <td data-label="ส่วนต่างรวม" style={css(`padding:10px 18px; text-align:center; font:var(--fw-bold) var(--text-2xs) var(--font-mono); color:${groupDiff > 0 ? 'var(--green-700)' : groupDiff < 0 ? 'var(--red-700)' : 'var(--text-tertiary)'};`)}>
-                        {groupDiff > 0 ? `+${groupDiff}` : groupDiff < 0 ? groupDiff : '—'}
+                      <td data-label="รวมนับได้" style={css(`padding:12px 18px; text-align:center; font:var(--fw-bold) var(--text-xs) var(--font-mono); color:var(--text-primary);`)}>
+                        {g.counted}
+                      </td>
+                      <td data-label="ส่วนต่างรวม" style={css(`padding:12px 18px; text-align:center;`)}>
+                        {diffBadgeFor(gd)}
                       </td>
                       <td />
                     </tr>
-                  )}
+                    {open && sec.items.map(item => renderLotRow(item, true))}
                   </React.Fragment>
                 );
               }) : (

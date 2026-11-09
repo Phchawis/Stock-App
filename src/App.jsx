@@ -1428,6 +1428,13 @@ class App extends React.Component {
   // back out to the right, the reverse of how it came in, where a crossfade
   // would only dissolve it.
   closeDetail() { this.setState({ detailId: null }); }
+  // A lot found on the shelf during a stock count but missing from the
+  // system goes in as a receipt, so it gets the same checks (expired, พ.ศ.
+  // year, near-duplicate lot number) and a sticker, marked as found stock.
+  openCountReceive({ rid, lot } = {}) {
+    if (!this.can('receive')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์รับเข้า', 'warn'); return; }
+    this.transitionState({ modal: 'receive', rf: { ...this.blankRf(), rid: rid ? String(rid) : '', lot: lot || '', note: 'พบตอนตรวจนับคลัง' } });
+  }
   openReceive(rid) { if (!this.can('receive')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์รับเข้า', 'warn'); return; } this.transitionState({ modal: 'receive', rf: { ...this.blankRf(), rid: rid ? String(rid) : '' } }); }
   openIssue(rid) {
     if (!this.can('issue')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์เบิกจ่าย', 'warn'); return; }
@@ -1681,6 +1688,9 @@ class App extends React.Component {
       expiry: f.expiry,
       qty,
       loc: f.loc,
+      // Set when the receipt starts from the stock count: logged in the
+      // movement's reference so it reads as found stock, not a delivery.
+      note: f.note || undefined,
       by: this.user.name
     };
 
@@ -2135,6 +2145,14 @@ class App extends React.Component {
         { label: 'มากกว่า 60 วัน', detail: 'ติดตามอายุล็อตอย่างต่อเนื่อง', tone: 'later', count: S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE' && this.days(l.expiry) > 60).length },
       ],
       activeLotsList: S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE').map(l => ({ ...l, recvDate: recvDateOf(l.id) })),
+      openCountReceive: (o) => this.openCountReceive(o),
+      // Any lot the code names, used-up ones included: a lot the system holds
+      // at zero that turns up on the shelf is received back into itself.
+      findLotByCode: (code) => {
+        const c = String(code || '').trim().toLowerCase();
+        const l = S.lots.find(x => (x.qr || '').toLowerCase() === c || String(x.lot).toLowerCase() === c);
+        return l ? { rid: l.rid, lot: l.lot } : null;
+      },
       stockCountList: S.lots.filter(l => l.qty > 0 && l.status === 'ACTIVE').map(l => {
         const r = S.reagents.find(x => x.id === l.rid);
         return {

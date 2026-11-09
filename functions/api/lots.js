@@ -16,7 +16,7 @@ export async function onRequestPost(context) {
   const { env, request } = context;
   let fp = null;                                    // this request's claim, once made
   try {
-    const { rid, lot, expiry, qty, loc } = await request.json();
+    const { rid, lot, expiry, qty, loc, note } = await request.json();
     if (!rid || !lot || !expiry || !qty || !loc) {
       return json({ error: 'Missing required fields' }, 400);
     }
@@ -26,7 +26,10 @@ export async function onRequestPost(context) {
     if (badExpiry) return json({ error: badExpiry }, 400);
 
     const reagent = await env.DB.prepare('SELECT supplier FROM reagents WHERE id = ?').bind(rid).first();
-    const supplierRef = reagent && reagent.supplier ? `รับจาก ${reagent.supplier}` : 'รับเข้าใหม่';
+    // A short note from the client (the stock count marks found stock) is
+    // appended to the reference; the supplier part stays first.
+    const cleanNote = String(note || '').trim().slice(0, 60);
+    const supplierRef = (reagent && reagent.supplier ? `รับจาก ${reagent.supplier}` : 'รับเข้าใหม่') + (cleanNote ? ` · ${cleanNote}` : '');
     const by = await actorName(context);           // trust the session, not the client
 
     // A second identical receipt within seconds is a double submit, not a

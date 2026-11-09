@@ -67,6 +67,11 @@ export function ReceiveModal({ v }) {
           
           {/* Body */}
           <div style={css(`padding:20px 22px; display:flex; flex-direction:column; gap:14px;`)}>
+            {rf.note && (
+              <div role="note" style={css(`padding:10px 12px; border-radius:var(--radius-md); background:var(--brand-50); border:1px solid var(--border-brand); font:var(--text-xs)/1.5 var(--font-body); color:var(--text-primary);`)}>
+                <strong>{rf.note}</strong> · บันทึกเป็นของที่พบบนชั้นแต่ยังไม่มีในระบบ ประวัติการเคลื่อนไหวจะมีหมายเหตุนี้ต่อท้าย
+              </div>
+            )}
             <SearchableSelect label="น้ำยา" required={true} placeholder="ค้นหาหรือเลือกน้ำยา..." options={reagentOpts} value={rf.rid} onChange={rfRid} />
             <div className="modal-grid-2col">
               <Input label="เลข Lot" required={true} placeholder="เช่น G2412C" value={rf.lot} onChange={rfLot} />
