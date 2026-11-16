@@ -4,7 +4,7 @@ import { css } from './css.js';
 import { captureExits, playExits, setViewTransitionActive, switchTheme, collapseRow } from './motion.js';
 import { flushSync } from 'react-dom';
 import { categoryLabel, CATEGORY_CODES, DEFAULT_CATEGORY } from './categories.js';
-import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity, testsPerMainUnit, stickerCount, buddhistYearFix, receiveWarnings, similarLot } from './domain/stock.js';
+import { daysUntil, severityOf, dayLabel as fmtDayLabel, activeLots, onHand, earliestExpiry, planFefo, signedQuantity, testsPerMainUnit, stickerCount, buddhistYearFix, receiveWarnings, similarLot, nearLots } from './domain/stock.js';
 import { renderLotSticker, canvasToPngBytes, downloadBlob, safeName } from './stickers/lotSticker.js';
 
 // What kind of material a catalogue entry is. Set from the product name when
@@ -522,8 +522,96 @@ class App extends React.Component {
       this.setState(s => ({ reagents, lots, txns, users, acked, stickerLogs, health, stickerLogsFullyLoaded: false, txnsFullyLoaded: false, perms: (perms && Object.keys(perms).length) ? perms : s.perms }), () => {
         this.autoClearAckedAlerts(reagents, lots, acked);
       });
+      this.fetchLotFixes();
     } catch (err) {
       this.showToast('ดึงข้อมูลล้มเหลว: ' + err.message, 'warn');
+    }
+  }
+
+  // Wrong lot numbers reported during a count, waiting for a supervisor.
+  async fetchLotFixes() {
+    try {
+      const res = await this.api('/api/lots/fix_requests');
+      if (res.ok) this.setState({ lotFixRequests: await res.json() });
+    } catch (e) { /* the dashboard card just stays empty */ }
+  }
+
+  // A lot recorded under the wrong number, corrected from its label during a
+  // stock count: renamed, or merged into the lot that already has the right
+  // number (the server decides). Not done through the count's figures, which
+  // would log a loss on one lot and a gain on the other. Returns true on success.
+  async correctLotNumber({ lotId, newLot, labelExpiry, boxes }) {
+    try {
+      const res = await this.api('/api/lots/correct', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lotId, newLot, labelExpiry }),
+      });
+      const r = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(r.error || 'แก้เลข Lot ไม่สำเร็จ');
+      this.afterLotCorrected(r, boxes);
+      return true;
+    } catch (err) {
+      this.showToast(err.message, 'warn');
+      return false;
+    }
+  }
+
+  async afterLotCorrected(r, boxes) {
+    // The count form is keyed by lot. A merged-away lot leaves it; the lot it
+    // went into is recounted from its new system figure, or submitting the
+    // count would book the merge as a loss.
+    this.setState(s => {
+      const form = { ...(s.stockCountForm || {}) };
+      if (r.removedLotId != null) delete form[r.removedLotId];
+      if (r.action === 'merge' && form[r.lot.id]) form[r.lot.id] = { qty: String(r.lot.qty), reason: '' };
+      return { stockCountForm: form };
+    });
+    await this.fetchData();
+    this.showToast(r.action === 'merge' ? `รวมเข้ากับ Lot ${r.lot.lot} แล้ว` : `แก้เลข Lot เป็น ${r.lot.lot} แล้ว`);
+    const reagent = this.state.reagents.find(x => x.id === r.lot.rid);
+    const n = Math.max(1, Math.floor(+boxes || r.lot.qty || 1));
+    const lastRecv = this.state.txns.filter(t => t.lotId === r.lot.id && t.type === 'RECEIVE')
+      .map(t => t.at).sort().pop();
+    const lot = { ...r.lot, recvDate: lastRecv ? lastRecv.slice(0, 10) : null };
+    if (reagent) {
+      this.askConfirm(
+        'พิมพ์สติกเกอร์ใหม่',
+        `QR บนกล่องเดิมสแกนไม่เจอแล้ว พิมพ์สติกเกอร์ Lot ${r.lot.lot} แปะทับกล่องที่ติดเลขเดิม (${n} ดวง แก้จำนวนได้)`,
+        () => this.openPrintSticker(lot, reagent, n),
+        { confirmLabel: 'พิมพ์สติกเกอร์' }
+      );
+    }
+  }
+
+  async reportLotFix({ lotId, newLot, labelExpiry, note }) {
+    try {
+      const res = await this.api('/api/lots/fix_requests', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lotId, newLot, labelExpiry, note }),
+      });
+      const r = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(r.error || 'แจ้งแก้เลข Lot ไม่สำเร็จ');
+      this.showToast('แจ้งหัวหน้างานแล้ว รออนุมัติที่หน้า Dashboard');
+      this.fetchLotFixes();
+      return true;
+    } catch (err) {
+      this.showToast(err.message, 'warn');
+      return false;
+    }
+  }
+
+  async decideLotFix(fix, decision) {
+    try {
+      const res = await this.api('/api/lots/fix_requests', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: fix.id, decision }),
+      });
+      const r = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(r.error || 'บันทึกการตัดสินไม่สำเร็จ');
+      if (decision === 'approve') this.afterLotCorrected(r, fix.qty);
+      else { this.showToast('ปฏิเสธรายการแล้ว'); this.fetchLotFixes(); }
+    } catch (err) {
+      this.showToast(err.message, 'warn');
     }
   }
 
@@ -2224,6 +2312,18 @@ class App extends React.Component {
       editReagentId: S.editReagentId,
       role: S.role,
       canManage: this.can('manage'),
+      // Lot-number correction during a count (see correctLotNumber).
+      lotFixRequests: S.lotFixRequests || [],
+      correctLotNumber: (o) => this.correctLotNumber(o),
+      reportLotFix: (o) => this.reportLotFix(o),
+      decideLotFix: (fix, d) => this.decideLotFix(fix, d),
+      reagentLots: (rid) => S.lots.filter(l => l.rid === rid),
+      // Lots, used-up ones included, one character from a code read off a
+      // label, in the shape the count's rows use.
+      findNearLots: (code) => nearLots(code, S.lots).map(l => {
+        const r = S.reagents.find(x => x.id === l.rid);
+        return { lotId: l.id, lot: l.lot, expiry: l.expiry, rid: l.rid, systemQty: l.qty, reagentName: r ? r.th : '—', unit: r ? r.unit : '' };
+      }),
       updateReagentCategory: (id, cat) => this.updateReagentCategory(id, cat),
 
       openEditLot: (id) => this.openEditLot(id),

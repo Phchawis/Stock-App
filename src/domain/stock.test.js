@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   daysUntil, severityOf, dayLabel, activeLots, onHand, earliestExpiry,
-  planFefo, signedQuantity, lotViolations, statusFor, SEVERITY, testsPerMainUnit, stickerCount, buddhistYearFix, receiveWarnings, similarLot,
+  planFefo, signedQuantity, lotViolations, statusFor, SEVERITY, testsPerMainUnit, stickerCount, buddhistYearFix, receiveWarnings, similarLot, nearLots,
 } from './stock.js';
 
 // Fixed reference date so these assertions mean the same thing next year.
@@ -304,5 +304,20 @@ describe('similarLot', () => {
   it('ignores two characters apart, and the lot itself', () => {
     expect(similarLot({ lot: '841UD00', expiry: '2027-07-05' }, lots)).toBeNull();
     expect(similarLot({ lot: '84441UD00', expiry: '2027-07-05' }, lots)).toBeNull();
+  });
+});
+
+describe('nearLots', () => {
+  const lots = [{ lot: '8441UD00' }, { lot: '80223UD00' }, { lot: '84441UD00' }];
+  it('finds lots one character from a label, QR prefix or not', () => {
+    expect(nearLots('84441ud00', lots.slice(0, 2))).toEqual([lots[0]]);
+    expect(nearLots('QR-80233UD00', lots)).toEqual([lots[1]]);
+  });
+  it('leaves out an exact match and anything further', () => {
+    expect(nearLots('84441UD00', lots)).toEqual([lots[0]]);
+    expect(nearLots('8UD00', lots)).toEqual([]);
+  });
+  it('ignores very short codes', () => {
+    expect(nearLots('AB1', [{ lot: 'AB12' }])).toEqual([]);
   });
 });

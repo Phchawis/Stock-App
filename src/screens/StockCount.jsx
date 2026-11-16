@@ -1,13 +1,23 @@
 import React from 'react';
 import { css } from '../css.js';
+import { buddhistYearFix } from '../domain/stock.js';
 
 export function StockCount({ v }) {
   const {
     isStockCount, stockCountList, stockCountForm, updateStockCountRow,
     submitStockCount, go, ic, canReceive, openCountReceive, findLotByCode,
+    canManage, lotFixRequests, correctLotNumber, reportLotFix, reagentLots, findNearLots,
   } = v;
 
   const [scannerInput, setScannerInput] = React.useState('');
+  // The lot whose number is being corrected from its label, or null.
+  const [fixing, setFixing] = React.useState(null);
+  const openFix = (item, newLot = '') => {
+    const row = stockCountForm[item.lotId];
+    const counted = row && row.qty !== '' && !isNaN(+row.qty) ? +row.qty : item.systemQty;
+    setUnknownScan(null);
+    setFixing({ item, newLot, labelExpiry: item.expiry, note: '', busy: false, boxes: counted });
+  };
   // Reagents whose lots are unfolded, by reagent id.
   const [expanded, setExpanded] = React.useState(() => new Set());
   // A scanned code that matched no lot in the count, offered as a receipt.
@@ -211,6 +221,9 @@ export function StockCount({ v }) {
     groups.set(it.rid, g);
   }
 
+  const nearForScan = unknownScan ? findNearLots(unknownScan) : [];
+  const pendingFor = (lotId) => (lotFixRequests || []).find(f => f.lotId === lotId);
+
   // The list arrives sorted by reagent; consecutive items of one reagent
   // make a section.
   const sections = [];
@@ -259,6 +272,20 @@ export function StockCount({ v }) {
             shrink these columns back down. */}
         <td data-label="Lot" style={css(`padding:12px 18px; font-family:var(--font-mono); color:var(--text-secondary);`)}>
           {item.lot}
+          {pendingFor(item.lotId) ? (
+            <span style={css(`display:block; margin-top:3px; font:var(--fw-semibold) var(--text-3xs)/1.3 var(--font-body); color:var(--amber-700);`)}>
+              แจ้งแก้เป็น {pendingFor(item.lotId).newLot} · รออนุมัติ
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => openFix(item)}
+              title="เลข Lot ในระบบไม่ตรงกับฉลาก"
+              style={css(`display:block; margin-top:3px; padding:0; border:none; background:transparent; color:var(--text-secondary); cursor:pointer; font-family:var(--font-body); font-size:var(--text-3xs); line-height:1.3; white-space:nowrap; text-decoration:underline;`)}
+            >
+              แก้เลข Lot
+            </button>
+          )}
         </td>
         <td data-label="วันหมดอายุ" style={css(`padding:12px 18px; font-family:var(--font-mono); color:var(--text-secondary);`)}>
           {item.expiry}
@@ -354,11 +381,43 @@ export function StockCount({ v }) {
         </button>
       </div>
 
+      {fixing && (
+        <LotFixDialog
+          fixing={fixing}
+          setFixing={setFixing}
+          canManage={canManage}
+          reagentLots={reagentLots}
+          onCorrect={async (f) => {
+            setFixing(x => ({ ...x, busy: true }));
+            const ok = await correctLotNumber({ lotId: f.item.lotId, newLot: f.newLot.trim(), labelExpiry: f.labelExpiry, boxes: f.boxes });
+            if (ok) setFixing(null); else setFixing(x => x && ({ ...x, busy: false }));
+          }}
+          onReport={async (f) => {
+            setFixing(x => ({ ...x, busy: true }));
+            const ok = await reportLotFix({ lotId: f.item.lotId, newLot: f.newLot.trim(), labelExpiry: f.labelExpiry, note: f.note });
+            if (ok) setFixing(null); else setFixing(x => x && ({ ...x, busy: false }));
+          }}
+        />
+      )}
+
       {unknownScan && (
         <div role="status" style={css(`display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; padding:12px 16px; background:var(--amber-100); border:1px solid var(--amber-fill); border-radius:var(--radius-md); font:var(--text-xs)/1.5 var(--font-body); color:var(--amber-700);`)}>
           <span style={css(`flex:1; min-width:220px;`)}>
-            ไม่พบ <strong style={css(`font-family:var(--font-mono);`)}>{unknownScan}</strong> ในรายการตรวจนับ ถ้าเป็นของที่อยู่บนชั้นจริง ให้รับเข้าเป็นของที่พบตอนตรวจนับ
+            ไม่พบ <strong style={css(`font-family:var(--font-mono);`)}>{unknownScan}</strong> ในรายการตรวจนับ
+            {nearForScan.length > 0
+              ? <> แต่ในระบบมี {nearForScan.map(n => <strong key={n.lotId} style={css(`font-family:var(--font-mono);`)}>{n.lot} </strong>)}({nearForScan[0].reagentName}) ซึ่งต่างกันแค่ 1 ตัวอักษร ถ้าฉลากเป็น {unknownScan.replace(/^QR-/i, '')} แสดงว่าเลขในระบบบันทึกผิด</>
+              : ' ถ้าเป็นของที่อยู่บนชั้นจริง ให้รับเข้าเป็นของที่พบตอนตรวจนับ'}
           </span>
+          {nearForScan.slice(0, 2).map(n => (
+            <button
+              key={n.lotId}
+              type="button"
+              onClick={() => openFix(n, unknownScan.replace(/^QR-/i, ''))}
+              style={css(`padding:8px 14px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); white-space:nowrap;`)}
+            >
+              แก้ {n.lot} เป็นเลขตามฉลาก
+            </button>
+          ))}
           {canReceive && (
             <button
               type="button"
@@ -598,6 +657,75 @@ export function StockCount({ v }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// Correcting a lot number from its label. Says before anything is saved
+// whether it will rename the lot or merge it into the lot that already has
+// the label's number, and refuses a merge across different expiry dates.
+function LotFixDialog({ fixing, setFixing, canManage, reagentLots, onCorrect, onReport }) {
+  const { item, newLot, labelExpiry, note, busy } = fixing;
+  const set = (k) => (e) => setFixing(f => ({ ...f, [k]: e.target.value }));
+  const name = newLot.trim();
+  const others = reagentLots(item.rid).filter(l => l.id !== item.lotId);
+  const target = name ? others.find(l => l.lot === name) : null;
+  const beYear = buddhistYearFix(labelExpiry);
+
+  let plan = null, blocked = false;
+  if (!name) { plan = 'พิมพ์เลข Lot ตามที่พิมพ์บนฉลากกล่อง'; blocked = true; }
+  else if (name === item.lot) { plan = 'เลขเหมือนในระบบอยู่แล้ว'; blocked = true; }
+  else if (beYear) { plan = `วันหมดอายุเป็นปี พ.ศ.? กรอกเป็นปี ค.ศ. (${beYear})`; blocked = true; }
+  else if (!labelExpiry) { plan = 'กรอกวันหมดอายุตามฉลาก'; blocked = true; }
+  else if (target && (target.expiry !== labelExpiry || item.expiry !== labelExpiry)) {
+    plan = `ในระบบมี Lot ${target.lot} อยู่แล้ว แต่วันหมดอายุไม่ตรงกัน (ฉลาก ${labelExpiry}, Lot ${item.lot} ${item.expiry}, Lot ${target.lot} ${target.expiry}) อาจเป็นคนละ Lot ตรวจฉลากอีกครั้ง หรือรับเข้าเป็น Lot ใหม่`;
+    blocked = true;
+  } else if (target) {
+    plan = `ในระบบมี Lot ${target.lot} อยู่แล้ว (คงเหลือ ${target.qty} ${item.unit}) จะ "รวม" Lot ${item.lot} (คงเหลือ ${item.systemQty}) เข้าไป ยอดและประวัติย้ายไปทั้งหมด และ Lot ${item.lot} จะถูกลบ`;
+  } else {
+    plan = `จะ "เปลี่ยนเลข Lot" จาก ${item.lot} เป็น ${name}${labelExpiry !== item.expiry ? ` และวันหมดอายุเป็น ${labelExpiry}` : ''} ยอดและประวัติอยู่ครบ`;
+  }
+
+  const field = `width:100%; box-sizing:border-box; height:38px; padding:0 10px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--white); color:var(--text-primary); font:var(--text-sm)/1 var(--font-mono); outline:none;`;
+  const label = `display:flex; flex-direction:column; gap:5px; font:var(--fw-semibold) var(--text-xs)/1.3 var(--font-body); color:var(--text-primary);`;
+  return (
+    <div className="ov-in" onClick={() => !busy && setFixing(null)} style={css(`position:fixed; inset:0; background:rgba(14,24,34,.6); z-index:80; display:grid; place-items:center; padding:20px;`)}>
+      <div role="dialog" aria-label="แก้เลข Lot ตามฉลาก" className="tt-in" onClick={(e) => e.stopPropagation()} style={css(`width:min(460px,94vw); max-height:92vh; overflow-y:auto; background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); padding:20px; display:flex; flex-direction:column; gap:14px;`)}>
+        <div>
+          <div style={css(`font:var(--fw-bold) var(--text-base)/1.3 var(--font-display); color:var(--text-primary);`)}>แก้เลข Lot ตามฉลาก</div>
+          <div style={css(`font:var(--text-xs)/1.5 var(--font-body); color:var(--text-secondary); margin-top:4px;`)}>
+            {item.reagentName} · ในระบบ <span style={css(`font-family:var(--font-mono);`)}>{item.lot}</span> · หมดอายุ <span style={css(`font-family:var(--font-mono);`)}>{item.expiry}</span> · คงเหลือ {item.systemQty} {item.unit}
+          </div>
+        </div>
+        <label style={css(label)}>
+          เลข Lot บนฉลาก
+          <input autoFocus value={newLot} onChange={set('newLot')} style={css(field)} />
+        </label>
+        <label style={css(label)}>
+          วันหมดอายุบนฉลาก
+          <input type="date" value={labelExpiry} onChange={set('labelExpiry')} style={css(field)} />
+        </label>
+        {!canManage && (
+          <label style={css(label)}>
+            หมายเหตุถึงหัวหน้างาน (ถ้ามี)
+            <input value={note} onChange={set('note')} style={css(field + ' font-family:var(--font-body);')} />
+          </label>
+        )}
+        <div role="status" style={css(`padding:10px 12px; border-radius:var(--radius-md); background:${blocked && name ? 'var(--amber-100)' : 'var(--surface-sunken)'}; border:1px solid ${blocked && name ? 'var(--amber-fill)' : 'var(--border-subtle)'}; font:var(--text-xs)/1.5 var(--font-body); color:${blocked && name ? 'var(--amber-700)' : 'var(--text-primary)'};`)}>
+          {plan}
+          {!blocked && <span style={css(`display:block; margin-top:4px; color:var(--text-secondary);`)}>{canManage ? 'บันทึกแล้วจะเสนอให้พิมพ์สติกเกอร์ใหม่ เพราะ QR บนกล่องเดิมจะสแกนไม่เจอ' : 'ส่งให้หัวหน้างานอนุมัติที่หน้า Dashboard ระหว่างนี้นับ Lot นี้ตามปกติได้'}</span>}
+        </div>
+        <div style={css(`display:flex; justify-content:flex-end; flex-wrap:wrap; gap:10px;`)}>
+          <button type="button" disabled={busy} onClick={() => setFixing(null)}
+            style={css(`padding:9px 16px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body);`)}>
+            ยกเลิก
+          </button>
+          <button type="button" disabled={blocked || busy} onClick={() => (canManage ? onCorrect(fixing) : onReport(fixing))}
+            style={css(`padding:9px 16px; border-radius:var(--radius-md); border:none; background:${blocked ? 'var(--slate-200)' : 'var(--brand-700)'}; color:${blocked ? 'var(--text-disabled)' : '#fff'}; cursor:${blocked ? 'not-allowed' : busy ? 'progress' : 'pointer'}; font:var(--fw-semibold) var(--text-sm)/1 var(--font-body);`)}>
+            {busy ? 'กำลังบันทึก…' : canManage ? (target ? `รวมเข้า Lot ${target.lot}` : 'แก้เลข Lot') : 'แจ้งหัวหน้างาน'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -32,13 +32,16 @@ export async function onRequestGet(context) {
     // anything had ever been deleted. Client error reports ride along; they are
     // small and they are the history of what has been failing.
     const systemEvents = await env.DB.prepare('SELECT * FROM system_events').all();
+    // Reports of wrong lot numbers and how they were decided: part of the
+    // record of why a lot's number changed.
+    const lotFixRequests = await env.DB.prepare('SELECT * FROM lot_fix_requests').all();
 
     // Not exported on purpose: `sessions` and `login_attempts` are live
     // credentials and rate-limit state that must not leave the server, and
     // `d1_migrations` describes the schema, which belongs to the deployment
     // rather than to the data.
     const backupData = {
-      version: '1.2',
+      version: '1.3',
       exportedAt: new Date().toISOString(),
       reagents: reagents.results || [],
       lots: lots.results || [],
@@ -48,7 +51,8 @@ export async function onRequestGet(context) {
       sticker_logs: stickerLogs.results || [],
       alert_acks: alertAcks.results || [],
       app_settings: appSettings.results || [],
-      system_events: systemEvents.results || []
+      system_events: systemEvents.results || [],
+      lot_fix_requests: lotFixRequests.results || []
     };
 
     // Leave a trace that a backup was taken, so the app can tell the lab when

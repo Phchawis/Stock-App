@@ -229,3 +229,18 @@ export function similarLot({ lot, expiry }, lots = []) {
   if (!name || lots.some(l => String(l.lot).toUpperCase() === name)) return null;
   return lots.find(l => l.expiry === expiry && editDistance(String(l.lot).toUpperCase(), name) <= 1) || null;
 }
+
+/**
+ * Lots whose number is one character from `code` (dropped, added or
+ * changed, any case), not counting an exact match. Used when a lot number
+ * read off a label isn't in the system: a near one is usually that lot,
+ * recorded wrong.
+ */
+export function nearLots(code, lots = []) {
+  const name = String(code || '').trim().replace(/^QR-/i, '').toUpperCase();
+  if (name.length < 4) return [];
+  return lots.filter(l => {
+    const n = String(l.lot).toUpperCase();
+    return n !== name && editDistance(n, name) <= 1;
+  });
+}

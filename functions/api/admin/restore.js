@@ -198,6 +198,19 @@ export async function onRequestPost(context) {
       }
     }
 
+    // Lot-number reports are audit trail too, merged the same way.
+    if (Array.isArray(backup.lot_fix_requests)) {
+      for (const f of backup.lot_fix_requests) {
+        queries.push(
+          env.DB.prepare(
+            `INSERT OR IGNORE INTO lot_fix_requests (id, lot_id, rid, old_lot, new_lot, label_expiry, note, status, by, at, decided_by, decided_at, result)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          ).bind(f.id, f.lot_id, f.rid, f.old_lot, f.new_lot, f.label_expiry, f.note ?? null, f.status || 'PENDING',
+                 f.by, f.at, f.decided_by ?? null, f.decided_at ?? null, f.result ?? null)
+        );
+      }
+    }
+
     if (Array.isArray(backup.app_settings)) {
       queries.push(env.DB.prepare('DELETE FROM app_settings'));
       for (const s of backup.app_settings) {

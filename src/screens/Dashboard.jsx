@@ -10,7 +10,7 @@ export function Dashboard({ v }) {
     go, isDash, title, dashAlerts, dashLow,
     recent, usageList, ic, user, usersList,
     deadStockReagents, dynamicMinSuggestions, backupHealth, errorsLast7Days,
-    lotIntegrity,
+    lotIntegrity, lotFixRequests, decideLotFix, canManage,
   } = v;
 
   const [period, setPeriod] = React.useState('6m');
@@ -264,6 +264,31 @@ export function Dashboard({ v }) {
           <div style={css(`background:var(--red-100); border:1px solid var(--red-fill); border-radius:var(--radius-md); padding:12px 16px; display:flex; align-items:center; gap:10px; font:var(--text-xs)/1.5 var(--font-body); color:var(--red-700);`)}>
             <span>⚠️</span><span style={css(`flex:1;`)}>ระบบพบข้อผิดพลาดฝั่งผู้ใช้ {errorsLast7Days} ครั้งในรอบ 7 วัน — หากเกิดซ้ำ กรุณาแจ้งผู้พัฒนาพร้อมบอกว่าทำอะไรอยู่ตอนนั้น</span>
           </div>
+        )}
+        {canManage && lotFixRequests && lotFixRequests.length > 0 && (
+          <section aria-label="แจ้งเลข Lot ผิดรออนุมัติ" style={css(`background:var(--surface-card); border:1px solid var(--border-brand); border-radius:var(--radius-md); padding:14px 16px; display:flex; flex-direction:column; gap:10px;`)}>
+            <div style={css(`font:var(--fw-bold) var(--text-sm)/1.3 var(--font-body); color:var(--text-primary);`)}>
+              แจ้งเลข Lot ไม่ตรงฉลาก รออนุมัติ {lotFixRequests.length} รายการ
+            </div>
+            {lotFixRequests.map(f => (
+              <div key={f.id} style={css(`display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; padding-top:10px; border-top:1px solid var(--border-subtle);`)}>
+                <div style={css(`flex:1; min-width:240px; font:var(--text-xs)/1.5 var(--font-body); color:var(--text-primary);`)}>
+                  <strong>{f.reagent}</strong> · ในระบบ <span style={css(`font-family:var(--font-mono);`)}>{f.oldLot}</span> → ฉลาก <span style={css(`font-family:var(--font-mono); font-weight:700;`)}>{f.newLot}</span> · หมดอายุตามฉลาก <span style={css(`font-family:var(--font-mono);`)}>{f.labelExpiry}</span>
+                  <span style={css(`display:block; color:var(--text-secondary);`)}>
+                    แจ้งโดย {f.by} · {f.at}{f.note ? ` · ${f.note}` : ''}
+                  </span>
+                </div>
+                <button type="button" onClick={() => decideLotFix(f, 'reject')}
+                  style={css(`padding:8px 14px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-secondary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body);`)}>
+                  ปฏิเสธ
+                </button>
+                <button type="button" onClick={() => decideLotFix(f, 'approve')}
+                  style={css(`padding:8px 14px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body);`)}>
+                  อนุมัติแก้เลข Lot
+                </button>
+              </div>
+            ))}
+          </section>
         )}
         {lotIntegrity && lotIntegrity.length > 0 && (
           <details style={css(`background:var(--amber-100); border:1px solid var(--amber-fill); border-radius:var(--radius-md); padding:12px 16px; font:var(--text-xs)/1.5 var(--font-body); color:var(--amber-700);`)}>
