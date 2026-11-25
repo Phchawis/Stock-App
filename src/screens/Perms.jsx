@@ -4,7 +4,7 @@ import { css } from '../css.js';
 export function Perms({ v }) {
   const {
     canEditPerms, permRoles, permRows, myRole, isPerms,
-    canAddUser, usersList, openAddUser, deleteUser, user, askConfirm,
+    canAddUser, usersList, openAddUser, deleteUser, user, askConfirm, openEditUser,
   } = v;
 
   if (!isPerms) return null;
@@ -108,7 +108,7 @@ export function Perms({ v }) {
       </div>
 
       <div style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); overflow:hidden;`)}>
-        <div className="perm-user-thead-desktop" style={css(`display:grid; grid-template-columns:1.5fr 1fr 1.2fr 1fr 0.6fr; background:var(--slate-50); border-bottom:1px solid var(--border-subtle); padding:12px 18px; font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.04em;`)}>
+        <div className="perm-user-thead-desktop" style={css(`display:grid; grid-template-columns:1.5fr 1fr 1.2fr 0.9fr 0.9fr; background:var(--slate-50); border-bottom:1px solid var(--border-subtle); padding:12px 18px; font:var(--fw-semibold) var(--text-2xs)/1.2 var(--font-body); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.04em;`)}>
           <div>ชื่อ-นามสกุล</div>
           <div>ชื่อเข้าใช้งาน (Username)</div>
           <div>บทบาทหน้าที่</div>
@@ -118,7 +118,7 @@ export function Perms({ v }) {
         {usersList.map((u, idx) => {
           const rLabel = ({ admin: 'ผู้ดูแลระบบ', supervisor: 'หัวหน้าคลังน้ำยา', technician: 'นักเทคนิคการแพทย์', viewer: 'ผู้ดูข้อมูล' })[u.role] || u.role;
           return (
-            <div key={idx} className="perm-user-row-desktop" style={css(`display:grid; grid-template-columns:1.5fr 1fr 1.2fr 1fr 0.6fr; border-bottom:1px solid var(--border-subtle); padding:12px 18px; align-items:center; font:var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>
+            <div key={idx} className="perm-user-row-desktop" style={css(`display:grid; grid-template-columns:1.5fr 1fr 1.2fr 0.9fr 0.9fr; border-bottom:1px solid var(--border-subtle); padding:12px 18px; align-items:center; font:var(--text-sm)/1.4 var(--font-body); color:var(--text-primary);`)}>
               <div style={css(`display:flex; align-items:center; gap:10px;`)}>
                 <span style={css(`width:28px; height:28px; border-radius:50%; background:color-mix(in srgb, ${u.color || 'var(--brand-700)'} 72%, #001A22); color:#fff; display:grid; place-items:center; font:600 11px/1 var(--font-body);`)}>{u.initials}</span>
                 <span style={css(`font-weight:600;`)}>{u.name}</span>
@@ -128,15 +128,22 @@ export function Perms({ v }) {
                 <span style={css(`padding:2px 8px; border-radius:var(--radius-pill); background:var(--brand-50); color:var(--brand-ink); font:var(--fw-semibold) var(--text-3xs)/1.2 var(--font-body);`)}>
                   {rLabel}
                 </span>
+                {u.isSectionHead ? <span style={css(`display:block; margin-top:4px; font:var(--fw-semibold) var(--text-3xs)/1.2 var(--font-body); color:var(--text-secondary);`)}>★ หัวหน้าหมวดงาน</span> : null}
               </div>
               <div>
                 <span style={css(`color:var(--green-700); display:inline-flex; align-items:center; gap:4px; font-size:var(--text-2xs); font-weight:600;`)}>
                   🟢 พร้อมใช้งาน
                 </span>
               </div>
-              <div style={{ display: 'grid', placeItems: 'center' }}>
+              <div style={css(`display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:4px;`)}>
+                {canAddUser && (
+                  <button type="button" onClick={() => openEditUser(u)}
+                    style={css(`border:none; background:transparent; color:var(--text-primary); cursor:pointer; font:var(--fw-semibold) var(--text-2xs)/1 var(--font-body); padding:4px 8px; border-radius:var(--radius-sm); text-decoration:underline;`)}>
+                    แก้ไข
+                  </button>
+                )}
                 {(u.role === 'admin' && usersList.filter(x => x.role === 'admin').length <= 1) ? (
-                  <span style={css(`font:var(--fw-semibold) var(--text-3xs)/1 var(--font-body); color:var(--text-disabled);`)}>Admin (ลบไม่ได้)</span>
+                  <span style={css(`font:var(--fw-semibold) var(--text-3xs)/1 var(--font-body); color:var(--text-tertiary);`)}>Admin (ลบไม่ได้)</span>
                 ) : (
                   isAdmin ? (
                     <button
@@ -153,9 +160,7 @@ export function Perms({ v }) {
                     >
                       ลบผู้ใช้
                     </button>
-                  ) : (
-                    <span style={css(`color:var(--text-tertiary); font-size:var(--text-2xs);`)}>—</span>
-                  )
+                  ) : null
                 )}
               </div>
             </div>
@@ -179,9 +184,18 @@ export function Perms({ v }) {
                 </span>
               </div>
               <div style={css(`display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:10px; border-top:1px dashed var(--border-subtle);`)}>
-                <span style={css(`padding:3px 10px; border-radius:var(--radius-pill); background:var(--brand-50); color:var(--brand-ink); font:var(--fw-semibold) var(--text-2xs)/1.3 var(--font-body);`)}>
-                  {rLabel}
+                <span>
+                  <span style={css(`padding:3px 10px; border-radius:var(--radius-pill); background:var(--brand-50); color:var(--brand-ink); font:var(--fw-semibold) var(--text-2xs)/1.3 var(--font-body);`)}>
+                    {rLabel}
+                  </span>
+                  {u.isSectionHead ? <span style={css(`display:block; margin-top:6px; font:var(--fw-semibold) var(--text-3xs)/1.2 var(--font-body); color:var(--text-secondary);`)}>★ หัวหน้าหมวดงาน</span> : null}
                 </span>
+                {canAddUser && (
+                  <button type="button" onClick={() => openEditUser(u)}
+                    style={css(`margin-left:auto; border:1px solid var(--border-default); background:transparent; color:var(--text-primary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); padding:6px 12px; border-radius:var(--radius-sm);`)}>
+                    แก้ไข
+                  </button>
+                )}
                 {canDelete ? (
                   <button
                     onClick={() => {

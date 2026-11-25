@@ -33,6 +33,7 @@ import { Toast } from './components/Toast.jsx';
 import { Login } from './screens/Login.jsx';
 import { RegisterModal } from './screens/RegisterModal.jsx';
 import { AddUserModal } from './screens/AddUserModal.jsx';
+import { EditUserModal } from './screens/EditUserModal.jsx';
 import { PrintStickerModal } from './screens/PrintStickerModal.jsx';
 import { UpdateBanner } from './components/UpdateBanner.jsx';
 import { SdsModal } from './screens/SdsModal.jsx';
@@ -216,6 +217,38 @@ class App extends React.Component {
       this.showToast(err.message, 'warn');
     }
   }
+  openEditUser(u) {
+    if (!this.can('users')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์แก้ไขผู้ใช้งาน', 'warn'); return; }
+    this.setState({ modal: 'editUser', eform: {
+      username: u.username, name: u.name, initials: u.initials, role: u.role,
+      sectionHead: !!u.isSectionHead, password: '',
+      currentSignature: u.signature || null, signature: undefined,
+    } });
+  }
+
+  async submitEditUser() {
+    const f = this.state.eform;
+    if (!f || this._saving) return;
+    if (!String(f.name || '').trim() || !String(f.initials || '').trim()) { this.showToast('กรุณากรอกชื่อและอักษรย่อ', 'warn'); return; }
+    const before = this.state.users.find(u => u.username === f.username) || {};
+    const body = { username: f.username, name: f.name.trim(), initials: f.initials.trim(), role: f.role };
+    if (f.password) body.password = f.password;
+    if (f.signature !== undefined) body.signature = f.signature;
+    if (!!f.sectionHead !== !!before.isSectionHead) body.sectionHead = !!f.sectionHead;
+    await this.guardSave(async () => {
+      try {
+        const res = await this.api('/api/users', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'แก้ไขผู้ใช้งานไม่สำเร็จ');
+        this.setState({ modal: null, eform: null });
+        await this.fetchData();
+        this.showToast(`บันทึกข้อมูล ${body.name} แล้ว` + (body.role !== before.role ? ' (บทบาทใหม่มีผลเมื่อเข้าสู่ระบบครั้งถัดไป)' : ''));
+      } catch (err) {
+        this.showToast(err.message, 'warn');
+      }
+    });
+  }
+
   async deleteUser(username) {
     if (this.state.role !== 'admin') {
       this.showToast('เฉพาะผู้ดูแลระบบเท่านั้นที่มีสิทธิ์ลบผู้ใช้งาน', 'warn');
@@ -427,7 +460,7 @@ class App extends React.Component {
   ROLES() {
     return [
       { id: 'admin', th: 'ผู้ดูแลระบบ', en: 'Administrator', name: 'ทนพ. ธนวัฒน์ ผู้ดูแลระบบ', initials: 'ธว', color: '#0E6A85', perms: { view: 1, receive: 1, issue: 1, manage: 1, ack: 1, users: 1, settings: 1 } },
-      { id: 'supervisor', th: 'หัวหน้าคลังน้ำยา', en: 'Store Supervisor', name: 'ทนพญ.เบญจวรรณ รุ่งเรือง', initials: 'บว', color: '#3D6291', perms: { view: 1, receive: 1, issue: 1, manage: 1, ack: 1, users: 0, settings: 0 } },
+      { id: 'supervisor', th: 'หัวหน้าคลังน้ำยา', en: 'Store Supervisor', name: 'หัวหน้าคลังน้ำยา', initials: 'บว', color: '#3D6291', perms: { view: 1, receive: 1, issue: 1, manage: 1, ack: 1, users: 0, settings: 0 } },
       { id: 'technician', th: 'นักเทคนิคการแพทย์', en: 'Medical Technologist', name: 'ทนพ. สมชาย ใจดี', initials: 'สช', color: '#217A4B', perms: { view: 1, receive: 0, issue: 1, manage: 0, ack: 1, users: 0, settings: 0 } },
       { id: 'viewer', th: 'ผู้ดูข้อมูล', en: 'Viewer', name: 'คุณวิภา (ผู้สังเกตการณ์)', initials: 'วภ', color: '#556A77', perms: { view: 1, receive: 0, issue: 0, manage: 0, ack: 0, users: 0, settings: 0 } },
     ];
@@ -2113,6 +2146,14 @@ class App extends React.Component {
       usersList: S.users,
       openAddUser: () => this.setState({ modal: 'addUser' }),
       modalAddUser: S.modal === 'addUser',
+      modalEditUser: S.modal === 'editUser',
+      eform: S.eform || null,
+      setEform: (f) => this.setState({ eform: f }),
+      openEditUser: (u) => this.openEditUser(u),
+      submitEditUser: () => this.submitEditUser(),
+      // The หัวหน้าหมวดงาน: whose name and signature documents needing the
+      // section head's sign-off carry. A title held by one account, not a role.
+      sectionHead: (S.users || []).find(u => u.isSectionHead) || null,
       uform: S.uform,
       ufName: this.bindUf('name'),
       ufUsername: this.bindUf('username'),
@@ -2408,6 +2449,7 @@ class App extends React.Component {
       <IssueModal v={v} />
       <RegisterModal v={v} />
       <AddUserModal v={v} />
+      <EditUserModal v={v} />
       <PrintStickerModal v={v} />
       <SdsModal v={v} />
       <EditLotModal v={v} />

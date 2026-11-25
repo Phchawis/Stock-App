@@ -1,10 +1,17 @@
-import { requirePerm, hashPassword, json } from './_lib.js';
+import { requirePerm, hashPassword, json, actorName, nowStr } from './_lib.js';
+
+// หัวหน้าหมวดงาน (section head) is a title, not a permission role: the person
+// whose name and signature go on documents that need the section head's
+// sign-off. It is held by one account, kept in app_settings.
+const SECTION_HEAD = 'section_head';
 
 // GET — any authenticated user. NEVER returns password hashes.
 export async function onRequestGet(context) {
   try {
     const { results } = await context.env.DB
-      .prepare('SELECT username, name, role, initials, color, signature FROM users').all();
+      .prepare(`SELECT username, name, role, initials, color, signature,
+                       CASE WHEN username = (SELECT value FROM app_settings WHERE key = '${SECTION_HEAD}') THEN 1 ELSE 0 END AS isSectionHead
+                  FROM users`).all();
     return json(results);
   } catch (err) {
     return json({ error: err.message }, 500);
@@ -70,7 +77,70 @@ export async function onRequestDelete(context) {
 
     await env.DB.prepare('DELETE FROM users WHERE username = ?').bind(username).run();
     await env.DB.prepare('DELETE FROM sessions WHERE username = ?').bind(username).run();
+    await env.DB.prepare('DELETE FROM app_settings WHERE key = ? AND value = ?').bind(SECTION_HEAD, username).run();
     return json({ success: true, username });
+  } catch (err) {
+    return json({ error: err.message }, 500);
+  }
+}
+
+// PUT — edit a user (perm: users): name, initials, role, an optional new
+// password, whether they hold the หัวหน้าหมวดงาน title, and optionally a
+// signature image attached on their behalf. The username is the key and
+// cannot change.
+export async function onRequestPut(context) {
+  const denied = await requirePerm(context, { perm: 'users' });
+  if (denied) return denied;
+  const { env } = context;
+  try {
+    const b = await context.request.json();
+    const username = String(b.username || '').trim().toLowerCase();
+    const target = await env.DB.prepare('SELECT * FROM users WHERE username = ?').bind(username).first();
+    if (!target) return json({ error: 'ไม่พบผู้ใช้นี้' }, 404);
+
+    const name = String(b.name ?? target.name).trim();
+    const initials = String(b.initials ?? target.initials).trim().slice(0, 3);
+    const role = String(b.role ?? target.role);
+    if (!name) return json({ error: 'กรุณากรอกชื่อ-นามสกุล' }, 400);
+    if (!initials) return json({ error: 'กรุณากรอกอักษรย่อ' }, 400);
+    if (!['admin', 'supervisor', 'technician', 'viewer'].includes(role)) return json({ error: 'บทบาทไม่ถูกต้อง' }, 400);
+
+    const isAdmin = context.data.auth.role === 'admin';
+    // As in POST and DELETE: someone granted `users` who isn't an admin must
+    // not be able to make or unmake admins.
+    if ((role === 'admin' || target.role === 'admin') && role !== target.role && !isAdmin) {
+      return json({ error: 'เฉพาะผู้ดูแลระบบ (Admin) เท่านั้นที่เปลี่ยนบทบาทระดับ Admin ได้' }, 403);
+    }
+    if (target.role === 'admin' && role !== 'admin') {
+      const { count } = await env.DB.prepare("SELECT COUNT(*) AS count FROM users WHERE role = 'admin'").first();
+      if (count <= 1) return json({ error: 'ต้องมีผู้ดูแลระบบ (Admin) เหลืออยู่อย่างน้อย 1 คน' }, 400);
+    }
+
+    const stmts = [env.DB.prepare('UPDATE users SET name = ?, initials = ?, role = ? WHERE username = ?')
+      .bind(name, initials, role, username)];
+    if (b.password) {
+      if (String(b.password).length < 6) return json({ error: 'รหัสผ่านใหม่ต้องยาวอย่างน้อย 6 ตัวอักษร' }, 400);
+      stmts.push(env.DB.prepare('UPDATE users SET password = ? WHERE username = ?').bind(await hashPassword(String(b.password)), username));
+    }
+    if (typeof b.signature === 'string') {
+      if (b.signature && !/^data:image\/(png|jpe?g);base64,/.test(b.signature)) return json({ error: 'ลายเซ็นต้องเป็นรูป PNG หรือ JPG' }, 400);
+      if (b.signature.length > 700000) return json({ error: 'ไฟล์ลายเซ็นใหญ่เกินไป' }, 400);
+      stmts.push(env.DB.prepare('UPDATE users SET signature = ? WHERE username = ?').bind(b.signature || null, username));
+    }
+    const by = await actorName(context);
+    if (b.sectionHead === true) {
+      stmts.push(env.DB.prepare(
+        `INSERT INTO app_settings (key, value, updated_by, updated_at) VALUES (?, ?, ?, ?)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_by = excluded.updated_by, updated_at = excluded.updated_at`
+      ).bind(SECTION_HEAD, username, by, nowStr()));
+    } else if (b.sectionHead === false) {
+      stmts.push(env.DB.prepare('DELETE FROM app_settings WHERE key = ? AND value = ?').bind(SECTION_HEAD, username));
+    }
+    // A role change takes effect at the next sign-in; end their sessions so
+    // it applies now rather than when their session happens to expire.
+    if (role !== target.role) stmts.push(env.DB.prepare('DELETE FROM sessions WHERE username = ?').bind(username));
+    await env.DB.batch(stmts);
+    return json({ success: true, username, name, initials, role });
   } catch (err) {
     return json({ error: err.message }, 500);
   }

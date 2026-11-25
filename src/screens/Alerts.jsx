@@ -4,7 +4,7 @@ import { categoryLabel } from '../categories.js';
 
 export function Alerts({ v }) {
   const {
-    isAlerts, alertRows, hasAlerts, ic, user, reorderReportRows, usersList, showToast, api, acked, setAlertStatus, openReceive
+    isAlerts, alertRows, hasAlerts, ic, user, reorderReportRows, usersList, sectionHead, showToast, api, acked, setAlertStatus, openReceive
   } = v;
 
   if (!isAlerts) return null;
@@ -19,9 +19,10 @@ export function Alerts({ v }) {
   const suppliers = Array.from(new Set(reorderReportRows.map(r => r.supplier).filter(Boolean)));
 
   // Signature block on the printed purchase-request form.
-  const supervisorUser = (usersList || []).find(u => u.username === 'supervisor' || u.role === 'supervisor');
-  const supervisorSig = supervisorUser ? supervisorUser.signature : null;
-  const supervisorName = (supervisorUser && supervisorUser.name) || 'ทนพญ.เบญจวรรณ รุ่งเรือง';
+  // The section head signs this report, not whoever holds the store
+  // supervisor role: the two are different jobs (set in user management).
+  const supervisorSig = sectionHead ? sectionHead.signature : null;
+  const supervisorName = sectionHead ? sectionHead.name : '................................................';
 
   const filteredReportRows = reorderReportRows.filter(r => {
     if (selectedCategory !== 'all' && r.cat !== selectedCategory) return false;
@@ -459,10 +460,8 @@ export function Alerts({ v }) {
             ) : (
               <p>ลงชื่อ.......................................................</p>
             )}
-            {/* The signature image is looked up from the supervisor account, so
-                the printed name has to come from the same account — a hardcoded
-                name here would put one person's signature over another person's
-                name on a purchasing document. */}
+            {/* Name and signature both come from the section head's account, so
+                one person's signature can never sit over another's name. */}
             <p style={css(`margin-top:6px; font-weight:bold;`)}>( {supervisorName} )</p>
             <p style={css(`margin-top:2px; color:#666;`)}>หัวหน้าหมวดงานปฏิบัติการตรวจวินิจฉัยทางการแพทย์</p>
           </div>

@@ -8,7 +8,7 @@ import { daysUntil } from '../domain/stock.js';
 export function Dashboard({ v }) {
   const {
     go, isDash, title, dashAlerts, dashLow,
-    recent, usageList, ic, user, usersList,
+    recent, usageList, ic, user, usersList, sectionHead,
     deadStockReagents, dynamicMinSuggestions, backupHealth, errorsLast7Days,
     lotIntegrity, lotFixRequests, decideLotFix, canManage,
   } = v;
@@ -947,16 +947,18 @@ export function Dashboard({ v }) {
             <p style={css(`margin-top:2px; color:#666;`)}>ผู้รายงาน ( {user.role} )</p>
           </div>
           <div style={css(`text-align:center; width:220px; font-size:10px; color:#333; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;`)}>
+            {/* Name and signature both from the section head's account (set in
+                user management): it once printed this name over the store
+                supervisor's signature. */}
             {(() => {
-              const supervisorUser = (usersList || []).find(u => u.username === 'supervisor' || u.role === 'supervisor');
-              const supervisorSig = supervisorUser ? supervisorUser.signature : null;
+              const supervisorSig = sectionHead ? sectionHead.signature : null;
               return supervisorSig ? (
                 <img src={supervisorSig} alt="Supervisor Signature" style={css(`max-height:36px; object-fit:contain; margin-bottom:4px; background:#fff; padding:2px; border:1px solid #eee;`)} />
               ) : (
                 <p>ลงชื่อ.......................................................</p>
               );
             })()}
-            <p style={css(`margin-top:6px; font-weight:bold;`)}>( ทนพญ.เบญจวรรณ รุ่งเรือง )</p>
+            <p style={css(`margin-top:6px; font-weight:bold;`)}>( {sectionHead ? sectionHead.name : '................................................'} )</p>
             <p style={css(`margin-top:2px; color:#666;`)}>หัวหน้าหมวดงานปฏิบัติการตรวจวินิจฉัยทางการแพทย์</p>
           </div>
         </div>

@@ -3,7 +3,7 @@ import { css } from '../css.js';
 
 export function SignatureModal({ v }) {
   const {
-    modalSignature, closeModal, user, onSaveSignature, stop, ic
+    modalSignature, closeModal, user, onSaveSignature, stop, ic, sectionHead,
   } = v;
 
   const [preview, setPreview] = React.useState(user ? user.signature : null);
@@ -57,8 +57,8 @@ export function SignatureModal({ v }) {
               <span style={css(`font-weight:600; color:var(--text-primary);`)}>{user ? user.role : '—'}</span>
             </div>
             <div style={css(`display:flex; justify-content:space-between;`)}>
-              <span style={css(`color:var(--text-secondary);`)}>หัวหน้าคลังน้ำยา:</span>
-              <span style={css(`font-weight:600; color:var(--text-primary);`)}>ทนพญ.เบญจวรรณ รุ่งเรือง</span>
+              <span style={css(`color:var(--text-secondary);`)}>หัวหน้าหมวดงาน:</span>
+              <span style={css(`font-weight:600; color:var(--text-primary);`)}>{sectionHead ? sectionHead.name : '—'}</span>
             </div>
           </div>
 
