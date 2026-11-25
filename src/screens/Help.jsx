@@ -207,17 +207,17 @@ export function Help({ v }) {
                     <strong style={css(`font:var(--fw-bold) var(--text-sm)/1 var(--font-body); color:var(--text-primary);`)}>Admin (ผู้ดูแลระบบ)</strong>
                   </div>
                   <p style={css(`font:var(--text-2xs)/1.5 var(--font-body); color:var(--text-secondary); margin:0;`)}>
-                    สิทธิ์สูงสุด จัดการสิทธิ์ผู้ใช้งาน ตารางทะเบียนน้ำยาหลัก บันทึกรับเข้า เบิกจ่าย และพิมพ์รายงาน PDF ทุกชนิด
+                    สิทธิ์สูงสุด: ทุกอย่างของหัวหน้าคลัง รวมถึงเพิ่ม/แก้ไข/ลบผู้ใช้งาน กำหนดผู้ลงนามหัวหน้าหมวดงาน ตั้งค่าสิทธิ์ สำรองและกู้คืนข้อมูล
                   </p>
                 </div>
 
                 <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:8px;`)}>
                   <div style={css(`display:flex; align-items:center; gap:8px;`)}>
                     <span style={css(`width:8px; height:8px; border-radius:50%; background:var(--green-700);`)} />
-                    <strong style={css(`font:var(--fw-bold) var(--text-sm)/1 var(--font-body); color:var(--text-primary);`)}>Supervisor (หัวหน้าแล็บ)</strong>
+                    <strong style={css(`font:var(--fw-bold) var(--text-sm)/1 var(--font-body); color:var(--text-primary);`)}>Supervisor (หัวหน้าคลังน้ำยา)</strong>
                   </div>
                   <p style={css(`font:var(--text-2xs)/1.5 var(--font-body); color:var(--text-secondary); margin:0;`)}>
-                    สิทธิ์ระดับจัดการ สามารถจัดการคลังน้ำยาหลัก รับน้ำยาเข้าคลัง เบิกจ่ายยา และพิมพ์รายงาน PDF ได้ทั้งหมด
+                    สิทธิ์ระดับจัดการ: ลงทะเบียน/แก้ไขน้ำยา รับเข้า เบิกจ่าย ตัดจำหน่าย บันทึกผลตรวจนับ แก้เลข Lot ได้ทันที และอนุมัติรายการแจ้งแก้เลข Lot ที่หน้า Dashboard
                   </p>
                 </div>
 
@@ -227,7 +227,7 @@ export function Help({ v }) {
                     <strong style={css(`font:var(--fw-bold) var(--text-sm)/1 var(--font-body); color:var(--text-primary);`)}>Technician (เจ้าหน้าที่)</strong>
                   </div>
                   <p style={css(`font:var(--text-2xs)/1.5 var(--font-body); color:var(--text-secondary); margin:0;`)}>
-                    ทำรายการเบิกจ่ายน้ำยาเป็นหลักผ่านระบบอัตโนมัติ ดูสถานะคลัง แจ้งเตือนจุดสั่งซื้อซ้ำ และรายการประวัติของตนเอง
+                    เบิกจ่ายน้ำยา (สแกน QR) พิมพ์สติกเกอร์ ดูสถานะคลังและการแจ้งเตือน ช่วยตรวจนับ และกด "แจ้งหัวหน้างาน" เมื่อพบเลข Lot ไม่ตรงฉลาก
                   </p>
                 </div>
 
@@ -242,6 +242,9 @@ export function Help({ v }) {
                 </div>
 
               </div>
+              <p style={css(`font:var(--text-xs)/1.6 var(--font-body); color:var(--text-secondary); margin:14px 0 0 0;`)}>
+                <strong>หัวหน้าหมวดงาน</strong> เป็น<em>ตำแหน่งสำหรับลงนามในเอกสาร</em> แยกจากบทบาทข้างต้น (ไม่ใช่หัวหน้าคลังน้ำยา) มีได้คนเดียว ชื่อและลายมือชื่อของผู้ที่ได้รับตำแหน่งจะพิมพ์ในช่องลงนามหัวหน้าหมวดงานของรายงานการใช้งานและรายงานสั่งซื้อ ผู้ดูแลระบบกำหนดได้ที่ <strong>สิทธิ์การใช้งาน → แก้ไข</strong>
+              </p>
             </div>
           </div>
         )}
@@ -267,7 +270,7 @@ export function Help({ v }) {
                 <div style={css(`display:flex; flex-direction:column; gap:12px;`)}>
                   <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
                     <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--brand-700); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>1</span>
-                    <div>คลิกปุ่ม <strong>"รับเข้า Lot"</strong> หรือปุ่มนำเข้าบริเวณด้านขวาบนหน้าจอหลัก</div>
+                    <div>คลิกปุ่ม <strong>"รับเข้า"</strong> มุมขวาบน หรือกด <strong>Alt+R</strong></div>
                   </div>
                   <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
                     <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--brand-700); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>2</span>
@@ -283,7 +286,7 @@ export function Help({ v }) {
                   </div>
                   <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
                     <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--brand-700); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>5</span>
-                    <div>ระบุ <strong>จำนวนรับเข้า</strong> และกด <strong>"บันทึกรับเข้า"</strong> เพื่อเสร็จสิ้นขั้นตอน</div>
+                    <div>ระบุ <strong>จำนวนรับเข้า</strong> (นับเป็นหน่วยหลัก เช่น Box) แล้วกด <strong>"บันทึกรับเข้า"</strong> ครั้งเดียว ระหว่างบันทึกปุ่มจะขึ้น "กำลังบันทึก…" จากนั้นพิมพ์สติกเกอร์ QR ติดกล่อง (ดูแท็บการสร้างสติกเกอร์)</div>
                   </div>
                 </div>
               </div>
@@ -332,6 +335,25 @@ export function Help({ v }) {
                 </div>
               </div>
             </div>
+            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap:24px;`)}>
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span>🛡️</span> ระบบช่วยตรวจก่อนบันทึกรับเข้า
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
+                  <div>ก่อนบันทึก ระบบจะตรวจข้อมูลให้ ถ้าเจอสิ่งผิดปกติจะถามก่อน กดยืนยันได้ถ้าข้อมูลถูกจริง</div>
+                  <ul style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
+                    <li><strong>น้ำยาหมดอายุแล้ว:</strong> ไม่ให้รับเข้า ตามเกณฑ์การปฏิเสธการรับน้ำยา</li>
+                    <li><strong>วันหมดอายุเป็นปี พ.ศ.</strong> (เช่น 2570): ถามว่าจะแก้เป็นปี ค.ศ. ให้หรือไม่ เพราะช่องวันที่ของ Chrome ภาษาไทยแสดงเป็น พ.ศ.</li>
+                    <li><strong>ใกล้หมดอายุ</strong> (เหลือไม่เกิน 30 วัน): ถามยืนยัน</li>
+                    <li><strong>เลข Lot เกือบเหมือน Lot เดิม</strong> (ต่างกัน 1 ตัวอักษรและวันหมดอายุเดียวกัน): ถามว่า "เป็น Lot … หรือเปล่า" เลือกรับเข้า Lot เดิม หรือยืนยันเป็น Lot ใหม่</li>
+                    <li><strong>เลข Lot มีอยู่แล้วแต่วันหมดอายุไม่ตรง:</strong> เตือนว่าวันหมดอายุเดิมจะถูกเปลี่ยน</li>
+                    <li><strong>เลข Lot สั้นหรือยาวผิดปกติ</strong> เทียบกับ Lot ก่อนหน้าของน้ำยาเดียวกัน: ถามยืนยัน (มักเป็นเลขตกหรือเกิน)</li>
+                    <li><strong>กดบันทึกซ้ำ:</strong> รายการเดียวกันที่ส่งซ้ำภายใน 3 วินาทีจะไม่ถูกบันทึกซ้ำ</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -360,7 +382,7 @@ export function Help({ v }) {
                   </div>
                   <div style={css(`display:flex; gap:10px; font-size:var(--text-xs); color:var(--text-secondary);`)}>
                     <span style={css(`width:20px; height:20px; border-radius:50%; background:var(--accent-600); color:#fff; display:grid; place-items:center; font-weight:bold; flex-shrink:0;`)}>2</span>
-                    <div><strong>ระบุจำนวนเบิกจ่าย:</strong> ระบุจำนวนที่ต้องการเบิก (โดยไม่ต้องกรอกเลขที่ใบเบิก/เลขเอกสารอ้างอิงให้เสียเวลา) ตรวจสอบแผนการจัดสรรคิวล็อต FEFO ด้านล่าง แล้วกด <strong>"ยืนยันเบิกจ่าย"</strong> เพื่อตัดยอดคงคลังทันที</div>
+                    <div><strong>ระบุจำนวนเบิกจ่าย:</strong> ระบุจำนวนที่ต้องการเบิก (โดยไม่ต้องกรอกเลขที่ใบเบิก/เลขเอกสารอ้างอิงให้เสียเวลา) ตรวจสอบแผนการจัดสรรคิวล็อต FEFO ด้านล่าง แล้วกด <strong>"ยืนยันเบิกจ่าย"</strong> ครั้งเดียวเพื่อตัดยอดคงคลังทันที (ระบบกันการกดซ้ำ: รายการเดียวกันภายใน 3 วินาทีจะไม่ถูกตัดซ้ำ)</div>
                   </div>
                 </div>
               </div>
@@ -429,6 +451,13 @@ export function Help({ v }) {
                     </div>
                   </div>
                   <div>4. <strong>อัปโหลดภาพ:</strong> สามารถเลือกไฟล์รูปภาพขวดน้ำยาจริงบันทึกประกอบหน้าต่างสารบัญได้</div>
+                  <div>5. <strong>ประเภท:</strong> เลือก 1 ใน 4 ประเภท ใช้แบ่งหมวดในหน้าตรวจนับ ใบสรุปคงคลัง และรายงาน
+                    <ul style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
+                      <li><strong>Reagent:</strong> น้ำยาตรวจวิเคราะห์ที่นับเป็นจำนวนเทส</li>
+                      <li><strong>Control / Calibrator:</strong> สารควบคุมคุณภาพ และสารสอบเทียบ</li>
+                      <li><strong>Consumable:</strong> น้ำยาล้าง สารเจือจาง Lyse Dye สีย้อม และวัสดุสิ้นเปลือง เช่น Cuvette, Sample Cup, Reaction Vessels</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
 
@@ -529,6 +558,21 @@ export function Help({ v }) {
                 </div>
               </div>
             </div>
+            <div style={css(`display:grid; grid-template-columns:repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap:24px;`)}>
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span>📄</span> สิ่งที่อยู่ในรายงานการใช้งาน (หน้า Dashboard)
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
+                  <ul style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
+                    <li><strong>ช่วงเวลา:</strong> ตามปุ่ม ย้อนหลัง 3 / 6 / 12 เดือน หรือวันที่ที่เลือกเอง หัวรายงานพิมพ์ช่วงที่ใช้</li>
+                    <li><strong>หน้าแรก:</strong> ตัวเลขสรุป 6 ช่อง (รวมยอดรับเข้าและเบิกจ่ายในช่วง) · สรุปสาระสำคัญ · สรุปตามประเภท · กราฟและตัวเลขรายเดือน · เบิกใช้มากที่สุด 10 อันดับ · สรุปตามผู้เบิกจ่าย</li>
+                    <li><strong>สรุปการเบิกจ่ายรายน้ำยา:</strong> 1 บรรทัดต่อ 1 น้ำยา (เบิกรวม จำนวนครั้ง Lot ที่ใช้ วันเบิกครั้งแรก/ล่าสุด) รายงานทั้งฉบับประมาณ 2–3 หน้า</li>
+                    <li><strong>ช่องลงนาม:</strong> ผู้รายงาน (ผู้ที่เข้าระบบ) และหัวหน้าหมวดงาน ชื่อและลายมือชื่อดึงจากบัญชีผู้ใช้ แนบลายมือชื่อได้ที่เมนูลายมือชื่อของตนเอง หรือผู้ดูแลระบบแนบให้ที่ สิทธิ์การใช้งาน → แก้ไข</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -573,12 +617,14 @@ export function Help({ v }) {
                   <div><strong>กรณีใช้งาน:</strong> หลังการนับสต็อกประจำสัปดาห์หรือประจำเดือน (Physical Count) แล้วพบยอดน้ำยาจริงไม่ตรงกับระบบคอมพิวเตอร์</div>
                   <div><strong>ขั้นตอนดำเนินการ:</strong>
                     <ol style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
-                      <li>คลิกเมนูหลัก <strong>"ตรวจนับคลัง"</strong> ที่แถบเมนูด้านซ้าย (เฉพาะ Admin/Supervisor)</li>
-                      <li>ตารางจะรวบรวม Lot ที่เปิดใช้งานอยู่ทั้งหมดมาแสดงผล</li>
-                      <li>กรอกจำนวนที่นับได้จริงลงในช่อง <strong>"นับได้จริง"</strong> ระบบจะคำนวณส่วนต่างคลาดเคลื่อนให้อัตโนมัติ</li>
-                      <li>กรอกเหตุผลที่ยอดไม่ตรงลงในช่องหมายเหตุ (เช่น ลืมคีย์เบิกจ่าย, นับผิดพลาด)</li>
-                      <li><strong>เลข Lot ในระบบไม่ตรงกับฉลาก</strong> (ตกไป เกินมา หรือผิดตัว): กด <strong>"แก้เลข Lot"</strong> ใต้เลข Lot แล้วพิมพ์เลขและวันหมดอายุตามฉลาก ระบบจะเปลี่ยนเลข หรือรวมเข้ากับ Lot ที่มีเลขถูกอยู่แล้วให้เอง จากนั้นพิมพ์สติกเกอร์ใหม่แปะทับ <em>ห้ามแก้ด้วยการกรอกยอดนับ</em> เพราะจะกลายเป็นของหาย/ของเกินที่ไม่มีจริง · นักเทคนิคกดได้เหมือนกัน รายการจะไปรอหัวหน้างานอนุมัติที่หน้า Dashboard</li>
-                      <li>คลิก <strong>"บันทึกผลการตรวจนับทั้งหมด"</strong> และกดยืนยันในป๊อปอัปเพื่อลงบันทึกธุรกรรมปรับยอดประเภท `ADJUST`</li>
+                      <li>คลิกเมนู <strong>"ตรวจนับคลัง"</strong> (หรือ Alt+S) ตารางแบ่งหัวข้อเป็น <strong>Reagent → Control → Calibrator → Consumable</strong> เรียงตามชื่อในแต่ละหมวด</li>
+                      <li>เลือก<strong>นับทีละหมวด</strong>ได้จากปุ่มด้านบนตาราง ปุ่มแต่ละหมวดบอกจำนวนรายการ และจำนวน Lot ที่นับแล้วยอดไม่ตรง</li>
+                      <li>น้ำยาที่มีหลาย Lot จะพับเป็นแถวเดียวพร้อมยอดรวม กด <strong>"แสดง … Lot"</strong> เพื่อนับแยกตามเลข Lot บนฉลาก (หรือ <strong>"แสดงทุก Lot"</strong>)</li>
+                      <li><strong>สแกน QR</strong> หรือพิมพ์เลข Lot ในช่องค้นหา ระบบจะพาไปที่ช่องนับของ Lot นั้น (สลับหมวดและกางให้เอง) แล้วกรอกจำนวนในช่อง <strong>"นับได้จริง"</strong></li>
+                      <li>ถ้ายอดไม่ตรง กรอกเหตุผลในช่องหมายเหตุ (เช่น ลืมคีย์เบิกจ่าย, นับผิดพลาด)</li>
+                      <li><strong>เจอของที่ไม่มีในรายการ</strong> (ไม่เคยรับเข้า หรือระบบบอกว่าหมดแล้ว): กด <strong>"+ เพิ่ม Lot ที่ไม่มีในรายการ"</strong> หรือกด <strong>"รับเข้า Lot นี้"</strong> ในแถบที่ขึ้นหลังสแกน ระบบเปิดหน้ารับเข้าพร้อมหมายเหตุ "พบตอนตรวจนับคลัง"</li>
+                      <li><strong>เลข Lot ในระบบไม่ตรงกับฉลาก</strong> (ตกไป เกินมา หรือผิดตัว): กด <strong>"แก้เลข Lot"</strong> ใต้เลข Lot พิมพ์เลขและวันหมดอายุตามฉลาก ระบบจะเปลี่ยนเลข หรือรวมเข้ากับ Lot ที่มีเลขถูกอยู่แล้วให้เอง แล้วพิมพ์สติกเกอร์ใหม่แปะทับ <em>ห้ามแก้ด้วยการกรอกยอดนับ</em> เพราะจะกลายเป็นของหาย/ของเกินที่ไม่มีจริง · ถ้าสแกนเลขบนฉลากแล้วระบบเจอ Lot ที่ใกล้เคียง จะเสนอปุ่มแก้ให้เลย · นักเทคนิคกดได้เหมือนกัน รายการจะไปรอหัวหน้าคลังหรือผู้ดูแลระบบอนุมัติที่หน้า Dashboard</li>
+                      <li>นับครบแล้วกด <strong>"บันทึกผลการตรวจนับทั้งหมด"</strong> (หัวหน้าคลัง/ผู้ดูแลระบบ) ระบบบันทึกส่วนต่างเป็นรายการปรับยอด <code>ADJUST</code> พร้อมเหตุผลและชื่อผู้นับ</li>
                     </ol>
                   </div>
                 </div>
@@ -789,6 +835,42 @@ export function Help({ v }) {
                 </div>
               </div>
 
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span>🔄</span> 4. แจ้งเตือนเมื่อมีแอปเวอร์ชันใหม่
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
+                  <ul style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
+                    <li>เมื่อมีการอัปเดตระบบ หน้าที่เปิดค้างไว้จะขึ้นแถบ <strong>"มีแอปเวอร์ชันใหม่ … โหลดใหม่"</strong> ใต้แถบด้านบน (ตรวจทุก 5 นาที และทุกครั้งที่กลับมาที่แท็บ)</li>
+                    <li>บันทึกงานที่ค้างอยู่ก่อน แล้วกด <strong>โหลดใหม่</strong> ระบบไม่โหลดใหม่เองเพราะอาจมีฟอร์มกรอกค้าง</li>
+                  </ul>
+                </div>
+              </div>
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span>🔎</span> 5. ตรวจความถูกต้องของข้อมูลอัตโนมัติ (ผู้ดูแลระบบ)
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
+                  <ul style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
+                    <li>ทุกครั้งที่เปิดแอป ระบบเทียบยอดคงเหลือและยอดรับสะสมของทุก Lot กับประวัติการเคลื่อนไหว และตรวจวันหมดอายุที่ปีผิด (เช่นกรอกเป็น พ.ศ.)</li>
+                    <li>ถ้าพบ จะขึ้นกล่องสีเหลือง <strong>"ตรวจพบ … Lot ที่ข้อมูลไม่ตรงกับประวัติ"</strong> ที่หน้า Dashboard กดเพื่อดูรายการ แล้วแก้ด้วยการตรวจนับหรือแจ้งผู้ดูแลระบบ</li>
+                    <li>กล่อง <strong>"แจ้งเลข Lot ไม่ตรงฉลาก รออนุมัติ"</strong> แสดงรายการที่นักเทคนิคแจ้งไว้ หัวหน้าคลังหรือผู้ดูแลระบบกด <strong>อนุมัติแก้เลข Lot</strong> หรือ <strong>ปฏิเสธ</strong></li>
+                  </ul>
+                </div>
+              </div>
+              <div style={css(`background:var(--slate-50); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; box-sizing:border-box;`)}>
+                <div style={css(`font:var(--fw-bold) var(--text-sm)/1.2 var(--font-display); color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;`)}>
+                  <span>👤</span> 6. การจัดการผู้ใช้และผู้ลงนาม (ผู้ดูแลระบบ)
+                </div>
+                <div style={css(`display:flex; flex-direction:column; gap:10px; font-size:var(--text-xs); color:var(--text-secondary); line-height:1.5;`)}>
+                  <ul style={css(`margin:6px 0 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px; color:var(--text-primary);`)}>
+                    <li>เมนู <strong>สิทธิ์การใช้งาน</strong> → ปุ่ม <strong>แก้ไข</strong> ในแถวผู้ใช้: แก้ชื่อ อักษรย่อ บทบาท ตั้งรหัสผ่านใหม่ แนบลายมือชื่อแทนเจ้าของบัญชี</li>
+                    <li>ติ๊ก <strong>หัวหน้าหมวดงาน</strong> เพื่อกำหนดผู้ลงนามในรายงาน (มีได้คนเดียว ติ๊กคนใหม่จะแทนคนเดิม) แถวนั้นจะมีป้าย ★ หัวหน้าหมวดงาน</li>
+                    <li>เปลี่ยนบทบาทแล้ว ผู้ใช้คนนั้นจะถูกออกจากระบบทันที และใช้สิทธิ์ใหม่เมื่อเข้าระบบอีกครั้ง</li>
+                    <li>ลายมือชื่อที่แนบใหม่จะขึ้นในเอกสารทันทีหลังโหลดข้อมูล ไม่ต้องออกจากระบบ</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         )}
