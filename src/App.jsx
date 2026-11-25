@@ -175,7 +175,7 @@ class App extends React.Component {
       // can show "who's logged in" immediately on next page load, before
       // fetchData()'s requests (which prove the cookie is still valid) resolve.
       sessionStorage.setItem('authUser', JSON.stringify(data.user));
-      this.login(data.user.role, data.user.name, data.user.initials, data.user.signature);
+      this.login(data.user.role, data.user.name, data.user.initials, data.user.signature, data.user.username);
       this.fetchData();
     } catch (err) {
       this.setState(s => ({ loginForm: { ...s.loginForm, error: 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้: ' + err.message } }));
@@ -476,7 +476,7 @@ class App extends React.Component {
       { key: 'settings', label: 'ตั้งค่าเกณฑ์ของระบบ' },
     ];
   }
-  login(id, name, initials, signature) { const r = this.ROLES().find(x => x.id === id); if (!r) return; this.user = { name: name || r.name, role: r.th, initials: initials || r.initials, roleId: r.id, signature: signature || null }; this.transitionState({ role: id, view: 'dashboard', detailId: null, modal: null }); }
+  login(id, name, initials, signature, username) { const r = this.ROLES().find(x => x.id === id); if (!r) return; this.user = { username: username || null, name: name || r.name, role: r.th, initials: initials || r.initials, roleId: r.id, signature: signature || null }; this.transitionState({ role: id, view: 'dashboard', detailId: null, modal: null }); }
   async logout() {
     try { await this.api('/api/logout', { method: 'POST' }); } catch (e) { /* best effort */ }
     sessionStorage.removeItem('authUser');
@@ -557,11 +557,30 @@ class App extends React.Component {
 
       this.setState(s => ({ reagents, lots, txns, users, acked, stickerLogs, health, stickerLogsFullyLoaded: false, txnsFullyLoaded: false, perms: (perms && Object.keys(perms).length) ? perms : s.perms }), () => {
         this.autoClearAckedAlerts(reagents, lots, acked);
+        this.syncSignedInUser(users);
       });
       this.fetchLotFixes();
     } catch (err) {
       this.showToast('ดึงข้อมูลล้มเหลว: ' + err.message, 'warn');
     }
+  }
+
+  // The signed-in user's details were copied at sign-in. A signature (or
+  // name) attached afterwards, by them or by an admin in user management,
+  // never reached the copy, so reports printed an empty line until they
+  // signed in again. Refresh it from the account on every data load.
+  syncSignedInUser(users) {
+    if (!this.user || !this.user.username || !Array.isArray(users)) return;
+    const me = users.find(u => u.username === this.user.username);
+    if (!me) return;
+    const next = { ...this.user, name: me.name, initials: me.initials, signature: me.signature || null };
+    if (next.name === this.user.name && next.initials === this.user.initials && next.signature === this.user.signature) return;
+    this.user = next;
+    try {
+      const cached = JSON.parse(sessionStorage.getItem('authUser') || 'null');
+      if (cached) sessionStorage.setItem('authUser', JSON.stringify({ ...cached, name: me.name, initials: me.initials, signature: me.signature || null }));
+    } catch (e) { /* display cache only */ }
+    this.forceUpdate();
   }
 
   // Wrong lot numbers reported during a count, waiting for a supervisor.
@@ -762,7 +781,7 @@ class App extends React.Component {
       const cached = JSON.parse(sessionStorage.getItem('authUser') || 'null');
       if (cached) {
         const r = this.ROLES().find(x => x.id === cached.role);
-        this.user = { name: cached.name, role: r ? r.th : cached.role, initials: cached.initials, roleId: cached.role, signature: cached.signature || null };
+        this.user = { username: cached.username || null, name: cached.name, role: r ? r.th : cached.role, initials: cached.initials, roleId: cached.role, signature: cached.signature || null };
         this.setState({ role: cached.role });
         this.fetchData();
       }
