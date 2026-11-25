@@ -4,7 +4,7 @@ import { categoryLabel } from '../categories.js';
 
 export function Alerts({ v }) {
   const {
-    isAlerts, alertRows, hasAlerts, ic, user, reorderReportRows, usersList, sectionHead, showToast, api, acked, setAlertStatus, openReceive
+    isAlerts, alertRows, hasAlerts, ic, user, reorderReportRows, usersList, sectionHead, showToast, api, acked, setAlertStatus, openReceive, canAck, setAlertStatusBulk,
   } = v;
 
   if (!isAlerts) return null;
@@ -12,7 +12,11 @@ export function Alerts({ v }) {
   const [selectedCategory, setSelectedCategory] = React.useState('all');
   const [selectedSupplier, setSelectedSupplier] = React.useState('all');
   const [isSendingLine, setIsSendingLine] = React.useState(false);
+  // Which alerts the list shows: all, expiry, or reorder. The bulk buttons
+  // act on exactly what is shown.
+  const [alertKind, setAlertKind] = React.useState('ALL');
 
+  const shownAlerts = alertKind === 'ALL' ? alertRows : alertRows.filter(a => a.kind === alertKind);
   const cats = Array.from(new Set(reorderReportRows.map(r => r.cat).filter(Boolean)));
   const getCategoryLabel = categoryLabel;
 
@@ -333,8 +337,34 @@ export function Alerts({ v }) {
           </div>
         </div>
 
+        {alertRows.length > 0 && (
+          <div className="no-print alert-bulk-bar" style={css(`display:flex; flex-wrap:wrap; align-items:center; gap:10px;`)}>
+            <div role="group" aria-label="ประเภทการแจ้งเตือน" style={css(`display:flex; flex-wrap:wrap; gap:6px; flex:1; min-width:240px;`)}>
+              {[['ALL', 'ทั้งหมด', alertRows.length], ['EXPIRY', 'ใกล้หมดอายุ', alertRows.filter(a => a.kind === 'EXPIRY').length], ['REORDER', 'จุดสั่งซื้อ', alertRows.filter(a => a.kind === 'REORDER').length]]
+                .map(([k, label, n]) => (
+                  <button key={k} type="button" aria-pressed={alertKind === k} onClick={() => setAlertKind(k)}
+                    style={css(`padding:7px 12px; border-radius:var(--radius-pill); border:1px solid ${alertKind === k ? 'var(--brand-700)' : 'var(--border-default)'}; background:${alertKind === k ? 'var(--brand-700)' : 'var(--white)'}; color:${alertKind === k ? '#fff' : 'var(--text-primary)'}; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); white-space:nowrap;`)}>
+                    {label} <span style={css(`font-weight:400;`)}>{n}</span>
+                  </button>
+                ))}
+            </div>
+            {canAck && shownAlerts.filter(a => a.kind === 'REORDER').length > 0 && (
+              <button type="button" onClick={() => setAlertStatusBulk(shownAlerts.filter(a => a.kind === 'REORDER').map(a => a.key), 'ordered')}
+                style={css(`padding:8px 14px; border-radius:var(--radius-md); border:1px solid var(--border-default); background:var(--white); color:var(--text-primary); cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); white-space:nowrap;`)}>
+                สั่งซื้อแล้วทั้งหมด ({shownAlerts.filter(a => a.kind === 'REORDER').length})
+              </button>
+            )}
+            {canAck && shownAlerts.length > 0 && (
+              <button type="button" onClick={() => setAlertStatusBulk(shownAlerts.map(a => a.key), 'acked')}
+                style={css(`padding:8px 14px; border-radius:var(--radius-md); border:none; background:var(--brand-700); color:#fff; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); white-space:nowrap;`)}>
+                รับทราบทั้งหมด ({shownAlerts.length})
+              </button>
+            )}
+          </div>
+        )}
+
         <div className="alerts-grid">
-          {alertRows.map((a, aI) => (<React.Fragment key={aI}>
+          {shownAlerts.map((a, aI) => (<React.Fragment key={a.key}>
             <div className="alert-row" style={css(`display:flex; align-items:center; gap:14px; padding:14px 18px; background:${a.isOrdered ? 'var(--blue-100)' : 'var(--surface-card)'}; border:1px solid ${a.isOrdered ? 'var(--blue-600)' : 'var(--border-subtle)'};  border-radius:var(--radius-md); box-shadow:var(--shadow-sm);`)}>
               <div style={css(`display:flex; align-items:center; gap:14px; flex:1; min-width:0;`)}>
                 <span style={css(`width:40px; height:40px; border-radius:var(--radius-md); background:${a.isOrdered ? '#FEF08A' : a.bg}; color:${a.isOrdered ? '#854D0E' : a.fg}; display:grid; place-items:center; flex-shrink:0;`)}>

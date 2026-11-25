@@ -68,13 +68,14 @@ export function DetailDrawer({ v }) {
         </div>
 
         <div style={css(`padding:18px 22px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:18px;`)}>
-          <div style={css(`position:relative; height:180px; border-radius:var(--radius-lg); overflow:hidden; border:1px solid var(--border-subtle); box-shadow:var(--shadow-sm); flex-shrink:0;`)}>
+          {/* The whole photo, fitted on a light mat, so the name printed on the
+              box can be read; it used to be cropped and darkened by a gradient. */}
+          <div style={css(`position:relative; height:240px; border-radius:var(--radius-lg); overflow:hidden; border:1px solid var(--border-subtle); box-shadow:var(--shadow-sm); flex-shrink:0; background:#eef1f0;`)}>
             <img 
               src={detail.img || '/reagent_placeholder.png'} 
               alt={detail.th} 
-              style={css(`width:100%; height:100%; object-fit:cover;`)}
+              style={css(`width:100%; height:100%; object-fit:contain; display:block;`)}
             />
-            <div style={css(`position:absolute; inset:0; background:linear-gradient(to top, rgba(14,24,34,0.92) 0%, rgba(14,24,34,0.3) 60%, rgba(14,24,34,0) 100%);`)} />
           </div>
 
           <div className="detail-kpi-grid">

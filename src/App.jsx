@@ -1669,6 +1669,39 @@ class App extends React.Component {
     }));
   }
   closeModal() { this.setState({ modal: null }); }
+  // Acknowledge, or mark as ordered, every alert in `keys` in one request.
+  // Asks first with the counts: the alerts leave this page, though expiry
+  // reminders still go to LINE.
+  setAlertStatusBulk(keys, status) {
+    if (!this.can('ack')) { this.showToast('บทบาทนี้ไม่มีสิทธิ์จัดการการแจ้งเตือน', 'warn'); return; }
+    if (!keys.length) return;
+    const all = this.buildAlerts(this.props.criticalDays ?? 30).filter(a => keys.includes(a.key));
+    const expired = all.filter(a => a.kind === 'EXPIRY' && a.order === -1).length;
+    const label = status === 'ordered' ? 'สั่งซื้อแล้ว' : 'รับทราบ';
+    this.askConfirm(
+      `${label}ทั้งหมด ${keys.length} รายการ`,
+      `รายการทั้ง ${keys.length} รายการจะถูกบันทึกเป็น "${label}" และหายจากหน้านี้` +
+        (expired ? `\n\nในนี้มีน้ำยาหมดอายุคาคลัง ${expired} Lot ซึ่งควรแยกออกและตัดจำหน่าย` : '') +
+        (status === 'acked' ? '\n\nการแจ้งเตือนน้ำยาใกล้หมดอายุเข้า LINE ยังส่งทุกวันตามปกติ' : '\n\nเมื่อรับของเข้าแล้ว สถานะจะเคลียร์ให้เอง'),
+      async () => {
+        try {
+          const res = await this.api('/api/alerts/acks', { method: 'POST', body: JSON.stringify({ keys, status }) });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error);
+          this.setState(s => {
+            const next = { ...s.acked };
+            (data.keys || keys).forEach(k => { next[k] = status; });
+            return { acked: next };
+          });
+          this.showToast(`${label} ${(data.keys || keys).length} รายการแล้ว`);
+        } catch (err) {
+          this.showToast('ไม่สามารถบันทึกสถานะการแจ้งเตือนได้', 'warn');
+        }
+      },
+      { confirmLabel: `${label}ทั้งหมด` }
+    );
+  }
+
   async setAlertStatus(key, status, rowEl) {
     if (!this.can('ack')) {
       this.showToast('บทบาทนี้ไม่มีสิทธิ์จัดการการแจ้งเตือน', 'warn');
@@ -2157,6 +2190,8 @@ class App extends React.Component {
     return {
       setRoot: (el) => { this.rootRef = el; }, stop: (e) => e.stopPropagation(), ic, user: this.user,
       confirmData: S.confirmData, askConfirm: (t, m, c) => this.askConfirm(t, m, c),
+      canAck: this.can('ack'),
+      setAlertStatusBulk: (keys, status) => this.setAlertStatusBulk(keys, status),
       notAuthed: !S.role, onLogout: () => this.logout(), currentRoleLabel: this.user.role, canEditPerms: S.role === 'admin',
       loginForm: S.loginForm, lfUser: this.bindLF('username'), lfPass: this.bindLF('password'), loginError: S.loginForm.error, hasLoginError: !!S.loginForm.error, submitLogin: () => this.submitLogin(),
       // No demo/quick-login on a real system — credentials must be entered.

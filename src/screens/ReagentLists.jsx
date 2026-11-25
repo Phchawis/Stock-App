@@ -162,26 +162,24 @@ export function ReagentLists({ v }) {
                   className="qrow reagent-card-btn"
                   style={css(`background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow:hidden; display:flex; flex-direction:column; cursor:pointer; width:100%; text-align:left; font-family:inherit; padding:0; outline:none;`)}
                 >
-                  {/* Card Image Header */}
-                  <div style={css(`position:relative; height:140px; width:100%; background:var(--surface-sunken); overflow:hidden;`)}>
+                  {/* Card Image Header. The whole photo, fitted into one 4:3 frame on
+                      a light mat: the product name printed on the box sits in its
+                      middle or lower half, which a short cropped strip under a dark
+                      gradient cut off or darkened, and photos of different shapes
+                      came out cropped differently. Fitted, every card frames its
+                      photo the same way. The mat is light in both themes, like the
+                      fridge shelf behind the boxes. */}
+                  <div style={css(`position:relative; aspect-ratio:4/3; width:100%; background:#eef1f0; overflow:hidden; display:grid; place-items:center;`)}>
                     <img 
                       src={r.img || '/reagent_placeholder.png'} 
                       alt={r.th} 
-                      style={css(`width:100%; height:100%; object-fit:cover;`)}
+                      loading="lazy"
+                      style={css(`width:100%; height:100%; object-fit:contain; display:block;`)}
                     />
-                    <div style={css(`position:absolute; inset:0; background:linear-gradient(to top, rgba(23,36,46,0.95) 0%, rgba(23,36,46,0.2) 60%, rgba(23,36,46,0) 100%);`)} />
-                    <div style={css(`position:absolute; bottom:10px; left:12px; right:12px;`)}>
-                      {/* The surface under this chip is the photo's dark
-                          gradient, not the page, so its ink must not follow
-                          the theme: --brand-800 is mint in dark and a deep
-                          green in light, and the light one vanished against
-                          the scrim. Fixed light ink reads on both. */}
-                      {/* The scrim has to carry the contrast on its own. At 55%
-                          it relied on the photo underneath being dark: over a
-                          pale label or a white box the chip fell to 3.6:1. At
-                          78% it clears 8:1 even against pure white, so the chip
-                          reads on every photograph in the catalogue. 8px was
-                          also below what Thai needs to be legible at a glance. */}
+                    <div style={css(`position:absolute; top:8px; left:8px; right:8px;`)}>
+                      {/* The chip sits on the photo, not the page, so it carries
+                          its own dark backing and fixed light ink: at 78% it
+                          clears 8:1 even over a white box or the light mat. */}
                       <span className="rl-cat-badge" style={css(`padding:3px 7px; border-radius:var(--radius-pill); background:rgba(8,26,32,.78); border:1px solid rgba(255,255,255,.35); color:#eef5f2; font:var(--fw-semibold) 10px/1.2 var(--font-body); white-space:nowrap; display:inline-block; max-width:calc(100% - 4px); overflow:hidden; text-overflow:ellipsis;`)}>
                         {getCategoryLabel(r.cat)}
                       </span>
@@ -286,20 +284,16 @@ export function ReagentLists({ v }) {
                 {/* Left Column: Reagent details & Lots */}
                 <div style={css(`flex:1; min-width:min(300px,100%); display:flex; flex-direction:column; gap:16px;`)}>
                   
-                  {/* Image hero banner */}
-                  <div style={css(`position:relative; height:150px; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border-subtle); flex-shrink:0;`)}>
+                  {/* Image hero: the whole photo, fitted on a light mat, as on the cards. */}
+                  <div style={css(`position:relative; height:240px; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border-subtle); flex-shrink:0; background:#eef1f0;`)}>
                     <img 
                       src={r.img || '/reagent_placeholder.png'} 
                       alt={r.th} 
-                      style={css(`width:100%; height:100%; object-fit:cover;`)}
+                      style={css(`width:100%; height:100%; object-fit:contain; display:block;`)}
                     />
-                    <div style={css(`position:absolute; inset:0; background:linear-gradient(to top, rgba(14,24,34,0.92) 0%, rgba(14,24,34,0.2) 60%, rgba(14,24,34,0) 100%);`)} />
-                    <div style={css(`position:absolute; bottom:12px; left:14px; right:14px;`)}>
-                      {/* Same as the card chip: this one sits on the photo's
-                          dark gradient too, so its ink cannot follow the
-                          theme — the light theme's deep green disappeared
-                          into the scrim. */}
-                      <span className="rl-cat-badge" style={css(`padding:2px 8px; border-radius:var(--radius-pill); background:rgba(8,26,32,.55); border:1px solid rgba(255,255,255,.35); color:#eef5f2; font:var(--fw-semibold) var(--text-3xs)/1.2 var(--font-body); text-transform:uppercase;`)}>
+                    <div style={css(`position:absolute; top:10px; left:10px; right:10px;`)}>
+                      {/* Same as the card chip: its own dark backing over the photo. */}
+                      <span className="rl-cat-badge" style={css(`padding:2px 8px; border-radius:var(--radius-pill); background:rgba(8,26,32,.78); border:1px solid rgba(255,255,255,.35); color:#eef5f2; font:var(--fw-semibold) var(--text-3xs)/1.2 var(--font-body); text-transform:uppercase;`)}>
                         {getCategoryLabel(r.cat)}
                       </span>
                     </div>
