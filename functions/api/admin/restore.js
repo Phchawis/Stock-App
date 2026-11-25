@@ -5,7 +5,7 @@ import { requirePerm, nowStr, json } from '../_lib.js';
 // rather than every control and calibrator coming back as a reagent.
 function kindForRestore(r) {
   const k = String(r.kind || '').toUpperCase();
-  if (k === 'REAGENT' || k === 'CONTROL' || k === 'CALIBRATOR') return k;
+  if (k === 'REAGENT' || k === 'CONTROL' || k === 'CALIBRATOR' || k === 'CONSUMABLE') return k;
   const n = `${r.th || ''} ${r.en || ''}`.toLowerCase();
   // Control first: the migration applies it second, so it wins there too.
   if (n.includes('control') || /(^|\s)multichem/.test(n)) return 'CONTROL';

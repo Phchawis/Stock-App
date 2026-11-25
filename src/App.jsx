@@ -13,7 +13,10 @@ const KIND_OPTS = [
   { value: 'REAGENT', label: 'Reagent' },
   { value: 'CONTROL', label: 'Control' },
   { value: 'CALIBRATOR', label: 'Calibrator' },
+  // Supplies counted as stock but not liquids: cuvettes, cups, slides, ribbon.
+  { value: 'CONSUMABLE', label: 'Consumable' },
 ];
+const KIND_RANK = (k) => { const i = KIND_OPTS.findIndex(o => o.value === k); return i < 0 ? KIND_OPTS.length : i; };
 
 // Sticker types recorded in the preparation log.
 const STICKER_KIND_LABEL = {
@@ -2255,13 +2258,18 @@ class App extends React.Component {
           rid: l.rid,
           reagentName: r ? r.th : '—',
           unit: r ? r.unit : '',
-          category: r ? r.cat : ''
+          category: r ? r.cat : '',
+          kind: (r && r.kind) || 'REAGENT',
         };
-      // One reagent's lots together, soonest expiry first. In lot-id order a
-      // reagent's four lots sat far apart, so a shelf count of every packet got
-      // typed against whichever single row was found first.
-      }).sort((a, b) => a.reagentName.localeCompare(b.reagentName, 'th', { numeric: true })
+      // Grouped by kind (reagent, control, calibrator, consumable) so a count
+      // can go one shelf type at a time, then by name, then one reagent's lots
+      // together, soonest expiry first. In lot-id order a reagent's four lots
+      // sat far apart, so a shelf count of every packet got typed against
+      // whichever single row was found first.
+      }).sort((a, b) => KIND_RANK(a.kind) - KIND_RANK(b.kind)
+        || a.reagentName.localeCompare(b.reagentName, 'th', { numeric: true })
         || a.rid - b.rid || a.expiry.localeCompare(b.expiry) || a.lot.localeCompare(b.lot)),
+      kindOptsForCount: KIND_OPTS,
       stockCountForm: S.stockCountForm || {},
       updateStockCountRow: (lotId, qty, reason) => this.updateStockCountRow(lotId, qty, reason),
       submitStockCount: () => this.submitStockCount(),
@@ -2322,7 +2330,7 @@ class App extends React.Component {
       // label, in the shape the count's rows use.
       findNearLots: (code) => nearLots(code, S.lots).map(l => {
         const r = S.reagents.find(x => x.id === l.rid);
-        return { lotId: l.id, lot: l.lot, expiry: l.expiry, rid: l.rid, systemQty: l.qty, reagentName: r ? r.th : '—', unit: r ? r.unit : '' };
+        return { lotId: l.id, lot: l.lot, expiry: l.expiry, rid: l.rid, systemQty: l.qty, reagentName: r ? r.th : '—', unit: r ? r.unit : '', kind: (r && r.kind) || 'REAGENT' };
       }),
       updateReagentCategory: (id, cat) => this.updateReagentCategory(id, cat),
 

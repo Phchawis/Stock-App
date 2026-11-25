@@ -40,7 +40,7 @@ export function Inventory({ v }) {
     const [y, m, d] = String(ymd).slice(0, 10).split('-').map(Number);
     return y && m && d ? `${d} ${TH_MON[m - 1]} ${y + 543}` : ymd;
   };
-  const KIND_ORDER = { REAGENT: 0, CONTROL: 1, CALIBRATOR: 2 };
+  const KIND_ORDER = { REAGENT: 0, CONTROL: 1, CALIBRATOR: 2, CONSUMABLE: 3 };
   const byCatKindName = (a, b) => (a.cat || '').localeCompare(b.cat || '')
     || (KIND_ORDER[a.kind] ?? 9) - (KIND_ORDER[b.kind] ?? 9)
     || a.th.localeCompare(b.th, 'th');
@@ -53,7 +53,7 @@ export function Inventory({ v }) {
       .map(([value, count]) => ({ value, count, label: labelOf ? labelOf(value) : value }))
       .sort((a, b) => (a.value === NONE) - (b.value === NONE) || String(a.label).localeCompare(String(b.label)));
   };
-  const KIND_LABEL = { REAGENT: 'Reagent', CONTROL: 'Control', CALIBRATOR: 'Calibrator' };
+  const KIND_LABEL = { REAGENT: 'Reagent', CONTROL: 'Control', CALIBRATOR: 'Calibrator', CONSUMABLE: 'Consumable' };
   const isNoTestReagent = (r) => r.kind === 'REAGENT' && !r.testsPerMain;
   const skippedCount = skipNoTests ? all.filter(isNoTestReagent).length : 0;
   // The machine group only appears once some reagent has been given one.

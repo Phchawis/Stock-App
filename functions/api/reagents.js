@@ -31,7 +31,7 @@ const cleanInstrument = (v) => {
   return s || null;
 };
 
-const KINDS = new Set(['REAGENT', 'CONTROL', 'CALIBRATOR']);
+const KINDS = new Set(['REAGENT', 'CONTROL', 'CALIBRATOR', 'CONSUMABLE']);
 const cleanKind = (v) => (KINDS.has(String(v || '').toUpperCase()) ? String(v).toUpperCase() : 'REAGENT');
 
 // POST — register a reagent (perm: manage)

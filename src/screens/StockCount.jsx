@@ -7,6 +7,7 @@ export function StockCount({ v }) {
     isStockCount, stockCountList, stockCountForm, updateStockCountRow,
     submitStockCount, go, ic, canReceive, openCountReceive, findLotByCode,
     canManage, lotFixRequests, correctLotNumber, reportLotFix, reagentLots, findNearLots,
+    kindOptsForCount,
   } = v;
 
   const [scannerInput, setScannerInput] = React.useState('');
@@ -18,6 +19,9 @@ export function StockCount({ v }) {
     setUnknownScan(null);
     setFixing({ item, newLot, labelExpiry: item.expiry, note: '', busy: false, boxes: counted });
   };
+  // Which kind is shown: 'ALL', or one of REAGENT / CONTROL / CALIBRATOR /
+  // CONSUMABLE, so a count can go one shelf type at a time.
+  const [kindFilter, setKindFilter] = React.useState('ALL');
   // Reagents whose lots are unfolded, by reagent id.
   const [expanded, setExpanded] = React.useState(() => new Set());
   // A scanned code that matched no lot in the count, offered as a receipt.
@@ -31,6 +35,8 @@ export function StockCount({ v }) {
   // the reagent is unfolded, hence the wait.
   const focusLot = (lot) => {
     setUnknownScan(null);
+    // A scan can land on a lot of another kind than the one being shown.
+    setKindFilter(f => (f === 'ALL' || f === lot.kind ? f : lot.kind));
     setExpanded(prev => (prev.has(lot.rid) ? prev : new Set(prev).add(lot.rid)));
     setHighlightedLotId(lot.lotId);
     setTimeout(() => {
@@ -226,12 +232,25 @@ export function StockCount({ v }) {
 
   // The list arrives sorted by reagent; consecutive items of one reagent
   // make a section.
+  const kindLabel = (k) => ((kindOptsForCount || []).find(o => o.value === k) || { label: k }).label;
+  const shown = kindFilter === 'ALL' ? stockCountList : stockCountList.filter(it => it.kind === kindFilter);
   const sections = [];
-  for (const it of stockCountList) {
+  for (const it of shown) {
     const last = sections[sections.length - 1];
     if (last && last.rid === it.rid) last.items.push(it);
-    else sections.push({ rid: it.rid, name: it.reagentName, unit: it.unit, items: [it] });
+    else sections.push({ rid: it.rid, name: it.reagentName, unit: it.unit, kind: it.kind, items: [it] });
   }
+  // Per kind: reagents, lots, and lots whose count differs from the system,
+  // for the kind headings and the filter chips.
+  const kindStats = new Map();
+  for (const it of stockCountList) {
+    const k = kindStats.get(it.kind) || { reagents: new Set(), lots: 0, diffs: 0 };
+    const row = stockCountForm[it.lotId];
+    const n = row && row.qty !== '' && !isNaN(+row.qty) ? +row.qty : it.systemQty;
+    k.reagents.add(it.rid); k.lots += 1; if (n !== it.systemQty) k.diffs += 1;
+    kindStats.set(it.kind, k);
+  }
+  const kindsPresent = (kindOptsForCount || []).filter(o => kindStats.has(o.value));
 
   // --text-disabled is for controls that cannot be used, which is what
   // exempts them from the contrast floor. The dash is ordinary text saying
@@ -245,6 +264,21 @@ export function StockCount({ v }) {
       badge = <span style={css(`padding:3px 8px; border-radius:var(--radius-pill); background:var(--red-100); color:var(--red-700); font:var(--fw-bold) var(--text-2xs) var(--font-mono);`)}>{diff}</span>;
     }
     return badge;
+  };
+
+  // A heading row opening each kind in the table.
+  const renderKindHeading = (kind) => {
+    const k = kindStats.get(kind);
+    return (
+      <tr className="sc-kind" key={'k' + kind}>
+        <td colSpan="7" style={css(`padding:14px 18px 10px; background:var(--surface-sunken); border-bottom:2px solid var(--border-default); font:var(--fw-bold) var(--text-sm)/1.3 var(--font-display); color:var(--text-primary);`)}>
+          {kindLabel(kind)}
+          <span style={css(`margin-left:10px; font:var(--fw-regular) var(--text-2xs)/1.3 var(--font-body); color:var(--text-secondary);`)}>
+            {k.reagents.size} รายการ · {k.lots} Lot{k.diffs > 0 ? ` · ยอดไม่ตรง ${k.diffs} Lot` : ''}
+          </span>
+        </td>
+      </tr>
+    );
   };
 
   const renderLotRow = (item, inGroup) => {
@@ -442,10 +476,32 @@ export function StockCount({ v }) {
         </div>
       )}
 
+      {/* Count one kind at a time */}
+      {kindsPresent.length > 1 && (
+        <div role="group" aria-label="เลือกประเภทที่จะตรวจนับ" style={css(`display:flex; flex-wrap:wrap; gap:8px;`)}>
+          {[{ value: 'ALL', label: 'ทั้งหมด', n: new Set(stockCountList.map(x => x.rid)).size, diffs: [...kindStats.values()].reduce((t, k) => t + k.diffs, 0) },
+            ...kindsPresent.map(o => ({ value: o.value, label: o.label, n: kindStats.get(o.value).reagents.size, diffs: kindStats.get(o.value).diffs }))]
+            .map(c => {
+              const on = kindFilter === c.value;
+              return (
+                <button
+                  key={c.value}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => setKindFilter(c.value)}
+                  style={css(`padding:8px 14px; border-radius:var(--radius-pill); border:1px solid ${on ? 'var(--brand-700)' : 'var(--border-default)'}; background:${on ? 'var(--brand-700)' : 'var(--white)'}; color:${on ? '#fff' : 'var(--text-primary)'}; cursor:pointer; font:var(--fw-semibold) var(--text-xs)/1 var(--font-body); white-space:nowrap;`)}
+                >
+                  {c.label} <span style={css(`font-weight:400; opacity:.85;`)}>{c.n}</span>{c.diffs > 0 ? <span style={css(`font-weight:700;`)}> · ไม่ตรง {c.diffs}</span> : null}
+                </button>
+              );
+            })}
+        </div>
+      )}
+
       {/* What the list holds, and the controls that act on all of it */}
       <div style={css(`display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px;`)}>
         <span style={css(`flex:1; min-width:200px; font:var(--text-xs)/1.4 var(--font-body); color:var(--text-secondary);`)}>
-          {sections.length} น้ำยา · {stockCountList.length} Lot{sections.filter(x => x.items.length > 1).length > 0 ? ` · ${sections.filter(x => x.items.length > 1).length} น้ำยามีหลาย Lot (พับไว้ กดแสดงเพื่อนับแยก)` : ''}
+          {kindFilter !== 'ALL' ? `${kindLabel(kindFilter)} · ` : ''}{sections.length} รายการ · {shown.length} Lot{sections.filter(x => x.items.length > 1).length > 0 ? ` · ${sections.filter(x => x.items.length > 1).length} น้ำยามีหลาย Lot (พับไว้ กดแสดงเพื่อนับแยก)` : ''}
         </span>
         {sections.filter(x => x.items.length > 1).length > 0 && (
           <button
@@ -488,7 +544,9 @@ export function StockCount({ v }) {
               </tr>
             </thead>
             <tbody>
-              {stockCountList.length > 0 ? sections.map((sec) => {
+              {sections.length > 0 ? sections.map((sec, si) => {
+                const heading = (si === 0 || sections[si - 1].kind !== sec.kind) ? renderKindHeading(sec.kind) : null;
+                const rows = (() => {
                 // A reagent with one lot is one row. A reagent with several
                 // gets a header row carrying its totals, folded by default so
                 // the page reads one line per reagent; unfolding shows a row
@@ -539,10 +597,12 @@ export function StockCount({ v }) {
                     {open && sec.items.map(item => renderLotRow(item, true))}
                   </React.Fragment>
                 );
+                })();
+                return <React.Fragment key={'s' + sec.rid}>{heading}{rows}</React.Fragment>;
               }) : (
                 <tr>
                   <td colSpan="7" style={css(`padding:32px; text-align:center; color:var(--text-tertiary); font:var(--text-sm)/1.4 var(--font-body);`)}>
-                    ไม่มี Lot น้ำยาที่พร้อมใช้งานเพื่อทำการตรวจนับคลังในขณะนี้
+                    {stockCountList.length > 0 ? `ไม่มี ${kindLabel(kindFilter)} ที่ต้องตรวจนับ` : 'ไม่มี Lot น้ำยาที่พร้อมใช้งานเพื่อทำการตรวจนับคลังในขณะนี้'}
                   </td>
                 </tr>
               )}
