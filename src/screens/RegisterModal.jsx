@@ -3,6 +3,7 @@ import { css } from '../css.js';
 import { Input } from '../components/Input.jsx';
 import { Select } from '../components/Select.jsx';
 import { CATEGORIES } from '../categories.js';
+import { PhotoFrameEditor } from '../components/PhotoFrameEditor.jsx';
 import { modalHeaderStyle, modalHeaderBadgeStyle, modalHeaderTitleStyle, modalHeaderSubtitleStyle, modalHeaderCloseStyle, modalHeaderResponsiveCSS } from '../theme.js';
 
 export function RegisterModal({ v }) {
@@ -14,6 +15,9 @@ export function RegisterModal({ v }) {
     mfSubUnitQty, mfTestsPerSubUnit, showToast,
     mfInstrument, mfKind, kindOpts, instrumentOpts,
   } = v;
+  // The photo waiting in the framing step (an object URL for a new file, or the
+  // reagent's current image when re-framing it). null = editor closed.
+  const [frameSrc, setFrameSrc] = React.useState(null);
 
   if (!modalRegister) return null;
 
@@ -50,9 +54,13 @@ export function RegisterModal({ v }) {
   ];
 
   // Uploaded photos are stored inline as a base64 string in D1 (no object storage
-  // configured), so downscale + recompress here — an uncompressed phone photo
-  // (several MB) exceeds D1's per-value size limit and fails with SQLITE_TOOBIG.
-  const MAX_IMG_DIM = 480;
+  // configured). A new photo goes through PhotoFrameEditor, which crops it to the
+  // catalogue's 4:3 frame and re-encodes it at 800x600 within a size budget — an
+  // uncompressed phone photo (several MB) would exceed D1's per-value limit.
+  const closeFrame = () => {
+    if (frameSrc && frameSrc.startsWith('blob:')) URL.revokeObjectURL(frameSrc);
+    setFrameSrc(null);
+  };
   const handleFileChange = (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -67,15 +75,8 @@ export function RegisterModal({ v }) {
     const objectUrl = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
-      URL.revokeObjectURL(objectUrl);
-      const scale = Math.min(1, MAX_IMG_DIM / Math.max(img.width, img.height));
-      const w = Math.max(1, Math.round(img.width * scale));
-      const h = Math.max(1, Math.round(img.height * scale));
-      const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      mfImg(canvas.toDataURL('image/jpeg', 0.72));
+      e.target.value = '';                 // picking the same file again still opens the editor
+      setFrameSrc(objectUrl);
     };
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl);
@@ -138,10 +139,10 @@ export function RegisterModal({ v }) {
             
             {/* Visual Reagent Card Preview */}
             <div style={css(`display:flex; gap:16px; background:var(--surface-sunken); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:12px; align-items:center;`)}>
-              <img 
-                src={mform.img || '/reagent_placeholder.png'} 
-                alt="Reagent Preview" 
-                style={css(`width:76px; height:76px; border-radius:var(--radius-md); object-fit:cover; border:1px solid var(--border-strong);`)}
+              <img
+                src={mform.img || '/reagent_placeholder.png'}
+                alt="Reagent Preview"
+                style={css(`width:112px; aspect-ratio:4/3; flex-shrink:0; border-radius:var(--radius-md); object-fit:contain; background:#eef1f0; border:1px solid var(--border-strong);`)}
               />
               <div style={css(`flex:1;`)}>
                 <div style={css(`font:var(--fw-bold) var(--text-sm)/1.3 var(--font-body); color:var(--text-primary);`)}>
@@ -303,9 +304,17 @@ export function RegisterModal({ v }) {
                       type="file" 
                       accept="image/*" 
                       onChange={handleFileChange} 
-                      style={css(`display:none;`)} 
+                      style={css(`display:none;`)}
                     />
                   </label>
+                  {mform.img && mform.img.startsWith('data:') && (
+                    <button type="button" className="upload-btn" onClick={() => setFrameSrc(mform.img)}>
+                      จัดกรอบรูปนี้
+                    </button>
+                  )}
+                </div>
+                <div style={css(`font:var(--text-2xs)/1.5 var(--font-body); color:var(--text-secondary);`)}>
+                  ถ่ายหน้ากล่องตรง ๆ ให้เห็นชื่อน้ำยา แล้วจัดให้หน้ากล่องเต็มกรอบในขั้นตอนถัดไป
                 </div>
               </div>
             </div>
@@ -320,6 +329,13 @@ export function RegisterModal({ v }) {
           </div>
         </div>
       </div>
+      {frameSrc && (
+        <PhotoFrameEditor
+          src={frameSrc}
+          onCancel={closeFrame}
+          onDone={(dataUrl) => { mfImg(dataUrl); closeFrame(); }}
+        />
+      )}
     </>
   );
 }
