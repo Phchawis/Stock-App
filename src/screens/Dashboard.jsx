@@ -939,7 +939,7 @@ export function Dashboard({ v }) {
         <div style={css(`margin-top:35px; display:flex; justify-content:space-between; page-break-inside:avoid;`)}>
           <div style={css(`text-align:center; width:220px; font-size:10px; color:#333; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;`)}>
             {user.signature ? (
-              <img src={user.signature} alt="Reporter Signature" style={css(`max-height:36px; object-fit:contain; margin-bottom:4px; background:#fff; padding:2px; border:1px solid #eee;`)} />
+              <img src={user.signature} alt="Reporter Signature" style={css(`max-height:36px; object-fit:contain; margin-bottom:4px;`)} />
             ) : (
               <p>ลงชื่อ.......................................................</p>
             )}
@@ -953,7 +953,7 @@ export function Dashboard({ v }) {
             {(() => {
               const supervisorSig = sectionHead ? sectionHead.signature : null;
               return supervisorSig ? (
-                <img src={supervisorSig} alt="Supervisor Signature" style={css(`max-height:36px; object-fit:contain; margin-bottom:4px; background:#fff; padding:2px; border:1px solid #eee;`)} />
+                <img src={supervisorSig} alt="Supervisor Signature" style={css(`max-height:36px; object-fit:contain; margin-bottom:4px;`)} />
               ) : (
                 <p>ลงชื่อ.......................................................</p>
               );
