@@ -133,6 +133,52 @@ export function Dashboard({ v }) {
     wasteRate
   };
 
+  // Figures for the printed report: totals for the period, and the issue
+  // log folded to one row per reagent and per person.
+  const KIND_LABELS = { REAGENT: 'Reagent', CONTROL: 'Control', CALIBRATOR: 'Calibrator', CONSUMABLE: 'Consumable' };
+  const rpt = (() => {
+    // With no dates picked, the report covers the same months as its chart
+    // (the 3 / 6 / 12-month buttons), not every movement on record.
+    const from = startDate || `${selectedMonths[0].prefix}-01`;
+    const inScope = filteredTxns.filter(t => filteredReagentIds.includes(t.rid) && (!t.at || t.at.slice(0, 10) >= from));
+    const issues = inScope.filter(t => t.type === 'ISSUE');
+    const recs = inScope.filter(t => t.type === 'RECEIVE');
+    const dmy = (at) => { const [y, m, d] = String(at).slice(0, 10).split('-'); return `${+d}/${+m}/${(+y + 543) % 100}`; };
+    const byRid = new Map();
+    for (const t of issues) {
+      const r = byRid.get(t.rid) || { rid: t.rid, name: t.name, unit: t.unit, qty: 0, times: 0, lots: [], firstAt: t.at, lastAt: t.at };
+      r.qty += Math.abs(t.qty || 0); r.times += 1;
+      if (t.lot && t.lot !== '—' && !r.lots.includes(t.lot)) r.lots.push(t.lot);
+      if (t.at < r.firstAt) r.firstAt = t.at;
+      if (t.at > r.lastAt) r.lastAt = t.at;
+      byRid.set(t.rid, r);
+    }
+    const kindOf = (rid) => { const r = reagents.find(x => x.id === rid); return (r && r.kind) || 'REAGENT'; };
+    const order = ['REAGENT', 'CONTROL', 'CALIBRATOR', 'CONSUMABLE'];
+    const byReagent = [...byRid.values()].map(r => ({ ...r, kind: kindOf(r.rid), kindLabel: KIND_LABELS[kindOf(r.rid)] || '', first: dmy(r.firstAt), last: dmy(r.lastAt) }))
+      .sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind) || a.name.localeCompare(b.name, 'th', { numeric: true }));
+    const people = new Map();
+    for (const t of issues) {
+      const p = people.get(t.by) || { by: t.by, times: 0, qty: 0, qr: 0 };
+      p.times += 1; p.qty += Math.abs(t.qty || 0); if (t.scan === 'QR' || t.scanLabel === 'QR code') p.qr += 1;
+      people.set(t.by, p);
+    }
+    const byKind = order.map(k => {
+      const rs = filteredReagents.filter(r => (r.kind || 'REAGENT') === k);
+      if (!rs.length) return null;
+      const ids = rs.map(r => r.id);
+      const stock = activeLots.filter(l => ids.includes(l.rid)).reduce((n, l) => n + l.qty, 0);
+      const issue = issues.filter(t => ids.includes(t.rid)).reduce((n, t) => n + Math.abs(t.qty || 0), 0);
+      const total = stock + issue;
+      return { kind: k, label: KIND_LABELS[k], types: rs.length, stock, issue, turnover: total > 0 ? Math.round(issue / total * 100) : 0 };
+    }).filter(Boolean);
+    return {
+      totalRec: recs.reduce((n, t) => n + (t.qty || 0), 0), recCount: recs.length,
+      totalIssue: issues.reduce((n, t) => n + Math.abs(t.qty || 0), 0), issueCount: issues.length,
+      byReagent, byPerson: [...people.values()].sort((a, b) => b.qty - a.qty), byKind,
+    };
+  })();
+
   const printStyle = `
     @page {
       size: A4 portrait;
@@ -193,6 +239,14 @@ export function Dashboard({ v }) {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
+      .report-table.report-compact th, .report-table.report-compact td {
+        padding: 2px 5px !important;
+        font-size: 8px !important;
+        line-height: 1.3 !important;
+      }
+      .report-table.report-compact { margin: 0 !important; }
+      .report-table thead { display: table-header-group; }
+      .report-table tr { page-break-inside: avoid; }
       .report-header {
         border-bottom: 2px solid #000000 !important;
         padding-bottom: 12px !important;
@@ -793,130 +847,151 @@ export function Dashboard({ v }) {
                 } else if (endDate) {
                   return `ถึง ${getThaiDate(endDate)}`;
                 }
-                return '01/01/2569 ถึง 30/06/2569';
+                const n = selectedMonths.length;
+                return `ย้อนหลัง ${n} เดือน (${getThaiDate(selectedMonths[0].prefix + '-01')} ถึง ${getThaiDate(new Date().toISOString().slice(0, 10))})`;
               })()} 
               &nbsp;· พิมพ์เอกสารเมื่อ: {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} น. · ผู้พิมพ์: {user.name}
             </p>
           </div>
         </div>
 
-        {/* Printable KPI Cards row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '16px' }}>
-          {kpis.map((k, idx) => (
-            <div key={idx} style={{ border: '1px solid #cccccc', borderRadius: '4px', padding: '8px', textAlign: 'center' }}>
-              <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#000' }}>{k.value}</div>
-              <div style={{ fontSize: '9px', color: '#666' }}>{k.label}</div>
+        {/* Printable KPI row: the four on screen plus received and issued in
+            the period, so page 1 states the period's movement up front. */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '6px', marginBottom: '10px' }}>
+          {[...kpis.map(k => ({ value: k.value, label: k.label })),
+            { value: rpt.totalRec.toLocaleString(), label: 'รับเข้าในช่วง (หน่วย)' },
+            { value: rpt.totalIssue.toLocaleString(), label: 'เบิกจ่ายในช่วง (หน่วย)' }].map((k, idx) => (
+            <div key={idx} style={{ border: '1px solid #cccccc', borderRadius: '4px', padding: '6px 4px', textAlign: 'center' }}>
+              <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#000' }}>{k.value}</div>
+              <div style={{ fontSize: '8px', color: '#555' }}>{k.label}</div>
             </div>
           ))}
         </div>
 
-        {/* Print Layout Row 1 */}
+        {/* Key points first, so the page opens with the conclusion */}
+        <div style={{ border: '1px solid #cccccc', borderRadius: '4px', padding: '8px 10px', fontSize: '9.5px', color: '#333', marginBottom: '10px', pageBreakInside: 'avoid' }}>
+          <h4 style={{ margin: '0 0 4px 0', fontSize: '11px', fontWeight: 'bold', color: '#000' }}>สรุปสาระสำคัญ</h4>
+          <p style={{ margin: '2px 0' }}>• รับเข้า <strong>{rpt.totalRec.toLocaleString()}</strong> หน่วย ({rpt.recCount} ครั้ง) · เบิกจ่าย <strong>{rpt.totalIssue.toLocaleString()}</strong> หน่วย ({rpt.issueCount} ครั้ง) จาก <strong>{rpt.byReagent.length}</strong> รายการน้ำยา</p>
+          {rpt.byReagent[0] && <p style={{ margin: '2px 0' }}>• เบิกใช้มากที่สุด: <strong>{rpt.byReagent.slice().sort((x, y) => y.qty - x.qty).slice(0, 3).map(r => `${r.name} (${r.qty} ${r.unit})`).join(', ')}</strong></p>}
+          <p style={{ margin: '2px 0' }}>• น้ำยาต่ำกว่าระดับต่ำสุด (Min) <strong>{insights.lowStockCount} รายการ</strong> · Lot ใกล้หมดอายุ <strong>{kpis[1].value} Lot</strong></p>
+          <p style={{ margin: '2px 0' }}>• น้ำยาหมดอายุค้างคลัง <strong>{insights.expiredQty} หน่วย</strong> ({insights.expiredLotsCount} Lot · คิดเป็น <strong>{insights.wasteRate}%</strong> ของคงคลัง)</p>
+        </div>
+
+        {/* Row 1: by kind | monthly movement */}
         <div className="print-grid">
-          {/* Category overview table */}
           <div className="print-chart-box">
-            <h4 style={{ margin: '0 0 8px 0', fontSize: '11px', fontWeight: 'bold', color: '#000' }}>สถิติแยกรายหมวดหมู่</h4>
-            <table className="report-table" style={{ margin: 0 }}>
+            <h4 style={{ margin: '0 0 6px 0', fontSize: '11px', fontWeight: 'bold', color: '#000' }}>สรุปตามประเภท</h4>
+            <table className="report-table report-compact" style={{ margin: 0 }}>
               <thead>
                 <tr>
-                  <th>หมวดหมู่</th>
-                  <th style={{ textAlign: 'center' }}>ชนิดน้ำยา</th>
+                  <th>ประเภท</th>
+                  <th style={{ textAlign: 'right' }}>รายการ</th>
                   <th style={{ textAlign: 'right' }}>คงคลัง</th>
                   <th style={{ textAlign: 'right' }}>เบิกใช้</th>
                   <th style={{ textAlign: 'right' }}>Turnover</th>
                 </tr>
               </thead>
               <tbody>
-                {catStats.map((s, idx) => (
-                  <tr key={idx}>
-                    <td><strong>{getCategoryLabel(s.cat)}</strong> <span style={{ color: '#666', fontFamily: 'monospace', fontSize: '0.9em' }}>({s.cat})</span></td>
-                    <td style={{ textAlign: 'center' }}>{s.types}</td>
-                    <td style={{ textAlign: 'right' }}>{s.stock}</td>
-                    <td style={{ textAlign: 'right' }}>{s.issue}</td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{s.turnover}%</td>
+                {rpt.byKind.map(k => (
+                  <tr key={k.kind}>
+                    <td><strong>{k.label}</strong></td>
+                    <td style={{ textAlign: 'right' }}>{k.types}</td>
+                    <td style={{ textAlign: 'right' }}>{k.stock}</td>
+                    <td style={{ textAlign: 'right' }}>{k.issue}</td>
+                    <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{k.turnover}%</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          {/* Bar Chart */}
-          <div className="print-chart-box" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: '11px', fontWeight: 'bold', color: '#000', alignSelf: 'flex-start' }}>ยอดนำเข้า (Rec) vs เบิกใช้สะสม (Issue)</h4>
-            <svg width="240" height="90" style={{ overflow: 'visible', marginTop: '10px' }}>
-              <line x1="20" y1="10" x2="230" y2="10" stroke="#cccccc" strokeDasharray="3,3" />
-              <line x1="20" y1="45" x2="230" y2="45" stroke="#cccccc" strokeDasharray="3,3" />
-              <line x1="20" y1="80" x2="230" y2="80" stroke="#cccccc" />
+          <div className="print-chart-box">
+            <h4 style={{ margin: '0 0 4px 0', fontSize: '11px', fontWeight: 'bold', color: '#000' }}>รับเข้า (เทา) vs เบิกใช้ (ดำ) รายเดือน</h4>
+            <svg width="240" height="70" style={{ overflow: 'visible', display: 'block', margin: '4px auto 10px' }}>
+              <line x1="20" y1="60" x2="230" y2="60" stroke="#cccccc" />
               {monthlyData.map((m, idx) => {
-                const printColWidth = 180 / Math.max(monthlyData.length, 1);
+                const printColWidth = 200 / Math.max(monthlyData.length, 1);
                 const printBarW = Math.max(3, printColWidth * 0.25);
-                const x = 30 + idx * printColWidth;
-                const recH = getBarHeight(m.rec) * 0.7;
-                const issH = getBarHeight(m.issue) * 0.7;
+                const x = 26 + idx * printColWidth;
+                const recH = getBarHeight(m.rec) * 0.5;
+                const issH = getBarHeight(m.issue) * 0.5;
                 return (
                   <g key={idx}>
-                    <rect x={x} y={80 - recH} width={printBarW} height={recH} fill="#555555" />
-                    <rect x={x + printBarW + 2} y={80 - issH} width={printBarW} height={issH} fill="#000000" />
-                    <text x={x + printBarW} y="92" fontSize="6" textAnchor="middle" fill="#666666" style={{ fontFamily: 'var(--font-body)' }}>{m.label}</text>
+                    <rect x={x} y={60 - recH} width={printBarW} height={recH} fill="#888888" />
+                    <rect x={x + printBarW + 2} y={60 - issH} width={printBarW} height={issH} fill="#000000" />
+                    <text x={x + printBarW} y="70" fontSize="6" textAnchor="middle" fill="#444444" style={{ fontFamily: 'var(--font-body)' }}>{m.label}</text>
                   </g>
                 );
               })}
             </svg>
+            <table className="report-table report-compact" style={{ margin: 0 }}>
+              <thead>
+                <tr><th>เดือน</th>{monthlyData.map((m, i) => <th key={i} style={{ textAlign: 'right' }}>{m.label}</th>)}</tr>
+              </thead>
+              <tbody>
+                <tr><td>รับเข้า</td>{monthlyData.map((m, i) => <td key={i} style={{ textAlign: 'right' }}>{m.rec}</td>)}</tr>
+                <tr><td>เบิกใช้</td>{monthlyData.map((m, i) => <td key={i} style={{ textAlign: 'right', fontWeight: 'bold' }}>{m.issue}</td>)}</tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Print Layout Row 2: Critical Reorders */}
-        <div style={{ border: '1px solid #cccccc', borderRadius: '4px', padding: '10px', fontSize: '10px', color: '#333', marginTop: '10px', pageBreakInside: 'avoid' }}>
-          <h4 style={{ margin: '0 0 6px 0', fontSize: '11px', fontWeight: 'bold', color: '#000' }}>รายการเตือนจัดซื้อด่วน (Critical Reorders)</h4>
-          {criticalReorders.length > 0 ? (
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9px', marginTop: '6px' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid #ddd' }}>
-                  <th style={{ textAlign: 'left', padding: '4px' }}>ชื่อน้ำยา</th>
-                  <th style={{ textAlign: 'right', padding: '4px' }}>คงคลัง</th>
-                  <th style={{ textAlign: 'right', padding: '4px' }}>เกณฑ์ Min</th>
-                  <th style={{ textAlign: 'left', padding: '4px' }}>ผู้จัดจำหน่าย</th>
-                </tr>
-              </thead>
+        {/* Row 2: top issued | by person */}
+        <div className="print-grid">
+          <div className="print-chart-box">
+            <h4 style={{ margin: '0 0 6px 0', fontSize: '11px', fontWeight: 'bold', color: '#000' }}>เบิกใช้มากที่สุด 10 อันดับ</h4>
+            <table className="report-table report-compact" style={{ margin: 0 }}>
+              <thead><tr><th>#</th><th>ชื่อน้ำยา</th><th style={{ textAlign: 'right' }}>เบิกรวม</th><th style={{ textAlign: 'right' }}>ครั้ง</th></tr></thead>
               <tbody>
-                {criticalReorders.map((r, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: '4px' }}>{r.th}</td>
-                    <td style={{ padding: '4px', textAlign: 'right', fontWeight: 'bold' }}>{r.onHand} {r.unit}</td>
-                    <td style={{ padding: '4px', textAlign: 'right' }}>{r.min} {r.unit}</td>
-                    <td style={{ padding: '4px' }}>{r.supplier}</td>
-                  </tr>
+                {rpt.byReagent.slice().sort((x, y) => y.qty - x.qty).slice(0, 10).map((r, i) => (
+                  <tr key={r.rid}><td>{i + 1}</td><td>{r.name}</td><td style={{ textAlign: 'right', fontWeight: 'bold' }}>{r.qty} {r.unit}</td><td style={{ textAlign: 'right' }}>{r.times}</td></tr>
                 ))}
+                {rpt.byReagent.length === 0 && <tr><td colSpan="4" style={{ textAlign: 'center' }}>ไม่มีการเบิกจ่ายในช่วงนี้</td></tr>}
               </tbody>
             </table>
-          ) : (
-            <p style={{ margin: 0 }}>ไม่มีรายการน้ำยาต่ำกว่าจุดสั่งซื้อซ้ำ</p>
-          )}
+          </div>
+          <div className="print-chart-box">
+            <h4 style={{ margin: '0 0 6px 0', fontSize: '11px', fontWeight: 'bold', color: '#000' }}>สรุปตามผู้เบิกจ่าย</h4>
+            <table className="report-table report-compact" style={{ margin: 0 }}>
+              <thead><tr><th>ผู้เบิกจ่าย</th><th style={{ textAlign: 'right' }}>ครั้ง</th><th style={{ textAlign: 'right' }}>หน่วย</th><th style={{ textAlign: 'right' }}>สแกน QR</th></tr></thead>
+              <tbody>
+                {rpt.byPerson.map(p => (
+                  <tr key={p.by}><td>{p.by}</td><td style={{ textAlign: 'right' }}>{p.times}</td><td style={{ textAlign: 'right', fontWeight: 'bold' }}>{p.qty}</td><td style={{ textAlign: 'right' }}>{p.times ? Math.round(p.qr / p.times * 100) : 0}%</td></tr>
+                ))}
+                {rpt.byPerson.length === 0 && <tr><td colSpan="4" style={{ textAlign: 'center' }}>—</td></tr>}
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        {/* Print Layout Row 3: Reagent Issue/Withdraw transaction logs (dynamic based on selected range) */}
-        <div style={{ border: '1px solid #cccccc', borderRadius: '4px', padding: '10px', fontSize: '10px', color: '#333', marginTop: '10px', pageBreakInside: 'avoid' }}>
-          <h4 style={{ margin: '0 0 6px 0', fontSize: '11px', fontWeight: 'bold', color: '#000' }}>ประวัติการเบิกจ่ายน้ำยาในช่วงเวลาวิเคราะห์ (Usage Transaction Logs)</h4>
-          {issueTxns.length > 0 ? (
-            <table className="report-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8px', marginTop: '6px' }}>
+        {/* Issue history, condensed: one row per reagent rather than one per
+            withdrawal (which ran to 45 pages). Allowed to break across pages
+            so it starts on page 1; the header row repeats on each page. */}
+        <div style={{ border: '1px solid #cccccc', borderRadius: '4px', padding: '8px 10px', fontSize: '9px', color: '#333', marginTop: '4px' }}>
+          <h4 style={{ margin: '0 0 4px 0', fontSize: '11px', fontWeight: 'bold', color: '#000' }}>สรุปการเบิกจ่ายรายน้ำยาในช่วงเวลาวิเคราะห์ ({rpt.byReagent.length} รายการ · {rpt.issueCount} ครั้ง)</h4>
+          {rpt.byReagent.length > 0 ? (
+            <table className="report-table report-compact" style={{ width: '100%', margin: 0 }}>
               <thead>
-                <tr style={{ backgroundColor: '#f5f5f5' }}>
-                  <th style={{ padding: '4px 6px', fontWeight: 'bold' }}>วันเวลาที่เบิกจ่าย</th>
-                  <th style={{ padding: '4px 6px', fontWeight: 'bold' }}>ชื่อน้ำยา</th>
-                  <th style={{ padding: '4px 6px', fontWeight: 'bold' }}>Lot</th>
-                  <th style={{ padding: '4px 6px', fontWeight: 'bold', textAlign: 'right' }}>จำนวนเบิก</th>
-                  <th style={{ padding: '4px 6px', fontWeight: 'bold' }}>ผู้เบิกจ่าย</th>
-                  <th style={{ padding: '4px 6px', fontWeight: 'bold' }}>เอกสารอ้างอิง</th>
+                <tr>
+                  <th>ชื่อน้ำยา</th>
+                  <th>ประเภท</th>
+                  <th style={{ textAlign: 'right' }}>เบิกรวม</th>
+                  <th style={{ textAlign: 'right' }}>ครั้ง</th>
+                  <th>Lot ที่ใช้</th>
+                  <th>เบิกครั้งแรก</th>
+                  <th>เบิกล่าสุด</th>
                 </tr>
               </thead>
               <tbody>
-                {issueTxns.map((t, idx) => (
-                  <tr key={idx}>
-                    <td style={{ padding: '4px 6px', fontFamily: 'var(--font-mono)' }}>{t.at}</td>
-                    <td style={{ padding: '4px 6px' }}>{t.name}</td>
-                    <td style={{ padding: '4px 6px', fontFamily: 'var(--font-mono)' }}>{t.lot}</td>
-                    <td style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'bold' }}>{t.qtyLabel}</td>
-                    <td style={{ padding: '4px 6px' }}>{t.by}</td>
-                    <td style={{ padding: '4px 6px' }}>{t.ref || '—'}</td>
+                {rpt.byReagent.map(r => (
+                  <tr key={r.rid}>
+                    <td>{r.name}</td>
+                    <td>{r.kindLabel}</td>
+                    <td style={{ textAlign: 'right', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{r.qty} {r.unit}</td>
+                    <td style={{ textAlign: 'right' }}>{r.times}</td>
+                    <td style={{ fontFamily: 'var(--font-mono)' }}>{r.lots.length > 2 ? `${r.lots.slice(0, 2).join(', ')} +${r.lots.length - 2}` : r.lots.join(', ')}</td>
+                    <td style={{ whiteSpace: 'nowrap' }}>{r.first}</td>
+                    <td style={{ whiteSpace: 'nowrap' }}>{r.last}</td>
                   </tr>
                 ))}
               </tbody>
@@ -924,15 +999,6 @@ export function Dashboard({ v }) {
           ) : (
             <p style={{ margin: 0, padding: '6px 0', color: '#666', textAlign: 'center' }}>ไม่มีข้อมูลการเบิกจ่ายน้ำยาในช่วงเวลาวิเคราะห์</p>
           )}
-        </div>
-
-        {/* Executive summary list */}
-        <div style={{ border: '1px solid #cccccc', borderRadius: '4px', padding: '10px', fontSize: '10px', color: '#333', marginTop: '10px', pageBreakInside: 'avoid' }}>
-          <h4 style={{ margin: '0 0 6px 0', fontSize: '11px', fontWeight: 'bold', color: '#000' }}>สรุปสาระสำคัญเชิงวิเคราะห์</h4>
-          <p style={{ margin: '2px 0' }}>• หมวดหมู่ที่มีอัตราจ่ายใช้งานสะสมสูงสุดในช่วงเวลาวิเคราะห์ คือ <strong>กลุ่ม{insights.topCatLabel}</strong></p>
-          <p style={{ margin: '2px 0' }}>• ยอดรับเข้ารวมสะสมในช่วงเวลาวิเคราะห์ <strong>{insights.totalRecInRange.toLocaleString()} ชิ้น</strong> ยอดเบิกจ่ายออกสะสม <strong>{insights.totalIssueInRange.toLocaleString()} ชิ้น</strong></p>
-          <p style={{ margin: '2px 0' }}>• ตรวจพบรายการน้ำยาต่ำกว่าระดับต่ำสุดแนะนำ (Min) <strong>{insights.lowStockCount} รายการ</strong></p>
-          <p style={{ margin: '2px 0' }}>• ตรวจพบน้ำยาหมดอายุสะสม <strong>{insights.expiredQty} ชิ้น/กล่อง</strong> (คิดเป็นอัตราส่วนความเสียหายคลัง <strong>{insights.wasteRate}%</strong>)</p>
         </div>
 
         {/* Sign-off signatures */}
